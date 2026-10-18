@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "issue": "FOR-38",
   "recordedAt": "2026-10-18T07:56:13Z",
-  "implementationRevision": "a3c1acec471eb8e66ffd09bf32ccd2ade6bf4712",
-  "implementationTree": "737130dece58806dc076e0eb8fc4bb0eaa4f727c",
-  "baseRevision": "60be15e",
+  "implementationRevision": "9b1881b418bf98a2efe3a80f277da9c86e0e8be4",
+  "implementationTree": "65536eb0b161418086a8e626ad36177ad53342af",
+  "baseRevision": "80f9421",
   "branch": "for-38-model-picker-linux",
   "rootCause": [
     "The operator service on Linux was started without CREWROOM_RUNTIME_CONFIG (health executionAvailable=false). The workflow, and with it the model catalog, exists only with runner configuration, so the workspace omitted modelDiscovery and Models & budget plus the role override rendered free-text fields.",
@@ -130,5 +130,38 @@
       "result": "passed"
     }
   ],
-  "checksNote": "'checks' ran at pre-rebase b8f38f0 on base 93ebcd6; 'rebasedChecks' ran at implementationRevision."
+  "checksNote": "'checks' ran at pre-rebase b8f38f0 on base 93ebcd6; 'rebasedChecks' ran at a3c1ace on 60be15e; 'integrationChecks' ran at the branch head over implementationRevision on 80f9421.",
+  "firstRebaseRevision": "a3c1acec471eb8e66ffd09bf32ccd2ade6bf4712",
+  "firstRebaseTree": "737130dece58806dc076e0eb8fc4bb0eaa4f727c",
+  "firstRebaseBase": "60be15e",
+  "integrationChecks": [
+    {
+      "command": "cargo test --locked --no-fail-fast -p crewroom-core -p crewroom-runtime -p crewroom-service -- --test-threads=1",
+      "result": "312 passed, 0 failed, 2 ignored; doctest step hit a shared-target rebuild race and passed on a separate --doc rerun (0 doctests)"
+    },
+    {
+      "command": "cargo test --locked -p crewroom-desktop",
+      "result": "137 passed, 0 failed, 15 ignored"
+    },
+    {
+      "command": "cargo clippy -D warnings (core/runtime/service all targets; desktop bin)",
+      "result": "clean"
+    },
+    {
+      "command": "cargo fmt --check (four packages)",
+      "result": "clean"
+    },
+    {
+      "command": "npm test",
+      "result": "332 passed, 0 failed"
+    },
+    {
+      "command": "npm run build",
+      "result": "passed"
+    },
+    {
+      "command": "npm run test:e2e",
+      "result": "29 passed, 2 failed (refinement.spec.ts:28 INT-03, research.spec.ts:27 INT-07/EVD-08: fixture-only OMP 18.4.12 not installed; same failures recorded at FOR-43 integration)"
+    }
+  ]
 }
