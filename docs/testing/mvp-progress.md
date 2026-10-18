@@ -223,6 +223,12 @@ Revision `d9d748e` on branch `for-41-bitbucket-continuation-linux`, based on mai
   - No check container was left behind (`docker ps -a --filter label=io.crewroom.command` is empty).
 - **Boundary.** The provider is the local simulated Bitbucket HTTP fixture with a synthetic token. Git, the Docker check containers, the native store and the process supervision are real. No live Bitbucket request was made. `npm run test:e2e` is left to the integrator.
 
+Integration checks after rebasing onto FOR-40 main `41feb31`. The code revision is now `76031b4` (the checks above name the pre-rebase `d9d748e`) and the evidence revision is `5512b3e`. The only rebase conflict was this file, resolved by keeping both the FOR-40 and FOR-41 entries. Simulated Bitbucket provider only; Git and Docker are real.
+- `crewroom-process` and the `repository-fixture`, `publication-git-fixture` and `container-fixture` examples were rebuilt from `76031b4` in a target directory private to the worktree. `tsx --test` for `publication-successors` **4/4**, `publication-service` **20/20** and `publication-recovery` **13/13**. No check container was left behind.
+- `cargo test --locked -p crewroom-runtime -- --test-threads=4`: **185 passed, 0 failed, 2 ignored**. `cargo fmt -p crewroom-runtime -- --check` and `cargo clippy --locked -p crewroom-runtime --all-targets -- -D warnings`: clean.
+- `npm test` **334/334**; `npm run build` passes (existing Vite chunk warning).
+- `npm run test:e2e`: **31/31**, with the fixture-only OMP and the Rust Mail runtime linked into the worktree. An earlier attempt without the Mail runtime link was not counted: INT-03 and INT-07/EVD-08 failed in fixture setup.
+
 ## FOR-40 — Whole-state restore across the source migration (2026-10-18)
 
 Branch `for-40-restore-across-migration` from main `3a2add0`; code and tests `df61cab`. This closes the gap left at the FOR-40 integration, where restore across the migration had been checked only by an in-process SQLite file restore. Simulated providers only: Jira issues enter through the daemon's own import operation. No live Jira site, credentials or packaged release build were used.
