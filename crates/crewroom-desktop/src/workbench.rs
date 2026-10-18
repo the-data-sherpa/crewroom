@@ -937,7 +937,7 @@ impl Workbench {
                 draft.revision, draft.source_revision
             )));
             if task["needsReacceptance"] == true {
-                let mut lines = jira_changes(&task).into_iter();
+                let mut lines = source_changes(&task).into_iter();
                 brief = brief
                     .child(
                         div()
@@ -947,7 +947,7 @@ impl Workbench {
                     .children(
                         lines
                             .enumerate()
-                            .map(|(i, line)| div().id(("jira-change", i)).child(hint(line))),
+                            .map(|(i, line)| div().id(("source-change", i)).child(hint(line))),
                     );
             }
             if draft.edited(cx)
@@ -1335,28 +1335,33 @@ impl Render for Workbench {
 
 /// Re-acceptance copy naming which Jira fields changed since the brief was last
 /// accepted, with previous and current text. The first line is the warning.
-fn jira_changes(task: &Value) -> Vec<String> {
+/// What changed in the imported source since the brief was accepted, named for its provider.
+fn source_changes(task: &Value) -> Vec<String> {
+    let name = ticket_source::source_name(task);
     let accepted = &task["acceptedSource"];
     if !accepted.is_object() {
-        return vec!["Jira requirements changed. The previously accepted Jira text was not retained; review the source description below and save the brief to accept it.".into()];
+        return vec![format!(
+            "{name} requirements changed. The previously accepted {name} text was not retained; review the source description below and save the brief to accept it."
+        )];
     }
     let fields: Vec<_> = [("title", "title"), ("description", "description")]
         .into_iter()
         .filter(|(key, _)| accepted[*key] != task[*key])
         .collect();
-    let mut lines = vec![
-        "Jira requirements changed. Review what changed and save the brief to accept them."
-            .to_owned(),
-    ];
+    let mut lines = vec![format!(
+        "{name} requirements changed. Review what changed and save the brief to accept them."
+    )];
     if fields.is_empty() {
-        lines.push("Jira title and description now match the accepted text.".into());
+        lines.push(format!(
+            "{name} title and description now match the accepted text."
+        ));
         return lines;
     }
     let names: Vec<_> = fields.iter().map(|(_, name)| *name).collect();
-    lines.push(format!("Changed in Jira: {}.", names.join(" and ")));
-    for (key, name) in fields {
-        lines.push(format!("Previous {name}: {}", string(accepted, key)));
-        lines.push(format!("Current {name}: {}", string(task, key)));
+    lines.push(format!("Changed in {name}: {}.", names.join(" and ")));
+    for (key, field) in fields {
+        lines.push(format!("Previous {field}: {}", string(accepted, key)));
+        lines.push(format!("Current {field}: {}", string(task, key)));
     }
     lines
 }

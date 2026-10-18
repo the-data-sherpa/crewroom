@@ -168,7 +168,7 @@ impl Workbench {
         let blockers = crate::workbench::blockers::adopt(
             self.observation.runtime_fresh,
             self.brief_dirty(task, cx),
-            task["needsReacceptance"] == true,
+            crate::workbench::blockers::reacceptance(task),
             claimed && reason.trim().is_empty(),
         );
         let blocked = self.blocked() || !blockers.is_empty();
@@ -341,7 +341,7 @@ impl Workbench {
 }
 
 /// What adopting moves the run from and to: the brief, each changed criterion, and
-/// the Jira source revision, so a criteria-only or source-only change is visible.
+/// the source revision (named for its provider), so a criteria-only or source-only change is visible.
 fn adoption_changes(snapshot: &Value, task: &Value) -> Vec<String> {
     let mut lines = vec![];
     let brief_changed = snapshot["brief"] != task["brief"];
@@ -353,8 +353,10 @@ fn adoption_changes(snapshot: &Value, task: &Value) -> Vec<String> {
         super::criteria_changes(&records(snapshot, "criteria"), &records(task, "criteria"));
     let source = (snapshot["sourceRevision"] != task["sourceRevision"]).then(|| {
         format!(
-            "Jira source revision {} → {}",
-            snapshot["sourceRevision"], task["sourceRevision"]
+            "{} source revision {} → {}",
+            crewroom_core::ticket_source::source_name(task),
+            snapshot["sourceRevision"],
+            task["sourceRevision"]
         )
     });
     match (brief_changed || !criteria.is_empty(), source) {

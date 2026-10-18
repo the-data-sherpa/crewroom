@@ -7,7 +7,10 @@ fn main() -> crewroom_core::Result<()> {
             crewroom_runtime::publication::assess(
                 &v["record"],
                 v.get("local"),
-                v["sourceConflict"] == true,
+                // `true` is the retired service's Jira-only conflict; a string names the source.
+                v["sourceConflict"]
+                    .as_str()
+                    .or((v["sourceConflict"] == true).then_some("Jira")),
             )
         })
         .collect();

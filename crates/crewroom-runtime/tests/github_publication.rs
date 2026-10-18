@@ -393,14 +393,23 @@ async fn github_pull_requests_publish_continue_and_report_readiness_at_a_named_r
         "push":{"state":"confirmed"},"pr":{"state":"confirmed","id":5,"providerState":"OPEN","describedSha256":digest(revised)},
         "remoteSourceHead":NEXT,"remoteTargetHead":BASE,"observation":observation});
     let local = json!({"ready":true,"candidate":{"id":"c-2","revision":{"head":NEXT,"base":BASE}}});
-    let ready = assess(&record, Some(&local), false);
+    let ready = assess(&record, Some(&local), None);
     assert_eq!(ready["ready"], true, "{ready}");
+    // FOR-56: a changed GitHub ticket names GitHub, never Jira, and latches review invalidation.
+    let changed = assess(&record, Some(&local), Some("GitHub"));
+    assert_eq!(changed["ready"], false);
+    assert_eq!(changed["reviewInvalidated"], true);
+    assert_eq!(
+        changed["blockers"],
+        json!(["GitHub requirements changed."]),
+        "{changed}"
+    );
     let mut stale = record.clone();
     stale["revision"]["head"] = json!(HEAD);
     stale["remoteSourceHead"] = json!(HEAD);
     let local_stale =
         json!({"ready":true,"candidate":{"id":"c-2","revision":{"head":HEAD,"base":BASE}}});
-    let blocked = assess(&stale, Some(&local_stale), false);
+    let blocked = assess(&stale, Some(&local_stale), None);
     assert_eq!(blocked["ready"], false);
     assert!(
         blocked["blockers"]
@@ -419,7 +428,7 @@ async fn github_pull_requests_publish_continue_and_report_readiness_at_a_named_r
     assert!(unlinked["pipelines"][0]["target"]["destination_commit"].is_null());
     let mut unbound = record.clone();
     unbound["observation"] = unlinked;
-    let held = assess(&unbound, Some(&local), false);
+    let held = assess(&unbound, Some(&local), None);
     assert!(
         held["blockers"]
             .as_array()
@@ -435,7 +444,7 @@ async fn github_pull_requests_publish_continue_and_report_readiness_at_a_named_r
     );
     let mut failed = record.clone();
     failed["observation"] = host.observe(5).await.unwrap();
-    let failed = assess(&failed, Some(&local), false);
+    let failed = assess(&failed, Some(&local), None);
     assert_eq!(failed["ready"], false);
     assert_eq!(failed["reviewInvalidated"], true);
 

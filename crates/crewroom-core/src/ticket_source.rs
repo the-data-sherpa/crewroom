@@ -48,6 +48,12 @@ pub fn provider(task: &Value) -> Option<Provider> {
     PROVIDERS.into_iter().find(|p| p.kind == kind)
 }
 
+/// The name that labels this ticket's source facts: "Jira", "GitHub", or
+/// "Source" for a ticket with no external provider.
+pub fn source_name(task: &Value) -> &'static str {
+    provider(task).map_or("Source", |p| p.name)
+}
+
 /// The provider's own status name, exactly as last imported.
 pub fn status(task: &Value) -> Option<&str> {
     provider(task).and(task["sourceStatus"].as_str())
@@ -234,10 +240,12 @@ mod tests {
         assert_eq!(status_label(&jira), "Jira In Progress");
         assert_eq!(status_value(&jira), "In Progress");
         assert_eq!(ticket_label(&jira), "Jira ticket");
+        assert_eq!(source_name(&jira), "Jira");
         assert_eq!(kind_tag(&jira), "jira");
         let github = json!({"source":"github","sourceStatus":"open"});
         assert_eq!(status_label(&github), "GitHub open");
         assert_eq!(ticket_label(&github), "GitHub ticket");
+        assert_eq!(source_name(&github), "GitHub");
         for local in [
             json!({"source":"local"}),
             json!({}),
@@ -246,6 +254,7 @@ mod tests {
             assert_eq!(status_label(&local), NOT_LINKED);
             assert_eq!(status_value(&local), NOT_LINKED);
             assert_eq!(ticket_label(&local), "Local ticket");
+            assert_eq!(source_name(&local), "Source");
             assert_eq!(kind_tag(&local), "local");
             assert_eq!(status(&local), None);
         }

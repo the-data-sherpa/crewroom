@@ -150,7 +150,7 @@ impl<S: StoreAccess> Publication<S> {
         let local = self.local(run).await;
         let source = self
             .remote
-            .store(|s| Ok(present(&s.get_run(run)?["sourceConflict"])))?;
+            .store(|s| Ok(source_conflict(&s.get_run(run)?)))?;
         let assessed = assess(&record, local.as_ref(), source);
         record
             .as_object_mut()

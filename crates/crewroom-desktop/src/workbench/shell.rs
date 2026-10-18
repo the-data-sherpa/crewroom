@@ -176,7 +176,7 @@ impl Workbench {
                     .flex_wrap()
                     .gap_1()
                     .child(chip(
-                        format!("row-jira-{id}"),
+                        format!("row-source-{id}"),
                         // Source status is the provider's fact, labelled with its name.
                         ticket_source::status_label(task),
                         0x9eacb9,
@@ -286,7 +286,7 @@ impl Workbench {
                 tickets = tickets.child(
                     named_hint(
                         "queue-empty",
-                        "No queued plans. Queue order is local, not Jira rank.",
+                        "No queued plans. Queue order is local, not the ticket source's rank.",
                     )
                     .text_xs(),
                 );
@@ -549,9 +549,9 @@ impl Workbench {
             .border_color(rgb(0x293642))
             .bg(rgb(0x17212a))
             .child(cell(
-                "jira",
+                "source",
                 // "Jira status" / "GitHub status"; a local ticket has no provider.
-                &format!("{} status", provider.map_or("Source", |p| p.name)),
+                &format!("{} status", ticket_source::source_name(task)),
                 ticket_source::status_value(task),
                 match provider {
                     Some(p) => format!("Imported {} field", p.name),

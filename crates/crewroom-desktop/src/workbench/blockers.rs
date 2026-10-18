@@ -2,7 +2,6 @@
 //! Each list is ordered so the first entry is the first step the operator can take.
 
 const SAVE_BRIEF: &str = "save or discard brief changes";
-const ACCEPT_JIRA: &str = "save the brief to accept the changed Jira requirements";
 
 /// Renders "To {action}: a, b." for a non-empty blocker list.
 pub(super) fn to(action: &str, blockers: &[String]) -> Option<String> {
@@ -24,11 +23,16 @@ pub(super) fn line(
     })
 }
 
-/// Brief state shared by the plan, basis and adoption controls. A pending Jira
+/// The source name ("Jira", "GitHub") whose changed requirements await re-acceptance.
+pub(super) fn reacceptance(task: &serde_json::Value) -> Option<&'static str> {
+    (task["needsReacceptance"] == true).then(|| crewroom_core::ticket_source::source_name(task))
+}
+
+/// Brief state shared by the plan, basis and adoption controls. A pending source
 /// re-acceptance is cleared by the same Save brief that saves local edits.
-fn brief(brief_dirty: bool, needs_reacceptance: bool) -> Option<String> {
-    if needs_reacceptance {
-        Some(ACCEPT_JIRA.into())
+fn brief(brief_dirty: bool, needs_reacceptance: Option<&str>) -> Option<String> {
+    if let Some(source) = needs_reacceptance {
+        Some(accept_source(source))
     } else if brief_dirty {
         Some(SAVE_BRIEF.into())
     } else {
@@ -36,10 +40,16 @@ fn brief(brief_dirty: bool, needs_reacceptance: bool) -> Option<String> {
     }
 }
 
+/// "save the brief to accept the changed Jira requirements", named for the ticket's source.
+pub(super) fn accept_source(source: &str) -> String {
+    format!("save the brief to accept the changed {source} requirements")
+}
+
 #[derive(Default)]
 pub(super) struct PlanDecision {
     pub brief_dirty: bool,
-    pub needs_reacceptance: bool,
+    /// The source name while its changed requirements await re-acceptance.
+    pub needs_reacceptance: Option<&'static str>,
     pub stale: bool,
     pub waiting: bool,
     pub dirty_plan: bool,
@@ -53,7 +63,7 @@ impl PlanDecision {
         let mut out: Vec<String> = brief(self.brief_dirty, self.needs_reacceptance)
             .into_iter()
             .collect();
-        if self.stale || self.needs_reacceptance {
+        if self.stale || self.needs_reacceptance.is_some() {
             out.push("refresh the repository basis and save a new plan version".into());
         }
         out
@@ -80,7 +90,7 @@ impl PlanDecision {
 }
 
 /// Refresh repository basis.
-pub(super) fn refresh_basis(brief_dirty: bool, needs_reacceptance: bool) -> Vec<String> {
+pub(super) fn refresh_basis(brief_dirty: bool, needs_reacceptance: Option<&str>) -> Vec<String> {
     brief(brief_dirty, needs_reacceptance).into_iter().collect()
 }
 
@@ -106,7 +116,7 @@ pub(super) fn change_target(open_run: bool) -> Vec<String> {
 pub(super) fn adopt(
     runtime_fresh: bool,
     brief_dirty: bool,
-    needs_reacceptance: bool,
+    needs_reacceptance: Option<&str>,
     reason_missing: bool,
 ) -> Vec<String> {
     let mut out = Vec::new();
@@ -195,7 +205,7 @@ mod tests {
         assert_eq!(to("accept", &PlanDecision::default().accept()), None);
         assert_eq!(to("save the plan", &save_plan(false)), None);
         assert_eq!(to("change the target", &change_target(false)), None);
-        assert_eq!(to("adopt", &adopt(true, false, false, false)), None);
+        assert_eq!(to("adopt", &adopt(true, false, None, false)), None);
         assert_eq!(
             to("reconcile", &reconcile_publication(true, true, "")),
             None
@@ -254,7 +264,7 @@ mod tests {
     #[test]
     fn jira_reacceptance_names_save_brief_before_refresh() {
         let changed = PlanDecision {
-            needs_reacceptance: true,
+            needs_reacceptance: Some("Jira"),
             brief_dirty: true,
             stale: true,
             ..Default::default()
@@ -264,11 +274,15 @@ mod tests {
             "To decide: save the brief to accept the changed Jira requirements, refresh the repository basis and save a new plan version."
         );
         assert_eq!(
-            hint("refresh the basis", refresh_basis(false, true)),
+            hint("refresh the basis", refresh_basis(false, Some("Jira"))),
             "To refresh the basis: save the brief to accept the changed Jira requirements."
         );
         assert_eq!(
-            hint("refresh the basis", refresh_basis(true, false)),
+            hint("refresh the basis", refresh_basis(false, Some("GitHub"))),
+            "To refresh the basis: save the brief to accept the changed GitHub requirements."
+        );
+        assert_eq!(
+            hint("refresh the basis", refresh_basis(true, None)),
             "To refresh the basis: save or discard brief changes."
         );
     }
@@ -288,19 +302,23 @@ mod tests {
     #[test]
     fn adoption_names_each_blocker() {
         assert_eq!(
-            hint("adopt", adopt(false, false, false, false)),
+            hint("adopt", adopt(false, false, None, false)),
             "To adopt: wait for the current run status to load."
         );
         assert_eq!(
-            hint("adopt", adopt(true, true, false, false)),
+            hint("adopt", adopt(true, true, None, false)),
             "To adopt: save or discard brief changes."
         );
         assert_eq!(
-            hint("adopt", adopt(true, true, true, false)),
+            hint("adopt", adopt(true, true, Some("Jira"), false)),
             "To adopt: save the brief to accept the changed Jira requirements."
         );
         assert_eq!(
-            hint("adopt", adopt(true, false, false, true)),
+            hint("adopt", adopt(true, false, Some("GitHub"), false)),
+            "To adopt: save the brief to accept the changed GitHub requirements."
+        );
+        assert_eq!(
+            hint("adopt", adopt(true, false, None, true)),
             "To adopt: enter an adoption reason."
         );
     }

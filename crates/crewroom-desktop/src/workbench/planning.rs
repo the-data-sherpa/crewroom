@@ -190,17 +190,17 @@ impl Workbench {
         if !selected_available {
             panel=panel.child(hint("The selected role is unavailable. Choose an enabled role before saving launch details."));
         }
-        let mut blockers = Vec::new();
+        let mut blockers: Vec<String> = Vec::new();
         if target.is_none() {
-            blockers.push("choose a target repository");
+            blockers.push("choose a target repository".into());
         }
         if retired {
-            blockers.push("choose an active repository");
+            blockers.push("choose an active repository".into());
         }
-        if task["needsReacceptance"] == true {
-            blockers.push("save the brief to accept the changed Jira requirements");
+        if let Some(source) = super::blockers::reacceptance(task) {
+            blockers.push(super::blockers::accept_source(source));
         } else if self.brief_dirty(task, cx) {
-            blockers.push("save or discard brief changes");
+            blockers.push("save or discard brief changes".into());
         }
         if current.is_none() && !blockers.is_empty() {
             panel = panel.child(hint(format!("To queue: {}.", blockers.join(", "))));
@@ -432,7 +432,7 @@ impl Workbench {
         let depends = records(task, "dependsOn");
         let tasks = records(&self.workspace, "tasks");
         let revision = task["dependencyRevision"].as_u64().unwrap_or(0);
-        let mut panel=section("Ticket dependencies").child(hint("Each dependency waits for a provider-verified merge. Declarations survive Jira refresh and apply to queued plans; running work is unchanged."));
+        let mut panel=section("Ticket dependencies").child(hint("Each dependency waits for a provider-verified merge. Declarations survive source refresh and apply to queued plans; running work is unchanged."));
         if depends.is_empty() {
             panel = panel.child(hint("No dependencies declared."));
         }

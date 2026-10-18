@@ -279,7 +279,7 @@ impl Workbench {
             );
             let blockers = super::blockers::refresh_basis(
                 self.brief_dirty(task, cx),
-                task["needsReacceptance"] == true,
+                super::blockers::reacceptance(task),
             );
             panel = panel.children(super::blockers::line(
                 "refresh-basis-blockers",
@@ -339,9 +339,12 @@ impl Workbench {
                 });
                 let stale = !plan["holdReason"].is_null()
                     || plan["basis"]["taskRevision"] != task["revision"];
-                // Jira re-acceptance disables Refresh, so guidance starts at Save brief.
+                // Source re-acceptance disables Refresh, so guidance starts at Save brief.
                 if task["needsReacceptance"] == true {
-                    panel = panel.child(hint("Jira requirements changed since this plan."));
+                    panel = panel.child(hint(format!(
+                        "{} requirements changed since this plan.",
+                        crewroom_core::ticket_source::source_name(task)
+                    )));
                 } else if stale {
                     panel = panel.child(hint(
                         "The task or repository basis changed since this plan.",
@@ -349,7 +352,7 @@ impl Workbench {
                 }
                 let state = super::blockers::PlanDecision {
                     brief_dirty: self.brief_dirty(task, cx),
-                    needs_reacceptance: task["needsReacceptance"] == true,
+                    needs_reacceptance: super::blockers::reacceptance(task),
                     stale,
                     waiting,
                     dirty_plan,

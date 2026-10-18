@@ -844,10 +844,10 @@ fn native_session_shell_groups_tickets_keeps_four_facts_separate_and_drawer_foll
         tops.windows(2).all(|w| w[0] < w[1]),
         "Sidebar order {order:?} at {tops:?}"
     );
-    // Each row keeps Jira status, workflow and agent activity as separate chips.
+    // Each row keeps source status, workflow and agent activity as separate chips.
     let mut row =
         |task: &Value, kind: &str| labels(cx, h, Some(&format!("row-{kind}-{}", id(task))));
-    assert_eq!(row(&active, "jira"), ["Not linked"]);
+    assert_eq!(row(&active, "source"), ["Not linked"]);
     assert_eq!(row(&active, "workflow"), ["Paused"]);
     assert_eq!(row(&active, "activity"), ["1 not started"]);
     assert_eq!(row(&queued, "workflow"), ["Queued"]);
@@ -856,7 +856,7 @@ fn native_session_shell_groups_tickets_keeps_four_facts_separate_and_drawer_foll
     contains(&side, "#1 in queue");
 
     // The header shows four facts; admitted is never reported as executing or ready.
-    assert_eq!(labels(cx, h, Some("fact-jira")), ["Not linked"]);
+    assert_eq!(labels(cx, h, Some("fact-source")), ["Not linked"]);
     // A local ticket names no provider: never "Jira status" (FOR-40).
     let header = labels(cx, h, None);
     contains(&header, "SOURCE STATUS");
@@ -1278,7 +1278,7 @@ fn native_jira_ticket_labels_source_status_with_provider_name_apart_from_workflo
     let row = |cx: &mut gpui::TestAppContext, kind: &str| {
         labels(cx, h, Some(&format!("row-{kind}-{}", id(&task))))
     };
-    assert_eq!(row(cx, "jira"), ["Jira Backlog"]);
+    assert_eq!(row(cx, "source"), ["Jira Backlog"]);
     assert_eq!(
         labels(cx, h, Some(&format!("row-key-{}", id(&task)))),
         ["SIM-7 · jira"]
@@ -1292,7 +1292,7 @@ fn native_jira_ticket_labels_source_status_with_provider_name_apart_from_workflo
             .chain(&activity)
             .any(|l| l.contains("Backlog"))
     );
-    assert_eq!(labels(cx, h, Some("fact-jira")), ["Backlog"]);
+    assert_eq!(labels(cx, h, Some("fact-source")), ["Backlog"]);
     let header = labels(cx, h, None);
     for caption in [
         "JIRA STATUS",
@@ -1388,7 +1388,7 @@ fn native_github_issue_shows_github_open_closed_apart_from_workflow_and_activity
     let row = |cx: &mut gpui::TestAppContext, kind: &str| {
         labels(cx, h, Some(&format!("row-{kind}-{}", id(&task))))
     };
-    assert_eq!(row(cx, "jira"), ["GitHub open"]);
+    assert_eq!(row(cx, "source"), ["GitHub open"]);
     assert_eq!(
         labels(cx, h, Some(&format!("row-key-{}", id(&task)))),
         ["#12 · github"]
@@ -1402,7 +1402,7 @@ fn native_github_issue_shows_github_open_closed_apart_from_workflow_and_activity
             .chain(&activity)
             .any(|l| l.contains("GitHub"))
     );
-    assert_eq!(labels(cx, h, Some("fact-jira")), ["open"]);
+    assert_eq!(labels(cx, h, Some("fact-source")), ["open"]);
     let header = labels(cx, h, None);
     for caption in [
         "GITHUB STATUS",
@@ -1414,4 +1414,80 @@ fn native_github_issue_shows_github_open_closed_apart_from_workflow_and_activity
     for fact in ["fact-workflow", "fact-activity"] {
         assert!(!labels(cx, h, Some(fact)).iter().any(|l| l == "open"));
     }
+}
+#[gpui::test]
+fn native_github_ticket_uses_neutral_identifiers_and_names_github_in_its_change_labels(
+    cx: &mut gpui::TestAppContext,
+) {
+    // FOR-56: row and fact identifiers are provider-neutral; the visible text names GitHub.
+    let mut task = Value::Null;
+    let f = Fixture::projected(|s, root| {
+        let project = github_project(s, root, "fixture/issues");
+        let source = s.github_source(&project).unwrap().unwrap()["source"].clone();
+        let issue = |title: &str| json!([{"id":9013,"number":13,"title":title,"body":"Source text","state":"open","html_url":"https://github.com/fixture/issues/issues/13","updated_at":"2026-10-18T08:00:00Z"}]);
+        s.commit_github_sync(
+            &project,
+            &source,
+            &issue("Original title"),
+            &json!([]),
+            &json!([]),
+        )
+        .unwrap();
+        task = s.snapshot().unwrap()["tasks"][0].clone();
+        let refined = s.refine(
+            &id(&task),
+            &json!({"revision":task["revision"],"sourceRevision":1,"brief":"Accepted brief","criteria":["Keep evidence"]}),
+        )
+        .unwrap();
+        s.queue_refinement(
+            &id(&task),
+            &json!({"revision":refined["revision"],"purpose":"explore"}),
+        )
+        .unwrap();
+        s.commit_github_sync(
+            &project,
+            &source,
+            &issue("Renamed title"),
+            &json!([]),
+            &json!([]),
+        )
+        .unwrap();
+        task = s.snapshot().unwrap()["tasks"][0].clone();
+    });
+    assert_eq!(task["needsReacceptance"], true);
+    let (h, v, e) = open(cx, &f);
+    select(cx, h, &v, &e, &task);
+    let task_id = id(&task);
+    assert_eq!(
+        labels(cx, h, Some(&format!("row-source-{task_id}"))),
+        ["GitHub open"]
+    );
+    assert_eq!(labels(cx, h, Some("fact-source")), ["open"]);
+    for retired in [
+        format!("row-jira-{task_id}"),
+        "fact-jira".into(),
+        "fact-cell-jira".into(),
+    ] {
+        assert!(
+            labels(cx, h, Some(&retired)).is_empty(),
+            "{retired} still rendered"
+        );
+    }
+    navigate(cx, h, "Brief");
+    let shown = labels(cx, h, None);
+    contains(&shown, "GitHub requirements changed.");
+    contains(&shown, "Changed in GitHub: title.");
+    contains(&shown, "Previous title: Original title");
+    contains(&shown, "Current title: Renamed title");
+    contains(&shown, "GitHub source revision 1 → 2");
+    contains(
+        &shown,
+        "save the brief to accept the changed GitHub requirements.",
+    );
+    // Only the integration status bar may name Jira; no ticket fact or guidance does.
+    let ticket_text = |l: &&String| !l.starts_with("Jira not configured");
+    assert!(
+        !shown.iter().filter(ticket_text).any(|l| l.contains("Jira")),
+        "{shown:#?}"
+    );
 }

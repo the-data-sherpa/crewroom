@@ -1,6 +1,11 @@
 /** N2.5b provider record and Jira intake oracle. Every native operation opens the database in a new process.
  * Process identities, publication observations and unported control states below
- * are explicit fixtures: this suite never starts agents or calls a provider. */
+ * are explicit fixtures: this suite never starts agents or calls a provider.
+ * The retired TypeScript Workbench (schema 26) keeps its Jira-named `jiraStatus`/`jiraStatusId`.
+ * The native store migrates the copied seed to the provider-neutral source model
+ * (`sourceStatus`/`sourceStatusId`, FOR-40) and adds tables the retired service never had.
+ * Parity is therefore read through `legacyView`: native rows and results must carry only the
+ * neutral names, which are then renamed for comparison. Native-only tables are reported, not compared. */
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
@@ -28,6 +33,36 @@ const transform=(value:any, strings:(s:string)=>string):any=>Array.isArray(value
   :value && typeof value==='object'?Object.fromEntries(Object.entries(value).map(([k,v])=>[strings(k),transform(v,strings)]))
   :typeof value==='string'?strings(value):value;
 const toNative=(v:any)=>transform(v,s=>ids.get(s)??s);
+// FOR-56: the native side must expose only neutral source fields; the retired names are its legacy view.
+const NEUTRAL:Record<string,string>={sourceStatus:'jiraStatus',sourceStatusId:'jiraStatusId'};
+const RETIRED=new Set(Object.values(NEUTRAL));
+let neutralReads=0;
+// Current ticket records carry only neutral names. A run's `taskSnapshot` is a historical
+// capture and keeps whatever names it was recorded with, so it is exempt.
+function neutralOnly(value:any,where:string) {
+  if(Array.isArray(value)){value.forEach(v=>neutralOnly(v,where));return;}
+  if(!value || typeof value!=='object')return;
+  for(const [k,v] of Object.entries(value)) {
+    assert.ok(!RETIRED.has(k),`${where}: native exposed retired field ${k}`);
+    if(k in NEUTRAL)neutralReads++;
+    if(k!=='taskSnapshot')neutralOnly(v,where);
+  }
+}
+// Native-only fields the retired service never wrote, each with the change that added it.
+// They are removed from the legacy view and counted, never compared.
+const NATIVE_ONLY:Record<string,string>={acceptedSource:'FOR-40 re-acceptance baseline (accepted source title/description)'};
+const nativeOnlyFields=new Map<string,number>();
+const legacyView=(value:any):any=>Array.isArray(value)?value.map(legacyView)
+  :value && typeof value==='object'?Object.fromEntries(Object.entries(value)
+    .filter(([k])=>!(k in NATIVE_ONLY) || (nativeOnlyFields.set(k,(nativeOnlyFields.get(k)??0)+1),false))
+    .map(([k,v])=>[NEUTRAL[k]??k,legacyView(v)])):value;
+// The neutral model stores no status for a ticket without an external provider; the retired
+// service wrote the "Not linked" placeholder. Current legacy records drop it before comparison.
+const withoutPlaceholder=(value:any):any=>Array.isArray(value)?value.map(withoutPlaceholder)
+  :value && typeof value==='object'?Object.fromEntries(Object.entries(value)
+    .filter(([k,v])=>!(k==='jiraStatus' && v==='Not linked' && value.source!=='jira' && !('jiraStatusId' in value)))
+    .map(([k,v])=>[k,k==='taskSnapshot'?v:withoutPlaceholder(v)])):value;
+const nativeOnlyTables=new Set<string>();
 const fromNative=(v:any)=>transform(v,s=>[...ids].find(([,actual])=>actual===s)?.[0]??s);
 const protect=(v:any)=>transform(v,s=>{if(uuid.test(s) && !ids.has(s))fixed.add(s);return s;});
 // Only newly allocated UUIDs may differ. References, request IDs, timestamps,
@@ -51,8 +86,13 @@ function snapshot(path:string) {
       Object.fromEntries(Object.entries(row).map(([k,v])=>[k,['data','imported','refinement','payload','result'].includes(k)?JSON.parse(String(v)):v])))]));
   } finally {db.close();}
 }
-function compare(label:string) {
-  const expected=snapshot(legacyPath), native=snapshot(nativePath);
+function compare(label:string,migrated=true) {
+  const recorded=snapshot(legacyPath), all=snapshot(nativePath);
+  const expected=migrated?{...recorded,tickets:withoutPlaceholder(recorded.tickets)}:recorded;
+  // Tables the retired service never had must stay empty: no operation here may write outside the compared state.
+  for(const table of Object.keys(all))if(!(table in expected)){nativeOnlyTables.add(table);assert.deepEqual(all[table],[],`${label}: native-only ${table} gained rows`);}
+  if(migrated)neutralOnly(all.tickets,label);
+  const native=legacyView(Object.fromEntries(Object.entries(all).filter(([table])=>table in expected)));
   // An existing derived-view difference from N2.1, never an ownership/timing field.
   for(const state of [expected,native])for(const row of state.runs)delete row.data.holdReason;
   remember(expected,native);const actual=fromNative(native);
@@ -84,12 +124,14 @@ function invoke(op:any):any {
     default:throw new Error(`Unknown method ${op.method}`);
   }
 }
+let lastNative:any;
 function step(label:string,op:any,refused=false):any {
   protect(op);let expected:any, error:unknown;
   try {expected=invoke(structuredClone(op))??null;}catch(e){error=e;}
   assert.equal(!!error,refused,`${label}: TypeScript ${String(error)}`);
-  const actual=JSON.parse(execFileSync(resolve('target/debug/examples/ledger-oracle'),[nativePath],{input:JSON.stringify(toNative({...op,now})),encoding:'utf8'}));
+  const actual=JSON.parse(execFileSync(resolve(process.env.CARGO_TARGET_DIR??'target','debug/examples/ledger-oracle'),[nativePath],{input:JSON.stringify(toNative({...op,now})),encoding:'utf8'}));
   assert.equal(actual.ok,!refused,`${label}: Rust ${JSON.stringify(actual)}`);
+  lastNative=actual.value;if(!refused){neutralOnly(actual.value,label);actual.value=legacyView(actual.value);}
   if(error instanceof Conflict || error instanceof NotFound)assert.equal(actual.error,error.message,`${label}: refusal reason`);
   if(error && typeof error==='object' && 'terminal' in error)assert.equal(actual.terminal,error.terminal,`${label}: terminal disposition`);
   if(!refused){expected=JSON.parse(JSON.stringify(expected));
@@ -118,7 +160,7 @@ try {
   const coordinator=legacy.admitAssignment(run.id,member),intakeCoordinator=legacy.admitAssignment(intakeRun.id,member);
   for(const [r,a] of [[run,coordinator],[intakeRun,intakeCoordinator]] as const) {legacy.claimAttempt(a.attempt.id);legacy.recordAttemptIdentity(a.attempt.id,{hostPid:123,ompPid:124,sessionId:'fixture',hostUrl:'http://127.0.0.1:9',pane:'%1'});legacy.setDesiredState(r.id,'running');legacy.startExecution(r.id);}
   const idleTask=legacy.createTask({title:'Other saved records',description:'',repositoryId:repo.id});legacy.refine(idleTask.id,{revision:1,sourceRevision:1,brief:'Separate run',criteria:['Own history']});const idle=legacy.queue(idleTask.id,{revision:2});
-  legacy.close();copyFileSync(legacyPath,nativePath);legacy=new Workbench(legacyPath,()=>now);protect(snapshot(legacyPath));compare('seed');
+  legacy.close();copyFileSync(legacyPath,nativePath);legacy=new Workbench(legacyPath,()=>now);protect(snapshot(legacyPath));compare('seed',false);
   step('No current coding record',{method:'codingRecord',runId:run.id});step('Missing coding run rejected',{method:'codingRecord',runId:'missing'},true);
   const record={runId:run.id,checks:[],reviews:[],completions:[{id:'fixture-completion',state:'completed',summary:'Historical result'}]};
   step('Persist coding record',{method:'updateCodingRecord',runId:run.id,record});
@@ -178,7 +220,10 @@ try {
   step('First complete sync retains explicit source order',sync([issue('2'),issue('1')]));
   step('Outage retains last complete source and sync time',fail());step('Recovery records a complete synchronization',sync([issue('1'),issue('2')]));
   step('Status-only source refresh does not change accepted requirements',sync([issue('1',undefined,{status:{id:'3',name:' In Progress '},updated:'2026-09-29T00:00:00.000+0000'}),issue('2')]));
-  const statusTask=step('Read preserved local brief and new Jira status',{method:'getTask',taskId:initial[0].id});assert.equal(statusTask.brief,'Retain local decisions');assert.equal(statusTask.needsReacceptance,false);assert.equal(statusTask.jiraStatus,'In Progress');
+  const statusTask=step('Read preserved local brief and new Jira status',{method:'getTask',taskId:initial[0].id});assert.equal(statusTask.brief,'Retain local decisions');assert.equal(statusTask.needsReacceptance,false);
+  // The native daemon reads the provider's status through the neutral source model; the provider name stays a separate fact.
+  assert.equal(lastNative.sourceStatus,'In Progress');assert.equal(lastNative.sourceStatusId,'3');assert.equal(lastNative.source,'jira');assert.equal(lastNative.jiraStatus,undefined);
+  assert.equal(lastNative.key,'FIX-1');assert.equal(lastNative.sourceId,'1');assert.equal(lastNative.sourceSite,source.siteUrl);assert.equal(statusTask.jiraStatus,'In Progress');
   step('Changed source updates imports and pauses affected execution',sync([issue('1','Changed source',{updated:'Wed, 30 Sep 2026 00:00:00 GMT'}),issue('2')]));
   step('Retained issue refresh stays outside an empty filter',sync([], [issue('1','Changed outside filter',{updated:'2026-10-01'})]));
   const changed=step('Accepted brief survives leaving source filter',{method:'getTask',taskId:initial[0].id});assert.equal(changed.brief,'Retain local decisions');assert.equal(changed.needsReacceptance,true);
@@ -200,5 +245,6 @@ try {
   for(const suffix of ['?query=1','#fragment','?#fragment'])step('Manual import rejects nonempty URL components '+suffix,{method:'importJira',input:{siteUrl:source.siteUrl+suffix,issues:[issue('3')]}},true);
   step('Final sync read',{method:'jiraState'});
   legacy.close();legacy=new Workbench(legacyPath,()=>now);compare('Final TypeScript reopen');
-  console.log(JSON.stringify({status:'passed',operations:cases.length,cases,fixtureBoundaries:fixtures,tables:Object.keys(snapshot(legacyPath)),clock:'Exact controlled timestamps including legacy wall-clock calls',reopen:'Rust process/store reopened for every operation; TypeScript reopened at seed and finish',claims:'Stored provider observations, coding receipts and Jira imports only; remote identities and process ownership are fixtures, with no provider calls'},null,2));
+  assert.ok(neutralReads>0,'The native side never reported a neutral source status');
+  console.log(JSON.stringify({status:'passed',operations:cases.length,cases,fixtureBoundaries:fixtures,tables:Object.keys(snapshot(legacyPath)),nativeOnlyTables:[...nativeOnlyTables].sort(),nativeOnlyFields:Object.fromEntries([...nativeOnlyFields].map(([k,n])=>[k,{observations:n,origin:NATIVE_ONLY[k]}])),neutralSourceFieldReads:neutralReads,clock:'Exact controlled timestamps including legacy wall-clock calls',reopen:'Rust process/store reopened for every operation; TypeScript reopened at seed and finish',claims:'Stored provider observations, coding receipts and Jira imports only; remote identities and process ownership are fixtures, with no provider calls'},null,2));
 } finally {legacy.close();globalThis.Date=RealDate;rmSync(root,{recursive:true,force:true});}

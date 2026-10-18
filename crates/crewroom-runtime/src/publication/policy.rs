@@ -1,7 +1,9 @@
 use super::*;
 /// Pure policy over already verified observations. Unknown evidence holds
 /// readiness; only confirmed regression latches a review invalidation.
-pub fn assess(record: &Value, local: Option<&Value>, source_conflict: bool) -> Value {
+/// `source_conflict` names the ticket's source ("Jira", "GitHub") when its
+/// requirements changed under the run.
+pub fn assess(record: &Value, local: Option<&Value>, source_conflict: Option<&str>) -> Value {
     if present(&record["merged"]) {
         return json!({"ready":false,"blockers":[],"reviewInvalidated":false});
     }
@@ -17,8 +19,8 @@ pub fn assess(record: &Value, local: Option<&Value>, source_conflict: bool) -> V
         }
         _ => {}
     }
-    if source_conflict {
-        blockers.push("Jira requirements changed.".into());
+    if let Some(source) = source_conflict {
+        blockers.push(format!("{source} requirements changed."));
     }
     if let Some(error) = record["error"].as_str().filter(|s| !s.is_empty()) {
         blockers.push(error.into());
@@ -144,7 +146,7 @@ pub fn assess(record: &Value, local: Option<&Value>, source_conflict: bool) -> V
                             && s["state"]["result"]["name"] == "FAILED"
                     }))
         }));
-    let regression = source_conflict
+    let regression = source_conflict.is_some()
         || local.is_some_and(|l| {
             l["confirmedInvalidation"] == true
                 || (present(&l["candidate"]) && l["candidate"]["id"] != record["candidateId"])

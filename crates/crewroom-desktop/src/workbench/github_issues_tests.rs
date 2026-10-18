@@ -271,7 +271,7 @@ fn native_project_confirms_github_issues_sets_filters_and_syncs_truthfully(
             labels(
                 cx,
                 h,
-                Some(&format!("row-jira-{}", task["id"].as_str().unwrap()))
+                Some(&format!("row-source-{}", task["id"].as_str().unwrap()))
             ),
             [format!("GitHub {status}")]
         );

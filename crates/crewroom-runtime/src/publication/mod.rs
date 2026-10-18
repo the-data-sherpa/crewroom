@@ -24,6 +24,11 @@ fn time() -> String {
 fn present(v: &Value) -> bool {
     !v.is_null() && v != false
 }
+/// The provider name ("Jira", "GitHub") of a run whose ticket requirements changed under it.
+fn source_conflict(run: &Value) -> Option<&'static str> {
+    present(&run["sourceConflict"])
+        .then(|| crewroom_core::ticket_source::source_name(&run["taskSnapshot"]))
+}
 fn remove(v: &mut Value, key: &str) {
     v.as_object_mut().unwrap().remove(key);
 }
@@ -90,7 +95,7 @@ impl<S: StoreAccess> Publication<S> {
         let local = self.local(run).await;
         let source = self
             .remote
-            .store(|s| Ok(present(&s.get_run(run)?["sourceConflict"])))?;
+            .store(|s| Ok(source_conflict(&s.get_run(run)?)))?;
         let assessed = assess(&record, local.as_ref(), source);
         record
             .as_object_mut()
