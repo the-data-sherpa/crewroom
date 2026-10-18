@@ -10,7 +10,7 @@ const image = pythonCheckImage();
 
 test('LIF-04/05: stop contains a detached child with closed descriptors and an empty environment', async t => {
   const root = mkdtempSync(join(tmpdir(), 'crewroom-contained-'));
-  const workspace = join(root, 'workspace'); mkdirSync(workspace);
+  const workspace = join(root, 'workspace'); mkdirSync(workspace, { mode: 0o700 });
   const job = new ContainerCommand(join(root, 'job'), engine);
   t.after(async () => { await job.stop(); await job.remove(); rmSync(root, { recursive: true, force: true }); });
   const writer = 'import time; from pathlib import Path; p=Path("/workspace/ticks");\nwhile True:\n with p.open("a") as f: f.write("tick\\n"); f.flush()\n time.sleep(0.03)';
@@ -54,6 +54,8 @@ test('EVD-02: command receipts prove execution, output, pinned environment and t
     const receipt = await job.receipt();
     assert.equal(receipt.started, true);
     assert.match(receipt.platform, /^linux\//);
+    // The command runs as the workspace owner, so CapDrop ALL does not deny writes to a private workspace on Linux.
+    assert.equal(receipt.user, `${process.geteuid!()}:${process.getegid!()}`);
     assert.equal(receipt.timedOut, index === 1);
     assert.equal(receipt.completed, index === 0);
     if (index === 0) assert.equal(receipt.exitCode, 0);

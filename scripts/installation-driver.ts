@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { backendFixture } from './backend-fixture';
 import { createRuntimeObserver } from './runtime-observer';
+import { pythonCheckImage } from './rust/docker-engine';
 const config=JSON.parse(readFileSync(process.argv[2],'utf8'));
 let app=await backendFixture(config);
 const backendPids=[app.pid];
@@ -21,7 +22,7 @@ const initialHead=git('rev-parse','HEAD');
 try {
  const empty=await request('/workspace');assert.equal(empty.tasks.length,0);assert.equal(empty.runs.length,0);assert.equal(empty.repositories.length,0);
  for(const [id,selector,effort] of config.roles){const role=empty.roles.find((r:any)=>r.id===id);assert.ok(role);await request(`/roles/${id}`,{...role,revision:role.revision??1,model:selector,effort});}
- const repo=await request('/repositories',{name:'Fresh installation fixture',path:config.repository,targetBranch:'main',checks:[{id:'unit',image:'sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285',command:'/usr/local/bin/python3',args:['-B','-m','unittest','-v'],timeoutMs:5000,required:true}]});
+ const repo=await request('/repositories',{name:'Fresh installation fixture',path:config.repository,targetBranch:'main',checks:[{id:'unit',image:pythonCheckImage(),command:'/usr/local/bin/python3',args:['-B','-m','unittest','-v'],timeoutMs:5000,required:true}]});
  const task=await request('/tasks',{title:'Fresh local coding run',description:'No live Jira connection is configured.',repositoryId:repo.id});
  await request(`/tasks/${task.id}/refinement`,{revision:1,sourceRevision:1,brief:'Return the sum including empty lists and document the contract.',criteria:['Empty input returns zero','Nonempty input returns its sum','Document the empty-list contract']});
  const run=await request(`/tasks/${task.id}/runs`,{revision:2});const owned=await request(`/runs/${run.id}/repository`,{mode:'new'});

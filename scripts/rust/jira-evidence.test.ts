@@ -5,7 +5,8 @@ import {join} from 'node:path';
 import {test} from 'node:test';
 import {gitLatch} from '../../tests/fixtures/git-latch';
 import {body,issue,jiraFixture} from './jira-workflow-fixture';
-const image='sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285';
+import {checkImage} from './docker-engine';
+const image=checkImage();
 async function candidate(f:Awaited<ReturnType<typeof jiraFixture>>){
  const run=f.seed.run.id;await f.c.command('prepare',{target:run,input:{mode:'new'}});
  const definition={id:'required',image,command:'/bin/sh',args:['-c','cat source.txt; test "$(cat source.txt)" = after'],timeoutMs:10000,memoryMiB:256,tmpExecutable:false,required:true};await f.c.command('configure',{target:run,input:[definition]});await f.c.command('activate',{target:run});

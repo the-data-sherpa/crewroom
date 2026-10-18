@@ -14,6 +14,7 @@ import { ContainerCommand } from '../server/runtime/container-command';
 import { deliveryProviderFixture } from './delivery-provider-fixture';
 import { verifyDelivery } from './delivery-driver';
 import { createRuntimeObserver } from './runtime-observer';
+import { pythonCheckImage } from './rust/docker-engine';
 const config = JSON.parse(readFileSync(process.argv[2], 'utf8'));
 const checkout = join(config.root, 'operator'); mkdirSync(checkout);
 const git = (...args: string[]) => execFileSync('git', ['-C', checkout, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
@@ -45,7 +46,7 @@ async function request(path: string, body?: unknown) {
 }
 const observedRuntime = createRuntimeObserver(request);
 try {
-  const repository = await request('/repositories', { name: 'Fixture', path: checkout, targetBranch: 'main', checks: [{ id: 'unit', image: 'sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285', command: '/usr/local/bin/python3', args: ['-B', '-m', 'unittest', '-v'], timeoutMs: 5000, required: true }] });
+  const repository = await request('/repositories', { name: 'Fixture', path: checkout, targetBranch: 'main', checks: [{ id: 'unit', image: pythonCheckImage(), command: '/usr/local/bin/python3', args: ['-B', '-m', 'unittest', '-v'], timeoutMs: 5000, required: true }] });
   if (provider) await request('/jira/sync', {});
   const task = provider ? (await request('/workspace')).tasks[0] : await request('/tasks', { title: 'Correct sum behavior', description: '', repositoryId: repository.id });
   if (provider) await request(`/tasks/${task.id}/repository`, { revision: 1, repositoryId: repository.id });

@@ -14,10 +14,11 @@ import {NativeSupervisor} from './supervisor-adapter';
 import {backend,until} from './host-fixture';
 import {inspectCheckedOwned,inspectOwned,sealCheckedOwned,stopOwned} from './process-adapter';
 import {ContainerCommand} from './container-adapter';
-import {dockerSocket} from './docker-engine';
+import {dockerSocket,pythonCheckImage} from './docker-engine';
 export {until};
 export const socket=dockerSocket();
-export const image='sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285';
+/** Check image with /usr/local/bin/python3, resolved on first use so fixtures without Docker commands never touch the engine. */
+export const image=()=>pythonCheckImage();
 export async function supervisorFixture(t:TestContext,count=2,oneRun=false) {
  const root=realpathSync(mkdtempSync(join(tmpdir(),'cr-sup-'))),runtime=join(root,'runtime'),database=join(root,'workflow.sqlite');mkdirSync(runtime,{mode:0o700});
  const b=await backend(),store=new Workbench(database),seeds:any[]=[];

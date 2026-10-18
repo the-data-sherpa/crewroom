@@ -11,7 +11,7 @@ const detached="import subprocess,sys,time;subprocess.Popen([sys.executable,'-c'
 
 test('restarted supervisor stops a real Docker descendant after controller and host SIGKILL and preserves its receipt',{timeout:45000},async t=>{
  const f=await supervisorFixture(t);const workspace=join(f.root,'workspace');mkdirSync(workspace);
- const identity=await f.launch(0,{}, {commandEngine:{socket},tools:[{id:'detached',image,workspace,command:'/usr/local/bin/python3',args:['-c',detached]}]});
+ const identity=await f.launch(0,{}, {commandEngine:{socket},tools:[{id:'detached',image:image(),workspace,command:'/usr/local/bin/python3',args:['-c',detached]}]});
  await f.input('container',{kind:'tool',name:'run_command',arguments:{commandId:'detached'}});
  const root=await until(()=>existsSync(join(f.attemptRoot(),'tools'))&&readdirSync(join(f.attemptRoot(),'tools'))[0]&&join(f.attemptRoot(),'tools',readdirSync(join(f.attemptRoot(),'tools'))[0]));const job=new ContainerCommand(root,{socket});
  await until(()=>existsSync(join(root,'live.log'))&&readFileSync(join(root,'live.log'),'utf8').includes('supervised-container-ready'));
@@ -23,7 +23,7 @@ test('unavailable Docker engine retains uncertain ownership until a repeated nat
  const f=await supervisorFixture(t);await f.c.close();const proxySocket=join(f.root,'engine.sock');let available=true;
  const proxy=createServer((req,res)=>{if(!available){res.destroy();return;}const upstream=request({socketPath:socket,path:req.url,method:req.method,headers:req.headers},response=>{res.writeHead(response.statusCode!,response.headers);response.pipe(res);});upstream.on('error',()=>res.destroy());req.pipe(upstream);res.on('close',()=>upstream.destroy());});
  proxy.listen(proxySocket);await once(proxy,'listening');t.after(()=>{proxy.closeAllConnections();proxy.close();});await f.reopen({socket:proxySocket});
- const workspace=join(f.root,'workspace');mkdirSync(workspace);const identity=await f.launch(0,{}, {commandEngine:{socket:proxySocket},tools:[{id:'detached',image,workspace,command:'/usr/local/bin/python3',args:['-c',detached]}]});await f.input('container',{kind:'tool',name:'run_command',arguments:{commandId:'detached'}});
+ const workspace=join(f.root,'workspace');mkdirSync(workspace);const identity=await f.launch(0,{}, {commandEngine:{socket:proxySocket},tools:[{id:'detached',image:image(),workspace,command:'/usr/local/bin/python3',args:['-c',detached]}]});await f.input('container',{kind:'tool',name:'run_command',arguments:{commandId:'detached'}});
  const root=await until(()=>existsSync(join(f.attemptRoot(),'tools'))&&readdirSync(join(f.attemptRoot(),'tools'))[0]&&join(f.attemptRoot(),'tools',readdirSync(join(f.attemptRoot(),'tools'))[0]));const job=new ContainerCommand(root,{socket});await until(async()=>(await job.inspect()).state==='running');
  await f.kill();process.kill(identity.hostPid,'SIGKILL');available=false;await f.reopen({socket:proxySocket});assert.equal((await f.stop()).stopped,false);assert.equal((await f.c.command('attempt',{target:f.seeds[0].attempt.id})).ownership,'uncertain');assert.equal((await job.inspect()).state,'running');
  available=true;assert.equal((await f.stop()).stopped,true);assert.equal((await job.inspect()).state,'stopped');assert.equal(JSON.parse(readFileSync(join(root,'container.json'),'utf8')).removed,true);

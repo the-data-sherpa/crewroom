@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Docker socket resolver for Python verification scripts.
+"""Docker socket resolver and pinned check images for Python verification scripts.
 
 Mirrors `scripts/rust/docker-engine.ts`; `tests/docker-engine.test.ts` runs both
 against the same environments. Order: CREWROOM_DOCKER_SOCKET, a unix://
@@ -13,12 +13,21 @@ import hashlib
 import json
 import os
 import socket as sockets
+import subprocess
 import sys
 from pathlib import Path
 
 REMEDY = ('Start the Docker engine, or point Crewroom at a reachable engine with '
           'CREWROOM_DOCKER_SOCKET=/path/to/docker.sock (a unix:// DOCKER_HOST or '
           '`docker context use <name>` also work).')
+
+
+# Historical macOS (arm64) fixture image; only an image ID, so it cannot be pulled on another host.
+LEGACY_CHECK_IMAGE = 'sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285'
+# Multi-platform busybox index pinned by digest: /bin/sh, cat, head and test.
+PINNED_CHECK_REFERENCE = 'busybox@sha256:bdf57e528e45e4433820e045b29b4597825a1c9e38353532d90a01445013f82e'
+# Multi-platform python:3.13-alpine index pinned by digest: adds /usr/local/bin/python3.
+PINNED_PYTHON_CHECK_REFERENCE = 'python@sha256:2d9aefe2fef018a7eb2c13064c89c71929800fd2e5dccdbf52ea5da5bb8d929a'
 
 
 class DockerEngineError(RuntimeError):
@@ -100,6 +109,37 @@ def require_docker_engine(env=None, platform=None, home=None, timeout=5.0):
     if not (text.startswith(('HTTP/1.0 200', 'HTTP/1.1 200')) and text.rstrip().endswith('OK')):
         raise DockerEngineError(unreachable_engine_message(resolved, f'unexpected /_ping reply {json.dumps(text.splitlines()[0] if text else "")}'))
     return resolved['socket']
+
+
+
+def _local_image(reference, env, platform):
+    environment = {**os.environ, 'DOCKER_HOST': f'unix://{docker_socket(env, platform)}', 'DOCKER_CONTEXT': ''}
+
+    def docker(*args):
+        return subprocess.run(['docker', *args], env=environment, check=True, capture_output=True, text=True).stdout.strip()
+    try:
+        return docker('image', 'inspect', '--format', '{{.Id}}', reference)
+    except subprocess.CalledProcessError:
+        docker('pull', '--quiet', reference)
+        return docker('image', 'inspect', '--format', '{{.Id}}', reference)
+
+
+def check_image(env=None, platform=None):
+    """CREWROOM_CHECK_IMAGE, the legacy pin on macOS, otherwise the pinned busybox index pulled locally, as its image ID."""
+    env = os.environ if env is None else env
+    platform = sys.platform if platform is None else platform
+    if env.get('CREWROOM_CHECK_IMAGE'):
+        return env['CREWROOM_CHECK_IMAGE']
+    return LEGACY_CHECK_IMAGE if platform == 'darwin' else _local_image(PINNED_CHECK_REFERENCE, env, platform)
+
+
+def python_check_image(env=None, platform=None):
+    """Check image with /usr/local/bin/python3: CREWROOM_PYTHON_CHECK_IMAGE, the legacy pin on macOS, otherwise the pinned python index."""
+    env = os.environ if env is None else env
+    platform = sys.platform if platform is None else platform
+    if env.get('CREWROOM_PYTHON_CHECK_IMAGE'):
+        return env['CREWROOM_PYTHON_CHECK_IMAGE']
+    return LEGACY_CHECK_IMAGE if platform == 'darwin' else _local_image(PINNED_PYTHON_CHECK_REFERENCE, env, platform)
 
 
 if __name__ == '__main__':

@@ -2,9 +2,10 @@ import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
 import {NativeDaemon} from './daemon-client';
 import {workflowFixture,until} from './workflow-support';
+import {checkImage} from './docker-engine';
 /** Creates proof through authenticated workflow tools and actual Git/Docker. */
 export async function prepareContributedPair(f:Awaited<ReturnType<typeof workflowFixture>>,additional:any[]=[]){
- const image=process.env.CREWROOM_CHECK_IMAGE??'sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285';const definitions=[{id:'required',image,command:'/bin/sh',args:['-c','test "$(cat source.txt)" = after'],timeoutMs:10000,memoryMiB:256,tmpExecutable:false,required:true},...additional];
+ const image=checkImage();const definitions=[{id:'required',image,command:'/bin/sh',args:['-c','test "$(cat source.txt)" = after'],timeoutMs:10000,memoryMiB:256,tmpExecutable:false,required:true},...additional];
  if(f.c instanceof NativeDaemon){const repo=(await f.c.request('/api/workspace')).repositories.find((r:any)=>r.id===f.repository.id);await f.c.request('/api/repositories/'+repo.id,{requestId:randomUUID(),revision:repo.revision,name:repo.name,path:repo.path,targetBranch:repo.targetBranch,checks:definitions});
  // The check configuration is part of the accepted repository basis. Explicitly
  // accept a fresh fixture plan and replace the unadmitted queued request.

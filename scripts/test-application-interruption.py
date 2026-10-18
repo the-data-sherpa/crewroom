@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 import subprocess
 import signal
-from docker_engine import docker_socket
+from docker_engine import docker_socket, python_check_image
 from mailbox_contract_fixture import PROJECT, RustMail, free_port
 from omp_offline_fixture import Provider, Sandbox
 
@@ -34,7 +34,7 @@ runtime = {'root': str(root / 'hosts'), 'socket': str(root / 'crewroom.sock'), '
            'launchPrefix': ['/usr/bin/sandbox-exec', '-f', str(sandbox.path)], 'hostPorts': host_ports,
            'mail': {'url': f'http://127.0.0.1:{mail_port}/mcp/', 'token': mail.token, 'projectRoot': mail.project, 'retentionSeconds': 86400, 'atcDisabled': True},
            'commandEngine': {'socket': docker_socket()},
-           'tools': [{'id':'slow','image':'sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285','command':'/bin/sh','args':['-c','while true; do echo tick >> /workspace/ticks; sleep 0.05; done'],'workspace':str(root/'workspace')}],
+           'tools': [{'id':'slow','image':python_check_image(),'command':'/bin/sh','args':['-c','while true; do echo tick >> /workspace/ticks; sleep 0.05; done'],'workspace':str(root/'workspace')}],
            'catalog': capabilities, 'policy': {}, 'models': {'providers': providers}}
 if arguments.fault == 'detached':
     writer = 'import time; from pathlib import Path; p=Path("/workspace/ticks");\nwhile True:\n with p.open("a") as f: f.write("tick\\n"); f.flush()\n time.sleep(0.03)'

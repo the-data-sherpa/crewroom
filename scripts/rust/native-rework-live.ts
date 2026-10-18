@@ -5,6 +5,7 @@ import {mkdirSync,readFileSync,writeFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {nativeScenarioBackend,nativeIdentities} from './native-scenario-backend';
 import {createRuntimeObserver} from '../runtime-observer';
+import {pythonCheckImage} from './docker-engine';
 const config=JSON.parse(readFileSync(process.argv[2],'utf8'));
 const checkout=join(config.root,'operator');mkdirSync(checkout);
 const git=(...args:string[])=>execFileSync('git',['-C',checkout,...args],{encoding:'utf8',stdio:'pipe'}).trim();
@@ -17,7 +18,7 @@ async function request(path:string,body?:unknown):Promise<any>{const response=aw
 const observe=createRuntimeObserver(request);
 try{
  const criteria=['Empty input returns zero','Nonempty input returns its sum','Document the empty-list contract'];
- const repository=await request('/repositories',{name:'Native rework',path:checkout,targetBranch:'main',checks:[{id:'unit',image:'sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285',command:'/usr/local/bin/python3',args:['-B','-m','unittest','-v'],timeoutMs:5000,required:true}]});
+ const repository=await request('/repositories',{name:'Native rework',path:checkout,targetBranch:'main',checks:[{id:'unit',image:pythonCheckImage(),command:'/usr/local/bin/python3',args:['-B','-m','unittest','-v'],timeoutMs:5000,required:true}]});
  const task=await request('/tasks',{title:'Repair real check and review failures',description:'Scripted model replies drive real native tools.',repositoryId:repository.id});
  await request(`/tasks/${task.id}/refinement`,{revision:1,sourceRevision:1,brief:'Return sums including empty input and document the contract.',criteria});
  const run=await request(`/tasks/${task.id}/runs`,{revision:2});const owned=await request(`/runs/${run.id}/repository`,{mode:'new'});

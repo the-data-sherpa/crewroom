@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
 import { execFile, execFileSync, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test, type TestContext } from 'node:test';
-import { checkImage, dockerSocket, legacyCheckImage, pythonCheckImage, requireDockerEngine, resolveDockerSocket } from '../scripts/rust/docker-engine';
+import { checkImage, dockerSocket, legacyCheckImage, pinnedCheckReference, pinnedPythonCheckReference, pythonCheckImage, requireDockerEngine, resolveDockerSocket } from '../scripts/rust/docker-engine';
 
 /** A synthetic Docker CLI configuration directory with named contexts and an optional current one. */
 function dockerConfig(t: TestContext, contexts: Record<string, unknown>, current?: string) {
@@ -89,4 +89,21 @@ test('native fixture check images honour explicit pins and keep the historical m
   assert.equal(checkImage({}, 'darwin'), legacyCheckImage);
   assert.equal(pythonCheckImage({ CREWROOM_PYTHON_CHECK_IMAGE: python, CREWROOM_CHECK_IMAGE: pinned }, 'linux'), python);
   assert.equal(pythonCheckImage({}, 'darwin'), legacyCheckImage);
+});
+
+test('Python verification scripts choose the same check images as the TypeScript fixtures', () => {
+  const pinned = 'sha256:' + 'a'.repeat(64), python = 'sha256:' + 'b'.repeat(64);
+  const code = 'import json,sys;sys.path.insert(0,"scripts");import docker_engine as d;env=json.loads(sys.argv[1]);p=sys.argv[2]\nprint(json.dumps({"check":d.check_image(env,p),"python":d.python_check_image(env,p),"pins":[d.LEGACY_CHECK_IMAGE,d.PINNED_CHECK_REFERENCE,d.PINNED_PYTHON_CHECK_REFERENCE]}))';
+  const run = (env: Record<string, string>, platform: string) => JSON.parse(execFileSync('python3', ['-I', '-c', code, JSON.stringify(env), platform], { encoding: 'utf8', cwd: process.cwd() }));
+  // Explicit pins and the macOS default only, so neither side touches the Docker engine.
+  const cases: [Record<string, string>, NodeJS.Platform][] = [[{ CREWROOM_CHECK_IMAGE: pinned, CREWROOM_PYTHON_CHECK_IMAGE: python }, 'linux'], [{}, 'darwin'], [{ CREWROOM_CHECK_IMAGE: pinned }, 'darwin']];
+  for (const [env, platform] of cases) {
+    assert.deepEqual(run(env, platform), { check: checkImage(env, platform), python: pythonCheckImage(env, platform), pins: [legacyCheckImage, pinnedCheckReference, pinnedPythonCheckReference] }, JSON.stringify(env));
+  }
+});
+
+test('only the shared Docker helpers name the historical macOS check image', () => {
+  const tracked = execFileSync('git', ['ls-files', 'scripts', 'tests', 'server', 'crates', 'src'], { encoding: 'utf8' }).split('\n').filter(path => /\.(ts|tsx|py|rs|sh)$/.test(path));
+  const id = legacyCheckImage.slice('sha256:'.length);
+  assert.deepEqual(tracked.filter(path => readFileSync(path, 'utf8').includes(id)).sort(), ['scripts/docker_engine.py', 'scripts/rust/docker-engine.ts']);
 });

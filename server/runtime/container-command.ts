@@ -6,10 +6,17 @@ import { isAbsolute, join, resolve } from 'node:path';
 /** `readOnlyWorkspace` mounts the workspace read-only: ad-hoc commands inspect the worktree; source changes go through the writer's hash-checked edits. */
 export interface CommandSpec { image: string; workspace: string; command: string; args: string[]; timeoutMs?: number; memoryMiB?: number; tmpExecutable?: boolean; readOnlyWorkspace?: boolean }
 export interface ContainerEngine { socket: string }
-interface CommandReceipt { spec: CommandSpec; started: boolean; completed: boolean; timedOut: boolean; exitCode: number; output: string; platform: string; containerId?: string }
+interface CommandReceipt { spec: CommandSpec; started: boolean; completed: boolean; timedOut: boolean; exitCode: number; output: string; platform: string; containerId?: string; user?: string }
 class EngineError extends Error { constructor(readonly status: number | undefined) { super(`Command engine returned HTTP ${status}.`); } }
-interface Intent { root?: string; token: string; name: string; spec: CommandSpec; id?: string; startRequested?: boolean; startConfirmed?: boolean; startedAt?: number; timedOut?: boolean; completed?: { exitCode: number }; stopRequested?: boolean; removed?: boolean; removalRequested?: boolean; receipt?: CommandReceipt }
+/** `user` is the uid:gid the container runs as; intents saved before it existed keep the image's default user. */
+interface Intent { root?: string; token: string; name: string; spec: CommandSpec; user?: string; id?: string; startRequested?: boolean; startConfirmed?: boolean; startedAt?: number; timedOut?: boolean; completed?: { exitCode: number }; stopRequested?: boolean; removed?: boolean; removalRequested?: boolean; receipt?: CommandReceipt }
 interface CommandState { state: 'running' | 'stopped' | 'uncertain'; id?: string; exitCode?: number; reason?: string }
+
+/** The effective uid:gid of this process, which owns every workspace it prepares. */
+function invokingUser() {
+  if (!process.geteuid || !process.getegid) throw new Error('Command containment requires a POSIX user identity.');
+  return `${process.geteuid()}:${process.getegid()}`;
+}
 
 /** A command's process namespace is its ownership boundary; a detached descendant stays inside it. */
 export class ContainerCommand {
@@ -55,7 +62,8 @@ export class ContainerCommand {
     if (found.Config?.Labels?.['io.crewroom.command'] !== intent.token || (intent.id && intent.id !== found.Id)
       || found.Image !== intent.spec.image || found.HostConfig?.NetworkMode !== 'none' || found.HostConfig?.Privileged
       || found.HostConfig?.Memory !== (intent.spec.memoryMiB ?? 1024) * 1024 * 1024
-      || found.HostConfig?.Tmpfs?.['/tmp'] !== this.temporaryMount(intent.spec)) throw new Error('Container identity or containment changed.');
+      || found.HostConfig?.Tmpfs?.['/tmp'] !== this.temporaryMount(intent.spec)
+      || (intent.user !== undefined && found.Config?.User !== intent.user)) throw new Error('Container identity or containment changed.');
     if (!intent.id) this.update({ id: found.Id });
     return found;
   }
@@ -67,7 +75,9 @@ export class ContainerCommand {
     if (existsSync(this.path())) throw new Error('Command already has a durable intent; reconcile it instead of restarting.');
     mkdirSync(this.root, { recursive: true, mode: 0o700 });
     const token = randomUUID();
-    this.write({ root: this.root, token, name: `crewroom-${token}`, spec: { ...spec, workspace: realpathSync(spec.workspace) } });
+    // Run as the invoking owner, as the native adapter does: with CapDrop ALL a root user has no
+    // DAC override, so on Linux it could not write an operator-owned 0700 workspace.
+    this.write({ root: this.root, token, name: `crewroom-${token}`, spec: { ...spec, workspace: realpathSync(spec.workspace) }, user: invokingUser() });
     this.starting = this.launch();
     try { await this.starting; } finally { this.starting = undefined; }
   }
@@ -75,7 +85,7 @@ export class ContainerCommand {
     const intent = this.read();
     const created = await this.api('POST', `/containers/create?name=${intent.name}`, {
       Image: intent.spec.image, Entrypoint: [], Cmd: [intent.spec.command, ...intent.spec.args], WorkingDir: '/workspace',
-      Env: ['HOME=/tmp'], Labels: { 'io.crewroom.command': intent.token }, NetworkDisabled: true,
+      Env: ['HOME=/tmp'], Labels: { 'io.crewroom.command': intent.token }, NetworkDisabled: true, ...(intent.user === undefined ? {} : { User: intent.user }),
       HostConfig: { NetworkMode: 'none', CapDrop: ['ALL'], SecurityOpt: ['no-new-privileges:true'], ReadonlyRootfs: true,
         PidsLimit: 256, Memory: (intent.spec.memoryMiB ?? 1024) * 1024 * 1024, NanoCpus: 2_000_000_000, RestartPolicy: { Name: 'no' },
         Mounts: [{ Type: 'bind', Source: intent.spec.workspace, Target: '/workspace', ReadOnly: intent.spec.readOnlyWorkspace === true }], Tmpfs: { '/tmp': this.temporaryMount(intent.spec) } },
@@ -146,7 +156,8 @@ export class ContainerCommand {
     if (!intent.completed && intent.startConfirmed && !intent.stopRequested && !intent.timedOut) { this.update({ completed: { exitCode: state.exitCode } }); intent = this.read(); }
     const image = await this.api('GET', `/images/${intent.spec.image}/json`);
     const receipt = { spec: intent.spec, started: intent.startConfirmed === true, completed: !!intent.completed && intent.completed.exitCode === state.exitCode && !intent.timedOut,
-      timedOut: intent.timedOut === true, exitCode: state.exitCode, output: await this.logs(), platform: `${image.Os}/${image.Architecture}`, containerId: state.id };
+      timedOut: intent.timedOut === true, exitCode: state.exitCode, output: await this.logs(), platform: `${image.Os}/${image.Architecture}`, containerId: state.id,
+      ...(intent.user === undefined ? {} : { user: intent.user }) };
     this.update({ receipt });
     return receipt;
   }

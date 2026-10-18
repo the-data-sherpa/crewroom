@@ -14,7 +14,7 @@ import {setTimeout as delay} from 'node:timers/promises';
 import {ContainerCommand} from './container-adapter';
 import {randomUUID} from 'node:crypto';
 import {inspectCheckedOwned,stopOwned} from './process-adapter';
-import {dockerSocket} from './docker-engine';
+import {checkImage,dockerSocket} from './docker-engine';
 function fixture(t:TestContext){
   const root=realpathSync(mkdtempSync(join(tmpdir(),'crewroom-native-repository-')));const seed=seedMessages(join(root,'operator'));
   const git=(...args:string[])=>execFileSync('git',['-C',seed.root,'-c','user.name=Fixture','-c','user.email=fixture@example.invalid',...args],{encoding:'utf8'}).trimEnd();
@@ -111,7 +111,7 @@ test('scoped edits reject links, special files, stale hashes and ambiguous overl
 });
 
 test('native ad-hoc preparation runs an actual read-only Docker command without creating check evidence',{timeout:60000},async t=>{
-  const f=fixture(t);const work=await f.prepare();await f.c.command('activate',{target:f.seed.run.id});const image='sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285';
+  const f=fixture(t);const work=await f.prepare();await f.c.command('activate',{target:f.seed.run.id});const image=checkImage();
   await assert.rejects(f.c.command('shell',{target:f.seed.recipient.attempt.id,input:{command:'true'}}),/configured, contained check environment/);
   await f.c.command('configure_checks',{target:f.seed.run.id,input:[{id:'required',required:true,image,memoryMiB:256,tmpExecutable:false}]});
   const input={command:'cat answer.txt; if echo forbidden > answer.txt; then exit 9; fi; test "$(cat answer.txt)" = original',timeoutMs:10000};
