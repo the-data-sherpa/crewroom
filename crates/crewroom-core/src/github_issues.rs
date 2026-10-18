@@ -213,6 +213,32 @@ fn observations(repository: &str, issues: &Value, unique: bool) -> Result<Vec<So
     Ok(normalized)
 }
 
+/// Validates the `{taskId, key, status}` records of issues GitHub no longer serves.
+fn unreadable_tickets(value: &Value) -> Result<Vec<Value>> {
+    let items = value
+        .as_array()
+        .filter(|a| a.len() <= MAX_ISSUES)
+        .ok_or_else(|| invalid("Invalid unreadable GitHub issue list."))?;
+    items
+        .iter()
+        .map(|item| {
+            let task = item["taskId"]
+                .as_str()
+                .filter(|t| !t.is_empty() && t.len() <= 200);
+            let key = item["key"]
+                .as_str()
+                .filter(|k| k.len() <= 24 && k.starts_with('#'));
+            let status = item["status"].as_u64().filter(|s| (100..600).contains(s));
+            match (task, key, status) {
+                (Some(task), Some(key), Some(status)) => {
+                    Ok(json!({"taskId": task, "key": key, "status": status}))
+                }
+                _ => Err(invalid("Invalid unreadable GitHub issue record.")),
+            }
+        })
+        .collect()
+}
+
 const UPSERT: &str =
     "INSERT INTO github_sync VALUES(1,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data";
 
@@ -238,14 +264,19 @@ impl Store {
         })
     }
     /// Commits one complete observation of the saved source atomically. `issues`
-    /// matched the filters, in GitHub's order; `retained` are issues with open
-    /// runs that no longer match but are re-read so their requirement changes
-    /// are still noticed. Nothing is saved when the source changed meanwhile.
+    /// matched the filters, in GitHub's order; `retained` are imported issues
+    /// that no longer match (they left the filter since the last sync, or have
+    /// open runs) and were re-read so their status and requirement changes are
+    /// still recorded. `unreadable` lists imported tickets GitHub no longer
+    /// serves (`{taskId, key, status}`: deleted, transferred or hidden), so the
+    /// workbench can say their source status is the last one observed. Nothing
+    /// is saved when the source changed meanwhile.
     pub fn commit_github_sync(
         &self,
         source: &Value,
         issues: &Value,
         retained: &Value,
+        unreadable: &Value,
     ) -> Result<Value> {
         let repository = source["repository"]
             .as_str()
@@ -260,6 +291,7 @@ impl Store {
         {
             return Err(conflict("GitHub synchronization repeated an issue."));
         }
+        let unreadable = unreadable_tickets(unreadable)?;
         let site = site(repository);
         self.transaction(|s| {
             let saved = s.github_sync_state()?;
@@ -275,6 +307,7 @@ impl Store {
             state["state"] = json!("connected");
             state["taskIds"] = json!(tasks.iter().map(|t| t["id"].clone()).collect::<Vec<_>>());
             state["issueCount"] = json!(tasks.len());
+            state["unreadable"] = json!(unreadable);
             state["lastSyncedAt"] = json!(at);
             state["lastAttemptAt"] = json!(at);
             if let Some(fields) = state.as_object_mut() {

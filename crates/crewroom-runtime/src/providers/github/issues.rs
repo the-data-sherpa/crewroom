@@ -58,6 +58,9 @@ pub enum Failure {
     NoAccess { status: u16, reason: String },
     /// HTTP 410: the repository has issues disabled.
     IssuesDisabled(String),
+    /// HTTP 301/302/307/308: the repository was renamed or transferred.
+    /// Redirects are not followed, so the token never leaves the saved path.
+    Moved { status: u16 },
     /// Primary or secondary rate limit. `reset_at` is GitHub's reset time.
     RateLimited {
         reason: String,
@@ -75,6 +78,7 @@ impl Failure {
             Self::Rejected(_) => "rejected",
             Self::NoAccess { .. } => "no_access",
             Self::IssuesDisabled(_) => "issues_disabled",
+            Self::Moved { .. } => "moved",
             Self::RateLimited { .. } => "rate_limited",
             Self::Unavailable(_) => "unreachable",
             Self::Filter(_) => "filter",
@@ -94,6 +98,9 @@ impl Failure {
                     .trim_end()
                     .to_owned()
             }
+            Self::Moved { status } => format!(
+                "GitHub reports that {repository} moved (HTTP {status}): it was renamed or transferred. Save the repository under its current owner/name; nothing was imported."
+            ),
             Self::RateLimited { reason, reset_at } => match reset_at {
                 Some(at) => format!("{reason} The limit resets at {at}."),
                 None => reason.clone(),
@@ -101,6 +108,20 @@ impl Failure {
             Self::Unavailable(reason) | Self::Filter(reason) => reason.clone(),
         }
     }
+}
+
+/// The answer to re-reading one issue that no longer matches the filters.
+#[derive(Clone, Debug, PartialEq)]
+pub enum Reread {
+    Issue(Value),
+    /// The number now belongs to a pull request.
+    PullRequest,
+    /// GitHub no longer serves the issue here: deleted (410), transferred
+    /// (301 or 404 when the new repository is hidden), or no longer visible to
+    /// the token (404). Only this issue is affected, not the repository.
+    Gone {
+        status: u16,
+    },
 }
 
 /// One complete listing: matching issues in GitHub's order.
@@ -179,24 +200,33 @@ impl GitHubClient {
         Ok(listing)
     }
 
-    /// One issue by number, used to re-read issues with open runs that no
-    /// longer match the filters. Returns `None` for a pull request.
+    /// One issue by number, used to re-read imported issues that no longer
+    /// match the filters. A missing, deleted or transferred issue is reported as
+    /// [`Reread::Gone`] so one unreachable issue cannot fail the whole sync;
+    /// token, rate-limit and network failures are still returned as failures.
     pub async fn issue(
         &self,
         token: &str,
         owner: &str,
         name: &str,
         number: u64,
-    ) -> Result<Option<Value>, Failure> {
+    ) -> Result<Reread, Failure> {
         let url = format!("{}/repos/{owner}/{name}/issues/{number}", self.base);
-        let (_, body) = self.read(token, &url).await?;
+        let body = match self.read(token, &url).await {
+            Ok((_, body)) => body,
+            Err(Failure::NoAccess { status: 404, .. }) => return Ok(Reread::Gone { status: 404 }),
+            Err(Failure::IssuesDisabled(_)) => return Ok(Reread::Gone { status: 410 }),
+            Err(Failure::Moved { status }) => return Ok(Reread::Gone { status }),
+            Err(failure) => return Err(failure),
+        };
         if !body.is_object() {
             return Err(Failure::Unavailable(unexpected()));
         }
-        Ok(body
-            .get("pull_request")
-            .is_none_or(Value::is_null)
-            .then_some(body))
+        Ok(if body.get("pull_request").is_none_or(Value::is_null) {
+            Reread::Issue(body)
+        } else {
+            Reread::PullRequest
+        })
     }
 
     async fn milestone_number(
@@ -264,11 +294,12 @@ impl GitHubClient {
         let status = response.status().as_u16();
         let headers = response.headers().clone();
         let body = read_body(response).await;
-        let message = body
+        let full_message = body
             .as_ref()
             .and_then(|b| b["message"].as_str())
-            .map(|m| m.chars().take(200).collect::<String>())
             .unwrap_or_default();
+        let limited = rate_limited(status, &headers, full_message);
+        let message = full_message.chars().take(200).collect::<String>();
         let said = if message.is_empty() {
             String::new()
         } else {
@@ -283,7 +314,7 @@ impl GitHubClient {
                     .trim_end()
                     .to_owned(),
             )),
-            403 | 429 if status == 429 || super::rate_limited(&headers) => {
+            403 | 429 if limited => {
                 Err(Failure::RateLimited {
                     reason: format!(
                         "GitHub rate-limited this request (HTTP {status}); nothing was imported. {said}"
@@ -298,11 +329,21 @@ impl GitHubClient {
                 reason: said,
             }),
             410 => Err(Failure::IssuesDisabled(said)),
+            301 | 302 | 307 | 308 => Err(Failure::Moved { status }),
             _ => Err(Failure::Unavailable(format!(
                 "GitHub returned HTTP {status}. Try again later; nothing was imported."
             ))),
         }
     }
+}
+
+/// Whether a refusal is a primary or secondary rate limit. GitHub's secondary
+/// limits answer 403 (or 429) and do not always carry `x-ratelimit-remaining: 0`
+/// or `retry-after`, but their message says "secondary rate limit".
+fn rate_limited(status: u16, headers: &HeaderMap, message: &str) -> bool {
+    status == 429
+        || (status == 403
+            && (super::rate_limited(headers) || message.to_lowercase().contains("rate limit")))
 }
 
 fn unexpected() -> String {
@@ -435,6 +476,22 @@ mod tests {
                 .message("o/r")
                 .ends_with("resets at 2026-10-18T09:00:00.000Z.")
         );
+        let empty = HeaderMap::new();
+        assert!(rate_limited(
+            403,
+            &empty,
+            "You have exceeded a secondary rate limit. Please wait a few minutes before you try again."
+        ));
+        assert!(rate_limited(429, &empty, ""));
+        assert!(!rate_limited(
+            403,
+            &empty,
+            "Resource not accessible by integration"
+        ));
+        assert!(!rate_limited(404, &empty, "API rate limit exceeded"));
+        let moved = Failure::Moved { status: 301 };
+        assert_eq!(moved.kind(), "moved");
+        assert!(moved.message("o/r").contains("renamed or transferred"));
         let none = Failure::NoAccess {
             status: 404,
             reason: String::new(),

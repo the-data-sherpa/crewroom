@@ -7,6 +7,12 @@
 //! rejected, no access to the repository (missing or not installed/granted),
 //! issues disabled, rate limited, unreachable, or an unusable filter. Imported
 //! tickets carry GitHub's open/closed state as their source status only.
+//!
+//! Imported tickets that leave the filter (for example an issue closed under
+//! the default `state=open`) are re-read once so their last GitHub status is
+//! recorded; tickets with unfinished runs are re-read on every sync. An issue
+//! GitHub no longer serves (deleted, transferred or hidden) is listed with the
+//! sync instead of failing it.
 use super::{Active, GitHub};
 use crate::{ApiError, AppState, array, operation};
 use crewroom_core::{
@@ -15,7 +21,7 @@ use crewroom_core::{
     ticket_source,
 };
 use crewroom_runtime::providers::{
-    github::issues::{Failure, Filters},
+    github::issues::{Failure, Filters, Reread},
     secrets,
 };
 use serde_json::{Value, json};
@@ -83,16 +89,20 @@ async fn sync(state: &AppState) -> Result<(), ApiError> {
     };
     let outcome = match github.issue_token() {
         Err((reason, message)) => Err((reason.to_owned(), message)),
-        Ok(token) => observe(state, &github, &token, &owner, &name, &source)
+        Ok(token) => observe(state, &github, &token, &owner, &name, &saved)
             .await
             .map_err(|f| (f.kind().to_owned(), f.message(&repository))),
     };
     match outcome {
-        Ok((issues, retained)) => {
+        Ok(observed) => {
             let committed = source.clone();
             let result = operation(state, move |s| {
-                s.store
-                    .commit_github_sync(&committed, &json!(issues), &json!(retained))
+                s.store.commit_github_sync(
+                    &committed,
+                    &json!(observed.issues),
+                    &json!(observed.retained),
+                    &json!(observed.unreadable),
+                )
             })
             .await;
             if let Err(error) = result {
@@ -116,19 +126,39 @@ async fn sync(state: &AppState) -> Result<(), ApiError> {
     Ok(())
 }
 
-/// Lists the matching issues, then re-reads issues that have open runs but no
-/// longer match, so a requirement change on running work is still noticed.
+/// One complete observation of the saved source.
+struct Observed {
+    /// Issues matching the filters, in GitHub's order.
+    issues: Vec<Value>,
+    /// Imported issues re-read because they no longer match.
+    retained: Vec<Value>,
+    /// `{taskId, key, status}` for imported issues GitHub no longer serves.
+    unreadable: Vec<Value>,
+}
+
+/// A run that can still act on its ticket's requirements.
+fn unfinished(run: &Value) -> bool {
+    !["cancelled", "closed", "completed"].contains(&run["status"].as_str().unwrap_or(""))
+        && run["desiredState"] != "cancelled"
+}
+
+/// Lists the matching issues, then re-reads imported issues that are missing
+/// from the listing: those that matched at the last sync (so a close, relabel
+/// or reassignment is recorded), those GitHub could not serve last time, and
+/// those with unfinished runs (so a requirement change is still noticed). A
+/// deleted, transferred or hidden issue is recorded as unreadable; token,
+/// rate-limit and network failures still fail the sync.
 async fn observe(
     state: &AppState,
     github: &GitHub,
     token: &str,
     owner: &str,
     name: &str,
-    source: &Value,
-) -> Result<(Vec<Value>, Vec<Value>), Failure> {
+    saved: &Value,
+) -> Result<Observed, Failure> {
     let listing = github
         .client
-        .list_issues(token, owner, name, &Filters::from_source(source))
+        .list_issues(token, owner, name, &Filters::from_source(&saved["source"]))
         .await?;
     let mut ids: HashSet<String> = listing
         .issues
@@ -139,18 +169,33 @@ async fn observe(
     let workspace = operation(state, |s| s.store.snapshot())
         .await
         .map_err(|e| Failure::Unavailable(e.0.to_string()))?;
-    let mut retained = vec![];
-    for run in array(&workspace["runs"])
+    let mut recheck: HashSet<&str> = array(&saved["taskIds"])
         .iter()
-        .filter(|r| r["desiredState"] != "cancelled")
-    {
-        let Some(task) = array(&workspace["tasks"])
+        .filter_map(Value::as_str)
+        .collect();
+    recheck.extend(
+        array(&saved["unreadable"])
             .iter()
-            .find(|t| t["id"] == run["taskId"])
-        else {
+            .filter_map(|u| u["taskId"].as_str()),
+    );
+    let runs = array(&workspace["runs"]);
+    let mut observed = Observed {
+        issues: vec![],
+        retained: vec![],
+        unreadable: vec![],
+    };
+    for task in array(&workspace["tasks"]) {
+        if !ticket_source::belongs_to(task, ticket_source::GITHUB, &site) {
+            continue;
+        }
+        let Some(task_id) = task["id"].as_str() else {
             continue;
         };
-        if !ticket_source::belongs_to(task, ticket_source::GITHUB, &site) {
+        if !recheck.contains(task_id)
+            && !runs
+                .iter()
+                .any(|r| r["taskId"] == task["id"] && unfinished(r))
+        {
             continue;
         }
         let Some(id) = task["sourceId"].as_str() else {
@@ -166,14 +211,25 @@ async fn observe(
         if ids.contains(id) {
             continue;
         }
-        if let Some(issue) = github.client.issue(token, owner, name, number).await?
-            && issue["id"].as_u64().map(|v| v.to_string()).as_deref() == Some(id)
-        {
-            retained.push(issue);
-            ids.insert(id.to_owned());
+        match github.client.issue(token, owner, name, number).await? {
+            Reread::Issue(issue)
+                if issue["id"].as_u64().map(|v| v.to_string()).as_deref() == Some(id) =>
+            {
+                observed.retained.push(issue);
+                ids.insert(id.to_owned());
+            }
+            Reread::Gone { status } => observed.unreadable.push(json!({
+                "taskId": task_id,
+                "key": task["key"],
+                "status": status,
+            })),
+            // A different issue or a pull request under this number: GitHub
+            // numbers are not reused, so there is nothing to record.
+            Reread::Issue(_) | Reread::PullRequest => {}
         }
     }
-    Ok((listing.issues, retained))
+    observed.issues = listing.issues;
+    Ok(observed)
 }
 
 fn filters_text(source: &Value) -> String {
@@ -219,6 +275,24 @@ pub(crate) fn view(saved: Option<&Value>, connection: &Value) -> Value {
         ),
         _ => format!("{repository}: saved, not synced yet."),
     };
+    // Recorded by the last complete sync; kept beside a later failure.
+    let unreadable: Vec<&str> = array(&saved["unreadable"])
+        .iter()
+        .filter_map(|u| u["key"].as_str())
+        .collect();
+    let label = if unreadable.is_empty() {
+        label
+    } else {
+        format!(
+            "{label} GitHub no longer serves {} (deleted, transferred, or hidden from this token); {} the last status GitHub reported.",
+            unreadable.join(", "),
+            if unreadable.len() == 1 {
+                "its ticket shows"
+            } else {
+                "their tickets show"
+            }
+        )
+    };
     let connection_state = connection["state"].as_str().unwrap_or("");
     let connection_note = match connection_state {
         "disconnected" => Some("GitHub is not connected, so sync is unavailable."),
@@ -237,6 +311,7 @@ pub(crate) fn view(saved: Option<&Value>, connection: &Value) -> Value {
         "lastSyncedAt": saved["lastSyncedAt"],
         "lastAttemptAt": saved["lastAttemptAt"],
         "issueCount": saved["issueCount"],
+        "unreadable": saved["unreadable"],
         "connection": connection_state,
     });
     if state == "unavailable" {

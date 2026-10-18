@@ -15,7 +15,7 @@ use crewroom_runtime::providers::github::GitHubClient;
 use crewroom_service::{GitHubOptions, Service, ServiceOptions};
 use serde_json::{Value, json};
 use std::{
-    collections::HashMap,
+    collections::{HashMap, HashSet},
     os::unix::fs::PermissionsExt,
     sync::{Arc, Mutex},
 };
@@ -27,6 +27,12 @@ struct Fixture {
     origin: Arc<Mutex<String>>,
     revoked: Arc<Mutex<bool>>,
     rate_limited: Arc<Mutex<bool>>,
+    /// A secondary rate limit: 403 with GitHub's message and no limit headers.
+    secondary_limited: Arc<Mutex<bool>>,
+    /// Issues closed since the fixture started (#3 is always closed).
+    closed: Arc<Mutex<HashSet<u64>>>,
+    /// Issues GitHub no longer serves, with the status their endpoint answers.
+    gone: Arc<Mutex<HashMap<u64, StatusCode>>>,
     first_title: Arc<Mutex<String>>,
     queries: Arc<Mutex<Vec<HashMap<String, String>>>>,
 }
@@ -43,6 +49,13 @@ fn bad_credentials() -> Response {
         Json(json!({"message":"Bad credentials"})),
     )
         .into_response()
+}
+fn state_of(fixture: &Fixture, number: u64) -> &'static str {
+    if number == 3 || fixture.closed.lock().unwrap().contains(&number) {
+        "closed"
+    } else {
+        "open"
+    }
 }
 fn issue(fixture: &Fixture, number: u64, state: &str) -> Value {
     let title = if number == 1 {
@@ -90,6 +103,13 @@ async fn issues(
             .insert("x-ratelimit-reset", "1792310400".parse().unwrap());
         return response;
     }
+    if *fixture.secondary_limited.lock().unwrap() {
+        return (
+            StatusCode::FORBIDDEN,
+            Json(json!({"message":"You have exceeded a secondary rate limit. Please wait a few minutes before you try again."})),
+        )
+            .into_response();
+    }
     match (owner.as_str(), name.as_str()) {
         ("fixture", "issues") => {}
         ("fixture", "disabled") => {
@@ -105,21 +125,29 @@ async fn issues(
     }
     fixture.queries.lock().unwrap().push(query.clone());
     let origin = fixture.origin.lock().unwrap().clone();
+    // GitHub's state filter: open (the default), closed or all. Issues it no
+    // longer serves are not listed.
+    let wanted = query.get("state").map(String::as_str).unwrap_or("open");
+    let listed = |numbers: &[u64]| -> Vec<Value> {
+        numbers
+            .iter()
+            .filter(|n| !fixture.gone.lock().unwrap().contains_key(n))
+            .map(|&n| issue(&fixture, n, state_of(&fixture, n)))
+            .filter(|i| wanted == "all" || i["state"] == wanted)
+            .collect()
+    };
     if query.get("page").map(String::as_str) == Some("2") {
         // Second page: one closed issue and nothing after it.
-        return Json(json!([issue(&fixture, 3, "closed")])).into_response();
+        return Json(json!(listed(&[3]))).into_response();
     }
     let pull = json!({"id":9100,"number":2,"title":"A pull request","body":"","state":"open","html_url":"https://github.com/fixture/issues/pull/2","updated_at":"2026-10-18T08:00:00Z","pull_request":{"url":"x"}});
-    let mut response = Json(json!([
-        issue(&fixture, 1, "open"),
-        pull,
-        issue(&fixture, 4, "open")
-    ]))
-    .into_response();
+    let mut page = listed(&[1, 4]);
+    page.insert(page.len().min(1), pull);
+    let mut response = Json(json!(page)).into_response();
     response.headers_mut().insert(
         "link",
         format!(
-            "<{origin}/repos/fixture/issues/issues?state=all&per_page=100&page=2>; rel=\"next\", <{origin}/repos/fixture/issues/issues?page=2>; rel=\"last\""
+            "<{origin}/repos/fixture/issues/issues?state={wanted}&per_page=100&page=2>; rel=\"next\", <{origin}/repos/fixture/issues/issues?page=2>; rel=\"last\""
         )
         .parse()
         .unwrap(),
@@ -134,7 +162,19 @@ async fn single(
     if !authorized(&fixture, &headers) {
         return bad_credentials();
     }
-    Json(issue(&fixture, number, "open")).into_response()
+    if let Some(status) = fixture.gone.lock().unwrap().get(&number).copied() {
+        let mut response = (status, Json(json!({"message":"gone"}))).into_response();
+        if status.is_redirection() {
+            response.headers_mut().insert(
+                "location",
+                "https://api.github.com/repositories/2/issues/1"
+                    .parse()
+                    .unwrap(),
+            );
+        }
+        return response;
+    }
+    Json(issue(&fixture, number, state_of(&fixture, number))).into_response()
 }
 async fn milestones(State(fixture): State<Fixture>, headers: HeaderMap) -> Response {
     if !authorized(&fixture, &headers) {
@@ -368,5 +408,95 @@ async fn github_issues_import_resync_and_report_unavailable_states() {
     // Changing the source never removes earlier tickets or their refinements.
     let kept = github_tasks(&workspace(&info).await);
     assert_eq!(kept.len(), 3);
+    drop(service);
+}
+
+fn task_by_key(view: &Value, key: &str) -> Value {
+    github_tasks(view)
+        .into_iter()
+        .find(|t| t["key"] == key)
+        .unwrap_or_else(|| panic!("{key} imported"))
+}
+
+#[tokio::test]
+async fn github_issues_refresh_tickets_that_leave_the_filter_and_survive_gone_issues() {
+    let root = tempfile::tempdir().unwrap();
+    let data = root.path().join("data");
+    std::fs::create_dir(&data).unwrap();
+    std::fs::set_permissions(&data, std::fs::Permissions::from_mode(0o700)).unwrap();
+    let roles = root.path().join("roles.json");
+    let (origin, fixture) = simulated_github().await;
+    let service = Service::start_with_options(&data, &roles, 0, options(&origin))
+        .await
+        .unwrap();
+    let info = service.info.clone();
+    // The default filter: open issues only.
+    let (status, saved) = post(
+        &info,
+        "/github/issues/source",
+        json!({"repository":"fixture/issues"}),
+    )
+    .await;
+    assert_eq!(status, 200, "{saved}");
+    assert_eq!(saved["githubIssues"]["filters"], "state open");
+    post(&info, "/github/connect", json!({"token": TOKEN})).await;
+    let (_, synced) = post(&info, "/github/issues/sync", json!({})).await;
+    assert_eq!(synced["githubIssues"]["issueCount"], 2, "{synced}");
+    let view = workspace(&info).await;
+    assert_eq!(github_tasks(&view).len(), 2, "closed #3 is not imported");
+    assert_eq!(task_by_key(&view, "#1")["sourceStatus"], "open");
+
+    // Closing #1 on GitHub drops it from the open listing; the re-sync still
+    // records that it is closed instead of leaving it shown as open.
+    fixture.closed.lock().unwrap().insert(1);
+    let (_, synced) = post(&info, "/github/issues/sync", json!({})).await;
+    assert_eq!(synced["githubIssues"]["state"], "connected", "{synced}");
+    assert_eq!(synced["githubIssues"]["issueCount"], 1);
+    let view = workspace(&info).await;
+    assert_eq!(task_by_key(&view, "#1")["sourceStatus"], "closed");
+    assert_eq!(task_by_key(&view, "#4")["sourceStatus"], "open");
+    // Reopened, it matches again.
+    fixture.closed.lock().unwrap().remove(&1);
+    post(&info, "/github/issues/sync", json!({})).await;
+    assert_eq!(
+        task_by_key(&workspace(&info).await, "#1")["sourceStatus"],
+        "open"
+    );
+
+    // A deleted issue (410) and a transferred one (301) no longer fail the
+    // whole sync or claim the repository is disabled or unreachable; they are
+    // named with the sync result and their tickets keep the last status.
+    fixture.gone.lock().unwrap().insert(4, StatusCode::GONE);
+    fixture
+        .gone
+        .lock()
+        .unwrap()
+        .insert(1, StatusCode::MOVED_PERMANENTLY);
+    let (_, synced) = post(&info, "/github/issues/sync", json!({})).await;
+    let issues = &synced["githubIssues"];
+    assert_eq!(issues["state"], "connected", "{synced}");
+    assert_eq!(issues["issueCount"], 0);
+    let label = issues["label"].as_str().unwrap();
+    assert!(label.contains("no longer serves #1, #4"), "{label}");
+    assert!(!label.contains("disabled"), "{label}");
+    assert_eq!(issues["unreadable"].as_array().unwrap().len(), 2);
+    // Still unreadable on the next sync, then readable again once restored.
+    let (_, again) = post(&info, "/github/issues/sync", json!({})).await;
+    assert_eq!(again["githubIssues"]["unreadable"], issues["unreadable"]);
+    fixture.gone.lock().unwrap().clear();
+    let (_, restored) = post(&info, "/github/issues/sync", json!({})).await;
+    assert_eq!(restored["githubIssues"]["issueCount"], 2, "{restored}");
+    assert_eq!(restored["githubIssues"]["unreadable"], json!([]));
+
+    // A secondary rate limit without rate-limit headers is reported as a rate
+    // limit, not as missing access.
+    *fixture.secondary_limited.lock().unwrap() = true;
+    let (_, limited) = post(&info, "/github/issues/sync", json!({})).await;
+    let limited = &limited["githubIssues"];
+    assert_eq!(limited["reason"], "rate_limited", "{limited}");
+    let error = limited["error"].as_str().unwrap();
+    assert!(error.contains("secondary rate limit"), "{error}");
+    assert!(!error.contains("not installed"), "{error}");
+    assert_eq!(github_tasks(&workspace(&info).await).len(), 2);
     drop(service);
 }

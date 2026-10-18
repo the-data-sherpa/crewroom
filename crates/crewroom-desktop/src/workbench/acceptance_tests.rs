@@ -1314,6 +1314,7 @@ fn native_github_issue_shows_github_open_closed_apart_from_workflow_and_activity
             &source,
             &json!([{"id":9012,"number":12,"title":"Synthetic GitHub issue","body":"Source text","state":"open","html_url":"https://github.com/fixture/issues/issues/12","updated_at":"2026-10-18T08:00:00Z"}]),
             &json!([]),
+            &json!([]),
         )
         .unwrap();
         task = s.snapshot().unwrap()["tasks"][0].clone();

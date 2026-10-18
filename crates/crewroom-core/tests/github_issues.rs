@@ -34,6 +34,7 @@ fn sync_matches_on_identity_keeps_refinements_and_records_failures_without_parti
                 issue(2, "Second", "closed", "2026-10-18T08:00:00Z")
             ]),
             &json!([]),
+            &json!([]),
         )
         .unwrap();
     assert_eq!(state["state"], "connected");
@@ -64,6 +65,7 @@ fn sync_matches_on_identity_keeps_refinements_and_records_failures_without_parti
             &source,
             &json!([issue(1, "First", "closed", "2026-10-18T09:00:00Z")]),
             &json!([]),
+            &json!([]),
         )
         .unwrap();
     let closed = store.get_task(&id).unwrap();
@@ -73,7 +75,7 @@ fn sync_matches_on_identity_keeps_refinements_and_records_failures_without_parti
     let mut changed = issue(1, "First", "closed", "2026-10-18T10:00:00Z");
     changed["body"] = json!("Synthetic body, revised");
     store
-        .commit_github_sync(&source, &json!([changed]), &json!([]))
+        .commit_github_sync(&source, &json!([changed]), &json!([]), &json!([]))
         .unwrap();
     let revised = store.get_task(&id).unwrap();
     assert_eq!(revised["needsReacceptance"], true);
@@ -90,7 +92,11 @@ fn sync_matches_on_identity_keeps_refinements_and_records_failures_without_parti
             issue(3, "Dup", "open", "2026-10-18T11:00:00Z")
         ]),
     ] {
-        assert!(store.commit_github_sync(&source, &bad, &json!([])).is_err());
+        assert!(
+            store
+                .commit_github_sync(&source, &bad, &json!([]), &json!([]))
+                .is_err()
+        );
     }
     assert_eq!(store.snapshot().unwrap()["tasks"], before);
 
@@ -104,6 +110,32 @@ fn sync_matches_on_identity_keeps_refinements_and_records_failures_without_parti
     assert_eq!(failed["reason"], "rate_limited");
     assert_eq!(failed["lastSyncedAt"], synced_at);
 
+    // Issues GitHub no longer serves are recorded with the sync, validated,
+    // and replaced by the next complete sync.
+    let gone = json!([{"taskId": id, "key": "#1", "status": 410}]);
+    let state = store
+        .commit_github_sync(&source, &json!([]), &json!([]), &gone)
+        .unwrap();
+    assert_eq!(state["unreadable"], gone);
+    assert_eq!(state["state"], "connected");
+    assert!(state.get("reason").is_none());
+    for bad in [
+        json!([{"taskId": id, "key": "1", "status": 410}]),
+        json!([{"taskId": id, "key": "#1"}]),
+        json!({"taskId": id}),
+    ] {
+        assert!(
+            store
+                .commit_github_sync(&source, &json!([]), &json!([]), &bad)
+                .is_err(),
+            "{bad}"
+        );
+    }
+    let state = store
+        .commit_github_sync(&source, &json!([]), &json!([]), &json!([]))
+        .unwrap();
+    assert_eq!(state["unreadable"], json!([]));
+
     // Replacing the source starts over; a sync of the old source is refused
     // and a late failure for it is ignored. Earlier tickets stay.
     store
@@ -111,7 +143,7 @@ fn sync_matches_on_identity_keeps_refinements_and_records_failures_without_parti
         .unwrap();
     assert!(
         store
-            .commit_github_sync(&source, &json!([]), &json!([]))
+            .commit_github_sync(&source, &json!([]), &json!([]), &json!([]))
             .is_err()
     );
     store
