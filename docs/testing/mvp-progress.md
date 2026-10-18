@@ -23,6 +23,13 @@ Checks at `96565b8` (private `CARGO_TARGET_DIR` in the worktree, `-j6`, 1-minute
 - `cargo test -p crewroom-desktop usage`: 2/2 (`usage_is_grouped_by_billing_route_without_a_dollar_figure_for_subscription`, `missing_cells_and_unavailable_usage_never_become_positive_results`); the desktop crate is unchanged and renders the service counts.
 - `npm run test:e2e`: not run (integrator).
 
+Integration on main `db0be2c` (the branch was already on main, so `96565b8` is the integrated revision; private `CARGO_TARGET_DIR`, fixture-only OMP and Rust Mail runtime linked into the worktree's ignored `.crewroom/`):
+
+- `npm test`: **342/342**. An earlier run at 1-minute load about 17 reported 327/330 with three whole files (`cancel-continuation`, `feedback-continuation`, `scheduler-http`) failing without assertion output (FOR-68 class); those three files passed 16/16 when rerun alone.
+- `npm run build`: passes.
+- `npm run test:e2e`: **31/31**. An earlier full run failed one case with `worker process exited unexpectedly (code=null, signal=SIGKILL)` (FOR-68); that spec passed 2/2 alone and the full rerun passed.
+- `cargo test -p crewroom-service -- --test-threads=4`: all suites pass; Clippy `--all-targets -D warnings` and `fmt --check` clean. The desktop crate is unchanged and was not rerun.
+
 No live usage run: it needs inference, as recorded for FOR-44.
 
 ## FOR-60 — `npm test` under machine load (2026-10-18)
