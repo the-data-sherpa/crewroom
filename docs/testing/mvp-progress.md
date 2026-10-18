@@ -42,6 +42,13 @@ Implementation revision `2832986234025ffcb90b120583ee893c4430ad85` (branch `for-
 
 Not run here: `npm run test:e2e` (fixed port 4331; the integrator runs it). `scripts/rust/verify-compatibility.ts` was also not run: there, the retired TypeScript Workbench reopens a native store, and it still expects `jiraStatus`. The retired service is out of scope for FOR-56.
 
+**Integration (2026-10-18).** Rebased onto main `76397e8` (FOR-55) as implementation `063b5a8e2b5ea170762bc42aa3bdba3f1892cf26` and evidence `7e4e26f`, with two integration fixes. `debe62c`: FOR-55 added two `publication::assess` callers (the `github-publication-live` example and a `github_publication.rs` test) that still passed the former `false`; they now pass `None`. `0d3d2fb`: FOR-55 changed the native comment-conflict reason from "Bitbucket returned an older or conflicting comment version…" to "The PR host returned…", which failed the provider oracle at its first feedback step; the oracle's legacy view now restores the retired wording and reports each use (`nativeWording`). All simulated; no provider was contacted.
+
+- `npx tsx scripts/rust/verify-providers.ts` at `0d3d2fb` (`ledger-oracle` built from the rebased tree): **passed**, 92 operations, 25 compared tables, 597 neutral source-field reads, `acceptedSource` observed 38 times, the neutral PR-host reason mapped 6 times.
+- `npx tsx scripts/rust/verify-publication-policy.ts` at `debe62c`: **57 passed**.
+- `cargo test -p crewroom-core -p crewroom-runtime -j6 -- --test-threads=4` at `debe62c`: **346 passed, 0 failed, 2 ignored** (FOR-65's `model_discovery` test passed in this run). `cargo test -p crewroom-desktop`: **147 passed, 0 failed, 15 ignored**. Clippy `--all-targets -D warnings` for core, runtime and desktop and `cargo fmt --check` are clean. Private `CARGO_TARGET_DIR`.
+- At `7e4e26f` (the TypeScript and browser code is unchanged by the two fixes): `npm test` **334/334**, `npm run build` passes, `npm run test:e2e` **31 passed** with the ignored OMP fixture and Mail runtime linked into the worktree. A first full e2e run had 1 failure, `feedback.spec.ts` "observe PR feedback…", with `page.goto: Page crashed` (Chromium) under load average about 7; it passed alone and in the full rerun.
+
 ## FOR-52 — OMP 18.11.3 execution (2026-10-18)
 
 Implementation revision `7466e0c1d6959fdee298f5445192271b071aa92b` (branch `for-52-omp-18-11-3-launch`, from main `3a2add0`). Every result below was produced by binaries built from that revision in a private target directory; their hashes are in the [receipt](for-52-omp-18-11-3-2026-10-18.json). The shared target was not used for evidence: a parallel worktree with older sources rebuilt it during this work.
