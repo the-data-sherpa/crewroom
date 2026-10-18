@@ -1,0 +1,90 @@
+{
+  "issue": "FOR-48",
+  "observedAt": "2026-10-18",
+  "branch": "for-48-github-issue-delivery",
+  "baseRevision": "ba3ec4c31283f8659d2a8c872cfee0f0c8a86f31",
+  "implementationRevision": "966b856d80dc2ef25817e6c1e43f3cd2d981b00a",
+  "probeRevision": "6a8dae3527d485a30822a62a1560d83f1306ee4e",
+  "documentationRevision": "5fe105e11f54ce49496928a0d52a2a01c345994e",
+  "scope": "Deliver GitHub-sourced tickets' milestone, blocker, evidence, PR-link and research-outcome updates as GitHub issue comments exactly once across retries and restarts; record the issue's open/closed state after a merge as the ticket's source status, separate from workflow state; optional in-progress/in-review workflow labels only when configured; undelivered updates visible with reason and retry. Schema 33 adds the github_updates outbox.",
+  "simulated": {
+    "provider": "Loopback GitHub REST fixture (axum in crates/crewroom-runtime/tests/github_delivery.rs); not github.com.",
+    "checks": [
+      "comments_post_exactly_once_across_an_outage_a_lost_reply_and_a_restart: only the delivery reporter may queue; same event key returns the same intent, different content and unknown fields are refused; HTTP 503 leaves the update pending with its reason and nothing posted; a stored comment with a lost reply (502) is uncertain; after reopening the store and building a new outbox the marker confirms it with GitHub's comment id; a further pass posts nothing (1 post, 1 comment); CRLF bodies match; imported description and source status are unchanged; the coordinator receives a 'github' delivery notice",
+      "an_unknown_write_stays_uncertain_without_duplicates_until_the_operator_retries: a write that never landed (502) stays uncertain over three passes with one POST and the next update waits in order; a pending update cannot be retried; operator retry re-reads, posts once and both updates confirm (3 POSTs, 2 comments)",
+      "refusals_and_missing_credentials_are_undelivered_with_a_reason_and_retry: GitHub not connected leaves the update pending with the reason and no request; HTTP 403 blocks with 'Issues: Read and write' and the token is absent from the record; a blocked update is not resent by itself; retry after the fix confirms one comment",
+      "labels_apply_only_when_configured_and_the_merge_closes_the_issue_as_a_separate_fact: with labels off, in_progress is refused and a confirmed open PR derives nothing (no label writes); after configuring labels, in_progress adds the in-progress label and the open PR derives in_review (adds in-review, removes in-progress); after a merged publication the labels are removed and the merge observation stays pending 'Waiting for GitHub to close #1' with source status open; an unforced pass within a minute does not re-read; after the fixture closes the issue a reconcile confirms issueState closed, the ticket's sourceStatus becomes closed with GitHub's update time, run status/desiredState/purpose are unchanged and no comment was posted for labels or closure",
+      "Unit tests: every comment kind's label (agent report vs verified evidence), run line and stable marker; issue numbers only from #N keys; GitHub and Bitbucket PR links; provider-named refusals; issue-delivery remedies for 401/403/404/410/429 keep status and GitHub's message; loopback-only fixture origins; github_report/github_updates offered only with GitHub delivery, report only to the reporter or research-coordinator fallback; GitHub tickets use GitHub delivery and every other ticket keeps Jira",
+      "crewroom-core/tests/github_delivery.rs: labels off by default, validated, kept across a repository change and cleared; observed issue state changes only sourceStatus/sourceUpdatedAt and ignores older observations; GitHub receipts are kept apart from Jira and notify the coordinator; a schema-32 store gains the github_updates table",
+      "crewroom-service/tests/github_delivery.rs: labels need a saved repository (409), invalid labels 400, saved labels and the labels note are projected; workspace carries githubUpdates; /github/delivery/reconcile answers the outbox; retry of an unknown update is 404; no response carries the token. needs.rs unit test: blocked/uncertain GitHub updates appear under Needs you with their reason, superseded ones do not",
+      "Desktop: github_issues_tests.rs saves an in-review label through Settings and shows the labels note; results/tests.rs github_issue_delivery_is_listed_with_reasons_and_retry shows Delivered / Not delivered with reasons, the merge observation with GitHub's issue state, and Retry only for undelivered updates"
+    ]
+  },
+  "live": {
+    "endpoint": "https://api.github.com through the production GitHubDelivery outbox and GitHubIssueClient, driven by crates/crewroom-runtime/examples/github-issue-delivery-live.rs at the probe revision (debug binary sha256 93ef7027b03c93fbe4a7ad36bb82e2ae60a422c4c2c52c75df004ee5c995f00c).",
+    "repository": "Private disposable sandbox <owner>/crewroom-e2e-sandbox, approved by the operator for comments and closing. Issue #5 is a synthetic issue created for FOR-45; all comment text is synthetic.",
+    "credential": "The operator's gh login token passed as CREWROOM_GITHUB_TOKEN, read in-process per request and never printed; the probe asserts the receipt does not contain it.",
+    "store": "A new workflow store in a private scratch directory outside the repository, with a synthetic coding run, an accepted brief and plan, and an admitted delivery reporter.",
+    "cases": [
+      {
+        "case": "workflow labels off",
+        "result": "in_progress refused: 'GitHub workflow labels are off. Name an in-progress label under Settings → Integrations → GitHub Issues to use it.' No label was written."
+      },
+      {
+        "case": "first pass",
+        "updates": [
+          {"kind": "milestone", "state": "confirmed", "externalId": 6248530982},
+          {"kind": "blocker", "state": "confirmed", "externalId": 6248531090}
+        ],
+        "crewroomComments": 2
+      },
+      {
+        "case": "restart with an unknown and an interrupted write",
+        "setup": "Store reopened and a new outbox built; the confirmed milestone was set back to uncertain and the blocker to sending, both without receipts.",
+        "updates": [
+          {"kind": "milestone", "state": "confirmed", "externalId": 6248530982},
+          {"kind": "blocker", "state": "confirmed", "externalId": 6248531090}
+        ],
+        "crewroomComments": 2,
+        "result": "Both confirmed by their markers with the same GitHub comment ids; nothing was posted again."
+      },
+      {
+        "case": "invalid synthetic token, then operator retry",
+        "blocked": "GitHub rejected the token (HTTP 401): it is invalid, expired or revoked. Reconnect GitHub in Settings → Integrations, or update CREWROOM_GITHUB_TOKEN, then retry the update. GitHub said: \"Bad credentials\".",
+        "afterRetry": {"state": "confirmed", "externalId": 6248531317},
+        "crewroomComments": 3
+      },
+      {
+        "case": "synthetic merged publication while the issue is open",
+        "mergeObservation": {"state": "pending", "issueState": "open", "reason": "Waiting for GitHub to close #5. GitHub closes it when the merged PR's closing reference reaches the default branch; Crewroom does not close it."},
+        "ticketSourceStatus": "open",
+        "runStatus": "running"
+      },
+      {
+        "case": "issue closed on github.com by the operator (gh issue close, completed), then reconcile",
+        "before": {"ticketSourceStatus": "open", "runStatus": "running", "runDesiredState": "running"},
+        "mergeObservation": {"state": "confirmed", "issueState": "closed"},
+        "after": {"ticketSourceStatus": "closed", "runStatus": "running", "runDesiredState": "running"},
+        "crewroomComments": 3
+      }
+    ],
+    "tokenAbsentFromReceipt": true,
+    "redaction": "Repository owner replaced with <owner>; no token or account id retained."
+  },
+  "commands": [
+    "cargo test -p crewroom-core -p crewroom-service (implementation tree): 177 passed, 0 failed",
+    "cargo test --no-fail-fast -p crewroom-runtime (probe revision): 173 passed, 0 failed, 2 ignored; one earlier full run failed two model_discovery tests under machine load, which passed alone and on the full rerun",
+    "cargo test -p crewroom-desktop (implementation tree): 141 passed, 15 ignored",
+    "cargo clippy -p crewroom-core -p crewroom-runtime -p crewroom-service --all-targets -- -D warnings: clean; cargo clippy -p crewroom-desktop --all-targets -- -D warnings: only the pre-existing useless_conversion in untouched feedback_tests.rs",
+    "cargo fmt -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop --check: clean",
+    "npm test: 332/332",
+    "npm run build: pass"
+  ],
+  "limitations": [
+    "No live merge: the operator approved comments and closing only, so the live merge is a synthetic publication record and the issue was closed by the operator with gh, not by GitHub's Closes #N handling. FOR-46 recorded GitHub's closingIssuesReferences for a live PR body; the merge-to-close step itself is not observed live.",
+    "Workflow labels were not exercised live (writes beyond comments and closing were not approved); they are proved against the loopback fixture only.",
+    "Evidence, PR-link and research-outcome comments share the marker-based delivery proved here with milestone and blocker comments, and their composition is shared with Jira; they were not produced end to end from a real verified coding or research run in this branch, simulated or live.",
+    "No agent process used github_report live; the probe calls the same prepare path the host tool routes to.",
+    "npm run test:e2e was not run (left to the integrator)."
+  ]
+}
