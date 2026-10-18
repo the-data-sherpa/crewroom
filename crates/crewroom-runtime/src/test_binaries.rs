@@ -18,6 +18,9 @@ pub struct HelperBinaries {
 }
 
 const BUILD: &str = "cargo build --locked -p crewroom-runtime --bins";
+/// The fresh-worktree preparation step (`scripts/prepare_worktree.py`) that also runs [`BUILD`].
+const PREPARE_SCRIPT: &str = "scripts/prepare_worktree.py";
+const PREPARE_FLAG: &str = "--build-helpers";
 
 /// The profile directory (for example `target/debug`) that holds the running test executable.
 pub fn profile_dir_of_current_test() -> PathBuf {
@@ -43,12 +46,16 @@ pub fn ensure(profile_dir: &Path) -> HelperBinaries {
     if let Err(reason) = outcome
         && !(helpers.process.is_file() && helpers.host.is_file())
     {
-        panic!(
-            "Runtime helper binaries are missing from {} and could not be built ({reason}). Run `{BUILD}` with the same CARGO_TARGET_DIR, or `python3 scripts/prepare-worktree.py --build-helpers`.",
-            profile_dir.display()
-        );
+        panic!("{}", missing_helpers_message(profile_dir, reason));
     }
     helpers
+}
+
+fn missing_helpers_message(profile_dir: &Path, reason: &str) -> String {
+    format!(
+        "Runtime helper binaries are missing from {} and could not be built ({reason}). Run `{BUILD}` with the same CARGO_TARGET_DIR, or `python3 {PREPARE_SCRIPT} {PREPARE_FLAG}`.",
+        profile_dir.display()
+    )
 }
 
 fn build(profile_dir: &Path) -> Result<(), String> {
@@ -106,6 +113,28 @@ fn target_layout(profile_dir: &Path) -> Result<(PathBuf, Option<String>), String
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn missing_helpers_message_names_the_real_preparation_step() {
+        let message = missing_helpers_message(Path::new("/x/debug"), "no cargo");
+        let workspace = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+        let script = workspace.join(PREPARE_SCRIPT);
+        let source = std::fs::read_to_string(&script)
+            .unwrap_or_else(|e| panic!("{} named in the message: {e}", script.display()));
+        assert!(message.contains(&format!("`python3 {PREPARE_SCRIPT} {PREPARE_FLAG}`")));
+        assert!(message.contains(&format!("`{BUILD}`")));
+        assert!(
+            source.contains(&format!("'{PREPARE_FLAG}'")),
+            "{PREPARE_FLAG} is a flag of the script"
+        );
+        // The script's helper build runs the same command the message names.
+        let argv = BUILD
+            .split(' ')
+            .map(|arg| format!("'{arg}'"))
+            .collect::<Vec<_>>()
+            .join(", ");
+        assert!(source.contains(&argv), "script builds with `{BUILD}`");
+    }
 
     #[test]
     fn host_and_cross_target_layouts_are_recognised() {
