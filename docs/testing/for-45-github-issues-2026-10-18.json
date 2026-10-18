@@ -143,5 +143,23 @@
     "A fine-grained or classic personal access token",
     "Review fix 697d86b: closing, deleting or transferring an imported issue on github.com, and a live secondary rate limit; covered by the simulated fixture"
   ],
-  "reviewFixRevision": "697d86b701c51a9a229765e4539f880e09d2a527"
+  "reviewFixRevision": "697d86b701c51a9a229765e4539f880e09d2a527",
+  "integration": {
+    "baseRevision": "cf9c20379d4e2c916e1745c6997b0a17a2e3be12",
+    "implementationRevision": "ad18021037d026731f14d8f7f11e084a7128d43a",
+    "documentationRevision": "73491feeb4901bfad7b3583b8b2ce53c868ed9b7",
+    "reviewFixRevision": "cf0e89baa1e5318175bcbea804db7687cfa8ceeb",
+    "checkedHead": "921a2492655b7b8b466ffdede1be7ec811c4069d",
+    "note": "Revisions above the integration block are pre-rebase; their checks and the live run were executed there.",
+    "checks": {
+      "cargo test --locked --no-fail-fast -p crewroom-core -p crewroom-runtime -p crewroom-service -- --test-threads=1": "332 passed, 0 failed, 2 ignored",
+      "cargo test --locked --no-fail-fast -p crewroom-desktop": "140 passed, 15 ignored",
+      "cargo clippy --locked -p crewroom-core -p crewroom-runtime -p crewroom-service --all-targets -- -D warnings": "clean (desktop --all-targets: pre-existing useless_conversion in untouched feedback_tests.rs)",
+      "cargo fmt --check (per package)": "clean",
+      "npm test": "332/332",
+      "npm run build": "pass",
+      "npm run test:e2e": "29 passed, 2 failed (refinement.spec.ts:28 and research.spec.ts:27 fixture setup: fixture-only OMP 18.4.12 not installed; same as earlier integrations)"
+    },
+    "liveRepeated": false
+  }
 }
