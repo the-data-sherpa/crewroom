@@ -4,6 +4,42 @@ The operator requested that each work item pass its checks before the next start
 
 Historical revision IDs and source hashes below refer to the original private snapshots before the FOR-17 history rewrite. Sanitized copies are not byte-identical evidence for rewritten revisions; replay requires the private archive. New validation is recorded separately.
 
+## FOR-60 — `npm test` under machine load (2026-10-18)
+
+Code revision `45b434f` (branch `for-60-reliable-npm-test`, from main `2b1b5e7`). This also covers the failures listed in FOR-63 and FOR-66. All runs are local tests with simulated providers and fixture Git remotes; nothing contacted a live service. The machine has 16 cores and is shared with other agents. Load came from 16 busy-loop CPU burners (`sh -c 'while :; do :; done'`) running for the whole series, plus the other agents' builds. Each run used `tsx --test --test-reporter=tap tests/*.test.ts`, which is the `npm test` command with a TAP reporter added so that each failed file's exit signal is recorded.
+
+**Root causes.**
+
+| Failure (issue) | Cause | Change |
+|---|---|---|
+| Duplicate checked helper reports `FileExistsError: … owner.json` instead of `Process lease already held.` (FOR-60, FOR-63; reported at FOR-54) | A real race in `server/runtime/process-lease.py`. The lease is one-shot, but the lock alone does not show that. Under load, the losing helper can reach `flock` only after the winner has exited, so the lock is free. It then failed while creating `owner.json` with `O_EXCL`. Nothing ran twice, but the reason was wrong. | After taking the lock, an existing `owner.json` shows the lease was used. The helper exits with `Process lease already held.` before reading the manifest or opening logs. The "duplicate helpers execute at most once" test now also starts a helper after the winner has exited, which is the case the scheduler hits under load. It requires the lease message, no `FileExistsError` or traceback, and output and logs unchanged. Without the fix, the new assertion fails with the exact `FileExistsError` from FOR-54. |
+| Whole test files end with no failing subtest, so the totals vary (283–337) (FOR-60: `live-viewer`, `cancel-continuation`; here: `admission-restart-review`, `feedback-continuation`, `publication`, `coding`, `target-refresh`) | The file's `node` process was killed by SIGKILL. The TAP record shows `signal: 'SIGKILL'`, `exitCode: ~`. Node's test runner never sends SIGKILL to test files, and nothing in `server/` or `tests/` signals a process it did not start. | None in code (see the next section). |
+| Git-backed cases fail closed in different tests on each run: `Repository configuration is unavailable.`, `Git could not complete rev-parse/worktree …`, `Target branch must resolve to a commit …`, `evidence.assess(...).ready === false` (the DEL-04/05/06 feedback case), REP-02 launch-reference errors, check-environment and publication blockers (FOR-60, FOR-63, FOR-66) | The same outside SIGKILL hits one Git child. One error records `signal: 'SIGKILL'` with `killed: false`. A Node `execFile` timeout would set `killed: true` and send SIGTERM, so this kill came from outside the process. Each caller then correctly fails closed: the configuration probe, `RepositoryWork.git`, the repository validation, and readiness (which reports the unavailable revision as a blocker). | None. Retrying a Git command that was killed would hide an uncertain outcome. |
+| `Publication process ownership is unresolved.` after `close` (FOR-66) | No case reproduced it here. 320 owned `git ls-remote` launches (8 at a time, load ~31) were each inspected right after `close` and all were `stopped`. It fits the same kill. When a Git leader is SIGKILLed while a child of it (for example the local transport's `upload-pack`/`receive-pack`) still holds the inherited lease lock, `inspectOwned` correctly reports the surviving holder as uncertain. | None. Treating it as stopped would weaken process ownership. |
+| `Coding schedule reconciliation failed: fetch failed` / `bad port` (FOR-60, FOR-63) | Log output, not a failure. The REVIEW-R2 "HTTP Save launch details" case in `tests/scheduler-replay-holds.test.ts` configures Mail at `http://127.0.0.1:9/mcp/`. Port 9 is on undici's blocked-port list, so the unavailable integration is reported truthfully and the scheduler retries on its next signal. The test passes. | None. |
+
+**Where the SIGKILL comes from.** The same revision and load gave these results:
+
+| Where the run was started | Runs | Result |
+|---|---|---|
+| Inside the agent session's process tree (a Bash tool background task); unloaded working tree, then 2 loaded runs | 3 | 0 of 3 passed: 3/334, 3/337 and 3/301 failures. File processes and Git children were SIGKILLed. |
+| `systemd-run --user --scope`: a new cgroup, but still a descendant of the agent process | 1 | Failed: the `target-refresh` file process was SIGKILLed (290/291). |
+| `systemd-run --user` service: a child of `systemd --user`, outside the agent's tree, with the same burners | 3 + 5 | 8 of 8 passed, 340/340 each. |
+
+The trigger follows the agent session's process tree, not the cgroup. Canary processes that block and log every catchable termination signal were never signalled. That fits a direct SIGKILL to chosen PIDs, not a SIGTERM-then-SIGKILL sweep. Earlier FOR-58 evidence also ruled out OOM and kills by process name. Without kernel signal tracing, which needs operator approval (FOR-68), the sending program is still unnamed. These results narrow the search to programs that act on descendants of the agent session. The [testing guide](feature-map/README.md#fresh-worktrees) now shows how to run repeated-run evidence outside that tree.
+
+**Five consecutive runs at `45b434f`** (a `systemd-run --user` service, 16 CPU burners for the whole series):
+
+| Run | Result | Duration | Load (1/5/15 min) at end |
+|---|---|---|---|
+| 1 | 340 passed, 0 failed | 360 s | 29.7 / 29.3 / 32.5 |
+| 2 | 340 / 0 | 338 s | 21.9 / 26.4 / 30.5 |
+| 3 | 340 / 0 | 333 s | 23.6 / 25.4 / 29.0 |
+| 4 | 340 / 0 | 303 s | 24.4 / 24.2 / 27.5 |
+| 5 | 340 / 0 | 324 s | 30.3 / 25.2 / 26.8 |
+
+Three more service runs passed 340/340 earlier, with the same change uncommitted on `2b1b5e7` (load 30–54). No assertion was weakened or skipped, and no timeout was changed. `npm run build` passes.
+
 ## FOR-62 — remaining Docker-backed fixtures run on Linux (2026-10-18)
 
 Code `78d1980` (branch `for-62-docker-fixtures-linux`, from main `2b1b5e7`; rebased without code changes onto main `c9b9a31` as `cbcefe3`). Every check below ran at `78d1980`, or on the identical uncommitted tree where noted, on Linux x86_64 with Docker Engine 29.7.2 (rootful, `default` context) and Node 26, with native helpers built from this revision into a target directory private to the worktree. Docker and Git are real; no provider, Jira or GitHub service was contacted. The machine was shared with parallel agents (load average 7–57).

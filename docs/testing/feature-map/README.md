@@ -61,6 +61,15 @@ It runs `npm ci` when `node_modules` is absent and links the fixture-only OMP (`
 
 Give every worktree its own Cargo build directory. Sharing one `CARGO_TARGET_DIR` across parallel worktrees mixes artifacts built from different revisions and produces stale compile and test failures. A private directory inside the worktree (`$PWD/target`, ignored) avoids this. Tests that start `crewroomd` or the native service build `crewroom-process` and `crewroom-host` into their own build directory on first use (`crewroom_runtime::test_binaries`), so a fresh build directory needs no manual `cargo build -p crewroom-runtime --bins`; `--build-helpers` builds them up front. Native fixtures create private per-test roots under the configured temporary directory (`TMPDIR`). The dev-mode UI watcher ignores `.claude/`, `.crewroom/`, `target/`, `dist/`, `crates/` and `vendor/`, so nested worktrees cannot exhaust the file-watcher limit.
 
+On the operator's Linux machine, processes started from inside an AI-agent session's process tree are sometimes SIGKILLed from outside that tree (FOR-60, FOR-68). Whole `node --test` file processes and single Git children die with `signal: 'SIGKILL'` and no failing assertion, and the Git callers then fail closed (`Repository configuration is unavailable.`, `Git could not complete …`). To record repeated-run evidence from an agent session, start the run as its own user service so that it is not a descendant of the agent:
+
+```sh
+systemd-run --user --collect --unit=crewroom-npm-test -p WorkingDirectory="$PWD" -E PATH="$PATH" -E HOME="$HOME" npm test
+journalctl --user -u crewroom-npm-test -f
+```
+
+A `systemd-run --scope` run is still a descendant of the agent process and is still affected.
+
 ## Evidence, cleanup and reruns
 
 Each invocation records recipe/manifest/helper hashes, source commit and dirty patch hash, native source and executable fingerprints, OS/architecture/toolchain, exact arguments and timing, selection/assertion counts, journey result and cleanup. Native action artifacts retain input plans, rendered labels, durable observations and test output. The isolated Git identities (target, candidate head/base/tree) differ from the application's source/build identity.
