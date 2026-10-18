@@ -52,10 +52,18 @@ function neutralOnly(value:any,where:string) {
 // They are removed from the legacy view and counted, never compared.
 const NATIVE_ONLY:Record<string,string>={acceptedSource:'FOR-40 re-acceptance baseline (accepted source title/description)'};
 const nativeOnlyFields=new Map<string,number>();
+// Native wording that no longer names the retired service's only PR host, each with the change
+// that neutralized it. The legacy view restores the retired text; uses are counted and reported.
+const NATIVE_WORDING:Record<string,string>={
+  'The PR host returned an older or conflicting comment version; prior content was retained.':
+    'Bitbucket returned an older or conflicting comment version; prior content was retained.', // FOR-55
+};
+const nativeWording=new Map<string,number>();
 const legacyView=(value:any):any=>Array.isArray(value)?value.map(legacyView)
   :value && typeof value==='object'?Object.fromEntries(Object.entries(value)
     .filter(([k])=>!(k in NATIVE_ONLY) || (nativeOnlyFields.set(k,(nativeOnlyFields.get(k)??0)+1),false))
-    .map(([k,v])=>[NEUTRAL[k]??k,legacyView(v)])):value;
+    .map(([k,v])=>[NEUTRAL[k]??k,legacyView(v)]))
+  :typeof value==='string' && value in NATIVE_WORDING?(nativeWording.set(value,(nativeWording.get(value)??0)+1),NATIVE_WORDING[value]):value;
 // The neutral model stores no status for a ticket without an external provider; the retired
 // service wrote the "Not linked" placeholder. Current legacy records drop it before comparison.
 const withoutPlaceholder=(value:any):any=>Array.isArray(value)?value.map(withoutPlaceholder)
@@ -246,5 +254,5 @@ try {
   step('Final sync read',{method:'jiraState'});
   legacy.close();legacy=new Workbench(legacyPath,()=>now);compare('Final TypeScript reopen');
   assert.ok(neutralReads>0,'The native side never reported a neutral source status');
-  console.log(JSON.stringify({status:'passed',operations:cases.length,cases,fixtureBoundaries:fixtures,tables:Object.keys(snapshot(legacyPath)),nativeOnlyTables:[...nativeOnlyTables].sort(),nativeOnlyFields:Object.fromEntries([...nativeOnlyFields].map(([k,n])=>[k,{observations:n,origin:NATIVE_ONLY[k]}])),neutralSourceFieldReads:neutralReads,clock:'Exact controlled timestamps including legacy wall-clock calls',reopen:'Rust process/store reopened for every operation; TypeScript reopened at seed and finish',claims:'Stored provider observations, coding receipts and Jira imports only; remote identities and process ownership are fixtures, with no provider calls'},null,2));
+  console.log(JSON.stringify({status:'passed',operations:cases.length,cases,fixtureBoundaries:fixtures,tables:Object.keys(snapshot(legacyPath)),nativeOnlyTables:[...nativeOnlyTables].sort(),nativeOnlyFields:Object.fromEntries([...nativeOnlyFields].map(([k,n])=>[k,{observations:n,origin:NATIVE_ONLY[k]}])),nativeWording:Object.fromEntries(nativeWording),neutralSourceFieldReads:neutralReads,clock:'Exact controlled timestamps including legacy wall-clock calls',reopen:'Rust process/store reopened for every operation; TypeScript reopened at seed and finish',claims:'Stored provider observations, coding receipts and Jira imports only; remote identities and process ownership are fixtures, with no provider calls'},null,2));
 } finally {legacy.close();globalThis.Date=RealDate;rmSync(root,{recursive:true,force:true});}
