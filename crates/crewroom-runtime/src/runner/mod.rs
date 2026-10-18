@@ -30,8 +30,8 @@ pub enum Runner {
 /// installed CLI may list models before it is verified to run them.
 pub fn execution_versions(adapter: &str) -> &'static [&'static str] {
     match adapter {
-        "codex" => &[profile::VERSION],
-        "claude-code" => &[claude_profile::VERSION],
+        "codex" => profile::VERSIONS,
+        "claude-code" => claude_profile::VERSIONS,
         "omp" => &["omp/18.4.12"],
         _ => &[],
     }
@@ -54,12 +54,10 @@ pub(crate) fn account_binding(adapter: &str, config: &Value) -> Result<String> {
         _ => Err(conflict("Unknown native account profile.")),
     }
 }
-pub(crate) fn verified_version(adapter: &str) -> Option<&'static str> {
-    match adapter {
-        "codex" => Some(profile::VERSION),
-        "claude-code" => Some(claude_profile::VERSION),
-        _ => None,
-    }
+/// Native adapters refuse to launch a CLI whose `--version` is not listed in
+/// `execution_versions`; OMP's version is observed through discovery.
+pub(crate) fn pins_version(adapter: &str) -> bool {
+    matches!(adapter, "codex" | "claude-code")
 }
 pub fn process_dir(model: &Value) -> Result<&'static str> {
     Ok(match kind(model)? {

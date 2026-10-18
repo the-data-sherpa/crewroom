@@ -52,7 +52,8 @@ pub(super) async fn open(
     private_dir(&sessions)?;
     let lease = auth::lock(&sessions.join("owner.lock")).await?;
     let binary = Path::new(text(&config["codex"], "binary")?);
-    let fingerprint = profile::prepare(binary, &home, &sessions, &config["model"]).await?;
+    let (fingerprint, version) =
+        profile::prepare(binary, &home, &sessions, &config["model"]).await?;
     let credential = auth::credentials(config, None).await?;
     let binding = json!({"assignmentId":config["assignmentId"],"model":config["model"]["resolved"],
         "profile":fingerprint,"account":profile::digest(credential.account.as_bytes()),
@@ -125,7 +126,7 @@ pub(super) async fn open(
         if retained_usage.get("totalTokens").is_some(){adapter.usage(&retained_usage)?;}
         if stopping.is_cancelled() || adapter.failed.load(Ordering::SeqCst) {return Err(conflict("Codex stopped during initialization."));}
         let mut identity=json!({"hostPid":std::process::id(),"runnerKind":"codex","runnerPid":rpc.pid,
-            "runnerVersion":profile::VERSION,"runnerProfile":fingerprint,"model":expected,
+            "runnerVersion":version,"runnerProfile":fingerprint,"model":expected,
             "thinkingLevel":expected["effort"],"sessionId":id,"sessionDirectory":sessions,
             "capabilities":{"authentication":"native-chatgpt","usage":"cumulative-tokens","cost":"unavailable",
                 "preRequestBudget":false,"hardOutputLimit":false,"compaction":"harness-managed","toolAuthority":"crewroom"}});

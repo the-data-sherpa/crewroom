@@ -54,11 +54,21 @@ impl<S: StoreAccess> Workflow<S> {
             .and_then(|c| c.snapshot().ok())
             .and_then(|s| s.harnesses.into_iter().find(|h| h.harness.as_str() == kind))
             .and_then(|h| h.identity);
-        let version = crate::runner::verified_version(kind)
-            .map(str::to_owned)
-            .or_else(|| discovered.as_ref().map(|i| i.version.clone()));
+        // Several CLI versions can be launch-verified; record the observed
+        // one and whether the adapter will require it at launch.
+        let version = discovered.as_ref().map(|i| i.version.clone());
+        let basis = match &version {
+            Some(v)
+                if crate::runner::pins_version(kind)
+                    && crate::runner::execution_versions(kind).contains(&v.as_str()) =>
+            {
+                "required-runtime-profile"
+            }
+            Some(_) => "discovery",
+            None => "unavailable-until-launch",
+        };
         Ok(
-            json!({"runner":{"kind":kind,"path":path,"sha256":files::hash(crate::read(&path)?),"version":version,"versionBasis":if crate::runner::verified_version(kind).is_some(){"required-runtime-profile"}else if version.is_some(){"discovery"}else{"unavailable-until-launch"},"profileHash":digest(&profile),"credentialReference":digest(&json!({"kind":kind,"reference":native,"account":account,"provider":model["resolved"]["provider"]}))},"application":{"path":application,"sha256":files::hash(crate::read(&application)?),"helpers":helpers,"launchPrefixExecutable":prefix_executable},"platform":{"os":std::env::consts::OS,"arch":std::env::consts::ARCH},"image":self.0.config.evaluation_image}),
+            json!({"runner":{"kind":kind,"path":path,"sha256":files::hash(crate::read(&path)?),"version":version,"versionBasis":basis,"profileHash":digest(&profile),"credentialReference":digest(&json!({"kind":kind,"reference":native,"account":account,"provider":model["resolved"]["provider"]}))},"application":{"path":application,"sha256":files::hash(crate::read(&application)?),"helpers":helpers,"launchPrefixExecutable":prefix_executable},"platform":{"os":std::env::consts::OS,"arch":std::env::consts::ARCH},"image":self.0.config.evaluation_image}),
         )
     }
     pub fn comparison_preflight(&self, input: &Value) -> Result<Value> {

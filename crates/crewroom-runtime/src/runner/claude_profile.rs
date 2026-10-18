@@ -8,7 +8,12 @@ use std::{
 };
 use tokio::process::Command;
 
-pub const VERSION: &str = "2.1.296 (Claude Code)";
+/// FOR-8/FOR-9 verified 2.1.296; FOR-38 re-verified live launch on 2.1.302.
+pub const VERSIONS: &[&str] = &["2.1.296 (Claude Code)", "2.1.302 (Claude Code)"];
+/// The startup frame reports the bare number of a `--version` output.
+pub fn startup_version(version: &str) -> &str {
+    version.split(' ').next().unwrap_or(version)
+}
 pub const POLICY: &str = "claude-2.1.296-safe-sdk-tools-v1";
 
 pub fn account(home: &Path) -> Result<String> {
@@ -52,7 +57,13 @@ pub fn environment(home: &Path) -> BTreeMap<String, String> {
     ])
 }
 
-pub async fn prepare(binary: &Path, home: &Path, cwd: &Path) -> Result<(String, PathBuf)> {
+/// Returns the profile fingerprint, session directory and the verified
+/// version the binary reported.
+pub async fn prepare(
+    binary: &Path,
+    home: &Path,
+    cwd: &Path,
+) -> Result<(String, PathBuf, &'static str)> {
     canonical(binary)?;
     canonical(home)?;
     let output = profile::bounded_output(
@@ -63,11 +74,16 @@ pub async fn prepare(binary: &Path, home: &Path, cwd: &Path) -> Result<(String, 
             .current_dir(cwd),
     )
     .await?;
-    if output != format!("{VERSION}\n").as_bytes() {
-        return Err(conflict(
-            "Claude requires the verified 2.1.296 native profile.",
-        ));
-    }
+    let version = VERSIONS
+        .iter()
+        .copied()
+        .find(|v| output == format!("{v}\n").as_bytes())
+        .ok_or_else(|| {
+            conflict(&format!(
+                "Claude requires a verified native profile ({}).",
+                VERSIONS.join(", ")
+            ))
+        })?;
     // The standard native HOME preserves the original account metadata/keychain
     // and native refresh locks. All settings/customizations are disabled by argv.
     let encoded: String = cwd
@@ -86,6 +102,7 @@ pub async fn prepare(binary: &Path, home: &Path, cwd: &Path) -> Result<(String, 
     Ok((
         profile::digest(format!("{}:{POLICY}", profile::digest(&crate::read(binary)?)).as_bytes()),
         sessions,
+        version,
     ))
 }
 
@@ -231,6 +248,25 @@ pub fn schema(schema: &Value, value: &Value) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn startup_readback_uses_the_launched_cli_version() {
+        assert_eq!(startup_version("2.1.302 (Claude Code)"), "2.1.302");
+        assert_eq!(startup_version("2.1.296 (Claude Code)"), "2.1.296");
+        // Execution and discovery verify the same installed versions.
+        assert_eq!(
+            VERSIONS,
+            crate::model_catalog::discovery::verified_versions(
+                &crate::model_catalog::Harness::ClaudeCode
+            )
+        );
+        assert_eq!(
+            super::super::profile::VERSIONS,
+            crate::model_catalog::discovery::verified_versions(
+                &crate::model_catalog::Harness::Codex
+            )
+        );
+    }
 
     fn write_schema() -> Value {
         let catalog: Value = serde_json::from_str(include_str!("../host-tools.json")).unwrap();

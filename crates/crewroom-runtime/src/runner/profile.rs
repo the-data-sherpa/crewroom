@@ -8,7 +8,8 @@ use tokio::{
     time::{Duration, timeout},
 };
 
-pub const VERSION: &str = "codex-cli 0.162.0";
+/// FOR-7/FOR-9 verified 0.162.0; FOR-38 re-verified live launch on 0.163.0.
+pub const VERSIONS: &[&str] = &["codex-cli 0.162.0", "codex-cli 0.163.0"];
 pub fn digest(bytes: &[u8]) -> String {
     format!("{:x}", Sha256::digest(bytes))
 }
@@ -62,13 +63,25 @@ pub(super) async fn bounded_output(command: &mut Command) -> Result<Vec<u8>> {
     result?;
     Ok(bytes)
 }
-pub async fn prepare(binary: &Path, home: &Path, state: &Path, plan: &Value) -> Result<String> {
+/// Returns the profile fingerprint and the verified version the binary reported.
+pub async fn prepare(
+    binary: &Path,
+    home: &Path,
+    state: &Path,
+    plan: &Value,
+) -> Result<(String, &'static str)> {
     canonical(binary)?;
-    if output(binary, &["--version"], home, state).await? != format!("{VERSION}\n").as_bytes() {
-        return Err(conflict(
-            "Codex requires the verified 0.162.0 app-server profile.",
-        ));
-    }
+    let reported = output(binary, &["--version"], home, state).await?;
+    let version = VERSIONS
+        .iter()
+        .copied()
+        .find(|v| reported == format!("{v}\n").as_bytes())
+        .ok_or_else(|| {
+            conflict(&format!(
+                "Codex requires a verified app-server profile ({}).",
+                VERSIONS.join(", ")
+            ))
+        })?;
     let raw: Value = serde_json::from_slice(
         &output(binary, &["debug", "models", "--bundled"], home, state).await?,
     )?;
@@ -117,14 +130,17 @@ pub async fn prepare(binary: &Path, home: &Path, state: &Path, plan: &Value) -> 
     }
     durable_new(&config_path, config.as_bytes())?;
     // Configuration contains an attempt path; the binding uses its stable content policy.
-    Ok(digest(
-        format!(
-            "{}\n{}\n{}",
-            digest(&crate::read(binary)?),
-            catalog,
-            RESTRICTED
-        )
-        .as_bytes(),
+    Ok((
+        digest(
+            format!(
+                "{}\n{}\n{}",
+                digest(&crate::read(binary)?),
+                catalog,
+                RESTRICTED
+            )
+            .as_bytes(),
+        ),
+        version,
     ))
 }
 const RESTRICTED: &str = r#"
