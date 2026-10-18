@@ -661,3 +661,110 @@ async fn unsupported_publish_remote_is_reported_as_an_unavailable_publication_pr
     assert_eq!(workspace["capabilities"]["publication"], false);
     service.close().await.unwrap();
 }
+
+/// FOR-38: the operator's Linux service ran without runner configuration, so
+/// the workspace had no catalog and the pickers silently became text fields.
+#[tokio::test]
+async fn unconfigured_runner_still_lists_installed_models_and_names_each_cause() {
+    let root = tempfile::tempdir().unwrap();
+    let bin = root.path().join("bin");
+    std::fs::DirBuilder::new().mode(0o700).create(&bin).unwrap();
+    let codex = bin.join("codex");
+    std::fs::write(&codex, r#"#!/usr/bin/python3
+import json,sys
+if '--version' in sys.argv:
+ print('codex-cli 0.163.0');sys.exit(0)
+assert sys.argv[1:4]==['app-server','--listen','stdio://']
+for line in sys.stdin:
+ v=json.loads(line)
+ if 'id' not in v: continue
+ result={'data':[{'model':'fixture-model','displayName':'Fixture model','inputModalities':['text'],'supportedReasoningEfforts':[{'reasoningEffort':'low'}],'apiKey':'credential-canary'}],'nextCursor':None} if v['method']=='model/list' else {}
+ print(json.dumps({'id':v['id'],'result':result}),flush=True)
+"#).unwrap();
+    std::fs::set_permissions(&codex, std::fs::Permissions::from_mode(0o700)).unwrap();
+    let mut setup = options(root.path());
+    setup.runtime = None;
+    setup.environment = json!({"PATH":bin,"HOME":root.path()});
+    let roles = root.path().join("roles.json");
+    let service = Service::start_with_options(root.path(), &roles, 0, setup)
+        .await
+        .unwrap();
+    let info = &service.info;
+    let workspace = get(info, "workspace").await;
+    let catalog = &workspace["modelDiscovery"];
+    assert_eq!(catalog["runner"]["configured"], false);
+    assert!(
+        catalog["runner"]["remedy"]
+            .as_str()
+            .unwrap()
+            .contains("CREWROOM_RUNTIME_CONFIG")
+    );
+    assert_eq!(catalog["selection"], "intent");
+    let harness = |view: &Value, name: &str| {
+        view["harnesses"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|h| h["harness"] == name)
+            .unwrap()
+            .clone()
+    };
+    assert_eq!(harness(catalog, "codex")["configured"], true);
+    for (name, executable) in [("omp", "`omp`"), ("claude-code", "`claude`")] {
+        let entry = harness(catalog, name);
+        assert_eq!(entry["configured"], false);
+        assert!(
+            entry["remedy"].as_str().unwrap().contains(executable),
+            "{entry}"
+        );
+    }
+    let view = refresh(info).await;
+    assert_eq!(view["selection"], "intent");
+    let codex_view = harness(&view, "codex");
+    assert_eq!(codex_view["outcome"], "success", "{codex_view}");
+    assert!(
+        codex_view["executionNote"]
+            .as_str()
+            .unwrap()
+            .contains("codex-cli 0.163.0 lists models"),
+        "{codex_view}"
+    );
+    assert_eq!(
+        harness(&view, "claude-code")["error"],
+        "Harness is not configured."
+    );
+    let key = "offering:codex:codex:fixture-model";
+    let choices = view["choices"].as_array().unwrap();
+    assert_eq!(choices.len(), 1);
+    assert_eq!(choices[0]["key"], key);
+    assert_eq!(choices[0]["eligibility"]["low"]["eligible"], false);
+    assert!(!view.to_string().contains("credential-canary"));
+    // Saving records intent; legacy free text and catalog keys stay verbatim.
+    let mut jobs = get(info, "workspace").await["modelJobs"].clone();
+    jobs["jobs"] =
+        json!({"code":key,"judgment":"legacy/free-text","review":key,"fast":"legacy/free-text"});
+    jobs["budget"] = json!("small");
+    let saved: Value = post(info, "model-jobs", jobs)
+        .await
+        .error_for_status()
+        .unwrap()
+        .json()
+        .await
+        .unwrap();
+    assert_eq!(saved["jobs"]["code"], key);
+    assert_eq!(saved["jobs"]["judgment"], "legacy/free-text");
+    let workspace = get(info, "workspace").await;
+    assert_eq!(workspace["modelJobs"]["jobs"], saved["jobs"]);
+    assert_eq!(workspace["modelDiscovery"]["choices"], view["choices"]);
+    service.close().await.unwrap();
+    // The persisted catalog survives restart in the private data directory.
+    let mut setup = options(root.path());
+    setup.runtime = None;
+    setup.environment = json!({"PATH":bin,"HOME":root.path()});
+    let reopened = Service::start_with_options(root.path(), &roles, 0, setup)
+        .await
+        .unwrap();
+    let restored = get(&reopened.info, "workspace").await;
+    assert_eq!(restored["modelDiscovery"]["choices"][0]["key"], key);
+    reopened.close().await.unwrap();
+}

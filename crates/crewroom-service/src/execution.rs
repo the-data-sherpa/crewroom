@@ -7,6 +7,7 @@ use crewroom_runtime::{
     jira_delivery::JiraDelivery,
     jira_sync::JiraSync,
     messaging::StoreAccess,
+    model_catalog::{store::Catalog, unconfigured},
     providers::{
         bitbucket::BitbucketClient, config, jira::JiraClient, remote::UnavailablePublication,
     },
@@ -110,6 +111,8 @@ pub(crate) struct Execution {
     pub sync: Option<JiraSync<Access>>,
     pub target: TargetRefresh<Access>,
     pub workflow: Option<Workflow<Access>>,
+    /// Discovery-only model catalog, present exactly when no runner is configured.
+    pub discovery: Option<Catalog>,
     pub scheduler: Option<Scheduler>,
     pub checks: bool,
     pub operations: RunTasks,
@@ -190,6 +193,27 @@ impl Execution {
             .transpose()?;
         let callback = Arc::new(OnceLock::<Weak<Self>>::new());
         let link = callback.clone();
+        // Without a runner, installed harnesses still list their models so the
+        // operator can record intent. The runner re-checks before admission.
+        let discovery = if options.runtime.is_none() {
+            let push = changes.clone();
+            Some(Catalog::open(
+                &data.join("model-catalog"),
+                unconfigured::sources(
+                    &std::fs::canonicalize(&options.helper)?,
+                    options.environment["PATH"]
+                        .as_str()
+                        .unwrap_or("/usr/bin:/bin"),
+                ),
+                move || {
+                    push.send_modify(|v| {
+                        *v = v.saturating_add(1);
+                    });
+                },
+            )?)
+        } else {
+            None
+        };
         let workflow = options
             .runtime
             .map(|runtime| {
@@ -245,6 +269,7 @@ impl Execution {
             sync,
             target,
             workflow,
+            discovery,
             scheduler,
             checks: checks.is_some(),
             operations: RunTasks::default(),
@@ -312,6 +337,11 @@ impl Execution {
         }
         if let Some(s) = &self.scheduler {
             s.drain().await;
+        }
+        if let Some(c) = &self.discovery
+            && let Err(e) = c.close().await
+        {
+            failures.push(e.to_string());
         }
         if let Some(j) = &self.sync
             && let Err(e) = j.close().await

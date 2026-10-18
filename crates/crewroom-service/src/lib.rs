@@ -643,7 +643,6 @@ async fn workspace_value(state: &AppState) -> Result<Value, ApiError> {
                     workflow.model_job_policy()["default"]["effort"].clone();
             }
             value["modelCatalog"] = workflow.model_catalog();
-            value["modelDiscovery"] = workflow.catalog_view()?;
             for role in array(&value["roles"]).to_vec() {
                 let id = text(&role, "id")?;
                 match workflow.role_model(&role) {
@@ -656,7 +655,39 @@ async fn workspace_value(state: &AppState) -> Result<Value, ApiError> {
             }
         }
     }
+    value["modelDiscovery"] = model_discovery(state);
     Ok(value)
+}
+fn unavailable_catalog(reason: &str, remedy: &str) -> Value {
+    json!({"state":"unavailable","reason":reason,"remedy":remedy,"harnesses":[],"choices":[],"offerings":[]})
+}
+/// Always projected: model pickers render either catalog facts or the
+/// operator-facing cause and remedy, never a silent free-text fallback.
+fn model_discovery(state: &AppState) -> Value {
+    let Some(e) = &state.execution else {
+        return unavailable_catalog(
+            "This service was started without model discovery.",
+            "Start the service from the Crewroom launcher or crewroomd, then reopen Crewroom.",
+        );
+    };
+    if let Some(workflow) = &e.workflow {
+        return workflow.catalog_view().unwrap_or_else(|error| {
+            unavailable_catalog(
+                &error.to_string(),
+                "Refresh models. If this persists, check the runner model configuration and restart the service.",
+            )
+        });
+    }
+    match &e.discovery {
+        Some(catalog) => crewroom_runtime::model_catalog::unconfigured::view(
+            catalog,
+            crewroom_runtime::model_catalog::store::now(),
+        ),
+        None => unavailable_catalog(
+            "Model discovery is unavailable in this service.",
+            "Restart the service to retry model discovery.",
+        ),
+    }
 }
 async fn workspace(State(state): State<AppState>) -> Result<Json<Value>, ApiError> {
     workspace_value(&state).await.map(Json)
@@ -667,14 +698,10 @@ async fn read(
     axum::extract::Query(query): axum::extract::Query<std::collections::HashMap<String, String>>,
 ) -> Result<Json<Value>, ApiError> {
     if path == "model-catalog" {
-        return state
-            .execution
-            .as_ref()
-            .and_then(|e| e.workflow.as_ref())
-            .ok_or_else(unavailable)?
-            .catalog_view()
-            .map(Json)
-            .map_err(ApiError::from);
+        if let Some(workflow) = state.execution.as_ref().and_then(|e| e.workflow.as_ref()) {
+            return workflow.catalog_view().map(Json).map_err(ApiError::from);
+        }
+        return Ok(Json(model_discovery(&state)));
     }
     if let Some(e) = &state.execution
         && let Some(value) = views::read(e, &path, &query).await?
@@ -833,13 +860,13 @@ async fn mutate_inner(state: AppState, path: String, body: Value) -> Result<Valu
                 Error::Invalid("Refresh accepts no configuration or credentials.".into()).into(),
             );
         }
-        return state
-            .execution
-            .as_ref()
-            .and_then(|e| e.workflow.as_ref())
-            .ok_or_else(unavailable)?
-            .refresh_model_catalog()
-            .map_err(ApiError::from);
+        let execution = state.execution.as_ref().ok_or_else(unavailable)?;
+        if let Some(workflow) = &execution.workflow {
+            return workflow.refresh_model_catalog().map_err(ApiError::from);
+        }
+        let catalog = execution.discovery.as_ref().ok_or_else(unavailable)?;
+        catalog.refresh()?;
+        return Ok(model_discovery(&state));
     }
     if path == "model-preview" {
         let role = crewroom_core::roles::validate_role(&body["role"])?;
