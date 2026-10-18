@@ -1,0 +1,52 @@
+{
+  "issue": "FOR-47",
+  "observedAt": "2026-10-18",
+  "implementationRevisions": [
+    "049737438db211e56828a39d55ee50fd90e8bd8c",
+    "eac1e84ff24da9a8f4c009a53ff3d379ecce72fe",
+    "8796a7cd39c1b3772e87d4a1845edb0afc5a0eb7"
+  ],
+  "checkedRevision": "8796a7cd39c1b3772e87d4a1845edb0afc5a0eb7",
+  "baseRevision": "ba3ec4c FOR-45 Bind evidence to the integrated revision",
+  "scope": "Per-project (configured repository) ticket source suggested from the publish remote: github.com/<owner>/<repo> suggests GitHub Issues with owner/repo prefilled and GitHub PRs; bitbucket.org suggests Jira (site picked by the operator) and Bitbucket PRs; anything else is the operator's choice. One explicit confirmation persists it with the remote it was made against; a later remote that differs shows 'Source no longer matches remote' and nothing switches; a change is refused while queued or open work references the repository, naming it; imported tickets keep their source. The FOR-45 GitHub Issues sync source remains a separate setting.",
+  "simulated": {
+    "provider": "None contacted. Real Git checkouts in temporary directories with synthetic remote addresses; the feature reads the configured address only.",
+    "checks": [
+      "Core unit: github.com, bitbucket.org, other hosts, GitHub Enterprise hosts, nested paths, local paths and missing remotes are classified; a credentialed remote is 'unrecognised' and its secret never appears in the classification",
+      "Core unit: suggestions per host; the Bitbucket suggestion carries no site and needsSite true; choices are validated (owner/repo; HTTPS Jira site without path or credentials; no mixed fields)",
+      "Core integration: the publish remote follows the only remote, origin, branch pushRemote and push URL",
+      "Core integration: nothing is saved before confirmation; confirmation persists across reopen without bumping the repository revision; a same-source re-confirmation is a no-op; a repository edit keeps the source; a moved remote reports mismatch with the saved source unchanged; a Jira confirmation without a site is refused",
+      "Core integration: queued work blocks a change with 'Cannot change the ticket source while queued or open work references this repository'; after cancelling it the change succeeds and the imported GitHub ticket keeps source, sourceSite, sourceId, key, sourceStatus and sourceUrl",
+      "Service: three linked repositories (GitHub, Bitbucket, credentialed GitLab) get the matching projectSource suggestion; the credentialed address is absent from the workspace; a cross-origin confirmation is refused (403) and saves nothing; confirmation saves; Jira without a site is 400; a saved Jira site is offered to other projects; a moved remote shows mismatch, also after restart",
+      "Desktop (GPUI, real local service): the suggestion text is shown and owner/repo is prefilled; Confirm GitHub Issues saves; a moved remote plus queued work shows the warning and the named blocker, and the disabled control sends nothing; after cancelling, an entered Jira site confirms Jira + Bitbucket"
+    ]
+  },
+  "daemonRun": {
+    "note": "Not a live provider check: the feature contacts no remote. A debug crewroomd built from 8796a7c (sha256 40101f2eba127c14e548dd6fd618325180b55870ffb708ac9cef3b230fb6d972) ran on loopback port 4373 with an isolated temporary --data-dir; a disposable checkout used the public Crewroom repository address as origin, then synthetic Bitbucket and GitLab addresses. Data directory and checkout were deleted afterwards.",
+    "cases": [
+      {"case": "link repository", "status": 200, "state": "unconfirmed", "suggestion": "GitHub Issues the-data-sherpa/crewroom, GitHub PRs"},
+      {"case": "confirm from another Origin", "status": 403, "saved": false},
+      {"case": "confirm", "status": 200, "state": "confirmed"},
+      {"case": "origin set to bitbucket.org/fixture/repository", "state": "mismatch", "warning": "Source no longer matches remote: it was confirmed for github.com/the-data-sherpa/crewroom, and the repository now has bitbucket.org/fixture/repository. Nothing was changed; confirm a new source to switch."},
+      {"case": "confirm Jira without a site", "status": 400, "error": "Pick the Jira site; it cannot be inferred from the remote."},
+      {"case": "daemon restart", "state": "mismatch", "saved": "GitHub Issues the-data-sherpa/crewroom"},
+      {"case": "confirm Jira https://fixture.atlassian.net", "status": 200, "state": "confirmed", "pullRequests": "Bitbucket"},
+      {"case": "origin set to gitlab.example", "state": "mismatch", "suggestion": "operator chooses"}
+    ]
+  },
+  "checks": {
+    "cargo test --locked -p crewroom-core -p crewroom-runtime -p crewroom-service -- --test-threads=1": "341 passed, 0 failed, 2 ignored",
+    "cargo test --locked -p crewroom-desktop -- --test-threads=4": "141 passed, 15 ignored (an earlier run at default parallelism was SIGKILLed under shared-machine memory pressure)",
+    "cargo clippy --locked -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop -- -D warnings": "clean",
+    "cargo clippy --locked -p crewroom-core -p crewroom-service --tests -- -D warnings": "clean",
+    "cargo fmt -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop -- --check": "clean",
+    "npm test": "332/332",
+    "npm run build": "pass",
+    "npm run test:e2e": "not run by this agent (fixed port 4331; run by the integrator)"
+  },
+  "notExecuted": [
+    "npm run test:e2e",
+    "Desktop clippy --all-targets (pre-existing useless_conversion in untouched feedback_tests.rs)",
+    "Wiring a confirmed GitHub source into the FOR-45 sync setting or a confirmed Jira site into Jira refresh; both remain separate settings"
+  ]
+}

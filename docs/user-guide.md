@@ -33,7 +33,7 @@ On a narrow window, use **Tickets & settings** to reach navigation. Jira status,
 
 ## Prepare and queue a coding ticket
 
-1. In **Repositories**, register the existing checkout, target branch, instruction files and required checks. Checks require existing pinned local Docker images, absolute executables, arguments and timeouts; they run without network. Crewroom uses owned worktrees and leaves your checkout intact.
+1. In **Repositories**, register the existing checkout, target branch, instruction files and required checks. Each repository's row suggests its ticket source from the remote it publishes to (a github.com remote suggests GitHub Issues; a bitbucket.org remote suggests Jira, with a site you pick); confirm it once. If the remote later changes, the row warns that the source no longer matches and changes nothing; a source cannot be changed while queued or open work uses the repository. Checks require existing pinned local Docker images, absolute executables, arguments and timeouts; they run without network. Crewroom uses owned worktrees and leaves your checkout intact.
 2. In **Agent roles**, choose **Edit** beside a specialty or **Create agent role** to add one. Set its purpose, instructions, model and reasoning effort, then **Save agent role**. Enabled roles are available for new assignments. Existing assignments keep their captured definitions.
 3. Use **New ticket** for a local request, **Refresh Jira** for configured live intake, or **Import snapshot** for supported Jira JSON. Snapshot import does not connect live Jira.
 4. Select the ticket and open **Brief**. Choose its target repository, save the local brief and acceptance criteria, and resolve source-change or unsaved-draft holds.
