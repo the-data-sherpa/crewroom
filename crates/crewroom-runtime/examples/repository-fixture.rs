@@ -417,6 +417,13 @@ async fn main() -> Result<()> {
             "replace"=>store.with_store(|s|s.replace_attempt(target,&r["input"])),
             "continue"=>store.with_store(|s|s.prepare_continuation(target,s.get_run(target)?["controlRevision"].as_u64().unwrap())),
             "task"=>store.with_store(|s|s.get_task(target)),
+            // Explicit operator plan acceptance through the same store gate as the native workbench.
+            "plan_source"=>{let preflight=store.with_store(|s|s.prepare_plan_source(target,r["input"]["revision"].as_u64().unwrap()))?;let pinned=tokio::task::spawn_blocking(move||preflight.validate()).await.map_err(|_|crewroom_core::Error::Conflict("Source validation interrupted.".into()))??;store.with_store(|s|s.save_plan_source(&pinned))},
+            "plan_save"=>store.with_store(|s|s.save_implementation_plan(target,&r["input"])),
+            "plan_decide"=>store.with_store(|s|s.decide_implementation_plan(target,&r["input"])),
+            // Seeds later queued intents after the native store owns the schema the legacy workbench can no longer open.
+            "create_task"=>store.with_store(|s|s.create_task(&r["input"])),
+            "queue"=>store.with_store(|s|s.queue(target,&r["input"])),
             "configure_checks"=>store.with_store(|s|s.update_coding_record(target,|old|{let mut record=old.unwrap();record["requiredChecks"]=r["input"].clone();Ok(record)})),
             "policy_fixture"=>store.with_store(|s|s.update_coding_record(target,|old|{let mut record=old.unwrap();for(k,v)in r["input"].as_object().unwrap(){record[k]=v.clone();}Ok(record)})),
             "activate"=>store.with_store(|s|{

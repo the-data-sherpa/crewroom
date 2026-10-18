@@ -5,7 +5,6 @@ import {join} from 'node:path';
 import {test} from 'node:test';
 import {setTimeout as delay} from 'node:timers/promises';
 import {DatabaseSync} from 'node:sqlite';
-import {Workbench} from '../../server/workbench';
 import {gitLatch} from '../../tests/fixtures/git-latch';
 import {inspectCheckedOwned} from './process-adapter';
 import {setup} from './publication-support';
@@ -38,7 +37,7 @@ test('Stop fences a pending second run admitted by a shared flush before the fir
  const r=await setup(t),p=await r.prepare();
  // This second intent is deliberately seeded to test admission/epoch fencing.
  // No readiness or provider success is inferred for this queued run.
- const store=new Workbench(r.f.database);let second:any;try{const task=store.createTask({title:'Queued publication fixture',description:'Explicit queued intent fixture',repositoryId:r.f.seed.repository.id});store.refine(task.id,{revision:1,sourceRevision:1,brief:'Pending publication scope',criteria:['Stay fenced']});second=store.queue(task.id,{revision:2});}finally{store.close();}
+ const task=await r.f.c.command('create_task',{input:{title:'Queued publication fixture',description:'Explicit queued intent fixture',repositoryId:r.f.seed.repository.id}});await r.f.c.command('refine',{target:task.id,input:{revision:1,sourceRevision:1,brief:'Pending publication scope',criteria:['Stay fenced']}});const second=await r.f.c.command('queue',{target:task.id,input:{revision:2}});
  await r.f.c.command('save_publication',{input:{...p,id:randomUUID(),runId:second.id}});
  let entered!:()=>void;const waiting=new Promise<void>(resolve=>entered=resolve);let respond!:()=>void;let reads=0;
  r.state.intercept=(_req,res)=>{reads++;if(reads!==1)return false;respond=()=>res.end(JSON.stringify({uuid:r.f.connection.repository.uuid,full_name:'fixture/repository'}));entered();return true;};

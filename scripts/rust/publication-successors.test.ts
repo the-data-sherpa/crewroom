@@ -24,6 +24,12 @@ async function revise(r:Fixture,agents:any,run=r.f.seed.run.id,claim=true){
  const read=await r.f.c.command('read',{target:run,path:'source.txt'});await r.f.c.command('edit',{target:agents.writer.id,key:'next-edit',input:{path:'source.txt',expectedHash:read.sha256,content:'after\nAdditional reviewed case\n'}});
  const completion=await r.f.c.command('request_completion',{target:agents.writer.id,key:'next-complete',input:{summary:'Cover the additional reviewed case'}});await pause(r,run,false,true);return r.f.c.command('complete',{target:run,key:completion.id});
 }
+/** Operator acceptance of a current implementation plan: the admission gate for new coding assignments on a continuation run. */
+async function acceptPlan(r:Fixture){
+ const task=await r.f.c.command('task',{target:r.f.seed.task.id});const source=await r.f.c.command('plan_source',{target:task.id,input:{revision:task.revision}});
+ const plan=await r.f.c.command('plan_save',{target:task.id,input:{requestId:randomUUID(),revision:task.revision,sourceId:source.id,content:{schemaVersion:1,goal:task.brief,scope:[task.brief],exclusions:[],assumptions:[],decisions:[],workPackages:[{id:'fixture',name:'Continue retained work',dependsOn:[],outputs:['A checked change'],criteria:task.criteria.map((_:unknown,i:number)=>i),validation:['Required check and independent review']}]}}});
+ await r.f.c.command('plan_decide',{target:plan.id,input:{requestId:randomUUID(),revision:task.revision,sourceId:source.id,decision:'accept'}});return plan;
+}
 function comment(id=51,text='Cover an additional edge case'){return {id,created_on:'2026-10-03T00:00:00Z',updated_on:'2026-10-03T00:00:00Z',deleted:false,content:{raw:text},user:{display_name:'Reviewer'}};}
 
 test('native target refresh publishes a freshly checked candidate on the same PR and reconciles a lost description reply',{timeout:120000},async t=>{
@@ -44,7 +50,7 @@ test('native captured feedback produces fresh evidence and publishes the success
 
 test('native cancelled continuation retains its PR but requires new candidate, target proof, checks and independent review',{timeout:150000},async t=>{
  const r=await setup(t),first=await r.publish();await pause(r,first.runId,true);await r.f.c.command('release_slot',{target:first.runId,reason:'cancelled'});
- const roles=defaultRoles.map(role=>({...role,model:'fixture/model',effort:'low'}));const task=await r.f.c.command('task',{target:r.f.seed.task.id});const next=await r.f.c.command('queue_later',{target:first.runId,input:{requestId:randomUUID(),revision:task.revision,roleId:'coordinator'},roles});assert.equal(next.continuedFrom.publicationId,first.id);await r.f.c.command('claim_slot');
+ const plan=await acceptPlan(r);const roles=defaultRoles.map(role=>({...role,model:'fixture/model',effort:'low'}));const task=await r.f.c.command('task',{target:r.f.seed.task.id});const next=await r.f.c.command('queue_later',{target:first.runId,input:{requestId:randomUUID(),revision:task.revision,roleId:'coordinator'},roles});assert.equal(next.continuedFrom.publicationId,first.id);assert.equal(next.implementationPlan.id,plan.id);await r.f.c.command('claim_slot');
  const work=await r.f.c.command('prepare',{target:next.id,input:next.launch.repository});assert.equal(work.branch,first.branch);await r.f.c.command('configure',{target:next.id,input:[r.proof.definition]});
  const agents:any={};for(const key of ['coordinator','writer','reviewer','reporter']){const a=r.f.seed[key].assignment;const admitted=await r.f.c.command('admit',{target:next.id,input:{role:a.role,model:a.model,name:a.name,coordinator:key==='coordinator',input:'Continue retained work with fresh validation.'}});agents[key]=admitted.attempt;}
  await r.f.c.command('activate',{target:next.id});const raw=await revise(r,agents,next.id,false);await assert.rejects(r.f.prepare({candidateId:raw.id,summary},agents.coordinator.id),/coordinator|validated/);
