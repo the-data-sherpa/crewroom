@@ -1,0 +1,129 @@
+{
+  "issue": "FOR-46",
+  "observedAt": "2026-10-18",
+  "implementationRevision": "ecff62527c1d74c0beb5614ebb652aaf5022755a",
+  "documentationRevision": "81030a787fee221717f65e2c46d1a55ecd261035",
+  "baseRevision": "80f9421c652dc9a4dd4b94a4c834638b1003d927",
+  "scope": "Publish PRs to github.com through the FOR-41 PullRequestHost with the FOR-43 token route: GitHub host selected from a github.com publish remote, normalized PR/status/check-run/comment shapes, Closes #N for GitHub-sourced tickets, keyed continuation of the same PR, provider PR state and observed head shown, refusals with remedies. Bitbucket behaviour unchanged.",
+  "simulated": {
+    "provider": "Loopback GitHub REST fixture (axum in crates/crewroom-runtime/tests/github_publication.rs); not github.com.",
+    "checks": [
+      "github_pull_requests_publish_continue_and_report_readiness_at_a_named_revision: verify repository by numeric id; empty branch search; create returns the normalized OPEN PR with head/base/repository github:42; marker search finds the same PR; description update after a new push keeps PR #5 and reads back the new head; no second PR",
+      "Hosted evidence: latest commit status per context; a check re-run replaces the earlier run; check runs naming this PR bind destination_commit to the base; provider-neutral assess() reports ready for that exact head/base and names 'The PR head, base or branch no longer matches local evidence.' for an older revision",
+      "A check run that does not name the PR leaves the base unbound and readiness blocked; a failed required check latches reviewInvalidated",
+      "closed+merged_at maps to MERGED with the merge commit; closed without merge maps to DECLINED; an open PR's test-merge commit is not reported",
+      "github_feedback_reads_every_page_of_conversation_and_review_comments: 120 conversation comments over two pages plus inline review comments with path/line/outdated/parent",
+      "github_refusals_are_reported_with_remedies_and_never_skipped: 401 names Settings → Integrations and never echoes the token; 403 names Pull requests and Contents Read and write; 404 names repository access; 401/403/404 on create keep the intent pending (request_sent false); rate limit maps to 429; 422 stays sent/blocking; a read-only account is refused before any write",
+      "Unit tests: remote selection (github.com supported, Enterprise hosts unsupported), GitHub repository identity normalization, config token route (environment over stored, missing token remedy, owner/name must match remote, id required), PullRequestHost GitHub identity and SSH remote, push refusal remedies, Closes reference rules, desktop provider PR facts and repository label"
+    ]
+  },
+  "live": {
+    "endpoint": "https://api.github.com through the production GitHubPullClient (PullRequestHost::GitHub) driven by crates/crewroom-runtime/examples/github-publication-live.rs, debug binary sha256 194f9581a8b6ceab27b0b9d8470e1101fed3a3cfd0d7ebdfcaa49da6b1e7171a built from the implementation revision's runtime library. The committed probe differs from the binary that ran only in formatting and in the synthetic invalid-token string.",
+    "repository": "Private disposable sandbox <owner>/crewroom-e2e-sandbox (repository id 1424057732), approved by the operator for live PRs. Content is synthetic.",
+    "credential": "The operator's gh login token passed as CREWROOM_GITHUB_TOKEN, read in-process and never printed. It is a gh OAuth token, not a fine-grained or classic personal access token.",
+    "push": "Branch crewroom/for-46-live-probe pushed with plain git over SSH to git@github.com:<owner>/crewroom-e2e-sandbox.git (the remote form Crewroom's transport uses), not through Crewroom's PublicationGit helper.",
+    "cases": [
+      {
+        "case": "verify repository",
+        "uuid": "github:1424057732",
+        "fullName": "<owner>/crewroom-e2e-sandbox"
+      },
+      {
+        "case": "branch search before publication",
+        "matches": 0
+      },
+      {
+        "case": "create PR",
+        "pr": 2,
+        "state": "OPEN",
+        "draft": false,
+        "head": "a0c0c69c6f57197010ef25f9261180e9c74e9f26",
+        "base": "c4aba0fad1d4a34eb7854ee2342a94b8ecf084f6",
+        "repository": "github:1424057732",
+        "url": "https://github.com/<owner>/crewroom-e2e-sandbox/pull/2"
+      },
+      {
+        "case": "branch search after publication",
+        "matches": [
+          {
+            "id": 2,
+            "hasMarker": true
+          }
+        ]
+      },
+      {
+        "case": "Closes #1 in the PR body",
+        "githubClosingIssuesReferences": [
+          1
+        ],
+        "issue": "synthetic sandbox issue #1, closed as not planned afterwards"
+      },
+      {
+        "case": "invalid synthetic token",
+        "status": 401,
+        "message": "GitHub rejected the saved token (HTTP 401): it is invalid, expired or revoked. Reconnect GitHub in Settings → Integrations, or update CREWROOM_GITHUB_TOKEN, then reconcile publication. GitHub said: \"Bad credentials\"."
+      },
+      {
+        "case": "repository not visible",
+        "status": 404,
+        "message": "GitHub could not find this repository or pull request with the saved token (HTTP 404). Add the repository to the token's repository access (fine-grained tokens see only selected repositories) and check the publish remote, then reconcile publication. GitHub said: \"Not Found\"."
+      },
+      {
+        "case": "configured repository id differs",
+        "message": "GitHub repository identity changed. Publication is blocked."
+      },
+      {
+        "case": "second create for the same branch",
+        "status": 422,
+        "requestSent": true,
+        "message": "GitHub refused the pull request (HTTP 422). A missing branch, a repository rule or another open PR for this branch can cause this. Inspect the repository before reconciling. GitHub said: \"Validation Failed: A pull request already exists for <owner>:crewroom/for-46-live-probe.\"."
+      },
+      {
+        "case": "keyed continuation after pushing f5696f0",
+        "keyedMatches": [
+          2
+        ],
+        "updatedPr": 2,
+        "state": "OPEN",
+        "head": "f5696f0821f42d63e70cfbcc91bc9a651cd51de5",
+        "base": "c4aba0fad1d4a34eb7854ee2342a94b8ecf084f6"
+      },
+      {
+        "case": "observe open PR",
+        "state": "OPEN",
+        "head": "f5696f0821f42d63e70cfbcc91bc9a651cd51de5",
+        "statuses": [],
+        "pipelines": [],
+        "comments": {
+          "state": "complete",
+          "count": 1,
+          "note": "one comment from a linked-tracker integration bot"
+        }
+      },
+      {
+        "case": "observe after closing without merging",
+        "state": "DECLINED",
+        "head": "f5696f0821f42d63e70cfbcc91bc9a651cd51de5"
+      }
+    ],
+    "tokenAbsentFromReceipt": true,
+    "redaction": "Repository owner replaced with <owner>; no token or account id retained."
+  },
+  "commands": {
+    "cargo test -p crewroom-runtime": "pass (lib 70 passed / 1 ignored; github_publication 3/3; all integration suites pass)",
+    "cargo test -p crewroom-service": "pass (all suites; a doc-test step first failed on a missing shared-target rlib from a concurrent build and passed on rerun)",
+    "cargo test -p crewroom-desktop": "137 passed / 15 ignored overall: the full run had 136 passed and 1 failed (blocker_tests::retired_target_and_open_run_name_the_controls_that_clear_them, 409 'Repository or target branch could not be verified.' under shared-machine load); it and the new provider_pr_state test pass on rerun",
+    "cargo clippy -p crewroom-runtime -p crewroom-service --all-targets -- -D warnings": "clean",
+    "cargo clippy -p crewroom-desktop --all-targets -- -D warnings": "only the pre-existing useless_conversion in untouched feedback_tests.rs; clean with that lint allowed",
+    "cargo fmt -p crewroom-runtime -p crewroom-service -p crewroom-desktop --check": "clean",
+    "npm test": "332/332 pass",
+    "npm run build": "pass"
+  },
+  "limitations": [
+    "No full Crewroom run published live: the live probe drives the production GitHub host directly; the push used plain git over SSH, not Crewroom's PublicationGit helper, and no coordinator, candidate evidence or desktop session was involved.",
+    "The live sandbox has no CI, so live hosted readiness was observed only as empty statuses and pipelines (not ready); check-run readiness is simulated.",
+    "Live 403 permission refusal, rate limiting, branch-protection push refusal and merged state were not exercised live; they are covered by fixtures and unit tests.",
+    "The live credential was a gh OAuth token, not a fine-grained or classic PAT.",
+    "npm run test:e2e was not run (the integrator runs it serially)."
+  ]
+}
