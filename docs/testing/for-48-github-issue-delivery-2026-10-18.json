@@ -121,7 +121,30 @@
     "Workflow labels were not exercised live (writes beyond comments and closing were not approved); they are proved against the loopback fixture only.",
     "Evidence, PR-link and research-outcome comments are proved against the loopback fixture with a ready Evidence/Research fixture whose check and review receipts are recorded directly; they were not produced from a real agent-driven verified run, and not live. The workflow research-completion gate is covered through its predicate (needs_research_summary) and the completion it then allows, not by driving the supervisor Workflow transition loop.",
     "No agent process used github_report live; the probe calls the same prepare path the host tool routes to.",
-    "npm run test:e2e was not run on this branch: the workflow reserves the fixed port 4331 for the integrator, who must run it at the integrated head and record it here. Earlier integrations had two known fixture-setup failures (fixture-only OMP 18.4.12 not installed); if they recur they are to be named and not counted as a pass. Acceptance criterion 6 stays unmet until then."
+    "npm run test:e2e at the integrated head: 29 passed and 2 failed on the known fixture setup (fixture-only OMP 18.4.12 not installed): refinement.spec.ts INT-03 and research.spec.ts INT-07/EVD-08. These two are not a pass; acceptance criterion 6 is met only for the 29 tests that can run on this machine."
   ],
-  "reviewFixRevision": "5f15de6"
+  "reviewFixRevision": "5f15de6",
+  "integration": {
+    "target": "main",
+    "mainBefore": "d15028456158a9c92fc0d463e9ca525e07aadbe5",
+    "finalHead": "the commit that adds this integration record (fast-forwarded onto main)",
+    "rebasedRevisions": {
+      "implementation": "1e28b14 (pre-rebase 966b856)",
+      "probe": "2b29245 (pre-rebase 6a8dae3)",
+      "documentation": "551d4b2 (pre-rebase 5fe105e)",
+      "evidence": "0fd6059 (pre-rebase b31dc14)",
+      "reviewFix": "9069c65 (pre-rebase 5f15de6)",
+      "reviewEvidence": "56b10a7 (pre-rebase 7b2c095)"
+    },
+    "conflicts": "crates/crewroom-desktop/src/workbench/results/tests.rs (FOR-44 usage tests and FOR-48 delivery test both kept), docs/status.md and docs/testing/mvp-progress.md (every earlier ticket entry kept beside FOR-48). No schema collision: main stayed at schema 32 before FOR-48's 33.",
+    "checksAtRebasedHead56b10a7": [
+      "npm test: 332/332",
+      "npm run build: pass (tsc --noEmit and vite build)",
+      "npm run test:e2e: 29 passed, 2 failed. Both failures are fixture setup, not product behaviour: refinement.spec.ts INT-03 and research.spec.ts INT-07/EVD-08 stop with 'Install fixture-only OMP 18.4.12 per docs/testing/mh2-runtime-acceptance.md' because that fixture-only OMP is not installed on this machine. They are named here and not counted as a pass.",
+      "cargo test --locked --no-fail-fast -p crewroom-core -p crewroom-runtime -p crewroom-service -- --test-threads=1: 372 passed, 0 failed, 2 ignored",
+      "cargo test --locked --no-fail-fast -p crewroom-desktop -- --test-threads=4: 146 passed, 15 ignored",
+      "cargo clippy --locked -p crewroom-core -p crewroom-runtime -p crewroom-service --all-targets -- -D warnings: clean; cargo clippy --locked -p crewroom-desktop -- -D warnings: clean",
+      "cargo fmt --check -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop: clean"
+    ]
+  }
 }
