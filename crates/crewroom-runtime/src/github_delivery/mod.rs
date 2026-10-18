@@ -208,3 +208,37 @@ impl<S: StoreAccess> GitHubDelivery<S> {
         self.flight.close().await
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn every_comment_kind_carries_its_label_run_and_stable_marker() {
+        for (kind, prefix) in [
+            ("milestone", "**Crewroom milestone — agent report**"),
+            ("blocker", "**Crewroom blocker — agent report**"),
+            ("evidence", "**Crewroom verified evidence**"),
+            ("pr_link", "**Crewroom verified evidence**"),
+            ("research_outcome", "**Crewroom verified evidence**"),
+        ] {
+            let update = json!({"id":"00000000-0000-4000-8000-000000000048","kind":kind,"runId":"run-1","body":"Synthetic body"});
+            let body = document(&update);
+            assert!(body.starts_with(prefix), "{kind}: {body}");
+            assert!(body.ends_with(
+                "Synthetic body\n\nRun run-1\nCrewroom update 00000000-0000-4000-8000-000000000048"
+            ));
+            assert_eq!(normalized(&body.replace('\n', "\r\n")), body);
+        }
+        assert!(labelled(&json!({"kind":"in_progress"})) && labelled(&json!({"kind":"done"})));
+        assert!(!labelled(&json!({"kind":"pr_link"})));
+    }
+
+    #[test]
+    fn only_numbered_issue_keys_name_an_issue() {
+        assert_eq!(issue_number(&json!({"key":"#12"})), Some(12));
+        for key in [json!("#0"), json!("SIM-1"), json!("12"), Value::Null] {
+            assert_eq!(issue_number(&json!({"key":key})), None);
+        }
+    }
+}

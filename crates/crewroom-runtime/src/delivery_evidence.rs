@@ -192,3 +192,56 @@ pub(crate) fn research_text<S: StoreAccess>(
         Ok(VerifiedText{body:format!("Research outcome completed for accepted revision {}.\n{artifacts}\nCrewroom reference: run {run_id}, /api/runs/{run_id}/result\nNo code change or PR is claimed.",run["taskRevision"]),proof})
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn pr_links_name_the_confirmed_pr_on_its_own_host() {
+        let github = json!({"repository":{"provider":"github","owner":"octo-fixture","name":"sandbox","id":42,"uuid":"github:42"},"pr":{"id":5}});
+        assert_eq!(
+            pr_url(&github),
+            "https://github.com/octo-fixture/sandbox/pull/5"
+        );
+        let bitbucket =
+            json!({"repository":{"workspace":"fixture","slug":"repository"},"pr":{"id":7}});
+        assert_eq!(
+            pr_url(&bitbucket),
+            "https://bitbucket.org/fixture/repository/pull-requests/7"
+        );
+    }
+
+    #[test]
+    fn reporter_requests_name_their_provider_in_refusals() {
+        let err = |input: Value| report(&input, "GitHub").unwrap_err().to_string();
+        assert!(
+            err(json!({"kind":"transition","eventKey":"x"})).contains("Invalid GitHub report kind")
+        );
+        assert!(
+            err(json!({"kind":"milestone","eventKey":"x","body":"b","extra":1}))
+                .contains("Unrecognized GitHub report fields")
+        );
+        assert!(
+            err(json!({"kind":"in_progress","eventKey":"started"}))
+                .contains("Invalid GitHub event key")
+        );
+        assert!(
+            err(json!({"kind":"evidence","eventKey":"e","candidateId":"nope"}))
+                .contains("Invalid GitHub candidate UUID")
+        );
+        assert!(
+            report(
+                &json!({"kind":"milestone","eventKey":"x","body":"b"}),
+                "Jira"
+            )
+            .is_ok()
+        );
+        assert!(
+            report(&json!({"kind":"kind"}), "Jira")
+                .unwrap_err()
+                .to_string()
+                .contains("Invalid Jira report kind")
+        );
+    }
+}
