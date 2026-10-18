@@ -2,11 +2,11 @@
 
 ## Current publication approach
 
-On 2026-10-18 the operator selected a new independent repository with a reviewed source snapshot as its initial commit. The existing GitHub repository will be renamed `the-data-sherpa/crewroom-private-archive` and retained privately. The new repository will use `the-data-sherpa/crewroom`, with a distinct GitHub repository identity and no inherited development history, pull-request refs or fork relationship.
+On 2026-10-18 the operator selected a new independent repository with a reviewed source snapshot as its initial commit. The existing GitHub repository was renamed `the-data-sherpa/crewroom-private-archive` and archived privately. The new public repository is [the-data-sherpa/crewroom](https://github.com/the-data-sherpa/crewroom), with a distinct GitHub repository identity and no inherited development history, pull-request refs or fork relationship.
 
 Preparation starts from private development revision `5dcbafd0210884ab01adb8cc00245c560c297bfe`. The application source, vendored files, licenses and package scripts are preserved. Publication-specific edits explain the history boundary and make public-content handling explicit in the tracked [AGENTS.md](../AGENTS.md#public-repository) and [contribution guide](../CONTRIBUTING.md).
 
-The prepared snapshot must pass its tracked-file privacy review, secret scan with reviewed findings, source/notice preservation checks and independent standards/spec review before publication. The final verification record will identify the public root revision and subsequent publication evidence, verify anonymous access, confirm that old private objects cannot be retrieved from the new repository, and confirm that the archive remains private. Until that record is present, these are preparation requirements rather than a claim that publication has completed.
+**Published and verified 2026-10-18 UTC.** Initial public commit `d9e2607a857950a4bb593534a7c0dc1b0a906269` has the exact reviewed source tree `47e041c04b09c12642741fab036e61e569f98556`. The [publication receipt](testing/for-17-publication-2026-10-18.json) records the source-preservation checks, secret-scan triage, independent reviews, 22 passing native-script tests, synthetic notice-packaging checks and web build. An anonymous fresh clone contained exactly one commit and passed Git integrity checks. Anonymous repository/README access succeeds; probes for old private objects and the former PR return 404 in the new repository. The private archive is inaccessible anonymously. This receipt and completion notes follow the initial snapshot as ordinary documentation changes.
 
 ## History and evidence
 
@@ -14,7 +14,7 @@ Public Git history starts with the reviewed snapshot. Earlier commit IDs and sou
 
 Original development history, the earlier sanitization commit map, Git metadata and raw verification artifacts remain private. Some older receipts were sanitized in the earlier review and are marked accordingly. Historical links to the private archive and old machine paths are provenance, not public installation prerequisites. Outside contributors can run current checks through [Contributing](../CONTRIBUTING.md#check-your-changes), [the feature map](testing/feature-map/README.md) and [the current status](status.md).
 
-Use a fresh clone of the public repository for new work. Maintainers migrate the existing checkout's Git metadata only after preserving and verifying the old refs and metadata privately. The working directory, untracked files and runtime data remain in place. Keep old branches, tags, stashes, bundles and Git metadata out of the new repository; importing or merging them would defeat this publication boundary.
+Use a fresh clone of the public repository for new work. The existing maintainer checkout was migrated after privately preserving and verifying its old refs and Git metadata. The working directory, untracked files and runtime data remain in place. Keep old branches, tags, stashes, bundles and Git metadata out of the new repository; importing or merging them would defeat this publication boundary.
 
 ## Earlier removal approach
 

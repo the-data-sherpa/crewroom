@@ -1,0 +1,138 @@
+{
+  "issue": "FOR-17",
+  "publishedAndVerifiedAt": "2026-10-18T04:39:59.875212+00:00",
+  "publicRootCommit": "d9e2607a857950a4bb593534a7c0dc1b0a906269",
+  "publicRootTree": "47e041c04b09c12642741fab036e61e569f98556",
+  "preparedPrivateRevision": "b6393176632ad391c1cf594267f05ed8f866c832",
+  "developmentBaseline": "5dcbafd0210884ab01adb8cc00245c560c297bfe",
+  "sourceBinding": "Initial public root and reviewed private preparation have identical tracked trees. The only preparation changes are the seven listed documentation/agent-instruction files. Application code, vendor source, locks, scripts and notices are unchanged. This receipt is a subsequent documentation-only commit, not old development history.",
+  "preparationChangedPaths": [
+    "AGENTS.md",
+    "CONTRIBUTING.md",
+    "README.md",
+    "docs/publication-review.md",
+    "docs/research/crewroom-specialist-workflow-assessment-2026-10-12.md",
+    "docs/status.md",
+    "docs/testing/mvp-progress.md"
+  ],
+  "publication": {
+    "checkedAt": "2026-10-18T04:39:59.875212+00:00",
+    "publicRepository": {
+      "id": 1423992316,
+      "name": "the-data-sherpa/crewroom",
+      "private": false,
+      "fork": false,
+      "url": "https://github.com/the-data-sherpa/crewroom"
+    },
+    "privateArchive": {
+      "id": 1400690332,
+      "name": "the-data-sherpa/crewroom-private-archive",
+      "private": true,
+      "archived": true
+    },
+    "publicRoot": "d9e2607a857950a4bb593534a7c0dc1b0a906269",
+    "anonymous": {
+      "repositoryApi": 200,
+      "repositoryWeb": 200,
+      "readme": 200,
+      "readmeMatchesRoot": true,
+      "privateArchive": 404,
+      "oldPrivateBlob": 404,
+      "oldMainGitObject": 404,
+      "oldPreparedGitObject": 404,
+      "oldPullRequest": 404
+    }
+  },
+  "anonymousFreshClone": {
+    "anonymousClone": true,
+    "main": "d9e2607a857950a4bb593534a7c0dc1b0a906269",
+    "tree": "47e041c04b09c12642741fab036e61e569f98556",
+    "reachableCommits": 1,
+    "physicalCommitObjects": 1,
+    "gitFsck": "passed",
+    "refs": [
+      "refs/heads/main d9e2607a857950a4bb593534a7c0dc1b0a906269"
+    ]
+  },
+  "privacyReview": {
+    "trackedFiles": 2731,
+    "trackedBytes": 49419930,
+    "knownPrivateMatches": 0,
+    "metadataKnownPrivateMatch": false,
+    "binaryFiles": 43,
+    "binaryScope": "Unchanged vendor assets plus independently visually inspected synthetic application screenshot. Gzip corpus decoded for known-pattern checks.",
+    "scanner": "Gitleaks 8.30.1",
+    "configuration": "Default rules; no project config or environment override; ignore file disabled; allow comments ignored; 100% redaction; archive depth two.",
+    "treeFindings": 400,
+    "rootHistoryFindings": 401,
+    "independentTriage": {
+      "treeSourceSha256Values": 396,
+      "historySourceSha256Values": 397,
+      "publicSigningKeyFingerprint": 1,
+      "ordinaryVendorExpressions": 3
+    },
+    "unresolvedFindings": 0
+  },
+  "checks": {
+    "nativeScriptTests": {
+      "passed": 22,
+      "failed": 0
+    },
+    "syntheticPackaging": {
+      "passed": true,
+      "finalBinaryHashesMatch": 4,
+      "outerSignatureChangeReproduced": false,
+      "deepSignatureVerified": false,
+      "packageFormat": "linux-directory",
+      "existingOutputRefused": true,
+      "vendoredDependencyNoticesPreserved": 10,
+      "sourceNoticesPreserved": 4,
+      "missingSourceNoticesRefused": 4,
+      "scope": "Synthetic native executable packaging regression; no Crewroom workflow, GUI or release acceptance claim."
+    },
+    "webBuild": "passed on Node 26.10.0; existing Vite large-chunk warning",
+    "entryPointLocalDocumentationLinks": 43,
+    "gitDiffCheck": "passed",
+    "sourceAndNoticesPreserved": true,
+    "independentStandards": {
+      "reviewedPreparedRevision": "b6393176632ad391c1cf594267f05ed8f866c832",
+      "reviewedPublicRoot": "d9e2607a857950a4bb593534a7c0dc1b0a906269",
+      "findings": 0
+    },
+    "independentSpecAndPrivacy": {
+      "reviewedPreparedRevision": "b6393176632ad391c1cf594267f05ed8f866c832",
+      "reviewedPublicRoot": "d9e2607a857950a4bb593534a7c0dc1b0a906269",
+      "findings": 0
+    }
+  },
+  "preservation": {
+    "privateArchiveVerified": true,
+    "privateBundleVerified": true,
+    "gitMetadataArchiveVerified": true,
+    "originalGitMetadataRetainedPrivately": true,
+    "sameDevelopmentCheckout": true,
+    "trackedWorkingFilesUnchangedByMigration": true,
+    "untrackedFilesVerifiedUnchanged": 2,
+    "runtimeInstallationChanged": false,
+    "originalLocalBranchesRetainedInPrivateBackup": true
+  },
+  "privateArtifactSha256": {
+    "snapshot-privacy.json": "2733d57cd1ec3c05ddd00f4837f310485f571cd6149f3afc8a323adf37403469",
+    "snapshot-gitleaks.json": "5e937705e8044fbbb1e6b8cfb024e70c9e660083de494bed5f20afab95cbcb4d",
+    "root-history-gitleaks.json": "13a48b9948dd57c284531d85cd9a083e21031011bd7775494961b569a412ae02",
+    "hosted-public-verification.json": "40f93622197fd6efc7e5fa14c929e92ecf33c7ffdaef3924515a2680ca34888d",
+    "anonymous-clone-verification.json": "b1bdef10b4391138da3375bddc0ac5416ad892265384841a7e19f502b3dc225b",
+    "checkout-transition.json": "2a340aee0f12b099f11216f0c5415a3eb7304e4512fa4e132cc98ed023e5354c",
+    "npm-build.log": "72676a6f6b7119bae810e387b14a5f8b5b8a1af13cfa487c257be7a309ff26b5"
+  },
+  "privateBackupSha256": {
+    "gitBundle": "318f6452eb659da848a20c58f0ae9a82aa15eacffffa7fc45d2383cac234debe",
+    "gitMetadataTar": "3048d20d28fb4223e40a077e6ce18af3ada0510c68ca70ab532aa5cf87582f3e"
+  },
+  "limits": [
+    "Incremental/publication checks do not constitute a full application security audit or proof of absence of unidentified private information.",
+    "No new application-domain, native GUI, live provider, install, portable-binary or cross-platform acceptance is claimed.",
+    "All prior development revision IDs and source hashes remain historical evidence for private snapshots; they are not fresh validation of the public root.",
+    "Original retained objects remain in the private historical repository; their deletion was not required or claimed."
+  ]
+}
