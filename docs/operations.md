@@ -99,9 +99,10 @@ The launcher requires explicit absolute data and role paths. The checkout wrappe
 | `<data>/jira.json` | Jira source/account metadata read by the native daemon |
 | `<data>/bitbucket.json` | Repository publication/hosted-check metadata read by the native daemon. An optional per-repository `remote` (HTTPS or SSH publish remote, no credentials) selects the publication provider; without it the entry is Bitbucket. A remote on a host with no provider is shown as an unavailable publication provider. The legacy browser server rejects `remote` |
 | `<data>/crewroom.secret` | Install key: 32 random bytes, mode 0600, created once on first start. Never regenerated while encrypted values exist. See [stored credentials](#stored-credentials) |
-| `<data>/credentials.json` | Jira/Bitbucket tokens saved in **Settings → Integrations**, only as `$crewroom$v1$…` encrypted values |
+| `<data>/credentials.json` | Jira/Bitbucket/GitHub tokens saved in **Settings → Integrations**, only as `$crewroom$v1$…` encrypted values |
 | `CREWROOM_JIRA_TOKEN` | Optional OAuth bearer access token for the configured Jira cloud, read server-side; overrides the saved Jira token |
 | `CREWROOM_BITBUCKET_TOKEN` | Optional OAuth bearer token, read server-side; overrides the saved Bitbucket token |
+| `CREWROOM_GITHUB_TOKEN` | Optional github.com personal access token, read server-side; overrides the saved GitHub token and is reported as the active source |
 
 Legacy `CREWROOM_DATA_DIR`, `CREWROOM_PORT`, `CREWROOM_JIRA_CONFIG` and `CREWROOM_PUBLICATION_CONFIG` do not select these native settings. Changing the selected paths opens a different installation; it does not move or import existing data. Reopening a live daemon does not reload its environment.
 
@@ -112,6 +113,32 @@ Legacy `CREWROOM_DATA_DIR`, `CREWROOM_PORT`, `CREWROOM_JIRA_CONFIG` and `CREWROO
 If `crewroom.secret` is missing, is not a private (0600, owner-only) file, or does not match the stored values, the integration shows **Credentials unreadable — reconnect**. No provider request is sent. Crewroom does not create a replacement key while encrypted values exist. Restore the secret from the same backup, or use **Reconnect**. Reconnect saves the new token and drops other unreadable values; those integrations must also be reconnected.
 
 Threat model: the install key protects tokens in copied configuration, backups, sync folders and accidentally shared files that do not also include `crewroom.secret`. It does **not** protect against processes running as the same OS user, because they can read both files. A backup that contains both files contains usable credentials.
+
+### GitHub personal access token
+
+**Settings → Integrations → GitHub** connects github.com with a pasted personal access token. GitHub Enterprise Server and GitHub App sign-in are not supported yet (FOR-50, FOR-51).
+
+Create the token on github.com under **Settings → Developer settings → Personal access tokens**:
+
+| Token type | Repository access | Permissions |
+| --- | --- | --- |
+| Fine-grained (recommended) | **Only select repositories**: the repositories Crewroom works on | Metadata: **Read** (required by GitHub); Contents: **Read and write**; Issues: **Read and write**; Pull requests: **Read and write** |
+| Classic | All repositories the account can reach | `repo` scope (`public_repo` reaches public repositories only) |
+
+Choose an expiry. An organization may require approval for fine-grained tokens or SSO authorization for classic tokens; until then GitHub hides its repositories from the token.
+
+**Connect GitHub** sends the token to the local service once. The service calls `GET https://api.github.com/user` with it. A token GitHub refuses (HTTP 401) is rejected with GitHub's reason and is **not** saved. If GitHub cannot be reached, nothing is saved either. Only an accepted token is stored, through the encrypted store above. The connected state shows the account, token kind (classic or fine-grained, from its prefix), classic scopes and expiry when GitHub reports them. The client never receives the token.
+
+Settings states what was last observed with the active token:
+
+- **Connected as @account** — the last check succeeded.
+- **No access to owner/repo** — after **Check repository access**, GitHub answered 404/403 for that repository. A fine-grained token sees 404 for repositories not selected under Repository access. A successful repository check confirms visibility only; GitHub does not report a fine-grained token's permissions, so issue, pull-request and contents writes are confirmed when Crewroom first uses them.
+- **Expired or revoked** — a later **Check connection** received HTTP 401. The saved token is kept until you reconnect or disconnect.
+- **Connection not confirmed** — GitHub was unreachable, rate-limited or returned an unexpected answer. This is not reported as revocation.
+- **Not checked since the service started** — a token is present (saved or `CREWROOM_GITHUB_TOKEN`), but the check results are held only in memory and are bound to the token they checked.
+- **Disconnected** — no saved token and no override.
+
+**Disconnect** removes the saved token from `credentials.json`. A non-empty `CREWROOM_GITHUB_TOKEN` still wins over a saved token and stays active after Disconnect; Settings names it as the source. Connect, check and disconnect are mutations: like every other one they require the loopback service's own origin and bearer token.
 
 Keep private configuration, backups and logs in operator-only directories. Runtime JSON contains provider/Mail credentials. It must not be committed or copied to the browser. A missing integration remains unavailable; saving a plan does not start an agent.
 
