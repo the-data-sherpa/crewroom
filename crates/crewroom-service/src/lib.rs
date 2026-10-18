@@ -1,6 +1,7 @@
 mod execution;
 mod github;
 mod intake;
+mod jira_refresh;
 mod role_catalog;
 mod routes;
 mod scheduler;
@@ -323,8 +324,7 @@ impl Service {
                     }
                 }
                 if tick.is_multiple_of(12)
-                    && let Some(j) = &e.sync
-                    && let Err(error) = j.refresh().await
+                    && let Err(error) = e.sync.refresh_all().await
                 {
                     eprintln!("Jira refresh failed: {error}");
                 }

@@ -670,7 +670,7 @@ fn schema_29_upgrade_retains_active_stopped_and_history_bytes_and_adds_empty_com
     assert_eq!(
         db.query_row("PRAGMA user_version", [], |r| r.get::<_, u32>(0))
             .unwrap(),
-        34
+        crewroom_core::store::SCHEMA_VERSION
     );
 }
 

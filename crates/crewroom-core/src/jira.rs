@@ -137,6 +137,10 @@ pub fn normalize_site(value: &Value) -> Result<String> {
 pub fn description_text(value: &Value) -> String {
     description(value, 0)
 }
+/// Validates one refresh batch (up to 1000 issues, possibly empty).
+pub(crate) fn batch(value: &Value, unique: bool) -> Result<Vec<Value>> {
+    issues_input(value, 0, unique)
+}
 impl Store {
     pub fn import_jira(&self, body: &Value) -> Result<Value> {
         let site = site_origin(&body["siteUrl"], true)?;
@@ -144,6 +148,16 @@ impl Store {
         self.transaction(|s| Ok(json!(s.import_jira_rows(&site, &issues)?)))
     }
     fn import_jira_rows(&self, site: &str, issues: &[Value]) -> Result<Vec<Value>> {
+        self.import_jira_project_rows(site, issues, None)
+    }
+    /// Imports normalized Jira issues; a ticket imported for the first time
+    /// targets `project` when one is given (FOR-53).
+    pub(crate) fn import_jira_project_rows(
+        &self,
+        site: &str,
+        issues: &[Value],
+        project: Option<&str>,
+    ) -> Result<Vec<Value>> {
         let observations = issues
             .iter()
             .map(|issue| {
@@ -166,8 +180,12 @@ impl Store {
                 }
             })
             .collect::<Vec<_>>();
-        self.import_source_rows(JIRA, site, &observations, None)
+        self.import_source_rows(JIRA, site, &observations, project)
     }
+    /// The workspace-level Jira refresh record (`jira_sync`). Since schema 35
+    /// it is only the former workspace setting (FOR-53); project refresh
+    /// lives in `jira_project_sync`. The commit and failure primitives below
+    /// remain for the ledger parity oracle and are not called by the service.
     pub fn jira_state(&self) -> Result<Option<Value>> {
         self.record("jira_sync", "id", "1")
     }

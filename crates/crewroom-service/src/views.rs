@@ -103,14 +103,25 @@ pub(super) fn workspace(e: &Execution, v: &mut Value) -> Result<()> {
     v["capabilities"]["execution"] =
         json!(e.workflow.is_some() && e.ready.load(std::sync::atomic::Ordering::SeqCst));
     v["capabilities"]["publication"] = json!(!e.publication_paths.is_empty());
-    v["capabilities"]["liveJira"] = json!(e.sync.is_some());
+    v["capabilities"]["liveJira"] = json!(e.sync.site().is_some());
     v["connections"]["runner"] =
         json!(e.workflow.is_some() && e.ready.load(std::sync::atomic::Ordering::SeqCst));
-    let jira = e.sync.as_ref().map(|j| j.snapshot()).transpose()?;
-    v["connections"]["jira"] = json!(jira.as_ref().is_some_and(|j| j["state"] == "connected"));
-    if let Some(jira) = jira {
-        v["jira"] = jira;
+    // Jira refresh is per project (FOR-53). `jira` carries only the
+    // connection's public site and name, for delivery and the site picker.
+    let refresh = crate::jira_refresh::workspace_view(e)?;
+    v["connections"]["jira"] = json!(
+        array(&refresh["projects"])
+            .iter()
+            .any(|p| p["availability"] == "connected")
+    );
+    if let Some(site) = e.sync.site() {
+        let mut source = json!({"siteUrl": site});
+        if let Some(name) = e.sync.connection().and_then(|c| c.get("name")) {
+            source["name"] = name.clone();
+        }
+        v["jira"] = json!({"source": source});
     }
+    v["jiraRefresh"] = refresh;
     v["jiraUpdates"] = json!(e.store.with_store(|s| s.jira_updates(None))?);
     v["githubUpdates"] = json!(e.store.with_store(|s| s.github_updates(None))?);
     v["needsYou"] = json!(needs::needs_you(v, &runs));

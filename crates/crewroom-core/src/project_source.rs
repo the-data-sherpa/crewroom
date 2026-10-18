@@ -418,6 +418,8 @@ impl Store {
             }
             // The confirmed source drives this project's sync (FOR-45).
             s.attach_github_source(id, &record)?;
+            // A confirmed Jira site drives this project's refresh (FOR-53).
+            s.attach_jira_source(id, &record)?;
             repository["ticketSource"] = record;
             s.db.execute(
                 "UPDATE repositories SET data=? WHERE id=?",

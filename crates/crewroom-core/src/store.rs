@@ -7,7 +7,7 @@ use std::{collections::HashSet, path::Path};
 use uuid::Uuid;
 /// Current workflow store schema. Version 31 moves ticket source status to the
 /// provider-neutral `sourceStatus`/`sourceStatusId` fields (FOR-40).
-pub const SCHEMA_VERSION: u32 = 34;
+pub const SCHEMA_VERSION: u32 = 35;
 
 pub struct Store {
     pub(crate) db: Connection,
@@ -642,9 +642,8 @@ impl Store {
                     self.continuation_view(run["id"].as_str().unwrap())?;
             }
         }
-        if let Some(jira) = self.record("jira_sync", "id", "1")?
-            && let Some(order) = jira["taskIds"].as_array()
-        {
+        let order = self.jira_task_order()?;
+        if !order.is_empty() {
             tasks.sort_by_key(|t| {
                 order
                     .iter()

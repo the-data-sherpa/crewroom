@@ -125,7 +125,9 @@ pub(crate) struct Execution {
     pub jira: Option<JiraDelivery<Access>>,
     /// GitHub issue delivery for GitHub-sourced tickets (FOR-48).
     pub github: GitHubDelivery<Access>,
-    pub sync: Option<JiraSync<Access>>,
+    /// Per-project Jira refresh (FOR-53). Always present: without a Jira
+    /// connection each project's refresh records that it is not connected.
+    pub sync: JiraSync<Access>,
     pub target: TargetRefresh<Access>,
     pub workflow: Option<Workflow<Access>>,
     /// Discovery-only model catalog, present exactly when no runner is configured.
@@ -187,10 +189,14 @@ impl Execution {
         remote.install_observers(&work);
         let target = TargetRefresh::new(work.clone(), evidence.clone(), remote.clone());
         let publication = Publication::new(remote, work.clone(), evidence.clone());
-        let sync = options
-            .jira
-            .clone()
-            .map(|c| JiraSync::new(store.clone(), c));
+        let sync = match options.jira.clone() {
+            Some(c) => JiraSync::new(store.clone(), c),
+            None => JiraSync::unconnected(store.clone()),
+        };
+        // A saved filter left in the connection file was the workspace-level
+        // refresh setting; it moves into the projects that confirmed its site,
+        // or is reported unused (FOR-53).
+        sync.offer_workspace_setting()?;
         let jira = options.jira.map(|c| {
             JiraDelivery::new(
                 store.clone(),
@@ -376,9 +382,7 @@ impl Execution {
         {
             failures.push(e.to_string());
         }
-        if let Some(j) = &self.sync
-            && let Err(e) = j.close().await
-        {
+        if let Err(e) = self.sync.close().await {
             failures.push(e.to_string());
         }
         if let Some(j) = &self.jira

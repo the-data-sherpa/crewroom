@@ -331,8 +331,15 @@ async fn main() -> Result<()> {
             "remote_verify"=>{remote.as_ref().unwrap().0.verify_cancelled_continuation(target).await?;Ok(Value::Null)},
             "remote_stop"=>{remote.as_ref().unwrap().0.stop_run(target).await?;Ok(Value::Null)},
             "remote_close"=>{remote.as_ref().unwrap().0.close().await?;Ok(Value::Null)},
-            "jira_snapshot"=>jira.as_ref().unwrap().0.snapshot(),
-            "jira_refresh"=>jira.as_ref().unwrap().0.refresh().await,
+            // Jira refresh is per project (FOR-53): a target names the project;
+            // without one, every project using the connected site refreshes and
+            // the snapshot is the workspace-level setting.
+            // Confirms the fixture site as a project's ticket source and offers
+            // the connection's saved filter, as the service does at start.
+            "jira_project" if target.is_empty()=>jira.as_ref().unwrap().0.offer_workspace_setting(),
+            "jira_project"=>{let site=r["site"].as_str().unwrap_or("https://fixture.atlassian.net");store.with_store(|s|s.confirm_ticket_source(target,&json!({"tickets":"jira","site":site}),&crewroom_core::project_source::observe(None)))?;jira.as_ref().unwrap().0.offer_workspace_setting()?;store.with_store(|s|Ok(s.jira_project_source(target)?.unwrap_or(Value::Null)))},
+            "jira_snapshot"=>if target.is_empty() {store.with_store(|s|Ok(s.jira_state()?.unwrap_or(Value::Null)))} else {store.with_store(|s|Ok(s.jira_project_source(target)?.unwrap_or(Value::Null)))},
+            "jira_refresh"=>if target.is_empty() {Ok(json!(jira.as_ref().unwrap().0.refresh_all().await?))} else {jira.as_ref().unwrap().0.refresh_project(target).await},
             "jira_report"=>jira.as_ref().unwrap().1.prepare(target,&r["input"]).await,
             "jira_updates"=>Ok(json!(jira.as_ref().unwrap().1.read(target)?)),
             "jira_needs_summary"=>Ok(json!(jira.as_ref().unwrap().1.needs_research_summary(target,r["revision"].as_u64().unwrap())?)),

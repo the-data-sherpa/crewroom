@@ -15,6 +15,7 @@ pub use feedback_resume::feedback_awaits_resume;
 pub mod github_issues;
 pub mod intake;
 pub mod jira;
+pub mod jira_projects;
 mod launch;
 pub use launch::parse_team;
 pub mod learning;

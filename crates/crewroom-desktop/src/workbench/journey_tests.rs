@@ -390,12 +390,54 @@ fn native_journey_jira_refresh_outage_retains_operator_brief_and_never_queues(
             options
         },
     );
+    // Refresh is per project (FOR-53): a project confirming the connected
+    // site adopts the workspace-level filter from the connection.
+    let checkout = std::fs::canonicalize(f.root.path())
+        .unwrap()
+        .join("jira-project");
+    std::fs::create_dir(&checkout).unwrap();
+    for args in [
+        &["init", "-b", "main"][..],
+        &[
+            "-c",
+            "user.name=Fixture",
+            "-c",
+            "user.email=fixture@example.invalid",
+            "commit",
+            "--allow-empty",
+            "-m",
+            "Seed",
+        ],
+    ] {
+        assert!(
+            std::process::Command::new("git")
+                .arg("-C")
+                .arg(&checkout)
+                .args(args)
+                .status()
+                .unwrap()
+                .success()
+        );
+    }
+    let (status, repository) = f.post(
+        "/repositories",
+        json!({"name":"Jira project","path":checkout,"targetBranch":"main","checks":[]}),
+    );
+    assert_eq!(status, 200, "{repository}");
+    let (status, confirmed) = f.post(
+        &format!(
+            "/repositories/{}/ticket-source",
+            repository["id"].as_str().unwrap()
+        ),
+        json!({"tickets":"jira","site":"https://fixture.atlassian.net"}),
+    );
+    assert_eq!(status, 200, "{confirmed}");
     let (h, v, e) = open(cx, &f);
     wait(cx, h, &v, &e, |v, _| v.connected);
     navigate(cx, h, "import-jira");
     click(cx, h, "refresh-jira");
     wait(cx, h, &v, &e, |v, _| {
-        !v.busy && v.workspace["jira"]["state"] == "connected"
+        !v.busy && v.workspace["jiraRefresh"]["projects"][0]["state"] == "connected"
     });
     let tasks = records(&f.get("/workspace"), "tasks");
     assert_eq!(
@@ -433,13 +475,13 @@ fn native_journey_jira_refresh_outage_retains_operator_brief_and_never_queues(
     mode.store(2, Ordering::SeqCst);
     click(cx, h, "refresh-jira");
     wait(cx, h, &v, &e, |v, _| {
-        !v.busy && v.workspace["jira"]["state"] == "unavailable"
+        !v.busy && v.workspace["jiraRefresh"]["projects"][0]["state"] == "unavailable"
     });
     let outage = f.get("/workspace");
     assert_eq!(outage["tasks"], workspace["tasks"]);
     assert_eq!(
-        outage["jira"]["lastSyncedAt"],
-        workspace["jira"]["lastSyncedAt"]
+        outage["jiraRefresh"]["projects"][0]["lastSyncedAt"],
+        workspace["jiraRefresh"]["projects"][0]["lastSyncedAt"]
     );
     assert!(records(&outage, "runs").is_empty());
     assert!(!outage.to_string().contains("synthetic-native-provider"));

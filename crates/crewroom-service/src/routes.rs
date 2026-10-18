@@ -51,12 +51,9 @@ pub(crate) async fn mutate(
                     .with_store(|s| s.record_comparison_adoption(id, body))?
             }
         }
-        ["jira", "sync"] => {
-            e.sync
-                .as_ref()
-                .ok_or_else(|| Error::Conflict("Jira connection is not configured.".into()))?
-                .refresh()
-                .await?
+        ["jira", "sync"] => crate::jira_refresh::refresh_all(e, body).await?,
+        ["repositories", id, "jira", action] => {
+            crate::jira_refresh::mutate(e, id, action, body).await?
         }
         ["jira", "reconcile"] => {
             e.jira

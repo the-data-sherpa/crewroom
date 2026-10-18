@@ -60,6 +60,66 @@ async fn simulated_jira() -> (String, Seen) {
     tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
     (origin, seen)
 }
+/// A project on a Git checkout with a synthetic bitbucket.org remote (never
+/// contacted) whose confirmed ticket source is the fixture's Jira site, so its
+/// refresh adopts the workspace-level filter in jira.json (FOR-53).
+async fn jira_project(info: &ConnectionInfo, root: &Path) -> String {
+    let path = std::fs::canonicalize(root).unwrap().join("jira-project");
+    std::fs::create_dir(&path).unwrap();
+    for args in [
+        &["init", "-b", "main"][..],
+        &[
+            "-c",
+            "user.name=Fixture",
+            "-c",
+            "user.email=fixture@example.invalid",
+            "commit",
+            "--allow-empty",
+            "-m",
+            "fixture",
+        ],
+        &[
+            "remote",
+            "add",
+            "origin",
+            "git@bitbucket.org:fixture/repo.git",
+        ],
+    ] {
+        assert!(
+            std::process::Command::new("git")
+                .arg("-C")
+                .arg(&path)
+                .args(args)
+                .status()
+                .unwrap()
+                .success()
+        );
+    }
+    let (status, saved) = post(
+        info,
+        "/repositories",
+        json!({"name":"Jira project","path":path,"targetBranch":"main","checks":[]}),
+    )
+    .await;
+    assert_eq!(status, 200, "{saved}");
+    let id = saved["id"].as_str().unwrap().to_owned();
+    let (status, confirmed) = post(
+        info,
+        &format!("/repositories/{id}/ticket-source"),
+        json!({"tickets":"jira","site":"https://fixture.atlassian.net"}),
+    )
+    .await;
+    assert_eq!(status, 200, "{confirmed}");
+    id
+}
+/// One project's Jira refresh status in a response or workspace.
+fn refresh_of(value: &Value, id: &str) -> Value {
+    value["jiraRefresh"]["projects"]
+        .as_array()
+        .and_then(|p| p.iter().find(|p| p["repositoryId"] == id))
+        .cloned()
+        .unwrap_or(Value::Null)
+}
 /// The production loader and store, with the provider origin pointed at the fixture.
 fn options(data: &Path, origin: &str) -> ServiceOptions {
     let connection = config::load_jira_connection_stored(
@@ -117,9 +177,16 @@ async fn jira_import_on_linux_uses_a_token_saved_through_settings() {
     assert_eq!(view["credentials"]["jira"]["source"], "none");
     assert_eq!(view["credentials"]["bitbucket"]["source"], "none");
 
+    // Refresh is per project: the confirmed site adopts jira.json's filter.
+    let project = jira_project(&info, root.path()).await;
     // Without a token the refresh fails before any request reaches the provider.
     let (_, failed) = post(&info, "/jira/sync", json!({})).await;
     assert!(seen.lock().unwrap().is_empty(), "{failed}");
+    assert_eq!(
+        refresh_of(&failed, &project)["availability"],
+        "not_connected",
+        "{failed}"
+    );
 
     // Settings saves the token; the response and workspace carry only status.
     let (status, saved) = post(&info, "/credentials/jira", json!({"token": TOKEN})).await;
@@ -143,7 +210,7 @@ async fn jira_import_on_linux_uses_a_token_saved_through_settings() {
     // Refresh imports through the stored token without a restart.
     let (status, synced) = post(&info, "/jira/sync", json!({})).await;
     assert_eq!(status, 200, "{synced}");
-    assert_eq!(synced["state"], "connected");
+    assert_eq!(refresh_of(&synced, &project)["state"], "connected");
     assert_eq!(
         seen.lock().unwrap().last().unwrap(),
         &format!("Bearer {TOKEN}")
@@ -195,14 +262,15 @@ async fn jira_import_on_linux_uses_a_token_saved_through_settings() {
     let (_, failed) = post(&service.info, "/jira/sync", json!({})).await;
     assert_eq!(seen.lock().unwrap().len(), before, "{failed}");
     let view: Value = serde_json::from_str(&workspace(&service.info).await).unwrap();
+    let status = refresh_of(&view, &project);
     assert!(
-        view["jira"]["error"]
+        status["error"]
             .as_str()
             .unwrap_or("")
             .contains(secrets::UNREADABLE),
-        "{}",
-        view["jira"]
+        "{status}"
     );
+    assert_eq!(status["availability"], "not_connected");
     // An ordinary save will not orphan values; an explicit reconnect replaces them.
     let (status, refused) = post(&service.info, "/credentials/jira", json!({"token": TOKEN})).await;
     assert_eq!(status, 409, "{refused}");

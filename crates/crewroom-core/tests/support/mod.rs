@@ -79,3 +79,22 @@ pub fn github_project(store: &Store, root: &std::path::Path, repository: &str) -
     confirm_github(store, &id, repository);
     id
 }
+
+/// Confirms Jira `site` as a project's ticket source (FOR-47) against a
+/// synthetic bitbucket.org remote observation; nothing is contacted.
+#[allow(dead_code)]
+pub fn confirm_jira(store: &Store, project: &str, site: &str) {
+    let observed =
+        crewroom_core::project_source::observe(Some("git@bitbucket.org:fixture/repo.git"));
+    store
+        .confirm_ticket_source(project, &json!({"tickets":"jira","site":site}), &observed)
+        .unwrap();
+}
+
+/// A project whose confirmed ticket source is the Jira site `site`.
+#[allow(dead_code)]
+pub fn jira_project(store: &Store, root: &std::path::Path, name: &str, site: &str) -> String {
+    let id = project(store, root, name);
+    confirm_jira(store, &id, site);
+    id
+}

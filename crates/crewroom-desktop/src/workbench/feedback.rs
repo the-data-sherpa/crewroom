@@ -95,6 +95,8 @@ pub(super) fn pending(path: &str, body: &Value) -> String {
         ("/github-issues/sync", "Syncing GitHub issues…"),
         ("/github-issues/filters", "Saving GitHub issue filters…"),
         ("/github-issues/labels", "Saving GitHub workflow labels…"),
+        ("/jira/sync", "Refreshing Jira…"),
+        ("/jira/filters", "Saving Jira filters…"),
         ("/retire", "Retiring…"),
         ("/delete", "Deleting…"),
         ("/decision", "Recording decision…"),

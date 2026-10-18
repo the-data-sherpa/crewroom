@@ -153,7 +153,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 match &client {
                     Client::Jira(c) => match request["op"].as_str().unwrap() {
                         "source" => Ok(c.source.clone()),
-                        "search" => Ok(json!(c.search().await?)),
+                        // An explicit `jql`, or the query the source's saved
+                        // filter and assignee imply (FOR-53).
+                        "search" => {
+                            let jql = input["jql"].as_str().map(str::to_owned).or_else(|| {
+                                crewroom_core::jira_projects::workspace_source(&c.source)
+                                    .and_then(|s| crewroom_core::jira_projects::jql(&s))
+                            });
+                            Ok(json!(c.search(&jql.unwrap_or_default()).await?))
+                        }
                         "issue" => c.issue(id).await,
                         "comments" => Ok(json!(c.comments(id).await?)),
                         "transitions" => Ok(json!(c.transitions(id).await?)),

@@ -293,19 +293,20 @@ impl JiraCredentials {
             let this = self.clone();
             self.renewing
                 .run(async move {
+                    // Any one-item search renews the ACLI session; the saved
+                    // filter is optional since filters are per project (FOR-53).
+                    let scope: Vec<String> = match this.source["filterId"].as_str() {
+                        Some(filter) => vec!["--filter".into(), filter.into()],
+                        None => vec!["--jql".into(), "order by created DESC".into()],
+                    };
+                    let mut args: Vec<String> =
+                        vec!["jira".into(), "workitem".into(), "search".into()];
+                    args.extend(scope);
+                    args.extend(["--limit".into(), "1".into(), "--json".into()]);
                     run(
                         &this.command,
                         "/opt/homebrew/bin/acli",
-                        vec![
-                            "jira".into(),
-                            "workitem".into(),
-                            "search".into(),
-                            "--filter".into(),
-                            this.source["filterId"].as_str().unwrap().into(),
-                            "--limit".into(),
-                            "1".into(),
-                            "--json".into(),
-                        ],
+                        args,
                         30,
                         2 * 1024 * 1024,
                     )

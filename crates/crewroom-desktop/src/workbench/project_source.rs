@@ -100,6 +100,10 @@ impl Workbench {
         if view["saved"]["tickets"] == "github" {
             block = block.child(self.github_issues_block(&id, window, cx));
         }
+        // A confirmed Jira site drives this project's Jira refresh (FOR-53).
+        if view["saved"]["tickets"] == "jira" {
+            block = block.child(self.jira_refresh_block(&id, window, cx));
+        }
         let open = state != "confirmed" || self.source_open.contains(&id);
         if !open {
             let target = id.clone();

@@ -157,7 +157,7 @@ fn schema_31_migrates_tickets_losslessly_and_whole_state_restore_reproduces_it()
         .map(|id| store.get_task(id).unwrap())
         .collect();
     drop(store);
-    assert_eq!(version(&path), 34);
+    assert_eq!(version(&path), crewroom_core::store::SCHEMA_VERSION);
     let after = rows(&path);
 
     // Jira: renamed in place, every other field and the refinement unchanged.
@@ -297,7 +297,7 @@ fn whole_state_written_by_the_pre_migration_daemon_restores_and_migrates_lossles
         .map(|(id, _, _)| store.get_task(id).unwrap())
         .collect();
     drop(store);
-    assert_eq!(version(&path), 34);
+    assert_eq!(version(&path), crewroom_core::store::SCHEMA_VERSION);
     let after = rows(&path);
     let rename = |k: &str| match k {
         "jiraStatus" => "sourceStatus".to_owned(),

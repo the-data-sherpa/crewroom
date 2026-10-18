@@ -35,7 +35,19 @@ pub fn source(value: &Value) -> Result<Value> {
     if !crewroom_core::store::valid_uuid(&cloud) {
         return Err(invalid());
     }
-    let mut result = json!({"siteUrl":site,"cloudId":cloud,"filterId":digits(&value["filterId"])?,"assigneeAccountId":account(&value["assigneeAccountId"])?,"name":text(&value["name"],1,120,true)?});
+    let mut result = json!({"siteUrl":site,"cloudId":cloud});
+    // The saved filter, assignee and name were the workspace-level refresh
+    // setting before each project's confirmed Jira site carried its own
+    // filters (FOR-53). They are optional and only offered for adoption.
+    if let Some(filter) = value.get("filterId") {
+        result["filterId"] = json!(digits(filter)?);
+    }
+    if let Some(assignee) = value.get("assigneeAccountId") {
+        result["assigneeAccountId"] = json!(account(assignee)?);
+    }
+    if let Some(name) = value.get("name") {
+        result["name"] = json!(text(name, 1, 120, true)?);
+    }
     for key in OPTIONAL {
         if let Some(value) = value.get(key) {
             result[key] = json!(digits(value)?);
@@ -183,21 +195,18 @@ impl JiraClient {
         .await?;
         Ok(())
     }
-    pub async fn search(&self) -> Result<Vec<Value>> {
+    /// Every issue matching `jql`, following pagination; any incomplete page
+    /// fails the whole search so nothing partial is imported.
+    pub async fn search(&self, jql: &str) -> Result<Vec<Value>> {
         let mut issues = vec![];
         let mut identities = HashSet::new();
         let mut tokens = HashSet::new();
         let mut next: Option<String> = None;
         loop {
-            let jql = format!(
-                "filter = {} AND assignee = {} ORDER BY Rank ASC",
-                self.source["filterId"].as_str().unwrap(),
-                crewroom_core::serialized::stringify(&self.source["assigneeAccountId"])
-            );
             let query = {
                 let mut query = url::form_urlencoded::Serializer::new(String::new());
                 query
-                    .append_pair("jql", &jql)
+                    .append_pair("jql", jql)
                     .append_pair(
                         "fields",
                         "summary,description,status,priority,project,updated",

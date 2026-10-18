@@ -30,6 +30,9 @@ mod github_issues;
 mod github_issues_tests;
 mod history;
 mod intake;
+mod jira_refresh;
+#[cfg(test)]
+mod jira_refresh_tests;
 #[cfg(test)]
 mod journey_tests;
 #[cfg(test)]
@@ -146,6 +149,8 @@ pub struct Workbench {
     import: Entity<TextareaState>,
     credential_inputs: credentials::CredentialInputs,
     issue_inputs: HashMap<String, github_issues::IssueSourceInputs>,
+    /// Per-project Jira filter inputs (FOR-53).
+    jira_inputs: HashMap<String, jira_refresh::JiraFilterInputs>,
     /// Ticket-source inputs per repository, and repositories whose confirmed
     /// source the operator opened to change (FOR-47).
     source_inputs: HashMap<String, project_source::SourceInputs>,
@@ -310,6 +315,7 @@ impl Workbench {
             }),
             credential_inputs: credentials::CredentialInputs::new(window, cx),
             issue_inputs: HashMap::new(),
+            jira_inputs: HashMap::new(),
             source_inputs: HashMap::new(),
             source_open: Default::default(),
             settings: settings::Settings::default(),
@@ -453,6 +459,12 @@ impl Workbench {
                                 self.workspace["githubIssues"] = facts.clone();
                             }
                         }
+                        if let Some(text) = jira_refresh::notice(&path, &value) {
+                            self.notice = text;
+                            if let Some(facts) = value.get("jiraRefresh") {
+                                self.workspace["jiraRefresh"] = facts.clone();
+                            }
+                        }
                         if let Some(text) = project_source::notice(&path) {
                             self.notice = text;
                             // Collapse the editor and re-prefill from the saved source.
@@ -461,6 +473,7 @@ impl Workbench {
                                 self.source_inputs.remove(id);
                                 // A new source brings its own filters.
                                 self.issue_inputs.remove(id);
+                                self.jira_inputs.remove(id);
                             }
                         }
                         if let Some(text) = credentials::github_notice(&path, &value) {
@@ -591,11 +604,6 @@ impl Workbench {
                         if path.ends_with("/specialists") {
                             self.notice =
                                 "Specialist proposal saved. Admission is shown separately.".into();
-                        }
-                        if path == "/jira/sync" {
-                            self.notice =
-                                "Jira refresh finished. Check the source status for completeness."
-                                    .into();
                         }
                         if path == "/import/jira" {
                             self.selected = value[0]["id"].as_str().map(str::to_owned);
@@ -737,11 +745,9 @@ impl Workbench {
                 "Jira: Credentials unreadable — reconnect under Credentials below."
             } else {
                 ""
-            })).child(hint(if self.workspace["capabilities"]["liveJira"]==true {"Refresh the configured source. Imported fields remain separate from your accepted brief."}else{"Live Jira is not configured. You can import a snapshot and retain source fields separately."}))
-            .child(hint(format!("{} · {}",self.workspace["jira"]["source"]["name"].as_str().unwrap_or("No saved source"),self.workspace["jira"]["state"].as_str().unwrap_or("not configured"))))
-            .child(hint(format!("Last complete refresh: {}",self.workspace["jira"]["lastSyncedAt"].as_str().unwrap_or("not yet recorded"))))
-            .child(hint(self.workspace["jira"]["error"].as_str().unwrap_or("")))
-            .child(Button::new("refresh-jira").label("Refresh Jira").disabled(self.blocked()||self.workspace["capabilities"]["liveJira"]!=true).on_click(cx.listener(|this,_,_,cx|this.send("/jira/sync".into(),json!({}),false,cx))))
+            })).child(hint(if self.workspace["capabilities"]["liveJira"]==true {"Each project whose ticket source is a Jira site refreshes with its own filters under Settings → Repositories. Imported fields remain separate from your accepted brief."}else{"Live Jira is not configured. You can import a snapshot and retain source fields separately."}))
+            .child(self.jira_refresh_section())
+            .child(Button::new("refresh-jira").label("Refresh all Jira projects").disabled(self.blocked()||self.workspace["capabilities"]["liveJira"]!=true).on_click(cx.listener(|this,_,_,cx|this.send("/jira/sync".into(),json!({}),false,cx))))
             .child(crate::accessibility::text("Import a Jira snapshot"))
             .child(Textarea::new(&self.import).accessibility_id("jira-json").aria_label("Jira JSON").h(px(320.)).disabled(self.blocked()))
             .child(Button::new("save-import").primary().label("Import snapshot").disabled(self.blocked()).on_click(cx.listener(|this,_,_,cx| {

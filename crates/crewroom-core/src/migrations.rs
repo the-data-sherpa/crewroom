@@ -29,6 +29,7 @@ impl Store {
                     24 => s.migrate_steering()?,
                     31 => s.migrate_ticket_sources()?,
                     34 => s.migrate_github_project_sources()?,
+                    35 => s.migrate_jira_project_sources()?,
                     _ => (),
                 }
                 s.db.pragma_update(None, "user_version", version)?;
