@@ -315,8 +315,10 @@ fn route_total(route: &str, members: &[&Value]) -> Value {
             .len()
     );
     total["tokenAttempts"] = json!(started.iter().filter(|r| !r["tokens"].is_null()).count());
+    // Attempts awaiting start are not usage: like `attempts`, the unrecorded
+    // count covers started attempts only, so it never exceeds them.
     total["unrecordedAttempts"] = json!(
-        members
+        started
             .iter()
             .filter(|r| r["billingRecorded"] != true)
             .count()
@@ -661,6 +663,14 @@ mod native_usage_tests {
     /// One run with an assignment per billing shape. Each assignment reports a
     /// Claude-native cumulative snapshot of `tokens` and a list-price cost.
     fn mixed_run(assignments: &[(&str, Value, u64)]) -> (tempfile::TempDir, Value) {
+        mixed_run_with_queued(assignments, &[])
+    }
+    /// As `mixed_run`, plus `queued` assignments admitted but never claimed:
+    /// their attempts stay awaiting start and report no usage.
+    fn mixed_run_with_queued(
+        assignments: &[(&str, Value, u64)],
+        queued: &[(&str, Value)],
+    ) -> (tempfile::TempDir, Value) {
         let root = tempfile::tempdir().unwrap();
         let store = Store::open(&root.path().join("workflow.sqlite")).unwrap();
         let task = store
@@ -697,6 +707,18 @@ mod native_usage_tests {
             // Stored identity fixture; this test starts no OS processes.
             store.record_attempt_identity(&id,&json!({"hostPid":101,"runnerKind":"claude-code","runnerPid":102,"sessionId":format!("session-{index}"),"hostUrl":"http://127.0.0.1:9","pane":"%1"})).unwrap();
             attempts.push(id);
+        }
+        for (name, selection) in queued {
+            let mut model = json!({"resolved":{"adapter":"claude-code","provider":"claude-code","api":"claude-code-stream","id":"fixture","resolvedModel":"fixture-resolved","selector":"claude-code/fixture"}});
+            if !selection.is_null() {
+                model["selection"] = selection.clone();
+            }
+            store
+                .admit_assignment(
+                    &run,
+                    &json!({"name":name,"coordinator":false,"role":role,"model":model,"input":"Read usage"}),
+                )
+                .unwrap();
         }
         store.set_desired_state(&run, "running").unwrap();
         store.start_execution(&run).unwrap();
@@ -799,5 +821,95 @@ mod native_usage_tests {
                 .iter()
                 .all(|r| r["billing"] != "api")
         );
+    }
+
+    #[test]
+    fn queued_attempts_are_neither_started_nor_unrecorded() {
+        // Started: one recorded API attempt and one without a recorded route.
+        // Queued (research runs admit three specialists): one without a
+        // recorded route beside a started one, and one alone on its route.
+        let (_root, result) = mixed_run_with_queued(
+            &[
+                ("Coordinator", json!({"offering":{"billing":"api"}}), 100),
+                ("Legacy", Value::Null, 40),
+            ],
+            &[
+                ("Queued legacy", Value::Null),
+                (
+                    "Queued subscription",
+                    json!({"offering":{"billing":"subscription"}}),
+                ),
+            ],
+        );
+        let queued = array(&result["rows"])
+            .iter()
+            .filter(|r| r["awaitingStart"] == true)
+            .count();
+        assert_eq!(queued, 2, "{result}");
+        let unknown = route(&result, "unknown");
+        assert_eq!(unknown["attempts"], 1);
+        assert_eq!(unknown["unrecordedAttempts"], 1);
+        assert_eq!(unknown["tokens"]["total"], 40.0);
+        let api = route(&result, "api");
+        assert_eq!(api["attempts"], 1);
+        assert_eq!(api["unrecordedAttempts"], 0);
+        assert_eq!(api["tokens"]["total"], 100.0);
+        // A route holding only queued attempts reports no usage at all.
+        let subscription = route(&result, "subscription");
+        assert_eq!(subscription["awaitingStart"], true);
+        assert_eq!(subscription["attempts"], 0);
+        assert_eq!(subscription["unrecordedAttempts"], 0);
+        assert!(subscription["tokens"].is_null());
+        for total in array(&result["routes"]) {
+            assert!(
+                total["unrecordedAttempts"].as_u64().unwrap()
+                    <= total["attempts"].as_u64().unwrap(),
+                "{total}"
+            );
+        }
+        assert!(result.get("total").is_none(), "no cross-route total");
+    }
+
+    #[test]
+    fn queued_attempt_counts_as_unrecorded_once_started() {
+        let root = tempfile::tempdir().unwrap();
+        let store = Store::open(&root.path().join("workflow.sqlite")).unwrap();
+        let task = store
+            .create_task(&json!({"title":"Usage after start","description":""}))
+            .unwrap();
+        let task = task["id"].as_str().unwrap();
+        store.refine(task,&json!({"revision":1,"sourceRevision":1,"brief":"Inspect usage","criteria":["Explain usage"]})).unwrap();
+        let run = store
+            .queue_research(
+                task,
+                &json!({"revision":2,"requestId":uuid::Uuid::new_v4().to_string()}),
+            )
+            .unwrap();
+        let run = run["id"].as_str().unwrap().to_owned();
+        let role = crewroom_core::roles::Roles::new(root.path().join("roles.json"))
+            .read()
+            .unwrap()
+            .remove(0);
+        // No selection: admitted before billing routes were recorded.
+        let model = json!({"resolved":{"adapter":"claude-code","provider":"claude-code","api":"claude-code-stream","id":"fixture","resolvedModel":"fixture-resolved","selector":"claude-code/fixture"}});
+        let admitted = store
+            .admit_assignment(
+                &run,
+                &json!({"name":"Legacy","coordinator":true,"role":role,"model":model,"input":"Read usage"}),
+            )
+            .unwrap();
+        let id = admitted["attempt"]["id"].as_str().unwrap().to_owned();
+        let before = usage(&store, &run).unwrap();
+        let unknown = route(&before, "unknown");
+        assert_eq!(unknown["awaitingStart"], true);
+        assert_eq!(unknown["attempts"], 0);
+        assert_eq!(unknown["unrecordedAttempts"], 0);
+        store.claim_attempt(&id).unwrap();
+        let after = usage(&store, &run).unwrap();
+        let unknown = route(&after, "unknown");
+        assert_eq!(unknown["awaitingStart"], false);
+        assert_eq!(unknown["attempts"], 1);
+        assert_eq!(unknown["unrecordedAttempts"], 1);
+        assert_eq!(after["rows"][0]["billingRecorded"], false);
     }
 }
