@@ -206,7 +206,7 @@ def preflight(recipe, manifest):
     facts['binaries'] = build['binaries']
     facts['sourceSha256'] = build['source']['sha256']
     facts['recipeSources'] = {name: sha(relative_file(name)) for name in sorted(set([
-        recipe['recipePath'], recipe['entryPoint'], *recipe['sourcePaths'], 'scripts/verify-feature.py', 'scripts/test_processes.py']))}
+        recipe['recipePath'], recipe['entryPoint'], *recipe['sourcePaths'], 'scripts/verify-feature.py', 'scripts/test_processes.py', 'scripts/docker_engine.py']))}
     return facts
 
 
