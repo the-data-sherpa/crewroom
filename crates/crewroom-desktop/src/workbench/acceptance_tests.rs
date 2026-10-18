@@ -857,6 +857,16 @@ fn native_session_shell_groups_tickets_keeps_four_facts_separate_and_drawer_foll
 
     // The header shows four facts; admitted is never reported as executing or ready.
     assert_eq!(labels(cx, h, Some("fact-jira")), ["Not linked"]);
+    // A local ticket names no provider: never "Jira status" (FOR-40).
+    let header = labels(cx, h, None);
+    contains(&header, "SOURCE STATUS");
+    contains(&header, "Local ticket");
+    assert!(
+        !header
+            .iter()
+            .any(|l| l.contains("JIRA STATUS") || l.contains("Jira ticket")),
+        "{header:#?}"
+    );
     assert_eq!(labels(cx, h, Some("fact-workflow")), ["Paused"]);
     assert_eq!(labels(cx, h, Some("fact-activity")), ["1 not started"]);
     let readiness = labels(cx, h, Some("fact-readiness"));

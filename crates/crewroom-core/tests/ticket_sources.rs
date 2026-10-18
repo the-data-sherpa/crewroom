@@ -249,3 +249,128 @@ fn ambiguous_ticket_source_fails_the_migration_without_partial_changes() {
     assert_eq!(version(&path), 30);
     assert_eq!(rows(&path), before);
 }
+
+/// Every row of one query's single text column, in query order.
+fn table(path: &Path, sql: &str) -> Vec<String> {
+    let db = Connection::open(path).unwrap();
+    let mut q = db.prepare(sql).unwrap();
+    q.query_map([], |r| r.get(0))
+        .unwrap()
+        .collect::<Result<_, _>>()
+        .unwrap()
+}
+
+#[test]
+fn whole_state_written_by_the_pre_migration_daemon_restores_and_migrates_losslessly() {
+    // Written by the pre-FOR-40 daemon's HTTP API (see the fixture header), not
+    // reconstructed by hand. The daemon-level receipt is
+    // scripts/verify_source_migration_restore.py.
+    let root = tempfile::tempdir().unwrap();
+    let live = root.path().join("live");
+    let backup = root.path().join("backup");
+    let path = live.join("workflow.sqlite");
+    std::fs::create_dir_all(&live).unwrap();
+    Connection::open(&path)
+        .unwrap()
+        .execute_batch(include_str!("fixtures/schema-30-daemon-state.sql"))
+        .unwrap();
+    std::fs::write(live.join("restore-marker.txt"), "retained\n").unwrap();
+    assert_eq!(version(&path), 30);
+    let legacy = rows(&path);
+    let notes = "SELECT data FROM notes ORDER BY rowid";
+    let revisions = "SELECT data FROM requirement_revisions ORDER BY rowid";
+    let (legacy_notes, legacy_revisions) = (table(&path, notes), table(&path, revisions));
+    assert_eq!(
+        (legacy.len(), legacy_notes.len(), legacy_revisions.len()),
+        (4, 2, 3)
+    );
+    copy_dir(&live, &backup);
+
+    // The live state is lost; the backup is restored at its original path and
+    // opened by the current build.
+    std::fs::remove_dir_all(&live).unwrap();
+    copy_dir(&backup, &live);
+    assert_eq!(rows(&path), legacy);
+    let store = Store::open(&path).unwrap();
+    let tasks: Vec<Value> = legacy
+        .iter()
+        .map(|(id, _, _)| store.get_task(id).unwrap())
+        .collect();
+    drop(store);
+    assert_eq!(version(&path), 33);
+    let after = rows(&path);
+    let rename = |k: &str| match k {
+        "jiraStatus" => "sourceStatus".to_owned(),
+        "jiraStatusId" => "sourceStatusId".to_owned(),
+        k => k.to_owned(),
+    };
+    for ((id, old, refinement), (new_id, new, new_refinement)) in legacy.iter().zip(&after) {
+        assert_eq!(id, new_id);
+        assert_eq!(refinement, new_refinement, "{id}: refinement untouched");
+        let mut old: Value = serde_json::from_str(old).unwrap();
+        let new: Value = serde_json::from_str(new).unwrap();
+        if old["source"] != "jira" {
+            assert_eq!(old["jiraStatus"], "Not linked");
+            old.as_object_mut().unwrap().shift_remove("jiraStatus");
+        }
+        let expected: serde_json::Map<String, Value> = old
+            .as_object()
+            .unwrap()
+            .iter()
+            .map(|(k, v)| (rename(k), v.clone()))
+            .collect();
+        // Same fields, same values, same key order.
+        assert_eq!(
+            new.as_object().unwrap().keys().collect::<Vec<_>>(),
+            expected.keys().collect::<Vec<_>>(),
+            "{id}"
+        );
+        assert_eq!(new, Value::Object(expected), "{id}");
+    }
+    assert_eq!(table(&path, notes), legacy_notes);
+    assert_eq!(table(&path, revisions), legacy_revisions);
+    assert_eq!(
+        std::fs::read_to_string(live.join("restore-marker.txt")).unwrap(),
+        "retained\n"
+    );
+
+    // Projected tickets: provider-labelled Jira status, no status for local ones,
+    // and the operator refinements as accepted before the migration.
+    let labels: Vec<_> = tasks.iter().map(ticket_source::status_label).collect();
+    assert_eq!(
+        labels,
+        [
+            "Jira In Progress",
+            "Jira Backlog",
+            ticket_source::NOT_LINKED,
+            ticket_source::NOT_LINKED
+        ]
+    );
+    let briefs: Vec<_> = tasks.iter().map(|t| t["brief"].clone()).collect();
+    assert_eq!(
+        briefs,
+        ["Handle zero", "List every total", "Keep it local", ""]
+    );
+    assert!(tasks.iter().all(|t| t["needsReacceptance"] == false));
+    assert_eq!(tasks[0]["sourceStatusId"], "3");
+    assert!(tasks[2].get("sourceStatus").is_none());
+
+    // Jira identity still matches after migration: a re-import updates the same
+    // ticket and keeps its refinement.
+    let store = Store::open(&path).unwrap();
+    let moved = store
+        .import_jira(&json!({"siteUrl":format!("{SITE}/"),"issues":[{"id":"100","key":"SIM-100","fields":{"summary":"Fix sum","description":"Synthetic description 100","status":{"id":"4","name":"Done"},"priority":{"name":"High"},"project":{"name":"Simulated"}}}]}))
+        .unwrap()[0]
+        .clone();
+    assert_eq!(moved["id"], tasks[0]["id"]);
+    assert_eq!(moved["sourceStatus"], "Done");
+    assert_eq!(moved["brief"], "Handle zero");
+    assert_eq!(moved["needsReacceptance"], false);
+    drop(store);
+
+    // Rolling back means restoring the same backup: the schema-30 rows return.
+    std::fs::remove_dir_all(&live).unwrap();
+    copy_dir(&backup, &live);
+    assert_eq!(version(&path), 30);
+    assert_eq!(rows(&path), legacy);
+}
