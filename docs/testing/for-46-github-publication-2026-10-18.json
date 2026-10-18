@@ -4,6 +4,24 @@
   "implementationRevision": "ecff62527c1d74c0beb5614ebb652aaf5022755a",
   "documentationRevision": "81030a787fee221717f65e2c46d1a55ecd261035",
   "baseRevision": "80f9421c652dc9a4dd4b94a4c834638b1003d927",
+  "integration": {
+    "note": "Rebased onto main 7975dcc at integration; the rebase conflicted only in docs/status.md and docs/testing/mvp-progress.md and both sides were kept. Live runs were not repeated after the rebase; they bind to the pre-rebase revisions above.",
+    "baseRevision": "7975dcccfcaf8e13a5c6bc5b8815bd8caf90e643",
+    "implementationRevision": "2b17b7e25cd96db452801e30b18c01e389863e26",
+    "implementationTree": "e53c42666caf72249f8aa54f7c0f47c7ff125923",
+    "documentationRevision": "18da839682fed9a19967b7e961d259e252551f0e",
+    "evidenceRevision": "0b1ad6d5bc7bd96a80b5c622163b87f1f0d727f2",
+    "evidenceTree": "05a9479ca97b1bc156ae0bab136adc83fad99058",
+    "checks": [
+      "cargo test --locked --no-fail-fast -p crewroom-core -p crewroom-runtime -p crewroom-service -- --test-threads=1: 323 passed, 0 failed; the crewroom-service doctest step hit a shared-target artifact from a concurrent worktree build and passed on a separate --doc rerun (0 doctests)",
+      "cargo test --locked -p crewroom-desktop: 138 passed, 15 ignored",
+      "cargo clippy --locked -p crewroom-runtime -p crewroom-service --all-targets -- -D warnings: pass; cargo clippy --locked -p crewroom-desktop --bins -- -D warnings: pass",
+      "cargo fmt -p crewroom-runtime -p crewroom-service -p crewroom-desktop --check: pass",
+      "npm test: 332/332",
+      "npm run build: pass",
+      "npm run test:e2e: 29 passed, 2 failed; refinement.spec.ts:28 INT-03 and research.spec.ts:27 INT-07/EVD-08 stop in fixture setup because the fixture-only OMP 18.4.12 is not installed on this machine, the same failures recorded at the FOR-43 and FOR-38 integrations"
+    ]
+  },
   "scope": "Publish PRs to github.com through the FOR-41 PullRequestHost with the FOR-43 token route: GitHub host selected from a github.com publish remote, normalized PR/status/check-run/comment shapes, Closes #N for GitHub-sourced tickets, keyed continuation of the same PR, provider PR state and observed head shown, refusals with remedies. Bitbucket behaviour unchanged.",
   "simulated": {
     "provider": "Loopback GitHub REST fixture (axum in crates/crewroom-runtime/tests/github_publication.rs); not github.com.",
