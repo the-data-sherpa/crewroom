@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { test } from 'node:test';
 import type { CheckedProcess, ControllerAuthority } from '../server/runtime/processes';
-import { acquireController, describeCheckedOwned, inspectCheckedOwned, launchCheckedOwned, prepareCheckedOwned, sealCheckedOwned, launchOwned, inspectOwned, stopOwned } from '../server/runtime/processes';
+import { acquireController, describeCheckedOwned, inspectCheckedOwned, launchCheckedOwned, prepareCheckedOwned, sealCheckedOwned, launchOwned, inspectOwned, prepareOwned, stopOwned } from '../server/runtime/processes';
 
 function freezeCheckedDispatch(descriptor: CheckedProcess, marker: string) {
   const script = [
@@ -90,6 +90,63 @@ test('LIF-05: a stale PID identity is not signalled or treated as stopped', asyn
   writeFileSync(join(job, 'owner.json'), JSON.stringify({ ...JSON.parse(original), started: 'stale process' }));
   assert.equal((await stopOwned(job)).state, 'uncertain');
   assert.doesNotThrow(() => process.kill(child.pid!, 0));
+});
+
+test('FOR-60: an owner receipt is never visible before it is complete', async t => {
+  const root = mkdtempSync(join(tmpdir(), 'crewroom-owner-receipt-')); const job = join(root, 'job'); const marker = join(root, 'writing');
+  const [, helper] = prepareOwned(job, '/bin/sleep', ['30'], { cwd: root, env: { PATH: process.env.PATH } });
+  // The real helper stops itself as it starts writing the receipt (the chmod right after creating the file),
+  // which is the window an inspector watching for owner.json used to land in under load.
+  const script = [
+    'import os,runpy,signal,sys',
+    'from pathlib import Path',
+    'helper,job,marker=sys.argv[1:]',
+    'original=os.chmod',
+    'def intercept(path,mode,*args,**kwargs):',
+    '    if Path(path).name.startswith("owner.json"):',
+    '        Path(marker+".tmp").write_text(Path(path).name)',
+    '        os.replace(marker+".tmp",marker)',
+    '        os.kill(os.getpid(),signal.SIGSTOP)',
+    '    return original(path,mode,*args,**kwargs)',
+    'os.chmod=intercept',
+    'sys.argv=[helper,"exec",job]',
+    'runpy.run_path(helper,run_name="__main__")',
+  ].join('\n');
+  const frozen = spawn('python3', ['-c', script, helper, job, marker], { detached: true, stdio: 'ignore' });
+  t.after(async () => {
+    try { process.kill(frozen.pid!, 'SIGCONT'); } catch {}
+    await stopOwned(job);
+    if (frozen.exitCode === null && frozen.signalCode === null) try { process.kill(-frozen.pid!, 'SIGKILL'); } catch {}
+    rmSync(root, { recursive: true, force: true });
+  });
+  const deadline = Date.now() + 10000;
+  while (!existsSync(marker) && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 10));
+  assert.equal(readFileSync(marker, 'utf8'), 'owner.json.partial', 'The receipt is written under its partial name.');
+  assert.equal(existsSync(join(job, 'owner.json')), false, 'A receipt still being written is not visible as owner.json.');
+  process.kill(frozen.pid!, 'SIGCONT');
+  let state = await inspectOwned(job);
+  while (state.state !== 'live' && Date.now() < deadline) { await new Promise(resolve => setTimeout(resolve, 20)); state = await inspectOwned(job); }
+  assert.equal(state.state, 'live', JSON.stringify(state));
+  assert.equal(JSON.parse(readFileSync(join(job, 'owner.json'), 'utf8')).pid, frozen.pid);
+  assert.equal(existsSync(join(job, 'owner.json.partial')), false);
+  assert.equal((await stopOwned(job)).state, 'stopped');
+});
+
+test('FOR-60: a checked helper killed while writing its receipt leaves a lease no duplicate can execute', async t => {
+  const root = realpathSync(mkdtempSync(join(tmpdir(), 'crewroom-checked-partial-'))); const job = join(root, 'job'); const output = join(root, 'count');
+  const authority = await acquireController(join(root, 'controller'));
+  t.after(async () => { await authority.close(); rmSync(root, { recursive: true, force: true }); });
+  const descriptor = prepareCheckedOwned(job, randomUUID(), '/bin/sh', ['-c', 'echo once >> "$1"', 'job', output], { cwd: root, env: { PATH: process.env.PATH } }, authority);
+  // What a winner SIGKILLed between creating and publishing its receipt leaves behind; its lock died with it.
+  writeFileSync(join(job, 'owner.json.partial'), '{"pi', { mode: 0o600 });
+  const late = spawn('python3', [resolve('server/runtime/process-lease.py'), 'checked-exec', job, descriptor.token, descriptor.specSha256, descriptor.epoch, descriptor.controllerRoot], { detached: true, stdio: ['ignore', 'ignore', 'pipe'] });
+  let diagnostics = '';
+  late.stderr.on('data', chunk => { diagnostics += chunk; });
+  assert.notEqual((await once(late, 'close'))[0], 0);
+  assert.match(diagnostics, /Process lease already held\./);
+  assert.doesNotMatch(diagnostics, /FileExistsError|Traceback/);
+  assert.equal(existsSync(output), false, 'The command never ran.');
+  assert.equal(existsSync(join(job, 'owner.json')), false);
 });
 
 test('R3: concurrent ownership probes of a stopped process agree that it stopped', async t => {

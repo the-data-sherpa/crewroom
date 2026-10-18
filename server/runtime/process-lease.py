@@ -36,6 +36,20 @@ def durable_write(path, value):
     finally:
         os.close(directory_fd)
 
+def publish_owner(value):
+    """`owner.json` is either absent or complete, as in the native helper: an inspector that sees the
+    receipt appear never reads a torn one, and a helper killed while writing leaves only the partial file."""
+    partial = root / 'owner.json.partial'
+    durable_write(partial, value)
+    # A hard link fails if a receipt already exists, unlike rename.
+    os.link(partial, root / 'owner.json')
+    partial.unlink()
+    directory_fd = os.open(root, os.O_RDONLY)
+    try:
+        os.fsync(directory_fd)
+    finally:
+        os.close(directory_fd)
+
 if operation == 'hold':
     authority = os.open(root / 'dispatch.lock', os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
     try:
@@ -92,7 +106,7 @@ if operation == 'checked-exec':
         sys.exit('Process lease already held.')
     # The lease is one-shot: a helper delayed until the winner has exited acquires the
     # free lock afterwards, so the durable owner record, not the lock, proves prior use.
-    if (root / 'owner.json').exists():
+    if (root / 'owner.json').exists() or (root / 'owner.json.partial').exists():
         sys.exit('Process lease already held.')
 else:
     fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -134,7 +148,7 @@ started = subprocess.check_output([os.environ.get('CREWROOM_PROCESS_INSPECTOR', 
 owner = {'pid': os.getpid(), 'pgid': os.getpgrp(), 'started': started, 'token': config['token']}
 if operation == 'checked-exec':
     owner.update({'specSha256': spec_digest, 'epoch': epoch})
-durable_write(root / 'owner.json', owner)
+publish_owner(owner)
 if operation == 'checked-exec':
     # Only the checked helper opens retained logs. Refused helpers report through their
     # separate stderr pipe and can never append to the winning command's output.
