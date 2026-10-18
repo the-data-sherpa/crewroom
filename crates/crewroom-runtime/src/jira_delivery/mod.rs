@@ -3,6 +3,7 @@ mod dispatch;
 mod prepare;
 use crate::{
     conflict,
+    delivery_evidence::{Proof, VerifiedText},
     delivery_flight::DeliveryFlight,
     evidence::{Evidence, Research},
     messaging::StoreAccess,
@@ -106,45 +107,4 @@ impl<S: StoreAccess> JiraDelivery<S> {
     pub async fn close(&self) -> Result<()> {
         self.flight.close().await
     }
-}
-
-/// Bind an async evidence assessment to the durable facts used to authorize it.
-/// Provider credentials and unrelated messages/observations are never captured.
-struct Proof {
-    run_id: String,
-    publication: bool,
-    value: Value,
-}
-impl Proof {
-    fn read(s: &Store, id: &str, publication: bool) -> Result<Value> {
-        let run = s.get_run(id)?;
-        let runtime = s.runtime(id)?;
-        let mut result = json!({
-            "requirements": {"revision":run["taskRevision"],"snapshot":run["taskSnapshot"],"sourceConflict":run["sourceConflict"],"researchSource":run["researchSource"],"researchCompletion":run["researchCompletion"],"researchOutcome":run["researchOutcome"]},
-            "coding":s.coding_record(id)?,"work":s.repository_work(id)?,"artifacts":s.research_artifacts(id)?,"insertion":s.insertion_blockers(id)?,
-            "assignments":array(&runtime["assignments"]).iter().map(|a|json!({"id":a["id"],"currentAttemptId":a["currentAttemptId"],"retiredAt":a["retiredAt"],"rebriefRequired":a["rebriefRequired"]})).collect::<Vec<_>>()
-        });
-        if publication {
-            let p = s.publication(id)?.unwrap_or(Value::Null);
-            result["publication"] = json!({"id":p["id"],"candidateId":p["candidateId"],"repository":p["repository"],"revision":p["revision"],"pr":p["pr"],"remoteSourceHead":p["remoteSourceHead"],"observedPr":p["observation"]["pr"]});
-        }
-        Ok(result)
-    }
-    fn capture<S: StoreAccess>(store: &S, id: &str, publication: bool) -> Result<Self> {
-        Ok(Self {
-            run_id: id.into(),
-            publication,
-            value: store.with_store(|s| Self::read(s, id, publication))?,
-        })
-    }
-    fn check(&self, s: &Store) -> Result<()> {
-        if Self::read(s, &self.run_id, self.publication)? != self.value {
-            return Err(conflict("Evidence changed before Jira authorization."));
-        }
-        Ok(())
-    }
-}
-struct VerifiedText {
-    body: String,
-    proof: Proof,
 }

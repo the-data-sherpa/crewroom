@@ -53,6 +53,10 @@ pub(crate) async fn mutate(state: &AppState, action: &str, body: Value) -> Resul
         "source" => {
             operation(state, move |s| s.store.save_github_source(&body)).await?;
         }
+        // Optional workflow labels for issue delivery (FOR-48); off by default.
+        "labels" => {
+            operation(state, move |s| s.store.save_github_status_labels(&body)).await?;
+        }
         "sync" => {
             if body != json!({}) {
                 return Err(Error::Invalid("Sync accepts no fields.".into()).into());
@@ -318,6 +322,21 @@ pub(crate) fn view(saved: Option<&Value>, connection: &Value) -> Value {
         view["reason"] = saved["reason"].clone();
         view["error"] = saved["error"].clone();
     }
+    // Issue delivery (FOR-48): labels are applied only when named here.
+    let labels = &saved["statusLabels"];
+    view["statusLabels"] =
+        json!({"inProgress": labels["inProgress"], "inReview": labels["inReview"]});
+    view["labelsNote"] = json!(
+        match (labels["inProgress"].as_str(), labels["inReview"].as_str()) {
+            (None, None) =>
+                "Workflow labels are off. Progress is reported as issue comments only.".to_owned(),
+            (progress, review) => format!(
+                "Workflow labels: in progress {}; in review {}. Labels never change the issue's open/closed state.",
+                progress.map_or("off".to_owned(), |l| format!("\"{l}\"")),
+                review.map_or("off".to_owned(), |l| format!("\"{l}\""))
+            ),
+        }
+    );
     if let Some(note) = connection_note {
         view["connectionNote"] = json!(note);
     }

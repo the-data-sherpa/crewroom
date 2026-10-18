@@ -85,6 +85,11 @@ pub(super) fn pending(path: &str, body: &Value) -> String {
         ("/github/disconnect", "Disconnecting GitHub…"),
         ("/github/issues/source", "Saving GitHub ticket source…"),
         ("/github/issues/sync", "Syncing GitHub issues…"),
+        ("/github/issues/labels", "Saving GitHub workflow labels…"),
+        (
+            "/github/delivery/reconcile",
+            "Reconciling GitHub issue updates…",
+        ),
     ];
     if let Some((_, text)) = exact.iter().find(|(p, _)| *p == path) {
         return (*text).into();
@@ -94,6 +99,7 @@ pub(super) fn pending(path: &str, body: &Value) -> String {
         ("/delete", "Deleting…"),
         ("/decision", "Recording decision…"),
         ("/publication/reconcile", "Reconciling publication…"),
+        ("/retry", "Retrying GitHub update…"),
         ("/steering", "Storing instruction…"),
         ("/pause", "Requesting pause…"),
         ("/resume", "Requesting resume…"),

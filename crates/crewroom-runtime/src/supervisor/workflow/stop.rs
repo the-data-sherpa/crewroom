@@ -230,6 +230,11 @@ impl<S: StoreAccess> Workflow<S> {
                     {
                         failures.push(e.to_string());
                     }
+                    if let Some(g) = &this.0.services.github
+                        && let Err(e) = g.close().await
+                    {
+                        failures.push(e.to_string());
+                    }
                     failures
                 };
                 let (hosts, repository, provider_errors, discovery) =

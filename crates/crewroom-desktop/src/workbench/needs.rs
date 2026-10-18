@@ -12,6 +12,7 @@ fn kind_label(kind: &str) -> &'static str {
         "feedback" => "PR feedback",
         "publication" => "Publication outcome",
         "jira" => "Jira outcome",
+        "github" => "GitHub issue update",
         "ownership" => "Process ownership",
         _ => "Decision",
     }
@@ -78,7 +79,7 @@ impl Workbench {
             .border_1()
             .border_l_4()
             .border_color(rgb(match kind.as_str() {
-                "repair" | "ownership" | "publication" | "jira" => 0xf1bf73,
+                "repair" | "ownership" | "publication" | "jira" | "github" => 0xf1bf73,
                 "learning" => 0x9fb7ff,
                 _ => 0x84d7bc,
             }))
@@ -271,6 +272,22 @@ impl Workbench {
                             "Reconcile publication"
                         })
                         .disabled(blocked || !available)
+                        .on_click(cx.listener(move |this, _, _, cx| {
+                            this.send(path.clone(), json!({}), false, cx)
+                        })),
+                );
+            }
+            "github" => {
+                // Retry re-reads the issue first, so an applied update is not repeated.
+                let path = format!(
+                    "/github/delivery/{}/retry",
+                    item["updateId"].as_str().unwrap_or("")
+                );
+                actions = actions.child(
+                    Button::new(SharedString::from(format!("needs-retry-{id}")))
+                        .primary()
+                        .label("Retry GitHub update")
+                        .disabled(blocked || !item["updateId"].is_string())
                         .on_click(cx.listener(move |this, _, _, cx| {
                             this.send(path.clone(), json!({}), false, cx)
                         })),

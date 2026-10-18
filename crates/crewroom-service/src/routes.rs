@@ -67,6 +67,17 @@ pub(crate) async fn mutate(
             e.notify_all()?;
             json!(e.store.with_store(|s| s.jira_updates(None))?)
         }
+        ["github", "delivery", "reconcile"] => {
+            e.github.reconcile().await?;
+            e.notify_all()?;
+            json!(e.store.with_store(|s| s.github_updates(None))?)
+        }
+        ["github", "delivery", id, "retry"] => {
+            e.github.retry(id)?;
+            e.github.reconcile().await?;
+            e.notify_all()?;
+            json!(e.store.with_store(|s| s.github_updates(None))?)
+        }
         ["runs", id, "publication", "reconcile"] => {
             e.store.with_store(|s| s.get_run(id))?;
             e.publication.flush().await?;

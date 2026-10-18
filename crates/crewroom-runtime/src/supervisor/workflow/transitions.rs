@@ -191,6 +191,11 @@ impl<S: StoreAccess> Workflow<S> {
         {
             return Ok(());
         }
+        if let Some(github) = &self.0.services.github
+            && github.needs_research_summary(run, current["taskRevision"].as_u64().unwrap_or(0))?
+        {
+            return Ok(());
+        }
         let result = async {
             if !self.agents_idle(run).await? {
                 return Ok(());

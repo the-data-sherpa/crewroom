@@ -4,6 +4,7 @@ use crate::{Access, array};
 use crewroom_core::{Error, Result, authority::Authority};
 use crewroom_runtime::{
     evidence::{Checks, Evidence, Research},
+    github_delivery::GitHubDelivery,
     jira_delivery::JiraDelivery,
     jira_sync::JiraSync,
     messaging::StoreAccess,
@@ -122,6 +123,8 @@ pub(crate) struct Execution {
     pub research: Research<Access>,
     pub publication: Publication<Access>,
     pub jira: Option<JiraDelivery<Access>>,
+    /// GitHub issue delivery for GitHub-sourced tickets (FOR-48).
+    pub github: GitHubDelivery<Access>,
     pub sync: Option<JiraSync<Access>>,
     pub target: TargetRefresh<Access>,
     pub workflow: Option<Workflow<Access>>,
@@ -138,6 +141,7 @@ pub(crate) struct Execution {
     changes: watch::Sender<u64>,
 }
 impl Execution {
+    #[allow(clippy::too_many_arguments)] // The service-owned GitHub token route stays explicit.
     pub fn new(
         store: Access,
         authority: Arc<Authority>,
@@ -146,6 +150,7 @@ impl Execution {
         backend: &str,
         options: ServiceOptions,
         changes: watch::Sender<u64>,
+        github: &Arc<crate::github::GitHub>,
     ) -> Result<Arc<Self>> {
         let work = Repository::new(
             store.clone(),
@@ -194,6 +199,15 @@ impl Execution {
                 Some(research.clone()),
             )
         });
+        // Always present: a GitHub-sourced ticket's updates are queued even while
+        // GitHub is disconnected and stay undelivered with that reason.
+        let github_delivery = GitHubDelivery::new(
+            store.clone(),
+            github.delivery_credentials(),
+            github.fixture_origin(),
+            Some(evidence.clone()),
+            Some(research.clone()),
+        );
         let checks = options
             .runtime
             .as_ref()
@@ -252,6 +266,7 @@ impl Execution {
                         checks: checks.clone(),
                         publication: Some(publication.clone()),
                         jira: jira.clone(),
+                        github: Some(github_delivery.clone()),
                     },
                     move |_| {
                         if let Some(execution) = link.get().and_then(Weak::upgrade) {
@@ -282,6 +297,7 @@ impl Execution {
             research,
             publication,
             jira,
+            github: github_delivery,
             sync,
             target,
             workflow,
@@ -368,6 +384,9 @@ impl Execution {
         if let Some(j) = &self.jira
             && let Err(e) = j.close().await
         {
+            failures.push(e.to_string());
+        }
+        if let Err(e) = self.github.close().await {
             failures.push(e.to_string());
         }
         if let Err(e) = self.publication.close().await {

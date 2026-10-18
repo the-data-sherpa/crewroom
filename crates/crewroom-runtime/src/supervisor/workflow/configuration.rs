@@ -313,6 +313,7 @@ pub struct HostAssignment<'a> {
     pub environment: &'a Value,
     pub publication: bool,
     pub jira: bool,
+    pub github: bool,
 }
 fn encode_agent(name: &str) -> String {
     let mut out = String::new();
@@ -353,7 +354,9 @@ impl RuntimeConfig {
             environment,
             publication,
             jira,
+            github,
         } = input;
+        let (jira, github) = super::delivery_flags(run, jira, github);
         for value in [text(assignment, "id")?, text(attempt, "id")?] {
             uuid::Uuid::parse_str(value)
                 .map_err(|_| conflict("Invalid assignment or attempt identity."))?;
@@ -468,7 +471,7 @@ impl RuntimeConfig {
             .filter(|a| purpose != "evaluation" || a["id"] != assignment["id"])
             .map(|a| text(a, "name"))
             .collect::<Result<Vec<_>>>()?;
-        let prompt = assignment_prompt(run, assignment, attempt, team, work, jira)?;
+        let prompt = assignment_prompt(run, assignment, attempt, team, work, jira || github)?;
         let mut command = self.prefix.clone();
         command.push(self.omp.clone());
         command.extend(
@@ -505,7 +508,7 @@ impl RuntimeConfig {
         let mut result = json!({"runnerCwd":runner_cwd,"budgetRoot":self.root.join("budgets").join(text(assignment,"id")?),
             "port":port,"model":model,"command":command[0],"args":command[1..],"env":env,"recipients":names,
             "purpose":purpose,"coordinator":assignment["coordinator"],"secrets":secrets,"publication":purpose=="coding"&&publication,
-            "jira":!refinement&&jira,"reporter":assignment["role"]["id"]=="delivery-reporter"&&assignment["coordinator"]!=true,
+            "jira":!refinement&&jira,"github":!refinement&&github,"reporter":assignment["role"]["id"]=="delivery-reporter"&&assignment["coordinator"]!=true,
             "researchCoordinatorReporter":purpose=="research"&&assignment["coordinator"]==true&&!active.iter().any(|a|a["role"]["id"]=="delivery-reporter"),
             "choreography":run["executionPolicy"]==1,"coding":work.is_some(),"research":purpose=="research","researchRepository":present(run,"researchSource"),"refinement":refinement,"intake":present(run,"intakeId")&&purpose=="grill",
             "tools":if work.is_some()||refinement||matches!(purpose,"research"|"evaluation"){json!([])}else{json!(self.tools)},
@@ -573,7 +576,7 @@ pub fn assignment_prompt(
     attempt: &Value,
     team: &[Value],
     work: Option<&Value>,
-    jira: bool,
+    delivery: bool,
 ) -> Result<String> {
     let purpose = crewroom_core::run_purpose(run)?;
     if purpose == "evaluation" {
@@ -596,19 +599,29 @@ pub fn assignment_prompt(
     } else {
         String::new()
     };
+    // `delivery` is true when the delivery for this ticket's own provider is
+    // available: Jira for a Jira ticket, GitHub issue delivery for a GitHub one.
+    let provider = crewroom_core::ticket_source::provider(&run["taskSnapshot"]);
+    let (tool, never) = if provider == Some(crewroom_core::ticket_source::GITHUB) {
+        ("github_report", "never changes GitHub labels")
+    } else {
+        ("jira_report", "never transitions Jira")
+    };
     let reporter_prompt = if purpose == "research"
-        && crewroom_core::ticket_source::provider(&run["taskSnapshot"])
-            == Some(crewroom_core::ticket_source::JIRA)
-        && jira
+        && matches!(
+            provider,
+            Some(crewroom_core::ticket_source::JIRA | crewroom_core::ticket_source::GITHUB)
+        )
+        && delivery
     {
         if assignment["role"]["id"] == "delivery-reporter" {
             format!(
-                "When the coordinator requests verified completion, call jira_report with kind research_outcome and eventKey research-outcome-{}. The server composes the summary, sends only after process ownership is stopped, and never transitions Jira.\n",
+                "When the coordinator requests verified completion, call {tool} with kind research_outcome and eventKey research-outcome-{}. The server composes the summary, sends only after process ownership is stopped, and {never}.\n",
                 run["taskRevision"]
             )
         } else if assignment["coordinator"] == true {
             format!(
-                "Before ending a completed research run, ask the delivery reporter to queue the research_outcome comment. If no reporter is on the team, call jira_report yourself after request_research_completion using eventKey research-outcome-{}. The server sends after verified completion.\n",
+                "Before ending a completed research run, ask the delivery reporter to queue the research_outcome comment. If no reporter is on the team, call {tool} yourself after request_research_completion using eventKey research-outcome-{}. The server sends after verified completion.\n",
                 run["taskRevision"]
             )
         } else {

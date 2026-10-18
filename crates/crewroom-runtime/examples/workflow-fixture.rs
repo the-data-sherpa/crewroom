@@ -149,6 +149,7 @@ async fn main() -> Result<()> {
             research: research.clone(),
             publication: publication.clone(),
             jira: jira.clone(),
+            github: None,
         },
         move |_| {
             notifications.fetch_add(1, std::sync::atomic::Ordering::SeqCst);

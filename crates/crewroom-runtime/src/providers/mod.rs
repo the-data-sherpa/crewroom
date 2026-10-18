@@ -4,6 +4,7 @@ pub mod bitbucket;
 mod bitbucket_schema;
 pub mod config;
 pub mod github;
+pub mod github_issue_client;
 pub mod github_pulls;
 pub mod jira;
 pub mod remote;

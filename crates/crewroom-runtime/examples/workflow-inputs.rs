@@ -72,6 +72,7 @@ fn execute(v: &Value) -> Result<Value> {
                     environment: &v["environment"],
                     publication: v["publication"] == true,
                     jira: v["jira"] == true,
+                    github: v["github"] == true,
                 }),
                 _ => Err(crewroom_core::Error::Invalid(
                     "Unknown workflow input operation.".into(),

@@ -42,6 +42,18 @@ pub(super) fn delivery_headline(record: &Value, fresh: bool) -> String {
         format!("Last observed: {headline} · observation not current")
     }
 }
+/// Label names, or "none".
+fn label_list(labels: &Value) -> String {
+    let names: Vec<_> = labels
+        .as_array()
+        .map(|a| a.iter().filter_map(Value::as_str).collect())
+        .unwrap_or_default();
+    if names.is_empty() {
+        "none".into()
+    } else {
+        format!("\"{}\"", names.join("\", \""))
+    }
+}
 fn short(hash: &Value) -> String {
     hash.as_str()
         .map(|h| h.chars().take(12).collect())
@@ -469,6 +481,95 @@ impl Workbench {
                 )),
             );
         }
+        if let Some(github) = self.github_delivery_section(run, &id, cx) {
+            panel = panel.child(github);
+        }
         panel
+    }
+
+    /// GitHub issue delivery (FOR-48) for a GitHub-sourced ticket: each update
+    /// with its state, reason and receipt, a retry for blocked or uncertain
+    /// updates, and the issue's GitHub state named as a separate fact.
+    fn github_delivery_section(
+        &self,
+        run: &Value,
+        id: &str,
+        cx: &mut Context<Self>,
+    ) -> Option<Div> {
+        let updates: Vec<_> = records(&self.workspace, "githubUpdates")
+            .into_iter()
+            .filter(|u| u["runId"] == id)
+            .collect();
+        if run["taskSnapshot"]["source"] != "github" && updates.is_empty() {
+            return None;
+        }
+        let mut github = section("GitHub issue delivery").child(hint(
+            "Only confirmed updates reached the issue. Pending, sending, uncertain and blocked updates are not delivered. The issue's GitHub open/closed state is a source fact, separate from this run's workflow state.",
+        ));
+        if updates.is_empty() {
+            github = github.child(hint("No GitHub issue updates requested."));
+        }
+        for u in &updates {
+            let state = match u["state"].as_str().unwrap_or("") {
+                "sending" => "Sending · confirmation pending".to_owned(),
+                "confirmed" => "Delivered".to_owned(),
+                other => format!("Not delivered · {other}"),
+            };
+            let what = match u["kind"].as_str().unwrap_or("") {
+                "in_progress" | "in_review" => format!(
+                    "Workflow label change: add {} · remove {}",
+                    label_list(&u["labels"]["add"]),
+                    label_list(&u["labels"]["remove"])
+                ),
+                "done" => format!(
+                    "Merged: workflow labels removed; GitHub issue state {}",
+                    u["issueState"].as_str().unwrap_or("not yet read")
+                ),
+                _ => u["body"].as_str().unwrap_or("").to_owned(),
+            };
+            let key = value(&u["eventKey"]);
+            github = github.child(
+                hint(format!(
+                    "{} {} · {state}\n{what}\nEvent {key} · receipt {}\n{}",
+                    u["issueKey"].as_str().unwrap_or(""),
+                    value(&u["kind"]),
+                    value(&u["externalId"]),
+                    u["reason"].as_str().unwrap_or("")
+                ))
+                .id(SharedString::from(format!("github-delivery-{key}"))),
+            );
+            if matches!(u["state"].as_str(), Some("blocked" | "uncertain"))
+                && !u["reason"]
+                    .as_str()
+                    .is_some_and(|r| r.starts_with("Superseded by the merge"))
+            {
+                let path = format!("/github/delivery/{}/retry", value(&u["id"]));
+                github = github.child(
+                    Button::new(SharedString::from(format!("retry-github-{key}")))
+                        .label(if u["state"] == "uncertain" {
+                            "Retry after checking the issue"
+                        } else {
+                            "Retry"
+                        })
+                        .disabled(self.blocked())
+                        .on_click(cx.listener(move |this, _, _, cx| {
+                            this.send(path.clone(), json!({}), false, cx)
+                        })),
+                );
+            }
+        }
+        let pending = updates.iter().any(|u| {
+            ["pending", "uncertain", "sending"].contains(&u["state"].as_str().unwrap_or(""))
+        });
+        Some(
+            github.child(
+                Button::new("reconcile-github")
+                    .label("Reconcile GitHub updates")
+                    .disabled(self.blocked() || !pending)
+                    .on_click(cx.listener(|this, _, _, cx| {
+                        this.send("/github/delivery/reconcile".into(), json!({}), false, cx)
+                    })),
+            ),
+        )
     }
 }

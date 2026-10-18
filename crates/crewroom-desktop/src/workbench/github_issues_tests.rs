@@ -117,6 +117,28 @@ fn native_settings_save_a_github_issue_source_and_sync_truthfully(cx: &mut gpui:
             .any(|l| l == "GitHub is not connected, so sync is unavailable.")
     );
 
+    // Issue delivery (FOR-48): workflow labels are off until named.
+    assert!(
+        text.iter()
+            .any(|l| l == "Workflow labels are off. Progress is reported as issue comments only."),
+        "{text:?}"
+    );
+    type_into(cx, |i| i.in_review.clone(), "crewroom: in review");
+    click(cx, h, "save-github-labels");
+    wait(cx, h, &v, &e, |v, _| {
+        !v.busy && v.workspace["githubIssues"]["statusLabels"]["inReview"] == "crewroom: in review"
+    });
+    let text = screen_text(cx, h);
+    assert!(
+        text.iter().any(|l| l
+            == "Workflow labels: in progress off; in review \"crewroom: in review\". Labels never change the issue's open/closed state."),
+        "{text:?}"
+    );
+    assert_eq!(
+        f.get("/workspace")["githubIssues"]["statusLabels"]["inProgress"],
+        Value::Null
+    );
+
     // Without a connection the sync is refused truthfully and imports nothing.
     click(cx, h, "sync-github-issues");
     wait(cx, h, &v, &e, |v, _| {

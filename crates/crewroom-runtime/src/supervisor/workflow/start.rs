@@ -265,6 +265,7 @@ impl<S: StoreAccess> Workflow<S> {
                 environment: &self.0.environment,
                 publication: self.0.services.publication.is_some(),
                 jira: self.0.services.jira.is_some(),
+                github: self.0.services.github.is_some(),
             })?;
             self.verify_evaluation_tools(run, &config)?;
             private_directory(Path::new(text(&config, "runnerCwd")?))?;

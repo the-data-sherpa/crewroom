@@ -247,6 +247,7 @@ impl Service {
                     &info.origin,
                     options,
                     changes.clone(),
+                    &github,
                 )
             })
             .transpose()?;
@@ -303,6 +304,9 @@ impl Service {
                     && let Err(error) = j.flush().await
                 {
                     eprintln!("Jira reconciliation failed: {error}");
+                }
+                if let Err(error) = e.github.flush().await {
+                    eprintln!("GitHub issue delivery reconciliation failed: {error}");
                 }
                 if tick.is_multiple_of(3) {
                     if let Err(error) = e.publication.flush().await {

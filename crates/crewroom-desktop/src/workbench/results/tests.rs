@@ -361,3 +361,42 @@ fn route_headings_name_each_billing_route() {
     assert_eq!(route_heading(&json!("unknown")), "Unknown billing route");
     assert_eq!(route_heading(&Value::Null), "Unknown billing route");
 }
+
+/// FOR-48: GitHub issue delivery names each update's state and reason, offers a
+/// retry only for blocked or uncertain updates, and keeps the issue's GitHub
+/// state apart from the run's workflow state.
+#[gpui::test]
+fn github_issue_delivery_is_listed_with_reasons_and_retry(cx: &mut gpui::TestAppContext) {
+    let h = open(cx, |view| {
+        view.observation.result = result(NEW, false);
+        view.observation.result_fresh = true;
+        view.workspace["runs"][0]["taskSnapshot"] = json!({"source":"github","key":"#4"});
+        view.workspace["githubUpdates"] = json!([
+            {"id":"g1","runId":"run-1","issueKey":"#4","kind":"milestone","eventKey":"impact","state":"confirmed","body":"Impact noted","externalId":101},
+            {"id":"g2","runId":"run-1","issueKey":"#4","kind":"blocker","eventKey":"access","state":"blocked","body":"Awaiting access","reason":"GitHub denied this request (HTTP 403)."},
+            {"id":"g3","runId":"run-1","issueKey":"#4","kind":"done","eventKey":"merged-p","state":"pending","labels":{"add":[],"remove":["crewroom: in review"]},"issueState":"open","reason":"Waiting for GitHub to close #4."},
+            {"id":"other","runId":"run-2","issueKey":"#9","kind":"milestone","eventKey":"elsewhere","state":"blocked","body":"Another run"}
+        ]);
+    });
+    let shown = labels(cx, h);
+    assert!(has(&shown, "GitHub issue delivery"), "{shown:#?}");
+    assert!(has(&shown, "#4 milestone · Delivered"), "{shown:#?}");
+    assert!(
+        has(&shown, "#4 blocker · Not delivered · blocked"),
+        "{shown:#?}"
+    );
+    assert!(
+        has(&shown, "GitHub denied this request (HTTP 403)."),
+        "{shown:#?}"
+    );
+    assert!(
+        has(
+            &shown,
+            "Merged: workflow labels removed; GitHub issue state open"
+        ),
+        "{shown:#?}"
+    );
+    assert!(has(&shown, "Waiting for GitHub to close #4."), "{shown:#?}");
+    assert!(has(&shown, "Retry"), "{shown:#?}");
+    assert!(!has(&shown, "Another run"), "{shown:#?}");
+}

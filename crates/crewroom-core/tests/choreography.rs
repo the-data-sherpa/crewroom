@@ -232,7 +232,7 @@ fn schema28_upgrade_preserves_admitted_legacy_without_pair_history() {
     assert_eq!(
         db.query_row("PRAGMA user_version", [], |r| r.get::<_, u32>(0))
             .unwrap(),
-        32
+        33
     );
 }
 fn seed_member(

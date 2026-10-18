@@ -30,7 +30,8 @@ impl<S: StoreAccess> Workflow<S> {
             let assignment=active(&runtime).into_iter().find(|a|a["currentAttemptId"]==attempt).ok_or_else(||conflict("Attempt is no longer the current assignment."))?.clone();
             if run["desiredState"]!="running" || present(&run,"sourceConflict") || current["ownership"]!="held" || (run["status"]!="running" && !(route=="agent-message" && run["status"]=="awaiting_runner")) {return Err(conflict("Agent host no longer owns active work."));}
             let purpose=crewroom_core::run_purpose(&run)?;let coordinator=assignment["coordinator"]==true;
-            let config=json!({"purpose":purpose,"coordinator":coordinator,"choreography":run["executionPolicy"]==1,"coding":s.repository_work(text(&run,"id")?)?.is_some(),"research":purpose=="research","researchRepository":present(&run,"researchSource"),"refinement":matches!(purpose,"explore"|"grill"),"intake":purpose=="grill"&&present(&run,"intakeId"),"publication":purpose=="coding"&&self.0.services.publication.is_some(),"jira":!matches!(purpose,"explore"|"grill")&&self.0.services.jira.is_some(),"reporter":assignment["role"]["id"]=="delivery-reporter"&&!coordinator,"researchCoordinatorReporter":purpose=="research"&&coordinator&&!active(&runtime).iter().any(|a|a["role"]["id"]=="delivery-reporter"),"commandEngine":self.0.config.engine});
+            let (jira,github)=delivery_flags(&run,self.0.services.jira.is_some(),self.0.services.github.is_some());
+            let config=json!({"github":!matches!(purpose,"explore"|"grill")&&github,"purpose":purpose,"coordinator":coordinator,"choreography":run["executionPolicy"]==1,"coding":s.repository_work(text(&run,"id")?)?.is_some(),"research":purpose=="research","researchRepository":present(&run,"researchSource"),"refinement":matches!(purpose,"explore"|"grill"),"intake":purpose=="grill"&&present(&run,"intakeId"),"publication":purpose=="coding"&&self.0.services.publication.is_some(),"jira":!matches!(purpose,"explore"|"grill")&&jira,"reporter":assignment["role"]["id"]=="delivery-reporter"&&!coordinator,"researchCoordinatorReporter":purpose=="research"&&coordinator&&!active(&runtime).iter().any(|a|a["role"]["id"]=="delivery-reporter"),"commandEngine":self.0.config.engine});
             let permitted=crate::host_protocol::permits_backend_route(&config,route);
             if !permitted{return Err(conflict("Tool is not registered for this assignment."));}
             Ok(Caller{run,assignment,attempt,key,args})
@@ -54,6 +55,7 @@ impl<S: StoreAccess> Workflow<S> {
                 | "research/search"
                 | "publication/status"
                 | "jira/updates"
+                | "github/updates"
                 | "agent-roles"
                 | "playbook/status"
         );
@@ -208,6 +210,26 @@ impl<S: StoreAccess> Workflow<S> {
                         .ok_or_else(|| conflict("Jira delivery is unavailable."))?
                         .read(run)?
                 ))
+            }
+            "github/updates" => {
+                empty()?;
+                Ok(json!(
+                    self.0
+                        .services
+                        .github
+                        .as_ref()
+                        .ok_or_else(|| conflict("GitHub issue delivery is unavailable."))?
+                        .read(run)?
+                ))
+            }
+            "github/report" => {
+                self.0
+                    .services
+                    .github
+                    .as_ref()
+                    .ok_or_else(|| conflict("GitHub issue delivery is unavailable."))?
+                    .prepare(&c.attempt, &c.args)
+                    .await
             }
             "jira/report" => {
                 self.0

@@ -10,6 +10,7 @@ pub(crate) mod issues;
 
 use crewroom_core::{Error, Result};
 use crewroom_runtime::providers::{
+    Credential, Credentials, Error as ProviderError, Unavailable,
     config::TokenEnvironment,
     github::{self, Account, GitHubClient, Outcome, RepositoryAccess},
     secrets::{self, Integration, SecretStore, StoredToken},
@@ -107,6 +108,40 @@ impl GitHub {
     }
     fn last(&self) -> Option<Check> {
         self.last.lock().ok().and_then(|l| l.clone())
+    }
+
+    /// The token route for GitHub issue delivery (FOR-48): the active token,
+    /// read per request so connecting or disconnecting applies without a
+    /// restart. A missing or unreadable token refuses before any request is
+    /// sent, so the update stays undelivered with that reason.
+    pub(crate) fn delivery_credentials(self: &Arc<Self>) -> Credentials {
+        let this = self.clone();
+        Arc::new(move || {
+            let this = this.clone();
+            Box::pin(async move {
+                let refused = |message: String| {
+                    ProviderError::Unavailable(Unavailable {
+                        message,
+                        status: None,
+                        request_sent: false,
+                    })
+                };
+                match this.active() {
+                    Active::Token(_, token) => Ok(Credential::Bearer(token.to_string())),
+                    Active::Unreadable => Err(refused(format!(
+                        "GitHub: {}. Connect GitHub again under Settings → Integrations; undelivered updates are kept.",
+                        secrets::UNREADABLE
+                    ))),
+                    Active::None => Err(refused(
+                        "GitHub is not connected. Connect GitHub under Settings → Integrations, or set CREWROOM_GITHUB_TOKEN for the server; undelivered updates are kept.".into(),
+                    )),
+                }
+            })
+        })
+    }
+    /// The loopback fixture origin when tests replaced api.github.com.
+    pub(crate) fn fixture_origin(&self) -> Option<String> {
+        (self.client.origin() != github::API_ORIGIN).then(|| format!("{}/", self.client.origin()))
     }
 
     /// Validates a pasted token and saves it encrypted only when GitHub accepts it.

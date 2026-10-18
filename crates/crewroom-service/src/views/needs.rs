@@ -187,6 +187,36 @@ pub(super) fn needs_you(v: &Value, runs: &HashMap<String, RunState>) -> Vec<Valu
         ));
         items.push(i);
     }
+    for update in array(&v["githubUpdates"]) {
+        let outcome = update["state"].as_str().unwrap_or("");
+        if !["uncertain", "blocked"].contains(&outcome)
+            || update["reason"]
+                .as_str()
+                .is_some_and(|r| r.starts_with("Superseded by the merge"))
+        {
+            continue;
+        }
+        let run = array(&v["runs"])
+            .iter()
+            .find(|r| r["id"] == update["runId"]);
+        let mut i = item(
+            "github",
+            format!("github-{}", update["id"].as_str().unwrap_or("")),
+            run,
+            run.map_or(&Value::Null, |r| &r["taskId"]),
+            format!(
+                "GitHub {} update for {} is {outcome}",
+                update["kind"].as_str().unwrap_or(""),
+                update["issueKey"].as_str().unwrap_or("the issue")
+            ),
+        );
+        i["available"] = json!(true);
+        i["updateId"] = update["id"].clone();
+        i["detail"] = json!(update["reason"].as_str().unwrap_or(
+            "Crewroom could not confirm whether GitHub applied this update. Check the issue, then retry or reconcile."
+        ));
+        items.push(i);
+    }
     for proposal in array(&v["learning"]) {
         let retry =
             proposal["status"] == "approved" && proposal["decision"]["pendingRoleSave"] == true;
@@ -304,6 +334,30 @@ mod tests {
         v["learning"][0]["status"] = json!("rejected");
         let runs = HashMap::from([("r".to_owned(), state(runtime, publication))]);
         assert!(needs_you(&v, &runs).is_empty());
+    }
+
+    #[test]
+    fn undelivered_github_issue_updates_ask_for_a_retry_with_their_reason() {
+        let mut v = json!({
+            "tasks":[{"id":"t","key":"#4"}],
+            "runs":[{"id":"r","taskId":"t","purpose":"coding","status":"running","desiredState":"running"}],
+            "githubUpdates":[
+                {"id":"g1","runId":"r","kind":"milestone","issueKey":"#4","state":"blocked","reason":"GitHub denied this request (HTTP 403)."},
+                {"id":"g2","runId":"r","kind":"in_review","issueKey":"#4","state":"blocked","reason":"Superseded by the merge."},
+                {"id":"g3","runId":"r","kind":"evidence","issueKey":"#4","state":"pending","reason":"GitHub is not connected."},
+            ],
+        });
+        let items = needs_you(&v, &HashMap::new());
+        assert_eq!(kinds(&items), ["github"]);
+        assert_eq!(items[0]["updateId"], "g1");
+        assert_eq!(
+            items[0]["title"],
+            "GitHub milestone update for #4 is blocked"
+        );
+        assert_eq!(items[0]["detail"], "GitHub denied this request (HTTP 403).");
+        assert_eq!(items[0]["runId"], "r");
+        v["githubUpdates"][0]["state"] = json!("confirmed");
+        assert!(needs_you(&v, &HashMap::new()).is_empty());
     }
 
     #[test]

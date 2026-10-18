@@ -962,6 +962,110 @@
         "additionalProperties": false
       }
     },
+    "github_updates": {
+      "name": "github_updates",
+      "label": "Inspect GitHub issue delivery",
+      "loadMode": "essential",
+      "description": "Read durable GitHub issue update receipts for this run. Pending, sending, uncertain or blocked is not delivered. The issue's GitHub open/closed state and Crewroom workflow progress are separate facts.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    "github_report": {
+      "name": "github_report",
+      "label": "Queue GitHub issue comment",
+      "loadMode": "essential",
+      "description": "Delivery reporter only. Queue an allowed update on the ticket's GitHub issue. Use a stable eventKey for the same milestone across retries and replacement sessions; inspect github_updates first. milestone/blocker require body and become issue comments. in_progress requires eventKey execution-started and applies the in-progress label only when the operator configured one. evidence/pr_link require the current verified candidateId; pr_link also requires a confirmed PR receipt and is composed by Crewroom. GitHub closes the issue when the PR merges; never claim it closed or delivered from a pending receipt, and do not rewrite requirements.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "milestone",
+              "blocker",
+              "in_progress",
+              "evidence",
+              "pr_link"
+            ]
+          },
+          "eventKey": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "candidateId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "eventKey"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "github_report-2": {
+      "name": "github_report",
+      "label": "Queue GitHub issue comment",
+      "loadMode": "essential",
+      "description": "Research reporter only. After verified completion is requested, queue research_outcome with eventKey research-outcome-<accepted revision>. Milestone/blocker comments remain available; no labels, PR or coding evidence.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "milestone",
+              "blocker",
+              "research_outcome"
+            ]
+          },
+          "eventKey": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "eventKey"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "github_report-3": {
+      "name": "github_report",
+      "label": "Queue GitHub issue comment",
+      "loadMode": "essential",
+      "description": "Research coordinator fallback only when no delivery reporter is assigned. After requesting verified completion, queue research_outcome with eventKey research-outcome-<accepted revision>; never a label change.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "research_outcome"
+            ]
+          },
+          "eventKey": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "eventKey"
+        ],
+        "additionalProperties": false
+      }
+    },
     "playbook_status": {
       "name": "playbook_status",
       "label": "Playbook Status",
@@ -1605,6 +1709,34 @@
     "jira-1-1-1": [
       "jira_updates",
       "jira_report-3"
+    ],
+    "github-0-0-0": [
+      "github_updates"
+    ],
+    "github-0-0-1": [
+      "github_updates"
+    ],
+    "github-0-1-0": [
+      "github_updates"
+    ],
+    "github-0-1-1": [
+      "github_updates"
+    ],
+    "github-1-0-0": [
+      "github_updates",
+      "github_report"
+    ],
+    "github-1-0-1": [
+      "github_updates",
+      "github_report"
+    ],
+    "github-1-1-0": [
+      "github_updates",
+      "github_report-2"
+    ],
+    "github-1-1-1": [
+      "github_updates",
+      "github_report-3"
     ],
     "playbook": [
       "playbook_status",

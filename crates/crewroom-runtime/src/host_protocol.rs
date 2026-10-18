@@ -111,6 +111,15 @@ pub fn host_tools(config: &Value) -> Vec<Value> {
             u8::from(fallback)
         )));
     }
+    if yes(config, "github") {
+        let fallback = yes(config, "researchCoordinatorReporter");
+        tools.extend(group(&format!(
+            "github-{}-{}-{}",
+            u8::from(yes(config, "reporter") || fallback),
+            u8::from(research),
+            u8::from(fallback)
+        )));
+    }
     if yes(config, "coding") {
         tools.extend(group(&format!(
             "coding-{}-{}",
@@ -180,6 +189,12 @@ pub fn backend_routes(config: &Value) -> BTreeMap<String, String> {
             add("jira_report", "jira/report");
         }
     }
+    if yes(config, "github") {
+        add("github_updates", "github/updates");
+        if yes(config, "reporter") {
+            add("github_report", "github/report");
+        }
+    }
     add("send_message", "agent-message");
     add("steering_receipt", "steering-receipt");
     if c && !yes(config, "refinement") {
@@ -235,6 +250,9 @@ pub fn backend_routes(config: &Value) -> BTreeMap<String, String> {
     if yes(config, "jira") && yes(config, "researchCoordinatorReporter") {
         add("jira_report", "jira/report");
     }
+    if yes(config, "github") && yes(config, "researchCoordinatorReporter") {
+        add("github_report", "github/report");
+    }
     if c && !yes(config, "refinement") && !yes(config, "research") {
         add("propose_learning", "learning-proposal");
     }
@@ -262,6 +280,7 @@ impl ToolCatalog {
             "researchRepository",
             "publication",
             "jira",
+            "github",
             "reporter",
             "researchCoordinatorReporter",
             "coding",
@@ -382,4 +401,60 @@ pub fn parse_request(bytes: &[u8]) -> Result<Value> {
         return Err(crate::conflict("Request too large."));
     }
     Ok(serde_json::from_str(text)?)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn names(config: &Value) -> Vec<String> {
+        host_tools(config)
+            .iter()
+            .map(|t| t["name"].as_str().unwrap().to_owned())
+            .collect()
+    }
+
+    #[test]
+    fn github_issue_delivery_tools_follow_the_reporter_policy() {
+        let reporter = json!({"purpose":"coding","coordinator":false,"recipients":[],"github":true,"reporter":true});
+        let tools = names(&reporter);
+        assert!(
+            tools.contains(&"github_updates".into()) && tools.contains(&"github_report".into())
+        );
+        assert!(!tools.iter().any(|t| t.starts_with("jira_")));
+        let catalog = ToolCatalog::new(&reporter).unwrap();
+        assert_eq!(
+            catalog.route("github_report").unwrap(),
+            ToolRoute::Backend("github/report".into())
+        );
+        assert!(permits_backend_route(&reporter, "github/updates"));
+        // Other specialists may read receipts but not queue updates.
+        let reader = json!({"purpose":"coding","coordinator":false,"recipients":[],"github":true});
+        assert_eq!(
+            names(&reader)
+                .iter()
+                .filter(|t| t.starts_with("github_"))
+                .count(),
+            1
+        );
+        assert!(!permits_backend_route(&reader, "github/report"));
+        // A research coordinator without a reporter may only queue its outcome.
+        let fallback = json!({"purpose":"research","coordinator":true,"research":true,"recipients":[],"github":true,"researchCoordinatorReporter":true});
+        let tool = host_tools(&fallback)
+            .into_iter()
+            .find(|t| t["name"] == "github_report")
+            .unwrap();
+        assert_eq!(
+            tool["parameters"]["properties"]["kind"]["enum"],
+            json!(["research_outcome"])
+        );
+        assert!(permits_backend_route(&fallback, "github/report"));
+        // Without GitHub delivery nothing GitHub-specific is offered.
+        let without =
+            json!({"purpose":"coding","coordinator":false,"recipients":[],"reporter":true});
+        assert!(!names(&without).iter().any(|t| t.starts_with("github_")));
+        assert!(
+            ToolCatalog::new(&json!({"purpose":"coding","recipients":[],"github":"yes"})).is_err()
+        );
+    }
 }

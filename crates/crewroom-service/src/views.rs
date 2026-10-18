@@ -112,6 +112,7 @@ pub(super) fn workspace(e: &Execution, v: &mut Value) -> Result<()> {
         v["jira"] = jira;
     }
     v["jiraUpdates"] = json!(e.store.with_store(|s| s.jira_updates(None))?);
+    v["githubUpdates"] = json!(e.store.with_store(|s| s.github_updates(None))?);
     v["needsYou"] = json!(needs::needs_you(v, &runs));
     Ok(())
 }

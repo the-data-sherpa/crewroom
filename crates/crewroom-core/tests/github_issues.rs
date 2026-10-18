@@ -174,5 +174,5 @@ fn schema_32_adds_the_github_sync_table_to_a_schema_31_store() {
         .unwrap()
         .query_row("PRAGMA user_version", [], |r| r.get(0))
         .unwrap();
-    assert_eq!(version, 32);
+    assert_eq!(version, crewroom_core::store::SCHEMA_VERSION);
 }

@@ -99,4 +99,25 @@ impl Store {
         }
         Ok(update.clone())
     }
+    /// GitHub issue delivery intents and receipts (FOR-48). Kept apart from
+    /// Jira's so each provider's outbox is reconciled only against itself.
+    pub fn github_updates(&self, run_id: Option<&str>) -> Result<Vec<Value>> {
+        if let Some(run_id) = run_id.filter(|s| !s.is_empty()) {
+            self.run_records("github_updates", run_id)
+        } else {
+            self.all("github_updates")
+        }
+    }
+    pub fn save_github_update(&self, update: &Value) -> Result<Value> {
+        let run_id = update["runId"].as_str().unwrap();
+        self.db.execute("INSERT INTO github_updates VALUES(?,?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data",params![update["id"].as_str(),run_id,update["eventKey"].as_str(),update.to_string()])?;
+        if ["confirmed", "uncertain", "blocked"].contains(&update["state"].as_str().unwrap_or("")) {
+            let mut payload = json!({"kind":"github","subjectId":update["id"],"eventKey":update["eventKey"],"state":update["state"]});
+            if let Some(external) = update.get("externalId") {
+                payload["externalId"] = external.clone();
+            }
+            self.notice_delivery(run_id, &payload)?;
+        }
+        Ok(update.clone())
+    }
 }

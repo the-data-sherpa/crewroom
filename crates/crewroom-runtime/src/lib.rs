@@ -1,7 +1,9 @@
 //! Native process ownership. Workflow admission and command containment live above this boundary.
 pub mod container_command;
+mod delivery_evidence;
 mod delivery_flight;
 pub mod evidence;
+pub mod github_delivery;
 pub mod helper;
 pub mod host;
 pub mod host_journal;

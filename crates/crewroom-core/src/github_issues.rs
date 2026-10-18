@@ -127,6 +127,35 @@ pub fn normalize_source(body: &Value) -> Result<Value> {
     }))
 }
 
+/// Validates `{inProgress, inReview}` workflow label names (FOR-48). Each is
+/// optional; an empty value means off.
+pub fn normalize_status_labels(body: &Value) -> Result<Value> {
+    strict(body, &["inProgress", "inReview"])?;
+    let mut result = json!({"inProgress": null, "inReview": null});
+    for key in ["inProgress", "inReview"] {
+        match &body[key] {
+            Value::Null => {}
+            Value::String(s) if trim_text(s).is_empty() => {}
+            Value::String(s) => {
+                let label = trim_text(s);
+                if label.chars().count() > 50 || label.contains(',') {
+                    return Err(invalid(
+                        "Each workflow label must be up to 50 characters, without commas.",
+                    ));
+                }
+                result[key] = json!(label);
+            }
+            _ => return Err(invalid("Workflow labels must be text.")),
+        }
+    }
+    if let (Some(a), Some(b)) = (result["inProgress"].as_str(), result["inReview"].as_str())
+        && a.eq_ignore_ascii_case(b)
+    {
+        return Err(invalid("The in-progress and in-review labels must differ."));
+    }
+    Ok(result)
+}
+
 fn text(value: &Value, min: usize, max: usize, label: &str) -> Result<String> {
     let value = value
         .as_str()
@@ -257,8 +286,15 @@ impl Store {
             {
                 return Ok(saved);
             }
-            let state =
+            let mut state =
                 json!({"source":source,"state":"not_synced","taskIds":[],"savedAt":s.time()});
+            // Delivery label settings (FOR-48) are not filters; keep them.
+            if let Some(labels) = s
+                .github_sync_state()?
+                .and_then(|v| v.get("statusLabels").cloned())
+            {
+                state["statusLabels"] = labels;
+            }
             s.db.execute(UPSERT, [state.to_string()])?;
             Ok(state)
         })
@@ -316,6 +352,74 @@ impl Store {
             }
             s.db.execute(UPSERT, [state.to_string()])?;
             Ok(state)
+        })
+    }
+    /// Saves the optional workflow labels Crewroom applies to GitHub-sourced
+    /// issues (FOR-48). Both are off unless named; an empty value turns one off.
+    /// They never change the ticket's source status or Crewroom workflow state.
+    pub fn save_github_status_labels(&self, body: &Value) -> Result<Value> {
+        let labels = normalize_status_labels(body)?;
+        self.transaction(|s| {
+            let mut state = s.github_sync_state()?.ok_or_else(|| {
+                conflict("Save a GitHub repository as the ticket source before configuring labels.")
+            })?;
+            if labels["inProgress"].is_null() && labels["inReview"].is_null() {
+                if let Some(fields) = state.as_object_mut() {
+                    fields.remove("statusLabels");
+                }
+            } else {
+                state["statusLabels"] = labels.clone();
+            }
+            s.db.execute(UPSERT, [state.to_string()])?;
+            Ok(state)
+        })
+    }
+    /// Records the open/closed state GitHub reported for one imported issue
+    /// when Crewroom reads it outside a sync (after its PR merged). Only the
+    /// source status and source update time change: requirements, refinements,
+    /// workflow state and agent activity are untouched. An observation older
+    /// than the one already recorded is ignored.
+    pub fn record_github_issue_state(
+        &self,
+        task_id: &str,
+        state: &str,
+        updated_at: Option<&str>,
+    ) -> Result<Value> {
+        if state != "open" && state != "closed" {
+            return Err(invalid("GitHub issue state must be open or closed."));
+        }
+        if updated_at.is_some_and(|t| source_timestamp(t).is_none()) {
+            return Err(invalid("Invalid source timestamp."));
+        }
+        self.transaction(|s| {
+            let task = s.get_task(task_id)?;
+            if task["source"] != GITHUB.kind {
+                return Err(conflict("This ticket was not imported from GitHub."));
+            }
+            let older = matches!(
+                (
+                    updated_at.and_then(source_timestamp),
+                    task["sourceUpdatedAt"].as_str().and_then(source_timestamp),
+                ),
+                (Some(new), Some(old)) if new < old
+            );
+            if older {
+                return Ok(task);
+            }
+            let imported: String =
+                s.db.query_row("SELECT imported FROM tickets WHERE id=?", [task_id], |r| {
+                    r.get(0)
+                })?;
+            let mut imported: Value = serde_json::from_str(&imported)?;
+            imported["sourceStatus"] = json!(state);
+            if let Some(at) = updated_at {
+                imported["sourceUpdatedAt"] = json!(at);
+            }
+            s.db.execute(
+                "UPDATE tickets SET imported=? WHERE id=?",
+                rusqlite::params![imported.to_string(), task_id],
+            )?;
+            s.get_task(task_id)
         })
     }
     /// Records why a sync could not complete. Earlier imported tickets and the

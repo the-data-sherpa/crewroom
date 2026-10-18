@@ -274,6 +274,7 @@ impl<S: StoreAccess> Workflow<S> {
             value.as_object_mut().unwrap().extend(context.as_object().unwrap().clone());
             if let Some(feedback)=feedback{value["feedbackContinuation"]=feedback.clone();}
             value["jiraUpdates"]=json!(s.jira_updates(Some(run))?);
+            if crewroom_core::ticket_source::provider(&current["taskSnapshot"])==Some(crewroom_core::ticket_source::GITHUB){value["githubUpdates"]=json!(s.github_updates(Some(run))?);}
             value["team"]=json!(active(runtime).iter().map(|a|json!({"name":a["name"],"roleId":a["role"]["id"]})).collect::<Vec<_>>());
             value["teamProposals"]=json!(s.team_proposals(run)?);
             let events=s.agent_events(run)?;

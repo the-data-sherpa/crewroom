@@ -1,50 +1,27 @@
 use super::*;
 fn report(input: &Value) -> Result<Value> {
-    let kind = input["kind"].as_str().unwrap_or("");
-    let allowed: &[&str] = match kind {
-        "milestone" | "blocker" => &["kind", "eventKey", "body"],
-        "evidence" | "pr_link" => &["kind", "eventKey", "candidateId"],
-        "in_progress" | "research_outcome" => &["kind", "eventKey"],
-        _ => return Err(Error::Invalid("Invalid Jira report kind.".into())),
-    };
-    if input
-        .as_object()
-        .is_none_or(|o| o.keys().any(|k| !allowed.contains(&k.as_str())))
-    {
-        return Err(Error::Invalid("Unrecognized Jira report fields.".into()));
-    }
-    let event = input["eventKey"].as_str().unwrap_or("");
-    if event.is_empty()
-        || event.len() > 200
-        || !event.as_bytes()[0].is_ascii_alphanumeric()
-        || !event
-            .bytes()
-            .all(|b| b.is_ascii_alphanumeric() || b":._-".contains(&b))
-        || kind == "in_progress" && event != "execution-started"
-    {
-        return Err(Error::Invalid("Invalid Jira event key.".into()));
-    }
-    let mut result = json!({"kind":kind,"eventKey":event});
-    if allowed.contains(&"body") {
-        let body = input["body"]
-            .as_str()
-            .ok_or_else(|| Error::Invalid("Invalid Jira report body.".into()))?;
-        let body = crewroom_core::store::trim_text(body);
-        if !(1..=12000).contains(&body.chars().count()) {
-            return Err(Error::Invalid("Invalid Jira report body length.".into()));
-        }
-        result["body"] = json!(body);
-    }
-    if allowed.contains(&"candidateId") {
-        let id = input["candidateId"]
-            .as_str()
-            .filter(|id| crewroom_core::store::valid_uuid(id))
-            .ok_or_else(|| Error::Invalid("Invalid Jira candidate UUID.".into()))?;
-        result["candidateId"] = json!(id);
-    }
-    Ok(result)
+    crate::delivery_evidence::report(input, "Jira")
 }
 impl<S: StoreAccess> JiraDelivery<S> {
+    pub(super) async fn evidence_text(
+        &self,
+        run_id: &str,
+        candidate_id: &str,
+        publication: bool,
+    ) -> Result<VerifiedText> {
+        crate::delivery_evidence::evidence_text(
+            &self.store,
+            self.evidence.as_ref(),
+            "Jira",
+            run_id,
+            candidate_id,
+            publication,
+        )
+        .await
+    }
+    pub(super) fn research_text(&self, run_id: &str) -> Result<VerifiedText> {
+        crate::delivery_evidence::research_text(&self.store, self.research.as_ref(), "Jira", run_id)
+    }
     fn authorize(
         &self,
         s: &Store,
@@ -155,52 +132,5 @@ impl<S: StoreAccess> JiraDelivery<S> {
             if let Some(verified)=verified {update["body"]=json!(verified.body);}
             s.save_jira_update(&update)
         }))
-    }
-    pub(super) async fn evidence_text(
-        &self,
-        run_id: &str,
-        candidate_id: &str,
-        publication: bool,
-    ) -> Result<VerifiedText> {
-        let evidence = self
-            .evidence
-            .as_ref()
-            .ok_or_else(|| conflict("Verified evidence is unavailable."))?;
-        let proof = Proof::capture(&self.store, run_id, publication)?;
-        let assessment = evidence.assess(run_id).await?;
-        if assessment["ready"] != true || assessment["candidate"]["id"] != candidate_id {
-            return Err(conflict(
-                "Evidence must cover the current verified candidate.",
-            ));
-        }
-        self.store.with_store(|s|{
-            proof.check(s)?;
-            let record=s.coding_record(run_id)?.unwrap();
-            let checks=array(&record["requiredChecks"]).iter().filter(|c|c["required"]==true).map(|c|c["id"].as_str().unwrap()).collect::<Vec<_>>().join(", ");
-            let mut body=format!("Revision {}\nCandidate {candidate_id}\nRequired checks passed: {checks}\nIndependent review passed for this revision.\nMerge remains an operator decision.",text(&assessment["candidate"]["revision"],"head")?);
-            if publication {
-                let p=s.publication(run_id)?.unwrap_or(Value::Null);
-                let expected=format!("https://bitbucket.org/{}/{}/pull-requests/{}",p["repository"]["workspace"].as_str().unwrap_or(""),p["repository"]["slug"].as_str().unwrap_or(""),p["pr"]["id"]);
-                if p["candidateId"]!=candidate_id || p["pr"]["state"]!="confirmed" || p["remoteSourceHead"]!=p["revision"]["head"]
-                    || p["observation"]["pr"]["source"]["commit"]["hash"]!=p["revision"]["head"] || p["observation"]["pr"]["state"]!="OPEN" || p["pr"]["url"]!=expected { return Err(conflict("A confirmed PR receipt for this candidate is required.")); }
-                body.push_str(&format!("\n\nPull request: {expected}\nHosted validation must be checked against the current PR revision."));
-            }
-            Ok(VerifiedText{body,proof})
-        })
-    }
-    pub(super) fn research_text(&self, run_id: &str) -> Result<VerifiedText> {
-        let research = self
-            .research
-            .as_ref()
-            .ok_or_else(|| conflict("Research evidence is unavailable."))?;
-        let proof = Proof::capture(&self.store, run_id, false)?;
-        let result = research.read(run_id)?;
-        self.store.with_store(|s|{
-            proof.check(s)?;let run=s.get_run(run_id)?;
-            if run["purpose"]!="research" || result["assessment"]["ready"]!=true || !present(&run["researchCompletion"]) || run["researchCompletion"]["revision"]!=run["taskRevision"] { return Err(conflict("A requested, fully verified research outcome is required before reporting to Jira.")); }
-            let artifacts=array(&result["artifacts"]).iter().filter(|a|a["state"]=="verified" && !present(&a["supersededBy"]) && a["requirementRevision"]==run["taskRevision"])
-                .map(|a|format!("- {} ({}), SHA-256 {}\n  Limitations: {}",a["title"].as_str().unwrap(),a["kind"].as_str().unwrap(),a["body"]["sha256"].as_str().unwrap(),a["limitations"].as_str().unwrap())).collect::<Vec<_>>().join("\n");
-            Ok(VerifiedText{body:format!("Research outcome completed for accepted revision {}.\n{artifacts}\nCrewroom reference: run {run_id}, /api/runs/{run_id}/result\nNo code change or PR is claimed.",run["taskRevision"]),proof})
-        })
     }
 }

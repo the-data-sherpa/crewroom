@@ -20,6 +20,7 @@ use super::{
 use crate::{
     conflict,
     evidence::{Checks, Evidence, Research},
+    github_delivery::GitHubDelivery,
     jira_delivery::JiraDelivery,
     mail::MailClient,
     messaging::{Messaging, StoreAccess},
@@ -55,6 +56,15 @@ pub struct Services<S: StoreAccess> {
     pub research: Research<S>,
     pub publication: Option<Publication<S>>,
     pub jira: Option<JiraDelivery<S>>,
+    /// GitHub issue delivery for GitHub-sourced tickets (FOR-48).
+    pub github: Option<GitHubDelivery<S>>,
+}
+/// Which ticket delivery an assignment may use: Jira for Jira and other
+/// non-GitHub tickets (unchanged), GitHub only for GitHub-sourced tickets.
+pub(crate) fn delivery_flags(run: &Value, jira: bool, github: bool) -> (bool, bool) {
+    let from_github = crewroom_core::ticket_source::provider(&run["taskSnapshot"])
+        == Some(crewroom_core::ticket_source::GITHUB);
+    (jira && !from_github, github && from_github)
 }
 #[derive(Default)]
 struct State {
@@ -468,3 +478,21 @@ fn remove(value: &mut Value, keys: &[&str]) {
 }
 
 mod choreography;
+
+#[cfg(test)]
+mod delivery_flag_tests {
+    use super::delivery_flags;
+    use serde_json::json;
+
+    #[test]
+    fn github_tickets_use_github_delivery_and_others_keep_jira() {
+        let github = json!({"taskSnapshot":{"source":"github"}});
+        let jira = json!({"taskSnapshot":{"source":"jira"}});
+        let local = json!({"taskSnapshot":{}});
+        assert_eq!(delivery_flags(&github, true, true), (false, true));
+        assert_eq!(delivery_flags(&github, true, false), (false, false));
+        assert_eq!(delivery_flags(&jira, true, true), (true, false));
+        assert_eq!(delivery_flags(&local, true, true), (true, false));
+        assert_eq!(delivery_flags(&local, false, true), (false, false));
+    }
+}
