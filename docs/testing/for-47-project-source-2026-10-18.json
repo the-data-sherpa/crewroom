@@ -24,14 +24,48 @@
   "daemonRun": {
     "note": "Not a live provider check: the feature contacts no remote. A debug crewroomd built from 8796a7c (sha256 40101f2eba127c14e548dd6fd618325180b55870ffb708ac9cef3b230fb6d972) ran on loopback port 4373 with an isolated temporary --data-dir; a disposable checkout used the public Crewroom repository address as origin, then synthetic Bitbucket and GitLab addresses. Data directory and checkout were deleted afterwards.",
     "cases": [
-      {"case": "link repository", "status": 200, "state": "unconfirmed", "suggestion": "GitHub Issues the-data-sherpa/crewroom, GitHub PRs"},
-      {"case": "confirm from another Origin", "status": 403, "saved": false},
-      {"case": "confirm", "status": 200, "state": "confirmed"},
-      {"case": "origin set to bitbucket.org/fixture/repository", "state": "mismatch", "warning": "Source no longer matches remote: it was confirmed for github.com/the-data-sherpa/crewroom, and the repository now has bitbucket.org/fixture/repository. Nothing was changed; confirm a new source to switch."},
-      {"case": "confirm Jira without a site", "status": 400, "error": "Pick the Jira site; it cannot be inferred from the remote."},
-      {"case": "daemon restart", "state": "mismatch", "saved": "GitHub Issues the-data-sherpa/crewroom"},
-      {"case": "confirm Jira https://fixture.atlassian.net", "status": 200, "state": "confirmed", "pullRequests": "Bitbucket"},
-      {"case": "origin set to gitlab.example", "state": "mismatch", "suggestion": "operator chooses"}
+      {
+        "case": "link repository",
+        "status": 200,
+        "state": "unconfirmed",
+        "suggestion": "GitHub Issues the-data-sherpa/crewroom, GitHub PRs"
+      },
+      {
+        "case": "confirm from another Origin",
+        "status": 403,
+        "saved": false
+      },
+      {
+        "case": "confirm",
+        "status": 200,
+        "state": "confirmed"
+      },
+      {
+        "case": "origin set to bitbucket.org/fixture/repository",
+        "state": "mismatch",
+        "warning": "Source no longer matches remote: it was confirmed for github.com/the-data-sherpa/crewroom, and the repository now has bitbucket.org/fixture/repository. Nothing was changed; confirm a new source to switch."
+      },
+      {
+        "case": "confirm Jira without a site",
+        "status": 400,
+        "error": "Pick the Jira site; it cannot be inferred from the remote."
+      },
+      {
+        "case": "daemon restart",
+        "state": "mismatch",
+        "saved": "GitHub Issues the-data-sherpa/crewroom"
+      },
+      {
+        "case": "confirm Jira https://fixture.atlassian.net",
+        "status": 200,
+        "state": "confirmed",
+        "pullRequests": "Bitbucket"
+      },
+      {
+        "case": "origin set to gitlab.example",
+        "state": "mismatch",
+        "suggestion": "operator chooses"
+      }
     ]
   },
   "checks": {
@@ -48,5 +82,26 @@
     "npm run test:e2e",
     "Desktop clippy --all-targets (pre-existing useless_conversion in untouched feedback_tests.rs)",
     "Wiring a confirmed GitHub source into the FOR-45 sync setting or a confirmed Jira site into Jira refresh; both remain separate settings"
-  ]
+  ],
+  "integration": {
+    "baseRevision": "8967496 FOR-42 Bind evidence to the integrated revision",
+    "implementationRevisions": [
+      "286b793eec801e27200140be451eef7cb2c11e8b",
+      "80d60e59b50f768771a24f5fe7d16e34b9e3767a",
+      "83776eaf3e41b5d66365177c524519cb67716618"
+    ],
+    "checkedHead": "12623d9 (evidence-record commit; code identical to the head after this record)",
+    "conflicts": "docs/status.md and docs/testing/mvp-progress.md only; every earlier ticket entry kept",
+    "checks": {
+      "cargo test --locked --no-fail-fast -p crewroom-core -p crewroom-runtime -p crewroom-service -- --test-threads=1": "349 passed, 0 failed, 2 ignored",
+      "cargo test --locked --no-fail-fast -p crewroom-desktop -- --test-threads=4": "143 passed, 15 ignored",
+      "cargo clippy --locked -p crewroom-core -p crewroom-runtime -p crewroom-service --all-targets -- -D warnings": "clean",
+      "cargo clippy --locked -p crewroom-desktop -- -D warnings": "clean",
+      "cargo fmt -p <crate> --check (core, runtime, service, desktop)": "clean",
+      "npm test": "332/332 (one earlier run had a single failing assertion that did not reproduce in two reruns)",
+      "npm run build": "pass",
+      "npm run test:e2e": "29 passed, 2 failed: refinement.spec.ts:28 INT-03 and research.spec.ts:27 INT-07/EVD-08 stop in fixture setup because fixture-only OMP 18.4.12 is not installed, the same failures recorded at earlier integrations"
+    },
+    "note": "Rust ran in a worktree-private target directory: the shared target served another worktree's crewroom-core/crewroom-runtime builds to the service doctest. The daemon run was not repeated after the rebase."
+  }
 }
