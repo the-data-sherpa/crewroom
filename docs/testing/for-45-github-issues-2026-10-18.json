@@ -1,0 +1,142 @@
+{
+  "issue": "FOR-45",
+  "observedAt": "2026-10-18",
+  "implementationRevision": "6a495e5acec93e8af3b6ae4b287e4d14de39adf7",
+  "documentationRevision": "6835b52ec10765de8fc036c30a2d6711646fbe05",
+  "baseRevision": "80f9421c652dc9a4dd4b94a4c834638b1003d927",
+  "scope": "GitHub Issues as a ticket source: one github.com repository with label, assignee, milestone and state filters saved in Settings; on-request paginated sync of plain issues (pull requests excluded) through the provider-neutral source model; re-sync identity matching and re-acceptance on title/body change; GitHub open/closed as source status only; truthful not connected / unreadable / rejected / no access (not installed) / issues disabled / rate limited / unreachable / filter states. Per-project source selection is FOR-47; delivery back to GitHub is FOR-48.",
+  "simulated": {
+    "provider": "Loopback GitHub API fixtures (axum in crates/crewroom-service/tests/github_issues.rs; std TcpListener in crates/crewroom-desktop/src/workbench/github_issues_tests.rs); not github.com.",
+    "checks": [
+      "Fresh workspace reports githubIssues not_configured; sync before a source is saved is refused (409); malformed sources (bad repository, unknown state, extra field) are refused (400)",
+      "Saved filters reach GitHub: labels, assignee, milestone title resolved to its number through /milestones, state, per_page=100",
+      "Sync without a connection records reason not_connected and imports nothing",
+      "Sync follows Link rel=\"next\" to a second page, excludes the pull request, imports #1/#3/#4 with sourceStatus open/closed, sourceSite, sourceId, sourceUrl, project and sourceUpdatedAt; no run is created",
+      "After the operator refines #1, a changed title re-syncs into the same ticket with sourceRevision 2, needsReacceptance true and the brief kept",
+      "Rate limit (403 with x-ratelimit-remaining 0) records reason rate_limited with GitHub's reset time; the last complete sync time and tickets are kept",
+      "404 records no_access with the not-installed/not-granted explanation; 410 records issues_disabled; a revoked token records rejected",
+      "Core: closing an issue changes source status without re-acceptance; older observations, pull requests and duplicates save nothing; a sync or failure for a replaced source is refused or ignored; schema-31 stores gain the github_sync table",
+      "Runtime: next-page links on another origin are refused so the token is not sent elsewhere",
+      "Desktop: Settings → Integrations → GitHub Issues saves a source, states the missing connection, connects, syncs, and the ticket list shows 'GitHub open' / 'GitHub closed'; a GitHub ticket's facts bar shows 'GITHUB STATUS' / 'open' apart from workflow and agent activity"
+    ]
+  },
+  "live": {
+    "endpoint": "https://api.github.com through a debug crewroomd built from the implementation revision 6a495e5 (sha256 81d7dd440463e1618e59c1fd28531a36bd46a60cd847037a4e418de12bcf9f5d), loopback port 4359, isolated temporary --data-dir (deleted afterwards)",
+    "repository": "Operator-approved private sandbox <owner>/crewroom-e2e-sandbox. Synthetic issues #3 (open), #4 (closed) and #5 (unlabelled) were created for this run with label for-45-intake and milestone 'FOR-45 synthetic'; issue #1 and pull request #2 belong to FOR-46's probe.",
+    "credential": "CREWROOM_GITHUB_TOKEN set from the operator's gh CLI login token in the daemon environment only; never printed. It is a gh OAuth token, not a fine-grained or classic PAT.",
+    "redaction": "Repository owner replaced with <owner>. No token is retained.",
+    "tokenAbsentFromResponsesAndDaemonLog": true,
+    "cases": [
+      {
+        "case": "fresh install",
+        "githubIssues": "not_configured",
+        "github": "unchecked",
+        "source": "environment"
+      },
+      {
+        "case": "save repository with label, milestone (title) and state filters",
+        "httpStatus": 200,
+        "state": "not_synced",
+        "filters": "state all · labels for-45-intake · milestone FOR-45 synthetic"
+      },
+      {
+        "case": "filtered sync",
+        "httpStatus": 200,
+        "state": "connected",
+        "label": "<owner>/crewroom-e2e-sandbox: 2 issues imported in the last complete sync.",
+        "tickets": [
+          {
+            "id": "4ab8a8c0-25e2-48dc-85c6-c76ff71c068a",
+            "key": "#3",
+            "title": "FOR-45 synthetic intake A",
+            "sourceStatus": "open",
+            "sourceSite": "https://github.com/<owner>/crewroom-e2e-sandbox",
+            "sourceUrl": "https://github.com/<owner>/crewroom-e2e-sandbox/issues/3",
+            "sourceRevision": 1,
+            "needsReacceptance": false,
+            "brief": "",
+            "project": "<owner>/crewroom-e2e-sandbox"
+          },
+          {
+            "id": "aef69173-d218-4487-9322-ec95abad1277",
+            "key": "#4",
+            "title": "FOR-45 synthetic intake B",
+            "sourceStatus": "closed",
+            "sourceSite": "https://github.com/<owner>/crewroom-e2e-sandbox",
+            "sourceUrl": "https://github.com/<owner>/crewroom-e2e-sandbox/issues/4",
+            "sourceRevision": 1,
+            "needsReacceptance": false,
+            "brief": "",
+            "project": "<owner>/crewroom-e2e-sandbox"
+          }
+        ],
+        "workflowRuns": 0
+      },
+      {
+        "case": "operator refined #3, title edited on github.com, re-sync",
+        "httpStatus": 200,
+        "state": "connected",
+        "sameTicket": true,
+        "ticket": {
+          "id": "4ab8a8c0-25e2-48dc-85c6-c76ff71c068a",
+          "key": "#3",
+          "title": "FOR-45 synthetic intake A (revised)",
+          "sourceStatus": "open",
+          "sourceSite": "https://github.com/<owner>/crewroom-e2e-sandbox",
+          "sourceUrl": "https://github.com/<owner>/crewroom-e2e-sandbox/issues/3",
+          "sourceRevision": 2,
+          "needsReacceptance": true,
+          "brief": "Synthetic operator brief",
+          "project": "<owner>/crewroom-e2e-sandbox"
+        },
+        "ticketCount": 2
+      },
+      {
+        "case": "unfiltered sync (state all); repository also has pull requests",
+        "httpStatus": 200,
+        "state": "connected",
+        "label": "<owner>/crewroom-e2e-sandbox: 4 issues imported in the last complete sync.",
+        "importedKeys": [
+          "#1",
+          "#3",
+          "#4",
+          "#5"
+        ],
+        "pullRequestNumbersOnGitHub": [
+          2
+        ]
+      },
+      {
+        "case": "repository missing or not installed/granted",
+        "httpStatus": 200,
+        "state": "unavailable",
+        "reason": "no_access",
+        "error": "No access to <owner>/crewroom-synthetic-missing-0 (HTTP 404): the repository does not exist, or the token or GitHub App is not installed on it or not granted Issues access. GitHub said: \"Not Found\"."
+      },
+      {
+        "case": "invalid filter refused",
+        "httpStatus": 400,
+        "error": "State must be open, closed or all."
+      },
+      {
+        "case": "sync without Origin",
+        "httpStatus": 403
+      },
+      {
+        "case": "restart without CREWROOM_GITHUB_TOKEN and no saved token",
+        "httpStatus": 200,
+        "state": "unavailable",
+        "reason": "not_connected",
+        "error": "GitHub is not connected. Connect GitHub under Settings → Integrations, then sync; nothing was imported.",
+        "connectionNote": "GitHub is not connected, so sync is unavailable.",
+        "lastSyncedAtRetained": true,
+        "ticketsRetained": 4
+      }
+    ]
+  },
+  "notExecutedLive": [
+    "Pagination across more than one page (the sandbox has fewer than 100 items); covered by the simulated fixture",
+    "A GitHub rate limit, a revoked token and a repository with issues disabled; covered by the simulated fixture",
+    "A fine-grained or classic personal access token"
+  ]
+}
