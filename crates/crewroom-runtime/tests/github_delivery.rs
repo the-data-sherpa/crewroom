@@ -12,10 +12,12 @@ use axum::{
     response::{IntoResponse, Response},
     routing::{delete, get},
 };
-use crewroom_core::store::Store;
+use crewroom_core::{authority::Authority, store::Store};
 use crewroom_runtime::{
+    evidence::{Evidence, Research},
     github_delivery::GitHubDelivery,
     providers::{Credential, Credentials, Error, Unavailable},
+    repository::Repository,
 };
 use serde_json::{Value, json};
 use std::{
@@ -222,9 +224,38 @@ struct Setup {
     other: String,
     task: String,
 }
-/// A GitHub-sourced ticket (#1 in fixture/issues) with a running run, an
-/// admitted delivery reporter and one other specialist.
+/// A GitHub-sourced ticket (#1 in fixture/issues) with a running coding run,
+/// an admitted delivery reporter, one implementer (`other`) and a reviewer.
 fn setup() -> Setup {
+    let s = setup_for(false);
+    start(&s);
+    s
+}
+/// The same ticket with a running research run: an admitted coordinator
+/// (`other`) and a delivery reporter.
+fn setup_research() -> Setup {
+    let s = setup_for(true);
+    start(&s);
+    s
+}
+/// Claims every admitted attempt with a recorded (never probed) process
+/// identity and starts execution of the run admitted by [`setup_for`].
+fn start(s: &Setup) {
+    with(&s.store, |st| {
+        let attempts = st.runtime(&s.run).unwrap()["attempts"].clone();
+        for (index, attempt) in attempts.as_array().unwrap().iter().enumerate() {
+            let attempt = attempt["id"].as_str().unwrap();
+            let pid = 101 + 100 * index as u64;
+            st.claim_attempt(attempt).unwrap();
+            st.record_attempt_identity(attempt, &json!({"hostPid":pid,"ompPid":pid+1,"hostUrl":"http://127.0.0.1:59999","sessionId":format!("fixture-{pid}"),"pane":"%1"}))
+                .unwrap();
+        }
+        st.set_desired_state(&s.run, "running").unwrap();
+        st.start_execution(&s.run).unwrap();
+    });
+}
+/// The ticket, run and admitted (unclaimed) team, before execution starts.
+fn setup_for(research: bool) -> Setup {
     let root = tempfile::tempdir().unwrap();
     let path = root.path().join("workflow.sqlite");
     let store = Store::open(&path).unwrap();
@@ -283,45 +314,55 @@ fn setup() -> Setup {
     store
         .refine(&task, &json!({"revision":revision(&store),"sourceRevision":1,"brief":"Report progress on the issue","criteria":["Updates reach the issue once"]}))
         .unwrap();
-    let current = store.get_task(&task).unwrap();
-    let plan_source = store
-        .save_plan_source(
-            &store
-                .prepare_plan_source(&task, current["revision"].as_u64().unwrap())
-                .unwrap()
-                .validate()
-                .unwrap(),
-        )
-        .unwrap();
-    let plan = store.save_implementation_plan(&task, &json!({"requestId":uuid_like(1),"revision":current["revision"],"sourceId":plan_source["id"],"content":{"schemaVersion":1,"goal":"Exercise delivery","scope":[current["brief"]],"exclusions":[],"assumptions":[],"decisions":[],"workPackages":[{"id":"fixture","name":"Fixture work","dependsOn":[],"outputs":["Revision-bound evidence"],"criteria":[0],"validation":["This test"]}]}})).unwrap();
-    store
-        .decide_implementation_plan(plan["id"].as_str().unwrap(), &json!({"requestId":uuid_like(2),"revision":current["revision"],"sourceId":plan_source["id"],"decision":"accept"}))
-        .unwrap();
-    let run = store
-        .queue(&task, &json!({"revision":revision(&store)}))
-        .unwrap();
+    let run = if research {
+        let run = store
+            .queue_research(
+                &task,
+                &json!({"revision":revision(&store),"requestId":uuid_like(3)}),
+            )
+            .unwrap();
+        assert_eq!(run["purpose"], "research");
+        run
+    } else {
+        let current = store.get_task(&task).unwrap();
+        let plan_source = store
+            .save_plan_source(
+                &store
+                    .prepare_plan_source(&task, current["revision"].as_u64().unwrap())
+                    .unwrap()
+                    .validate()
+                    .unwrap(),
+            )
+            .unwrap();
+        let plan = store.save_implementation_plan(&task, &json!({"requestId":uuid_like(1),"revision":current["revision"],"sourceId":plan_source["id"],"content":{"schemaVersion":1,"goal":"Exercise delivery","scope":[current["brief"]],"exclusions":[],"assumptions":[],"decisions":[],"workPackages":[{"id":"fixture","name":"Fixture work","dependsOn":[],"outputs":["Revision-bound evidence"],"criteria":[0],"validation":["This test"]}]}})).unwrap();
+        store
+            .decide_implementation_plan(plan["id"].as_str().unwrap(), &json!({"requestId":uuid_like(2),"revision":current["revision"],"sourceId":plan_source["id"],"decision":"accept"}))
+            .unwrap();
+        store
+            .queue(&task, &json!({"revision":revision(&store)}))
+            .unwrap()
+    };
     let run = run["id"].as_str().unwrap().to_owned();
     let roles: Vec<Value> =
         serde_json::from_str(include_str!("../../crewroom-core/src/default-roles.json")).unwrap();
     let role = |id: &str| roles.iter().find(|r| r["id"] == id).unwrap().clone();
-    let admit = |name: &str, role: Value, pid: u64| {
+    let admit = |name: &str, role: Value| {
         let admitted = store
             .admit_assignment(
                 &run,
-                &json!({"name":name,"coordinator":false,"role":role,"model":{},"input":"Report"}),
+                &json!({"name":name,"coordinator":role["id"] == "coordinator","role":role,"model":{},"input":"Report"}),
             )
             .unwrap();
-        let attempt = admitted["attempt"]["id"].as_str().unwrap().to_owned();
-        store.claim_attempt(&attempt).unwrap();
-        store
-            .record_attempt_identity(&attempt, &json!({"hostPid":pid,"ompPid":pid+1,"hostUrl":"http://127.0.0.1:59999","sessionId":format!("fixture-{pid}"),"pane":"%1"}))
-            .unwrap();
-        attempt
+        admitted["attempt"]["id"].as_str().unwrap().to_owned()
     };
-    let reporter = admit("Reporter", role("delivery-reporter"), 101);
-    let other = admit("Writer", role("implementer"), 201);
-    store.set_desired_state(&run, "running").unwrap();
-    store.start_execution(&run).unwrap();
+    let reporter = admit("Reporter", role("delivery-reporter"));
+    let other = if research {
+        admit("Coordinator", role("coordinator"))
+    } else {
+        let other = admit("Writer", role("implementer"));
+        admit("Reviewer", role("reviewer"));
+        other
+    };
     Setup {
         _root: root,
         path,
@@ -664,4 +705,358 @@ async fn labels_apply_only_when_configured_and_the_merge_closes_the_issue_as_a_s
         0,
         "no comment was invented for labels or closure"
     );
+}
+
+/// Verified-evidence services over the test store: a real repository worktree
+/// (via the crewroom-process helper), evidence artifacts and research reads.
+struct Verified {
+    repository: Repository<Shared>,
+    evidence: Evidence<Shared>,
+    research: Research<Shared>,
+}
+impl Verified {
+    fn new(s: &Setup, store: &Shared) -> Self {
+        let root = s._root.path().canonicalize().unwrap();
+        let authority = Arc::new(Authority::acquire_for_execution(&root.join("data")).unwrap());
+        let repository = Repository::new(
+            store.clone(),
+            root.join("data/worktrees"),
+            env!("CARGO_BIN_EXE_crewroom-process").into(),
+            authority,
+        )
+        .unwrap();
+        let evidence = Evidence::new(repository.clone(), root.join("data/artifacts")).unwrap();
+        let research = Research::new(evidence.clone());
+        Self {
+            repository,
+            evidence,
+            research,
+        }
+    }
+    fn delivery(&self, store: &Shared, origin: &str) -> GitHubDelivery<Shared> {
+        GitHubDelivery::new(
+            store.clone(),
+            token(),
+            Some(origin.into()),
+            Some(self.evidence.clone()),
+            Some(self.research.clone()),
+        )
+    }
+    async fn close(self) {
+        self.repository.close().unwrap().wait().await.unwrap();
+    }
+}
+fn commit_in(dir: &std::path::Path, args: &[&str]) {
+    assert!(
+        std::process::Command::new("git")
+            .arg("-C")
+            .arg(dir)
+            .args([
+                "-c",
+                "user.name=Fixture",
+                "-c",
+                "user.email=fixture@example.invalid"
+            ])
+            .args(args)
+            .status()
+            .unwrap()
+            .success()
+    );
+}
+/// Starts the coding run from [`setup_for`] and records a ready candidate: the implementer's commit in the run's worktree, its
+/// ownership stopped, one required check passed for that exact candidate and
+/// a passing independent review. Check and review receipts are recorded
+/// directly (no container runtime); readiness is still assessed by Evidence.
+async fn ready_candidate(s: &Setup, verified: &Verified) -> Value {
+    let check = json!({"id":"unit","image":format!("sha256:{}", "0".repeat(64)),"command":"/bin/true","args":[],"timeoutMs":1000,"required":true});
+    verified
+        .evidence
+        .configure(&s.run, &json!([check]))
+        .unwrap();
+    // Repository ownership is prepared before execution starts.
+    let work = verified
+        .repository
+        .prepare(&s.run, &json!({"mode":"new"}))
+        .await
+        .unwrap();
+    start(s);
+    let path = std::path::Path::new(work["path"].as_str().unwrap());
+    std::fs::write(path.join("delivery.txt"), "Synthetic delivery change\n").unwrap();
+    commit_in(path, &["add", "delivery.txt"]);
+    commit_in(path, &["commit", "-q", "-m", "Synthetic delivery change"]);
+    with(&s.store, |st| {
+        st.record_ownership(&s.other, true, Some("Recorded fixture; no agent executed"))
+            .unwrap()
+    });
+    let candidate = verified
+        .evidence
+        .register_candidate(&s.run, std::slice::from_ref(&s.other), None, None)
+        .await
+        .unwrap();
+    let output = verified.evidence.artifact("ok\n").unwrap();
+    let source = verified.evidence.artifact("synthetic source").unwrap();
+    let review = verified.evidence.artifact("Synthetic review").unwrap();
+    with(&s.store, |st| {
+        let reviewer = st.runtime(&s.run).unwrap()["assignments"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|a| a["name"] == "Reviewer")
+            .unwrap()["id"]
+            .clone();
+        st.update_coding_record(&s.run, |record| {
+            let mut record = record.unwrap();
+            let definition = record["requiredChecks"][0].clone();
+            record["checks"].as_array_mut().unwrap().push(json!({"id":uuid_like(0x10),"candidateId":candidate["id"],"checkId":"unit","definition":definition,"started":true,"completed":true,"sourceIntact":true,"exitCode":0,"timedOut":false,"output":output,"source":source}));
+            record["reviews"].as_array_mut().unwrap().push(json!({"id":uuid_like(0x11),"candidateId":candidate["id"],"assignmentId":reviewer,"verdict":"pass","checkPolicyRevision":0,"artifact":review}));
+            Ok(record)
+        })
+        .unwrap()
+    });
+    let assessment = verified.evidence.assess(&s.run).await.unwrap();
+    assert_eq!(assessment["ready"], true, "{assessment}");
+    assert_eq!(assessment["candidate"]["id"], candidate["id"]);
+    candidate
+}
+/// The fixture's comment receipts, copied so no lock is held across an await.
+struct Posted {
+    posts: usize,
+    comments: Vec<Value>,
+}
+fn posted(fixture: &Fixture) -> Posted {
+    let world = fixture.lock().unwrap();
+    Posted {
+        posts: world.posts,
+        comments: world.comments.clone(),
+    }
+}
+/// A confirmed, open GitHub PR for the candidate's exact head.
+fn open_pr(run: &str, candidate: &Value) -> Value {
+    let head = candidate["revision"]["head"].clone();
+    let mut record = publication(run, false);
+    record["candidateId"] = candidate["id"].clone();
+    record["revision"] = candidate["revision"].clone();
+    record["remoteSourceHead"] = head.clone();
+    record["observation"] = json!({"pr":{"state":"OPEN","source":{"commit":{"hash":head}}}});
+    record
+}
+const CLOSING: &str =
+    "The pull request description closes this issue when the PR merges into the default branch.";
+
+#[tokio::test]
+async fn evidence_and_pr_link_post_once_with_the_closing_sentence_across_a_lost_reply_and_a_reopen()
+{
+    let (fixture, origin) = serve().await;
+    let s = setup_for(false);
+    let verified = Verified::new(&s, &s.store);
+    let candidate = ready_candidate(&s, &verified).await;
+    let candidate_id = candidate["id"].as_str().unwrap();
+    let head = candidate["revision"]["head"].as_str().unwrap();
+    let delivery = verified.delivery(&s.store, &origin);
+
+    let evidence = delivery
+        .prepare(
+            &s.reporter,
+            &json!({"kind":"evidence","eventKey":"evidence-ready","candidateId":candidate_id}),
+        )
+        .await
+        .unwrap();
+    assert_eq!(evidence["state"], "pending");
+    let body = evidence["body"].as_str().unwrap();
+    assert!(body.contains(&format!("Revision {head}")), "{body}");
+    assert!(body.contains("Required checks passed: unit"), "{body}");
+    assert!(!body.contains("Pull request:"), "{body}");
+
+    // A PR link needs a confirmed open PR for this candidate.
+    let pr_input = json!({"kind":"pr_link","eventKey":"pr-opened","candidateId":candidate_id});
+    assert!(
+        delivery
+            .prepare(&s.reporter, &pr_input)
+            .await
+            .unwrap_err()
+            .to_string()
+            .contains("confirmed PR receipt")
+    );
+    with(&s.store, |st| {
+        st.save_publication(&open_pr(&s.run, &candidate)).unwrap()
+    });
+    let pr_link = delivery.prepare(&s.reporter, &pr_input).await.unwrap();
+    let body = pr_link["body"].as_str().unwrap();
+    assert!(
+        body.contains(&format!(
+            "Pull request: https://github.com/{OWNER}/{NAME}/pull/9"
+        )),
+        "{body}"
+    );
+    assert!(body.ends_with(&format!("\n{CLOSING}")), "{body}");
+    assert_eq!(
+        delivery.prepare(&s.reporter, &pr_input).await.unwrap()["id"],
+        pr_link["id"]
+    );
+
+    // The evidence comment's reply is lost; the PR link waits behind it.
+    fixture.lock().unwrap().mode = Mode::LostReply;
+    delivery.flush().await.unwrap();
+    let updates = delivery.read(&s.run).unwrap();
+    assert_eq!(updates[0]["state"], "uncertain", "{}", updates[0]);
+    assert_eq!(updates[1]["state"], "pending", "{}", updates[1]);
+    assert_eq!(fixture.lock().unwrap().posts, 1);
+
+    // Restart: the earlier write is confirmed by its marker; the PR link is
+    // recomputed from current evidence (closing sentence included), still
+    // matches what was queued, and is posted once.
+    fixture.lock().unwrap().mode = Mode::Online;
+    drop(delivery);
+    verified.close().await;
+    let reopened: Shared = Arc::new(Mutex::new(Store::open(&s.path).unwrap()));
+    let verified = Verified::new(&s, &reopened);
+    let delivery = verified.delivery(&reopened, &origin);
+    delivery.flush().await.unwrap();
+    delivery.flush().await.unwrap();
+    let updates = delivery.read(&s.run).unwrap();
+    for update in &updates {
+        assert_eq!(update["state"], "confirmed", "{update}");
+    }
+    let world = posted(&fixture);
+    assert_eq!((world.posts, world.comments.len()), (2, 2));
+    for (comment, update) in world.comments.iter().zip([&evidence, &pr_link]) {
+        let body = comment["body"].as_str().unwrap().replace("\r\n", "\n");
+        assert!(body.starts_with("**Crewroom verified evidence**"), "{body}");
+        assert!(body.contains(update["body"].as_str().unwrap()), "{body}");
+        assert!(body.ends_with(&format!(
+            "Crewroom update {}",
+            update["id"].as_str().unwrap()
+        )));
+    }
+    assert!(
+        world.comments[1]["body"]
+            .as_str()
+            .unwrap()
+            .contains(CLOSING)
+    );
+    verified.close().await;
+}
+
+#[tokio::test]
+async fn a_pr_link_whose_publication_changed_is_blocked_instead_of_posted() {
+    let (fixture, origin) = serve().await;
+    let s = setup_for(false);
+    let verified = Verified::new(&s, &s.store);
+    let candidate = ready_candidate(&s, &verified).await;
+    with(&s.store, |st| {
+        st.save_publication(&open_pr(&s.run, &candidate)).unwrap()
+    });
+    let delivery = verified.delivery(&s.store, &origin);
+    delivery
+        .prepare(
+            &s.reporter,
+            &json!({"kind":"pr_link","eventKey":"pr-opened","candidateId":candidate["id"]}),
+        )
+        .await
+        .unwrap();
+    // The PR is no longer the confirmed open receipt the link was built from.
+    let mut moved = open_pr(&s.run, &candidate);
+    moved["observation"]["pr"]["state"] = json!("DECLINED");
+    with(&s.store, |st| st.save_publication(&moved).unwrap());
+    delivery.flush().await.unwrap();
+    let update = &delivery.read(&s.run).unwrap()[0];
+    assert_eq!(update["state"], "blocked", "{update}");
+    assert_eq!(
+        update["reason"],
+        "The recorded evidence is no longer current."
+    );
+    assert_eq!(fixture.lock().unwrap().posts, 0);
+    verified.close().await;
+}
+
+#[tokio::test]
+async fn a_research_outcome_holds_completion_until_queued_and_posts_once_after_completion() {
+    let (fixture, origin) = serve().await;
+    let s = setup_research();
+    let verified = Verified::new(&s, &s.store);
+    let delivery = verified.delivery(&s.store, &origin);
+    let run = with(&s.store, |st| st.get_run(&s.run).unwrap());
+    let revision = run["taskRevision"].as_u64().unwrap();
+    let body = verified
+        .evidence
+        .artifact("Synthetic research finding")
+        .unwrap();
+    with(&s.store, |st| {
+        let coordinator = st.get_attempt(&s.other).unwrap();
+        st.save_research_artifact(&json!({"id":uuid_like(0x20),"runId":s.run,"attemptId":s.other,"assignmentId":coordinator["assignmentId"],"toolCallId":"artifact-1","title":"Synthetic finding","kind":"finding","body":body,"citations":[],"limitations":"Synthetic fixture only","coverage":[{"criterionId":0}],"state":"verified","requirementRevision":revision,"pinnedCommit":run["researchSource"]["commit"]}))
+            .unwrap()
+    });
+    let input =
+        json!({"kind":"research_outcome","eventKey":format!("research-outcome-{revision}")});
+    // No outcome before the coordinator requests completion.
+    assert!(
+        delivery
+            .prepare(&s.reporter, &input)
+            .await
+            .unwrap_err()
+            .to_string()
+            .contains("fully verified research outcome")
+    );
+    verified
+        .research
+        .request_completion(&s.other, "complete-1", &json!({}))
+        .unwrap();
+    // The workflow's research-completion gate holds a GitHub-sourced run
+    // until its outcome comment is queued.
+    assert!(delivery.needs_research_summary(&s.run, revision).unwrap());
+    let queued = delivery.prepare(&s.reporter, &input).await.unwrap();
+    assert_eq!(queued["state"], "pending");
+    assert!(!delivery.needs_research_summary(&s.run, revision).unwrap());
+    assert_eq!(
+        with(&s.store, |st| st.get_run(&s.run).unwrap())["status"],
+        "running"
+    );
+
+    // Not posted while the run is still running.
+    delivery.flush().await.unwrap();
+    let waiting = &delivery.read(&s.run).unwrap()[0];
+    assert_eq!(waiting["state"], "pending");
+    assert_eq!(
+        waiting["reason"],
+        "Waiting for confirmed research completion."
+    );
+    assert_eq!(fixture.lock().unwrap().posts, 0);
+
+    // Completion (what the gate allows once the outcome is queued): stop the
+    // team, then complete research for the accepted revision.
+    with(&s.store, |st| {
+        for attempt in [&s.reporter, &s.other] {
+            st.record_ownership(attempt, true, Some("Recorded fixture; no agent executed"))
+                .unwrap();
+        }
+        st.begin_pause(&s.run, None).unwrap();
+        st.finish_pause(&s.run).unwrap();
+    });
+    let completed = verified.research.complete(&s.run).unwrap();
+    assert_eq!(completed["status"], "completed");
+
+    fixture.lock().unwrap().mode = Mode::LostReply;
+    delivery.flush().await.unwrap();
+    assert_eq!(delivery.read(&s.run).unwrap()[0]["state"], "uncertain");
+    assert_eq!(fixture.lock().unwrap().posts, 1);
+
+    fixture.lock().unwrap().mode = Mode::Online;
+    drop(delivery);
+    verified.close().await;
+    let reopened: Shared = Arc::new(Mutex::new(Store::open(&s.path).unwrap()));
+    let verified = Verified::new(&s, &reopened);
+    let delivery = verified.delivery(&reopened, &origin);
+    delivery.flush().await.unwrap();
+    delivery.flush().await.unwrap();
+    let confirmed = &delivery.read(&s.run).unwrap()[0];
+    assert_eq!(confirmed["state"], "confirmed", "{confirmed}");
+    let world = posted(&fixture);
+    assert_eq!((world.posts, world.comments.len()), (1, 1));
+    let comment = world.comments[0]["body"].as_str().unwrap();
+    assert!(comment.starts_with("**Crewroom verified evidence**"));
+    assert!(comment.contains(&format!(
+        "Research outcome completed for accepted revision {revision}."
+    )));
+    assert!(comment.contains("- Synthetic finding (finding), SHA-256"));
+    verified.close().await;
 }
