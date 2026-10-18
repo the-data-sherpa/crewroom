@@ -64,7 +64,7 @@ Implementation revision `6a0a65df0bbb61871ff4dffc08172044d2ee30e0` on branch `fo
 The run used 101 synthetic issues, #10 to #110, labelled `for-45-pages`. They were created for this run and closed as not planned afterwards.
 - Before confirmation, sync and filters were refused with 409. Confirming GitHub Issues gave the project filters `state open`. A `repository` key in the filters was refused with 400.
 - With filters `labels for-45-pages · state open`, the sync imported **101 issues across two pages of 100**. All were "GitHub open" and all targeted the project. No pull request was imported and no run was created.
-- #10 was then closed on github.com. In the next sync, GitHub's open listing still returned #10, already marked closed, so the ticket recorded "closed" and 101 issues matched. Changing the filters to `state all` kept the same 101 tickets, with only #10 closed. Back on `state open`, the listing returned 100 issues, and #10 was re-read and stayed closed.
+- #10 was then closed on github.com. In the next sync, GitHub's open listing still returned #10, already marked closed, so the ticket recorded "closed" and 101 issues matched. Changing the filters to `state all` kept the same 101 tickets, with only #10 closed. Back on `state open`, the listing returned 100 issues. #10 was not listed and was not re-read: saving the filters starts a fresh sync record with no previous tickets and the project had no runs, so the ticket kept the closed status observed earlier (source update time unchanged). The live closed state came from the lagging open listing's payload. The re-read of a ticket that leaves the filter under unchanged filters is covered by simulated tests only.
 - A sync without an Origin header was refused with 403.
 - After a restart with no token, the filters, the 101 tickets and the last sync time were all kept. The sync reported `not_connected`, and the summary still named the project.
 
@@ -75,6 +75,12 @@ The run used 101 synthetic issues, #10 to #110, labelled `for-45-pages`. They we
 - `cargo fmt --check` is clean.
 - `npm test` gave **332/332**, and `npm run build` passes.
 - Rust ran in a target directory private to the worktree. The shared target directory compiled tests against another worktree's stale `crewroom-core`, the same failure recorded at the FOR-47 integration.
+
+**Review fixes (on `ab7680f`):**
+- The in-progress label refusal now points to the project's GitHub Issues workflow labels under Settings → Repositories, not Settings → Integrations. `crewroom-runtime/tests/github_delivery.rs` asserts the new location.
+- The desktop pending text follows the per-project routes: `…/github-issues/sync`, `…/filters` and `…/labels` show "Syncing GitHub issues…", "Saving GitHub issue filters…" and "Saving GitHub workflow labels…" again instead of "Saving…". The removed `/github/issues/*` entries were dropped. `feedback_tests.rs` `native_pending_text_names_the_command` covers all three, and its `useless_conversion` Clippy finding is fixed.
+- The live #10 statement above was corrected. It previously claimed a re-read that the code does not perform after a filter change.
+- Checks: `cargo test -p crewroom-runtime -- --test-threads=4` gave **184 passed / 2 ignored**. `cargo test -p crewroom-desktop -- --test-threads=4` gave **146 passed / 15 ignored** before the Clippy fix (shared target). After the Clippy fix the shared target compiled another worktree's `crewroom-core` again, so the run used a target directory private to the worktree. That run gave **142 passed / 4 failed / 15 ignored**. The four failures were `model_picker` tests whose fixture service did not start within 10 s on the loaded machine. Rerun alone, `model_picker` gave **5 passed / 1 ignored**. Clippy `-D warnings` is clean for runtime and desktop `--all-targets`, and `cargo fmt --check` is clean for both crates. No live run was repeated.
 
 **Not executed:**
 - A live migration of a real schema-33 store.

@@ -32,7 +32,7 @@ fn offline(
         )
         .unwrap()
     });
-    (handle.into(), view)
+    (handle, view)
 }
 fn task(id: &str) -> Value {
     json!({"id":id,"key":id.to_uppercase(),"source":"local","title":format!("Ticket {id}"),"brief":"","criteria":[],"revision":1,"sourceRevision":1})
@@ -193,6 +193,22 @@ fn native_pending_text_names_the_command(cx: &mut gpui::TestAppContext) {
             "/runs/r/publication/reconcile",
             json!({}),
             "Reconciling publication…",
+        ),
+        // FOR-45: GitHub Issues controls live with each project.
+        (
+            "/repositories/r/github-issues/sync",
+            json!({}),
+            "Syncing GitHub issues…",
+        ),
+        (
+            "/repositories/r/github-issues/filters",
+            json!({"state":"open"}),
+            "Saving GitHub issue filters…",
+        ),
+        (
+            "/repositories/r/github-issues/labels",
+            json!({}),
+            "Saving GitHub workflow labels…",
         ),
     ] {
         let notice = cx.update(|cx| {

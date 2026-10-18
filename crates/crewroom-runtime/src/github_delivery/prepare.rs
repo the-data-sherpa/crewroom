@@ -133,7 +133,7 @@ impl<S: StoreAccess> GitHubDelivery<S> {
                 if value["kind"] == "in_progress" {
                     let Some(label) = source.labels["inProgress"].as_str() else {
                         return Err(conflict(
-                            "GitHub workflow labels are off. Name an in-progress label under Settings → Integrations → GitHub Issues to use it.",
+                            "GitHub workflow labels are off. Name an in-progress label in this project's GitHub Issues workflow labels under Settings → Repositories to use it.",
                         ));
                     };
                     update["labels"] = json!({"add":[label],"remove":[]});

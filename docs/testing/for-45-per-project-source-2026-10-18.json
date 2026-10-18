@@ -22,7 +22,7 @@
     "project": "A local Git checkout whose origin is git@github.com:<owner>/crewroom-e2e-sandbox.git (never fetched), linked as project 'Sandbox'.",
     "credential": "CREWROOM_GITHUB_TOKEN set from the operator's gh CLI login in the daemon environment only; never printed. It is a gh OAuth token, not a fine-grained or classic PAT.",
     "pagination": "The client requests per_page=100; 101 matching issues therefore needed a second page through Link rel=next. Individual page requests were not logged; the count proves that more than one page was read.",
-    "observation": "Immediately after #10 was closed, GitHub's state=open listing still returned it (with state closed in the payload), so that sync counted 101 matching issues; the next state=open sync listed 100 and re-read #10 as closed.",
+    "observation": "Immediately after #10 was closed, GitHub's state=open listing still returned it (with state closed in the payload), so that sync counted 101 matching issues and recorded #10 closed from that listing payload. After the filters went to state=all and back to state=open, the sync listed 100; #10 was not listed and not re-read (saving filters starts a fresh sync record with no previous tickets, and the project had no runs), so it kept the closed status observed earlier with an unchanged sourceUpdatedAt. The leave-filter re-read under unchanged filters was not exercised live.",
     "redaction": "Repository owner replaced with <owner>. No token is retained.",
     "tokenAbsentFromResponsesAndDaemonLog": true,
     "cases": [
@@ -146,7 +146,7 @@
         "httpStatus": 403
       },
       {
-        "case": "filters back to state=open, re-sync (#10 no longer listed, re-read)",
+        "case": "filters back to state=open, re-sync (#10 no longer listed and not re-read; it keeps the closed status recorded from the earlier listing payload)",
         "httpStatus": 200,
         "filters": "state open · labels for-45-pages",
         "state": "connected",

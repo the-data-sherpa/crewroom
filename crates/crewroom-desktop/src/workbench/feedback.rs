@@ -83,9 +83,6 @@ pub(super) fn pending(path: &str, body: &Value) -> String {
         ("/github/connect", "Checking the token with GitHub…"),
         ("/github/check", "Checking with GitHub…"),
         ("/github/disconnect", "Disconnecting GitHub…"),
-        ("/github/issues/source", "Saving GitHub ticket source…"),
-        ("/github/issues/sync", "Syncing GitHub issues…"),
-        ("/github/issues/labels", "Saving GitHub workflow labels…"),
         (
             "/github/delivery/reconcile",
             "Reconciling GitHub issue updates…",
@@ -95,6 +92,9 @@ pub(super) fn pending(path: &str, body: &Value) -> String {
         return (*text).into();
     }
     let suffixes = [
+        ("/github-issues/sync", "Syncing GitHub issues…"),
+        ("/github-issues/filters", "Saving GitHub issue filters…"),
+        ("/github-issues/labels", "Saving GitHub workflow labels…"),
         ("/retire", "Retiring…"),
         ("/delete", "Deleting…"),
         ("/decision", "Recording decision…"),
