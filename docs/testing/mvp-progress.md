@@ -6,7 +6,7 @@ Historical revision IDs and source hashes below refer to the original private sn
 
 ## FOR-60 — `npm test` under machine load (2026-10-18)
 
-Code revision `45b434f` (branch `for-60-reliable-npm-test`, from main `2b1b5e7`). This also covers the failures listed in FOR-63 and FOR-66. All runs are local tests with simulated providers and fixture Git remotes; nothing contacted a live service. The machine has 16 cores and is shared with other agents. Load came from 16 busy-loop CPU burners (`sh -c 'while :; do :; done'`) running for the whole series, plus the other agents' builds. Each run used `tsx --test --test-reporter=tap tests/*.test.ts`, which is the `npm test` command with a TAP reporter added so that each failed file's exit signal is recorded.
+Code revision `45b434f` (branch `for-60-reliable-npm-test`, from main `2b1b5e7`), integrated on main as `3ec4f26` without code changes. This also covers the failures listed in FOR-63 and FOR-66. All runs are local tests with simulated providers and fixture Git remotes; nothing contacted a live service. The machine has 16 cores and is shared with other agents. Load came from 16 busy-loop CPU burners (`sh -c 'while :; do :; done'`) running for the whole series, plus the other agents' builds. Each run used `tsx --test --test-reporter=tap tests/*.test.ts`, which is the `npm test` command with a TAP reporter added so that each failed file's exit signal is recorded.
 
 **Acceptance status.** The lease-race fix and its test are met; `npm run build` passes. Two criteria are **partially met**, and FOR-60 is blocked by FOR-68:
 
@@ -14,6 +14,8 @@ Code revision `45b434f` (branch `for-60-reliable-npm-test`, from main `2b1b5e7`)
 - *`npm test` passes 5 consecutive times under load: partially met.* The 5/5 (and 8/8) passes come only from runs started as a `systemd-run --user` service, outside the agent session's process tree. Inside that tree, where every FOR-60, FOR-63 and FOR-66 failure was observed, 0 of 4 runs passed at this revision.
 
 Review-fix check (docs only, same code as `45b434f`): one literal `npm test` inside the agent's process tree passed 340/340 at load 4.5 (1 min). That is a single unloaded run and does not close the loaded criterion.
+
+**Integration at `3ec4f26`** (rebased onto main `d42130c`; docs conflicts only, resolved by keeping every entry; worktree prepared with `python3 scripts/prepare_worktree.py`): `npm test` **342/342** inside the agent's process tree at 1-minute load 7–12 (a single, lightly loaded run that does not close the loaded criterion); `npm run build` passes; `npm run test:e2e` **31/31**. No Rust code changed, so no cargo tests were run. Simulated providers only.
 
 To close either criterion: FOR-68 names the sender and the suite passes inside an agent session, or failing runs record a SIGKILLed Git child or file process for each inferred failure above, and readiness timing is ruled out.
 
