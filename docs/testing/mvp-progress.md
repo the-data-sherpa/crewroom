@@ -58,6 +58,14 @@ Implementation revision `2e23990450460471cfffe322afbb583a91ecc4f3` on branch `fo
 
 **Not executed:** live refresh against a real Jira site (no Jira token on this machine; operator decision recorded on FOR-53 per FOR-39, not a completion gate this round). `npm run test:e2e` (fixed port 4331; left to the integrator; the browser suite exercises the retired TypeScript server, whose Jira refresh is unchanged). The macOS ACLI credential renewal now uses a one-item JQL search when no saved filter is configured; it is untested on Linux.
 
+**Integration (2026-10-18).** Rebased without code changes onto main `af0cb74` (FOR-56) as implementation `dedc4ed7af632b588637ccc5c2351910d6fc4ad9` and evidence `3008eea`; only the `docs/status.md` and this file's entries conflicted, and both tickets' entries were kept. The simulated checks above stay bound to `2e23990`; these ran on the rebased tree with a worktree-private `CARGO_TARGET_DIR`, under load average 7–14. All simulated; no provider was contacted.
+
+- `cargo test --locked --no-fail-fast -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop -j6 -- --test-threads=4`: **538 passed, 0 failed, 17 ignored**. Clippy `--all-targets -D warnings` for the four crates and `cargo fmt --check`: clean.
+- `npx tsx scripts/rust/verify-providers.ts`: **passed**, 92 operations, 25 compared tables, 13 native-only tables checked empty (now including `jira_project_sync`), 597 neutral source-field reads. `npx tsx scripts/rust/verify-publication-policy.ts`: **57 passed**. `scripts/rust/jira-sync.test.ts`, `jira-client.test.ts` and `provider-config.test.ts`: **14/14**.
+- `npm test` **334/334**; `npm run build` passes (existing Vite chunk-size warning); `npm run test:e2e` **31 passed** with the ignored OMP fixture and Mail runtime linked into the worktree. Two earlier full runs each had one failure: `cancel-continuation.spec.ts` CAN-02/04/05 at `page.goto` after a restart (passed 2/2 alone), then a Playwright worker killed by SIGKILL. FOR-53 changes no browser or TypeScript server code.
+
+Still not executed: live refresh against a real Jira site (no Jira token; not a gate this round) and the macOS ACLI renewal path.
+
 ## FOR-56 — Neutral source identifiers and native provider oracle (2026-10-18)
 
 Implementation revision `2832986234025ffcb90b120583ee893c4430ad85` (branch `for-56-neutral-source-identifiers`, from main `aa2d619`). Rust builds used a worktree-private `CARGO_TARGET_DIR`. All evidence is simulated: synthetic fixtures and a loopback service, with no Jira or GitHub calls. The machine was shared and heavily loaded during these runs (load average 15–30).
