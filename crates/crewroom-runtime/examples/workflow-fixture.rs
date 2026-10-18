@@ -284,8 +284,16 @@ async fn main() -> Result<()> {
                     // Imports one GitHub issue as the ticket, assigns the saved
                     // repository, accepts the brief and queues pinned research.
                     "github_seed" => store.with_store(|s| {
-                        let saved = s.save_github_source(&json!({"repository":r["input"]["repository"]}))?;
-                        s.commit_github_sync(&saved["source"], &json!([r["input"]["issue"]]), &json!([]), &json!([]))?;
+                        // The project confirms GitHub Issues as its ticket source (FOR-45).
+                        let project = r["input"]["repositoryId"].as_str().unwrap_or_default().to_owned();
+                        let repository = r["input"]["repository"].as_str().unwrap_or_default();
+                        s.confirm_ticket_source(
+                            &project,
+                            &json!({"tickets":"github","repository":repository}),
+                            &crewroom_core::project_source::observe(Some(&format!("git@github.com:{repository}.git"))),
+                        )?;
+                        let saved = s.github_source(&project)?.ok_or_else(|| crewroom_core::Error::Conflict("GitHub source was not confirmed.".into()))?;
+                        s.commit_github_sync(&project, &saved["source"], &json!([r["input"]["issue"]]), &json!([]), &json!([]))?;
                         let task = s.snapshot()?["tasks"]
                             .as_array()
                             .and_then(|tasks| tasks.first())

@@ -221,16 +221,6 @@ async fn import(data: &Path, owner: &str, name: &str, number: u64) -> String {
         _ => panic!("the issue could not be read"),
     };
     let store = Store::open(&data.join("workflow.sqlite")).unwrap();
-    let saved = store
-        .save_github_source(&json!({"repository":format!("{owner}/{name}"),"state":"all"}))
-        .unwrap();
-    store
-        .commit_github_sync(&saved["source"], &json!([raw]), &json!([]), &json!([]))
-        .unwrap();
-    let task = store.snapshot().unwrap()["tasks"][0]["id"]
-        .as_str()
-        .unwrap()
-        .to_owned();
     let checkout = data.join("repository");
     let status = std::process::Command::new("git")
         .args(["clone", "-q", &format!("git@github.com:{owner}/{name}.git")])
@@ -241,6 +231,33 @@ async fn import(data: &Path, owner: &str, name: &str, number: u64) -> String {
     let repository = store
         .create_repository(&json!({"name":"Live sandbox","path":checkout.canonicalize().unwrap(),"targetBranch":"main"}))
         .unwrap();
+    // The project's confirmed GitHub Issues source drives its sync (FOR-45).
+    let project = repository["id"].as_str().unwrap().to_owned();
+    store
+        .confirm_ticket_source(
+            &project,
+            &json!({"tickets":"github","repository":format!("{owner}/{name}")}),
+            &crewroom_core::project_source::observe(Some(&format!(
+                "git@github.com:{owner}/{name}.git"
+            ))),
+        )
+        .unwrap();
+    let saved = store
+        .save_github_filters(&project, &json!({"state":"all"}))
+        .unwrap();
+    store
+        .commit_github_sync(
+            &project,
+            &saved["source"],
+            &json!([raw]),
+            &json!([]),
+            &json!([]),
+        )
+        .unwrap();
+    let task = store.snapshot().unwrap()["tasks"][0]["id"]
+        .as_str()
+        .unwrap()
+        .to_owned();
     let revision = |s: &Store| s.get_task(&task).unwrap()["revision"].clone();
     store
         .assign_repository(
@@ -506,7 +523,13 @@ async fn publish(
         .unwrap();
     receipt["prLinkQueued"] = json!({"state":pr_link["state"],"lines":pr_link["body"].as_str().unwrap_or("").lines().filter(|l| l.starts_with("Pull request:") || l.contains("closes this issue")).collect::<Vec<_>>()});
     world.with(|s| {
+        let task = state["task"].as_str().unwrap();
+        let project = s.get_task(task).unwrap()["repositoryId"]
+            .as_str()
+            .unwrap()
+            .to_owned();
         s.save_github_status_labels(
+            &project,
             &json!({"inProgress":"crewroom: in progress","inReview":"crewroom: in review"}),
         )
         .unwrap()

@@ -297,7 +297,7 @@ fn whole_state_written_by_the_pre_migration_daemon_restores_and_migrates_lossles
         .map(|(id, _, _)| store.get_task(id).unwrap())
         .collect();
     drop(store);
-    assert_eq!(version(&path), 33);
+    assert_eq!(version(&path), 34);
     let after = rows(&path);
     let rename = |k: &str| match k {
         "jiraStatus" => "sourceStatus".to_owned(),
