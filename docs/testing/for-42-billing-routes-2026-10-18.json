@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "issue": "FOR-42",
+  "recordedAt": "2026-10-18T08:55:29Z",
+  "implementationRevision": "7be5d969a7e0f29b6932ec2be18adfa623405189",
+  "implementationTree": "35a0c4713322ddc4d94b4a51f1a3fdadb537908b",
+  "baseRevision": "7975dcc",
+  "branch": "for-42-billing-route-offerings",
+  "liveEvidence": [
+    {
+      "class": "live disposable daemon, runner unconfigured, metadata only (no inference)",
+      "command": "python3 scripts/verify_billing_routes.py --binaries <private copy of target/debug> --port 4372 --output <new private dir>",
+      "binaryBinding": "crewroomd, crewroom-process and crewroom-host built from the working tree committed as 7be5d96 (only tests/model_discovery.rs and documentation changed after the build) and copied out of the shared target before the run.",
+      "result": "Passed. Real HOME and PATH; runner.configured=false; 0 runs; daemon exit 0.",
+      "harnesses": [
+        {
+          "harness": "codex",
+          "version": "codex-cli 0.163.0",
+          "routes": ["subscription"],
+          "basis": "Codex auth.json has a ChatGPT login (auth_mode chatgpt).",
+          "offeringsByRoute": {"subscription": 8},
+          "sampleLabel": "Codex · GPT-6-Astra · subscription"
+        },
+        {
+          "harness": "claude-code",
+          "version": "2.1.302 (Claude Code)",
+          "routes": ["subscription"],
+          "basis": "Claude Code has a claude.ai subscription login (.credentials.json OAuth with a subscription plan).",
+          "offeringsByRoute": {"subscription": 5},
+          "sampleLabel": "Claude Code · Opus · subscription"
+        },
+        {
+          "harness": "omp",
+          "version": "omp/18.11.3",
+          "routes": [],
+          "basis": "No runner provider definitions exist on this machine, so OMP lists no models and no route is claimed.",
+          "offeringsByRoute": {}
+        }
+      ],
+      "secretScan": "33 credential-shaped strings from the local Codex/Claude login files and *_API_KEY environment variables were compared with the catalog, workspace and daemon log; 0 found. Only the counts were retained.",
+      "reportSha256": "fbb655545fe37d6ad5fcbbdc20046366ecf10ffd135bd761886a7b0f6bed8e36"
+    },
+    {
+      "class": "live metadata discovery with billing detection (no inference)",
+      "command": "CREWROOM_LIVE_DISCOVERY=1 cargo test -p crewroom-runtime --test model_discovery installed_harnesses -- --include-ignored --nocapture",
+      "result": "Passed. codex billing=[subscription] (auth_mode chatgpt); claude-code billing=[subscription] (.credentials.json subscription login); omp billing=[unknown] for the synthetic loopback provider (gateway host, never contacted). Output prints route kinds and file names only."
+    }
+  ],
+  "simulatedEvidence": [
+    "billing::tests: Codex chatgpt / apikey / both / incomplete / missing / malformed / symlinked logins; Claude subscription / Console key / both / OAuth without plan / no scope / missing; OMP first-party API hosts vs gateway, missing key, invalid URL; CODEX_HOME and HOME resolution. Each serialized detection is checked for the synthetic canary values.",
+    "catalog_tests::a_model_on_both_billing_routes_is_two_offerings_and_needs_an_explicit_choice: two Codex offerings with distinct keys and labels; a pre-billing selection is refused with 'Choose one billing route explicitly'; the API route is blocked with its reason; the subscription route admits and records billingRoute.",
+    "catalog_tests::admitted_billing_route_survives_restart_and_never_falls_back_at_launch: preview and admitted assignment record subscription; the route survives a store reopen; after the login switches to API-key billing, launch verification refuses with 'Re-admission is required' and the saved choice does not resolve to the other route.",
+    "catalog_tests::omp_gateway_provider_billing_is_unknown_and_recorded and service model_catalog tests: unknown routes are recorded and labelled; catalog JSON carries no fixture credential.",
+    "tests/model_catalog.rs::billing_route_is_part_of_offering_identity: routed keys, forged-route rejection, labels, backward-compatible deserialization of pre-billing frozen offerings, legacy resolution and equivalence members.",
+    "Desktop GPUI: picker rows read 'OMP · Shared label · unknown billing' and 'Codex · Fixture model · subscription' (synthetic ChatGPT login in an isolated HOME); the refresh panel shows 'Billing (codex): subscription · …'; history details of an admitted catalog selection show 'Billing: subscription'."
+  ],
+  "checks": [
+    {"command": "cargo test --locked --no-fail-fast -p crewroom-core -p crewroom-runtime -p crewroom-service -- --test-threads=1", "result": "319 passed, 0 failed, 1 ignored"},
+    {"command": "cargo test -p crewroom-desktop", "result": "137 passed, 0 failed, 15 ignored"},
+    {"command": "cargo clippy -p crewroom-runtime -p crewroom-service --all-targets -- -D warnings; cargo clippy -p crewroom-desktop -- -D warnings", "result": "clean"},
+    {"command": "cargo clippy -p crewroom-desktop --all-targets -- -D warnings", "result": "one existing lint in untouched feedback_tests.rs (useless_conversion), unchanged from main"},
+    {"command": "cargo fmt -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop -- --check", "result": "clean"},
+    {"command": "npm test", "result": "332/332"},
+    {"command": "npm run build", "result": "passed"},
+    {"command": "npm run test:e2e", "result": "not run (reserved for the integrator)"}
+  ],
+  "limitations": [
+    "OMP has no runner provider definitions on this machine, so live OMP billing was observed only for the synthetic loopback provider (unknown). API detection for first-party hosts is simulated.",
+    "Codex API-key and Claude Console API-key logins are simulated; this machine has subscription logins only.",
+    "Claude Code logins held only in a system keychain (no .credentials.json) are reported unknown.",
+    "No live inference or launch was repeated; the launch refusal on a changed route is covered by runtime tests.",
+    "The operator service on port 4318 was not restarted and shows routes only after a stopped restart with this build."
+  ]
+}
