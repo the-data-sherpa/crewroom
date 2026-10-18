@@ -97,7 +97,7 @@ The launcher requires explicit absolute data and role paths. The checkout wrappe
 | `CREWROOM_RUNTIME_CONFIG` | Private regular JSON file owned by this user, mode 0600; absent means unavailable runner |
 | `CREWROOM_TMUX` | Optional trusted tmux executable; otherwise discovered on daemon PATH |
 | `<data>/jira.json` | Jira source/account metadata read by the native daemon |
-| `<data>/bitbucket.json` | Repository publication/hosted-check metadata read by the native daemon |
+| `<data>/bitbucket.json` | Repository publication/hosted-check metadata read by the native daemon. An optional per-repository `remote` (HTTPS or SSH publish remote, no credentials) selects the publication provider; without it the entry is Bitbucket. A remote on a host with no provider is shown as an unavailable publication provider. The legacy browser server rejects `remote` |
 | `<data>/crewroom.secret` | Install key: 32 random bytes, mode 0600, created once on first start. Never regenerated while encrypted values exist. See [stored credentials](#stored-credentials) |
 | `<data>/credentials.json` | Jira/Bitbucket tokens saved in **Settings → Integrations**, only as `$crewroom$v1$…` encrypted values |
 | `CREWROOM_JIRA_TOKEN` | Optional OAuth bearer access token for the configured Jira cloud, read server-side; overrides the saved Jira token |
