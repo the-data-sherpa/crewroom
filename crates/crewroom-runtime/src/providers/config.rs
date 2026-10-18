@@ -570,8 +570,12 @@ pub fn load_publication_config(path: &Path, secrets: SecretStore) -> Result<Publ
         command(),
         Arc::new(crewroom_core::now_ms),
         Arc::new(|| std::env::var(Integration::Bitbucket.environment()).ok()),
-        Some(stored_tokens(secrets, Integration::Bitbucket)),
+        Some(stored_tokens(secrets.clone(), Integration::Bitbucket)),
         cfg!(target_os = "macos"),
+        Some(GitHubTokens {
+            environment: Arc::new(|| std::env::var(Integration::GitHub.environment()).ok()),
+            stored: Some(stored_tokens(secrets, Integration::GitHub)),
+        }),
     )
 }
 /// Supported connections only; prefer [`load_publication_config`], which also
@@ -588,7 +592,10 @@ pub fn load_publication_connections_with(
     clock: Clock,
     environment: TokenEnvironment,
 ) -> Result<Vec<PublicationConnection>> {
-    Ok(load_publication_config_options(path, command, clock, environment, None, true)?.connections)
+    Ok(
+        load_publication_config_options(path, command, clock, environment, None, true, None)?
+            .connections,
+    )
 }
 #[cfg(test)]
 fn load_publication_connections_options(
@@ -600,12 +607,31 @@ fn load_publication_connections_options(
     keychain: bool,
 ) -> Result<Vec<PublicationConnection>> {
     Ok(
-        load_publication_config_options(path, command, clock, environment, stored, keychain)?
+        load_publication_config_options(path, command, clock, environment, stored, keychain, None)?
             .connections,
     )
 }
+/// The GitHub token route for publication: `CREWROOM_GITHUB_TOKEN`, then the
+/// token saved in Settings → Integrations → GitHub (FOR-43). Read per request,
+/// so connecting or disconnecting applies without a restart.
+#[derive(Clone)]
+pub struct GitHubTokens {
+    pub environment: TokenEnvironment,
+    pub stored: Option<StoredTokens>,
+}
+impl GitHubTokens {
+    fn credentials(&self) -> Result<Credential> {
+        if let Some(token) = (self.environment)().filter(|s| !s.trim().is_empty()) {
+            return Ok(Credential::Bearer(token.trim().to_owned()));
+        }
+        stored_credential(self.stored.as_ref(), Provider::GitHub)?
+            .ok_or_else(|| credential_error(Provider::GitHub))
+    }
+}
 /// Each entry selects its provider from its optional `remote` (the publish
-/// remote). Without one, the entry keeps the original Bitbucket contract.
+/// remote). Without one, the entry keeps the original Bitbucket contract. A
+/// github.com remote requires `repository` as `{owner, name, id}` naming the
+/// same repository; it authenticates with the GitHub token route.
 fn load_publication_config_options(
     path: &Path,
     command: Command,
@@ -613,6 +639,7 @@ fn load_publication_config_options(
     environment: TokenEnvironment,
     stored: Option<StoredTokens>,
     keychain: bool,
+    github: Option<GitHubTokens>,
 ) -> Result<PublicationConfig> {
     let Some(metadata) = json_file(path)? else {
         return Ok(PublicationConfig::default());
@@ -655,6 +682,37 @@ fn load_publication_config_options(
                 continue;
             }
             Some(remote::RemoteSelection::Supported {
+                provider: remote::PublicationProvider::GitHub,
+                owner,
+                name,
+            }) => {
+                let repository = github_pulls::repository(&entry["repository"])?;
+                if !repository["owner"]
+                    .as_str()
+                    .is_some_and(|s| s.eq_ignore_ascii_case(&owner))
+                    || !repository["name"]
+                        .as_str()
+                        .is_some_and(|s| s.eq_ignore_ascii_case(&name))
+                {
+                    return Err(invalid());
+                }
+                let github = github.clone();
+                config.connections.push(PublicationConnection {
+                    provider: remote::PublicationProvider::GitHub,
+                    repository_path,
+                    repository,
+                    policy: publication_policy(&entry["policy"])?,
+                    credentials: Arc::new(move || {
+                        let result = github.as_ref().map_or_else(
+                            || Err(credential_error(Provider::GitHub)),
+                            |g| g.credentials(),
+                        );
+                        Box::pin(async move { result })
+                    }),
+                });
+                continue;
+            }
+            Some(remote::RemoteSelection::Supported {
                 provider,
                 owner,
                 name,
@@ -674,20 +732,7 @@ fn load_publication_config_options(
         };
         config.connections.push({
             let repository = bitbucket::repository(&entry["repository"])?;
-            let policy = &entry["policy"];
-            strict(policy, &["statusKeys", "pipelineSteps", "optionalSteps"])?;
-            let mut normalized = json!({});
-            for key in ["statusKeys", "pipelineSteps", "optionalSteps"] {
-                let values = match policy.get(key) {
-                    Some(v) => array(v)?.iter().map(string).collect::<Result<Vec<_>>>()?,
-                    None if key == "optionalSteps" => vec![],
-                    None => return Err(invalid()),
-                };
-                if key != "optionalSteps" && values.is_empty() {
-                    return Err(invalid());
-                }
-                normalized[key] = json!(values);
-            }
+            let normalized = publication_policy(&entry["policy"])?;
             let inner = inner.clone();
             PublicationConnection {
                 provider,
@@ -702,6 +747,25 @@ fn load_publication_config_options(
         });
     }
     Ok(config)
+}
+/// The accepted hosted-check policy: required status keys and pipeline steps,
+/// plus optional steps. For GitHub, check runs are the pipeline steps and both
+/// commit statuses and check runs are status keys.
+fn publication_policy(policy: &Value) -> Result<Value> {
+    strict(policy, &["statusKeys", "pipelineSteps", "optionalSteps"])?;
+    let mut normalized = json!({});
+    for key in ["statusKeys", "pipelineSteps", "optionalSteps"] {
+        let values = match policy.get(key) {
+            Some(v) => array(v)?.iter().map(string).collect::<Result<Vec<_>>>()?,
+            None if key == "optionalSteps" => vec![],
+            None => return Err(invalid()),
+        };
+        if key != "optionalSteps" && values.is_empty() {
+            return Err(invalid());
+        }
+        normalized[key] = json!(values);
+    }
+    Ok(normalized)
 }
 
 #[cfg(test)]
@@ -819,6 +883,7 @@ mod tests {
                 Arc::new(|| None),
                 None,
                 false,
+                None,
             )
         };
         // Without a remote, the original Bitbucket contract is unchanged.
@@ -834,7 +899,7 @@ mod tests {
         // reported as an unavailable provider instead of failing or vanishing.
         let mixed = load(json!([
             {"repositoryPath":"/disposable/bitbucket","remote":"git@bitbucket.org:fixture/repository.git","repository":repository,"policy":policy},
-            {"repositoryPath":"/disposable/github","remote":"https://github.com/fixture/repository.git"}
+            {"repositoryPath":"/disposable/gitlab","remote":"https://gitlab.example/fixture/repository.git"}
         ]))
         .unwrap();
         assert_eq!(mixed.connections.len(), 1);
@@ -849,8 +914,8 @@ mod tests {
         assert_eq!(
             mixed.unavailable,
             vec![remote::UnavailablePublication::unsupported(
-                "/disposable/github".into(),
-                "github.com"
+                "/disposable/gitlab".into(),
+                "gitlab.example"
             )]
         );
         // A Bitbucket remote naming another repository, or a credentialed
@@ -865,6 +930,89 @@ mod tests {
             assert!(!error.to_string().contains("synthetic-secret"));
         }
         assert!(load(json!([{"repositoryPath":"/disposable/bitbucket","remote":7,"repository":repository,"policy":policy}])).is_err());
+    }
+
+    #[tokio::test]
+    async fn github_publish_remotes_use_the_github_token_route() {
+        let root = tempfile::tempdir().unwrap();
+        let path = root.path().join("bitbucket.json");
+        let store = SecretStore::open(root.path()).unwrap();
+        let environment = Arc::new(Mutex::new(None::<String>));
+        let tokens = {
+            let environment = environment.clone();
+            GitHubTokens {
+                environment: Arc::new(move || environment.lock().unwrap().clone()),
+                stored: Some(stored_tokens(store.clone(), Integration::GitHub)),
+            }
+        };
+        let policy = json!({"statusKeys":["test"],"pipelineSteps":["test"]});
+        let load = |metadata: Value| {
+            std::fs::write(&path, serde_json::to_vec(&metadata).unwrap()).unwrap();
+            load_publication_config_options(
+                &path,
+                no_credential_commands(),
+                Arc::new(|| 0),
+                Arc::new(|| Some("synthetic-bitbucket-env".into())),
+                None,
+                false,
+                Some(tokens.clone()),
+            )
+        };
+        let remote = |name: &str| format!("git@github.com:Octo-Fixture/{name}.git");
+        let config = load(json!([
+            {"repositoryPath":"/disposable/github","remote":remote("sandbox"),"repository":{"owner":"octo-fixture","name":"sandbox","id":42},"policy":policy},
+            {"repositoryPath":"/disposable/bitbucket","repository":{"workspace":"fixture","slug":"repository","uuid":"{00000000-0000-4000-8000-000000000011}"},"policy":policy}
+        ]))
+        .unwrap();
+        assert_eq!(config.connections.len(), 2);
+        assert!(config.unavailable.is_empty());
+        let github = &config.connections[0];
+        assert_eq!(github.provider, remote::PublicationProvider::GitHub);
+        assert_eq!(
+            github.repository,
+            json!({"provider":"github","owner":"octo-fixture","name":"sandbox","id":42,"uuid":"github:42"})
+        );
+        assert_eq!(github.policy["optionalSteps"], json!([]));
+        // Bitbucket keeps its own token route alongside GitHub.
+        assert_eq!(
+            config.connections[1].provider,
+            remote::PublicationProvider::Bitbucket
+        );
+        assert!(
+            matches!((config.connections[1].credentials)().await.unwrap(), Credential::Bearer(v) if v == "synthetic-bitbucket-env")
+        );
+        // No token: the operator is told where to connect GitHub.
+        match (github.credentials)().await {
+            Err(Error::Unavailable(e)) => {
+                assert!(
+                    e.message
+                        .contains("Connect GitHub in Settings → Integrations")
+                );
+                assert!(!e.request_sent);
+            }
+            _ => panic!("A missing GitHub token must be unavailable"),
+        }
+        // The saved token applies without a restart; the environment wins.
+        store
+            .save(Integration::GitHub, "github_pat_synthetic_stored", false)
+            .unwrap();
+        assert!(
+            matches!((github.credentials)().await.unwrap(), Credential::Bearer(v) if v == "github_pat_synthetic_stored")
+        );
+        *environment.lock().unwrap() = Some("ghp_synthetic_env".into());
+        assert!(
+            matches!((github.credentials)().await.unwrap(), Credential::Bearer(v) if v == "ghp_synthetic_env")
+        );
+        // The configured repository must be the remote's repository, and GitHub
+        // metadata needs its numeric id.
+        for entry in [
+            json!({"repositoryPath":"/disposable/github","remote":remote("other"),"repository":{"owner":"octo-fixture","name":"sandbox","id":42},"policy":policy}),
+            json!({"repositoryPath":"/disposable/github","remote":remote("sandbox"),"repository":{"owner":"octo-fixture","name":"sandbox"},"policy":policy}),
+            json!({"repositoryPath":"/disposable/github","remote":remote("sandbox"),"repository":{"workspace":"fixture","slug":"repository","uuid":"{00000000-0000-4000-8000-000000000011}"},"policy":policy}),
+            json!({"repositoryPath":"/disposable/github","remote":remote("sandbox"),"repository":{"owner":"octo-fixture","name":"sandbox","id":42},"policy":{"statusKeys":[],"pipelineSteps":["test"]}}),
+        ] {
+            assert!(load(json!([entry])).is_err(), "{entry}");
+        }
     }
 
     #[tokio::test]

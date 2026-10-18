@@ -59,7 +59,15 @@ pub struct PublicationGit {
     inner: Arc<Inner>,
 }
 pub enum Remote {
-    Bitbucket { workspace: String, slug: String },
+    Bitbucket {
+        workspace: String,
+        slug: String,
+    },
+    /// A github.com repository, reached over SSH with the operator's agent.
+    GitHub {
+        owner: String,
+        name: String,
+    },
     Fixture(PathBuf),
 }
 pub struct Push {
@@ -100,6 +108,41 @@ fn hash(value: &str) -> Result<()> {
         return Err(conflict("Invalid publication revision."));
     }
     Ok(())
+}
+/// Names the remedy for a refused push from Git's own output. The output itself
+/// is never returned, so remote diagnostics cannot leak into workflow records.
+pub(crate) fn push_refusal(output: &str, branch: &str) -> String {
+    let lower = output.to_ascii_lowercase();
+    if [
+        "protected branch",
+        "gh006",
+        "gh013",
+        "repository rule",
+        "rule violation",
+    ]
+    .iter()
+    .any(|s| lower.contains(s))
+    {
+        format!(
+            "The remote refused the push: branch protection or a repository rule blocks {branch}. Allow this branch in the repository's rules, then reconcile publication."
+        )
+    } else if lower.contains("host key verification failed") {
+        "The remote host key is not trusted on this machine. Add the provider's published host key to known_hosts, then reconcile publication.".into()
+    } else if [
+        "permission denied",
+        "permission to",
+        "access denied",
+        "could not read from remote repository",
+        "repository not found",
+    ]
+    .iter()
+    .any(|s| lower.contains(s))
+    {
+        "The remote refused the push: the SSH key loaded on this machine has no write access to the repository. Load a key with write access in the SSH agent, then reconcile publication.".into()
+    } else {
+        "Git publication was not confirmed. Reconcile the remote branch before another write."
+            .into()
+    }
 }
 fn git_executable() -> Result<PathBuf> {
     for directory in std::env::split_paths(&std::env::var_os("PATH").unwrap_or_default())
@@ -175,6 +218,20 @@ impl PublicationGit {
                     return Err(conflict("Invalid Bitbucket remote identity."));
                 }
                 format!("git@bitbucket.org:{workspace}/{slug}.git")
+            }
+            Remote::GitHub { owner, name } => {
+                let part = |s: &str| {
+                    !s.is_empty()
+                        && s.len() <= 100
+                        && s != "."
+                        && s != ".."
+                        && s.bytes()
+                            .all(|b| b.is_ascii_alphanumeric() || b"_.-".contains(&b))
+                };
+                if !part(&owner) || !part(&name) {
+                    return Err(conflict("Invalid GitHub remote identity."));
+                }
+                format!("git@github.com:{owner}/{name}.git")
             }
         };
         for name in &protected {
@@ -380,9 +437,7 @@ impl PublicationGit {
             )
             .await?;
         if result.code != 0 {
-            return Err(conflict(
-                "Git publication was not confirmed. Reconcile the remote branch before another write.",
-            ));
+            return Err(conflict(&push_refusal(&result.output, &input.branch)));
         }
         Ok(())
     }
@@ -700,5 +755,39 @@ impl Inner {
         }
         self.state.lock().unwrap().lease.take();
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::push_refusal;
+
+    #[test]
+    fn refused_pushes_name_their_remedy_without_echoing_remote_output() {
+        let protected = push_refusal(
+            "remote: error: GH006: Protected branch update failed for refs/heads/crewroom/x.\nsynthetic-detail",
+            "crewroom/x",
+        );
+        assert!(protected.contains("branch protection or a repository rule blocks crewroom/x"));
+        assert!(!protected.contains("synthetic-detail"));
+        assert!(
+            push_refusal(
+                "remote: error: GH013: Repository rule violations found",
+                "b"
+            )
+            .contains("repository rule")
+        );
+        assert!(
+            push_refusal(
+                "ERROR: Permission to octo-fixture/sandbox.git denied to someone.",
+                "b"
+            )
+            .contains("no write access")
+        );
+        assert!(push_refusal("Host key verification failed.", "b").contains("known_hosts"));
+        assert_eq!(
+            push_refusal("unexpected", "b"),
+            "Git publication was not confirmed. Reconcile the remote branch before another write."
+        );
     }
 }

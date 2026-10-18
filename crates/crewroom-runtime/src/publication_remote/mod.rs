@@ -86,10 +86,14 @@ impl Connection {
         }
     }
 }
-/// The provider that wrote a durable publication record. Every retained
-/// record carries a Bitbucket repository identity; it is the only provider.
-pub(crate) fn recorded_provider(_record: &Value) -> PublicationProvider {
-    PublicationProvider::Bitbucket
+/// The provider that wrote a durable publication record. GitHub identities
+/// carry their provider; every earlier record is Bitbucket.
+pub(crate) fn recorded_provider(record: &Value) -> PublicationProvider {
+    if crate::providers::github_pulls::is_github(&record["repository"]) {
+        PublicationProvider::GitHub
+    } else {
+        PublicationProvider::Bitbucket
+    }
 }
 /// Explains why a record's repository has no matching configured provider.
 pub(crate) fn unmatched(record: &Value) -> String {

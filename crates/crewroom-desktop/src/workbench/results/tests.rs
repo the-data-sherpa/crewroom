@@ -1,5 +1,5 @@
 //! Truthful PR readiness and named revisions (FOR-25: H3, M7, M21, L18).
-use super::publication::delivery_headline;
+use super::publication::{delivery_headline, pr_facts, repository_label};
 use super::*;
 use gpui::test::TestWindowExt;
 use gpui::{AnyWindowHandle, Bounds, WindowBounds, WindowOptions, point, size};
@@ -244,4 +244,49 @@ fn waiting_and_error_hints_are_never_shown_together(cx: &mut gpui::TestAppContex
     let shown = labels(cx, h);
     assert!(has(&shown, "Waiting for saved evidence…"), "{shown:#?}");
     assert!(!has(&shown, "Evidence unavailable"), "{shown:#?}");
+}
+
+/// FOR-46: the provider's own PR state and observed head sit beside the
+/// published revision, for GitHub and Bitbucket alike.
+#[test]
+fn provider_pr_state_and_observed_head_are_named_beside_the_published_revision() {
+    let github = json!({"provider":"github","owner":"octo-fixture","name":"sandbox","id":42,"uuid":"github:42"});
+    let mut record = json!({"repository":github,"revision":{"head":NEW},"pr":{"state":"pending"}});
+    assert_eq!(
+        pr_facts(&record),
+        None,
+        "no provider facts before a PR receipt"
+    );
+    record["pr"] = json!({"state":"confirmed","id":5,"providerState":"OPEN"});
+    assert_eq!(
+        pr_facts(&record).unwrap(),
+        "GitHub PR #5 · open · head not yet observed (published bbbbbbbbbbbb)"
+    );
+    record["observation"] = json!({"pr":{"draft":false,"source":{"commit":{"hash":NEW}},"destination":{"commit":{"hash":OLD}}}});
+    assert_eq!(
+        pr_facts(&record).unwrap(),
+        "GitHub PR #5 · open · observed head bbbbbbbbbbbb on base aaaaaaaaaaaa"
+    );
+    record["observation"]["pr"]["source"]["commit"]["hash"] = json!(OLD);
+    record["pr"]["providerState"] = json!("DECLINED");
+    assert_eq!(
+        pr_facts(&record).unwrap(),
+        "GitHub PR #5 · closed without merging · observed head aaaaaaaaaaaa on base aaaaaaaaaaaa · differs from the published revision bbbbbbbbbbbb"
+    );
+    assert_eq!(
+        repository_label(&github),
+        "GitHub octo-fixture/sandbox · repository github:42"
+    );
+    let bitbucket = json!({"workspace":"fixture","slug":"repository","uuid":"{00000000-0000-4000-8000-000000000011}"});
+    record["repository"] = bitbucket.clone();
+    record["pr"]["providerState"] = json!("MERGED");
+    assert!(
+        pr_facts(&record)
+            .unwrap()
+            .starts_with("Bitbucket PR #5 · merged")
+    );
+    assert_eq!(
+        repository_label(&bitbucket),
+        "Bitbucket fixture/repository · repository {00000000-0000-4000-8000-000000000011}"
+    );
 }

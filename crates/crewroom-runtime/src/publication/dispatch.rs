@@ -410,9 +410,10 @@ impl<S: StoreAccess> Publication<S> {
                 if present(&record["observation"])
                     && policy::regressed(&observation, &record["observation"])
                 {
-                    return Err(held(
-                        "Bitbucket returned older observations. Retained evidence was not replaced.",
-                    ));
+                    return Err(Failure::Held(format!(
+                        "{} returned older observations. Retained evidence was not replaced.",
+                        connection.provider().name()
+                    )));
                 }
                 if !identity(record, &observation["pr"]) {
                     return Err(held(

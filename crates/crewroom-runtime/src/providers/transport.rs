@@ -3,7 +3,7 @@ use base64::{Engine, engine::general_purpose::STANDARD};
 use futures_util::{StreamExt, future::BoxFuture};
 use reqwest::{
     Method,
-    header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE, HeaderValue},
+    header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE, HeaderValue, USER_AGENT},
 };
 use serde_json::Value;
 use std::{sync::Arc, time::Duration};
@@ -90,8 +90,17 @@ impl Transport {
                 let mut request = self
                     .client
                     .request(method, format!("{}{path}", self.base))
-                    .header(AUTHORIZATION, authorization)
-                    .header(ACCEPT, "application/json");
+                    .header(AUTHORIZATION, authorization);
+                request = if self.provider == Provider::GitHub {
+                    // GitHub refuses requests without a User-Agent and pins
+                    // response shapes to the requested API version.
+                    request
+                        .header(ACCEPT, "application/vnd.github+json")
+                        .header("X-GitHub-Api-Version", "2022-11-28")
+                        .header(USER_AGENT, "crewroom")
+                } else {
+                    request.header(ACCEPT, "application/json")
+                };
                 if let Some(body) = body {
                     request = request
                         .header(CONTENT_TYPE, "application/json")
@@ -103,6 +112,15 @@ impl Transport {
                 // not a known rejection of the attempted provider mutation.
                 if [301, 302, 303, 307, 308].contains(&status.as_u16()) {
                     return Err(invalid());
+                }
+                if !status.is_success() && self.provider == Provider::GitHub {
+                    let limited = super::github_pulls::rate_limited(response.headers());
+                    let said = super::github_pulls::error_message(response).await;
+                    return Err(super::github_pulls::failure(
+                        status.as_u16(),
+                        limited,
+                        &said,
+                    ));
                 }
                 if !status.is_success() {
                     let retained = match self.provider {

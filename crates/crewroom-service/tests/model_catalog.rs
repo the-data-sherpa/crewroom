@@ -633,7 +633,7 @@ async fn unsupported_publish_remote_is_reported_as_an_unavailable_publication_pr
     setup.publication_unavailable = vec![
         crewroom_runtime::providers::remote::UnavailablePublication::unsupported(
             checkout.clone(),
-            "github.com",
+            "gitlab.example",
         ),
     ];
     let service = Service::start_with_options(root.path(), &roles, 0, setup)
@@ -651,7 +651,7 @@ async fn unsupported_publish_remote_is_reported_as_an_unavailable_publication_pr
     let repo = &workspace["repositories"][0];
     assert_eq!(repo["publicationAvailable"], false);
     assert_eq!(repo["publicationProvider"]["state"], "unavailable");
-    assert_eq!(repo["publicationProvider"]["host"], "github.com");
+    assert_eq!(repo["publicationProvider"]["host"], "gitlab.example");
     assert!(
         repo["publicationProvider"]["reason"]
             .as_str()

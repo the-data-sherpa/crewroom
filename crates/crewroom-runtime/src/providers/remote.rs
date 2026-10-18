@@ -1,7 +1,7 @@
 //! Provider-neutral selection of the PR publication host from a repository's
-//! configured publish remote. Bitbucket is the only implemented provider; any
-//! other well-formed remote is reported as an unavailable publication provider
-//! rather than silently ignored.
+//! configured publish remote. Bitbucket and github.com are implemented
+//! providers; any other well-formed remote is reported as an unavailable
+//! publication provider rather than silently ignored.
 use super::*;
 use std::path::PathBuf;
 
@@ -9,20 +9,25 @@ use std::path::PathBuf;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PublicationProvider {
     Bitbucket,
+    GitHub,
 }
 impl PublicationProvider {
     pub fn name(self) -> &'static str {
         match self {
             Self::Bitbucket => Provider::Bitbucket.name(),
+            Self::GitHub => Provider::GitHub.name(),
         }
     }
     fn host(self) -> &'static str {
         match self {
             Self::Bitbucket => "bitbucket.org",
+            Self::GitHub => "github.com",
         }
     }
     fn from_host(host: &str) -> Option<Self> {
-        [Self::Bitbucket].into_iter().find(|p| p.host() == host)
+        [Self::Bitbucket, Self::GitHub]
+            .into_iter()
+            .find(|p| p.host() == host)
     }
 }
 
@@ -171,10 +176,45 @@ mod tests {
     }
 
     #[test]
+    fn github_remotes_select_the_github_provider() {
+        for remote in [
+            "https://github.com/fixture/repository.git",
+            "https://GitHub.com/fixture/repository",
+            "ssh://git@github.com/fixture/repository.git",
+            "git@github.com:fixture/repository.git",
+        ] {
+            assert_eq!(
+                select(remote).unwrap(),
+                RemoteSelection::Supported {
+                    provider: PublicationProvider::GitHub,
+                    owner: "fixture".into(),
+                    name: "repository".into(),
+                },
+                "{remote}"
+            );
+        }
+        assert_eq!(PublicationProvider::GitHub.name(), "GitHub");
+        // GitHub Enterprise Server hosts are not github.com (FOR-50).
+        assert_eq!(
+            select("git@github.example.com:fixture/repository.git").unwrap(),
+            RemoteSelection::Unsupported {
+                host: "github.example.com".into()
+            }
+        );
+        assert!(select("https://github.com/fixture/group/repository").is_err());
+    }
+
+    #[test]
     fn other_hosts_are_unsupported_not_silently_bitbucket() {
         for (remote, host) in [
-            ("https://github.com/fixture/repository.git", "github.com"),
-            ("git@github.com:fixture/repository.git", "github.com"),
+            (
+                "https://gitlab.example/fixture/repository.git",
+                "gitlab.example",
+            ),
+            (
+                "git@gitlab.example:fixture/repository.git",
+                "gitlab.example",
+            ),
             (
                 "ssh://git@gitlab.example/group/sub/repository",
                 "gitlab.example",
@@ -185,8 +225,8 @@ mod tests {
                 RemoteSelection::Unsupported { host: host.into() }
             );
         }
-        let unavailable = UnavailablePublication::unsupported("/repo".into(), "github.com");
-        assert!(unavailable.reason.contains("github.com"));
+        let unavailable = UnavailablePublication::unsupported("/repo".into(), "gitlab.example");
+        assert!(unavailable.reason.contains("gitlab.example"));
         assert!(unavailable.reason.contains("unavailable"));
     }
 

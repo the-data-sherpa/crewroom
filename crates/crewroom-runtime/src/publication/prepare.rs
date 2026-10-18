@@ -1,5 +1,6 @@
 use super::*;
-use crate::repository::request;
+use crate::{providers::github_pulls, repository::request};
+use crewroom_core::ticket_source;
 use std::collections::HashSet;
 fn continues(s: &Store, run: &str, candidate: &str, published: &Value) -> Result<bool> {
     let coding = s.coding_record(run)?.unwrap_or(Value::Null);
@@ -187,24 +188,33 @@ fn describe(s: &Store, record: &Value) -> Result<String> {
                 .find(|c| c["id"] == *parent)
         });
     }
+    let github = github_pulls::is_github(&record["repository"]);
+    let task = &run["taskSnapshot"];
     let mut lines = vec![
         record
             .get("summary")
-            .unwrap_or(&run["taskSnapshot"]["brief"])
+            .unwrap_or(&task["brief"])
             .as_str()
             .unwrap_or("")
             .to_owned(),
         "".into(),
+    ];
+    if let Some(closes) = closing_reference(task, &record["repository"]) {
+        lines.extend([closes, "".into()]);
+    }
+    lines.extend([
         "---".into(),
         "".into(),
         "### Crewroom evidence".into(),
         "".into(),
-    ];
-    if let Some(url) = run["taskSnapshot"]["sourceUrl"]
-        .as_str()
-        .filter(|s| !s.is_empty())
-    {
-        lines.extend([format!("Jira: {url}"), "".into()]);
+    ]);
+    if let Some(url) = task["sourceUrl"].as_str().filter(|s| !s.is_empty()) {
+        let label = if ticket_source::provider(task) == Some(ticket_source::GITHUB) {
+            "GitHub issue"
+        } else {
+            "Jira"
+        };
+        lines.extend([format!("{label}: {url}"), "".into()]);
     }
     lines.push("Acceptance criteria:".into());
     lines.extend(
@@ -257,6 +267,110 @@ fn describe(s: &Store, record: &Value) -> Result<String> {
             text(&receipt["output"], "sha256")?
         ));
     }
-    lines.extend(["- Independent review passed for this commit.".into(),"- Hosted checks are this PR's build statuses and pipeline. Crewroom reports the PR ready only when they pass for this head and base.".into(),"- Merge is the operator's decision.".into(),"".into(),marker(record)]);
+    let hosted = if github {
+        "- Hosted checks are this PR's commit statuses and check runs. Crewroom reports the PR ready only when they pass for this head and base."
+    } else {
+        "- Hosted checks are this PR's build statuses and pipeline. Crewroom reports the PR ready only when they pass for this head and base."
+    };
+    lines.extend([
+        "- Independent review passed for this commit.".into(),
+        hosted.into(),
+        "- Merge is the operator's decision.".into(),
+        "".into(),
+        marker(record),
+    ]);
     Ok(lines.join("\n"))
+}
+
+/// `owner/name` and issue number of a github.com issue URL.
+fn github_issue(url: &str) -> Option<(String, String, u64)> {
+    let rest = url.strip_prefix("https://github.com/")?;
+    let parts = rest.trim_end_matches('/').split('/').collect::<Vec<_>>();
+    match parts.as_slice() {
+        [owner, name, "issues", number]
+            if !owner.is_empty()
+                && !name.is_empty()
+                && !number.is_empty()
+                && number.bytes().all(|b| b.is_ascii_digit()) =>
+        {
+            Some(((*owner).into(), (*name).into(), number.parse().ok()?))
+        }
+        _ => None,
+    }
+}
+
+/// The closing keyword for a GitHub-sourced ticket whose PR is published to
+/// GitHub: `Closes #N` in the same repository, `Closes owner/name#N` across
+/// repositories. Jira, local and Bitbucket publications get none.
+pub(super) fn closing_reference(task: &Value, repository: &Value) -> Option<String> {
+    if ticket_source::provider(task) != Some(ticket_source::GITHUB)
+        || !github_pulls::is_github(repository)
+    {
+        return None;
+    }
+    let (owner, name, number) =
+        task["sourceUrl"]
+            .as_str()
+            .and_then(github_issue)
+            .or_else(|| {
+                // The issue key is `#N`, scoped to the source repository site.
+                let number = task["key"].as_str()?.strip_prefix('#')?.parse().ok()?;
+                let site = task["sourceSite"].as_str()?.trim_end_matches('/');
+                let (owner, name) = site.strip_prefix("https://github.com/")?.split_once('/')?;
+                (!name.contains('/')).then(|| (owner.to_owned(), name.to_owned(), number))
+            })?;
+    let same = repository["owner"]
+        .as_str()
+        .is_some_and(|o| o.eq_ignore_ascii_case(&owner))
+        && repository["name"]
+            .as_str()
+            .is_some_and(|n| n.eq_ignore_ascii_case(&name));
+    Some(if same {
+        format!("Closes #{number}")
+    } else {
+        format!("Closes {owner}/{name}#{number}")
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn github_repository() -> Value {
+        json!({"provider":"github","owner":"octo-fixture","name":"sandbox","id":42,"uuid":"github:42"})
+    }
+
+    #[test]
+    fn github_sourced_tickets_close_their_issue_on_github_publications_only() {
+        let issue = json!({"source":"github","key":"#12","sourceSite":"https://github.com/octo-fixture/sandbox","sourceUrl":"https://github.com/octo-fixture/sandbox/issues/12"});
+        assert_eq!(
+            closing_reference(&issue, &github_repository()).as_deref(),
+            Some("Closes #12")
+        );
+        // Another repository's issue is named in full.
+        let other = json!({"source":"github","key":"#7","sourceUrl":"https://github.com/octo-fixture/tracker/issues/7"});
+        assert_eq!(
+            closing_reference(&other, &github_repository()).as_deref(),
+            Some("Closes octo-fixture/tracker#7")
+        );
+        // Without a URL, the `#N` key is scoped to its source repository site.
+        let keyed = json!({"source":"github","key":"#3","sourceSite":"https://github.com/Octo-Fixture/Sandbox"});
+        assert_eq!(
+            closing_reference(&keyed, &github_repository()).as_deref(),
+            Some("Closes #3")
+        );
+        // A pull request URL is not an issue to close.
+        let pull = json!({"source":"github","key":"#4","sourceUrl":"https://github.com/octo-fixture/sandbox/pull/4"});
+        assert_eq!(closing_reference(&pull, &github_repository()), None);
+        // Jira and local tickets keep the existing description.
+        let jira = json!({"source":"jira","key":"FIX-1","sourceUrl":"https://fixture.atlassian.net/browse/FIX-1"});
+        assert_eq!(closing_reference(&jira, &github_repository()), None);
+        assert_eq!(
+            closing_reference(&json!({"key":"LOCAL-1"}), &github_repository()),
+            None
+        );
+        // A Bitbucket publication cannot close a GitHub issue.
+        let bitbucket = json!({"workspace":"fixture","slug":"repository","uuid":"{00000000-0000-4000-8000-000000000011}"});
+        assert_eq!(closing_reference(&issue, &bitbucket), None);
+    }
 }

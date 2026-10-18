@@ -1,10 +1,12 @@
 //! Provider-neutral PR host. Publication, readiness observation, feedback and
 //! continuation verification reach the provider only through this interface.
-//! Bitbucket is the only implementation; every call delegates unchanged.
+//! Bitbucket and GitHub implement it; every call delegates to the provider
+//! client, which returns the same normalized publication shapes.
 use crate::{
     providers::{
         BeforeDispatch, Result,
         bitbucket::{self, BitbucketClient},
+        github_pulls::{self, GitHubPullClient},
         remote::PublicationProvider,
     },
     publication_git::Remote,
@@ -16,22 +18,30 @@ use serde_json::Value;
 #[derive(Clone)]
 pub enum PullRequestHost {
     Bitbucket(BitbucketClient),
+    GitHub(GitHubPullClient),
 }
 impl From<BitbucketClient> for PullRequestHost {
     fn from(client: BitbucketClient) -> Self {
         Self::Bitbucket(client)
     }
 }
+impl From<GitHubPullClient> for PullRequestHost {
+    fn from(client: GitHubPullClient) -> Self {
+        Self::GitHub(client)
+    }
+}
 impl PullRequestHost {
     pub fn provider(&self) -> PublicationProvider {
         match self {
             Self::Bitbucket(_) => PublicationProvider::Bitbucket,
+            Self::GitHub(_) => PublicationProvider::GitHub,
         }
     }
     /// The provider's normalized repository identity.
     pub fn repository(&self) -> &Value {
         match self {
             Self::Bitbucket(client) => &client.repository,
+            Self::GitHub(client) => &client.repository,
         }
     }
     /// Rejects configured repository metadata that does not name this host's
@@ -49,6 +59,17 @@ impl PullRequestHost {
                 }
                 Ok(())
             }
+            Self::GitHub(client) => {
+                if github_pulls::repository(repository)
+                    .map_err(|_| Error::Invalid("Invalid configured GitHub repository.".into()))?
+                    != client.repository
+                {
+                    return Err(Error::Invalid(
+                        "Configured GitHub client identity changed.".into(),
+                    ));
+                }
+                Ok(())
+            }
         }
     }
     /// The Git transport remote for pushes and reference observation.
@@ -58,31 +79,40 @@ impl PullRequestHost {
                 workspace: text(&client.repository, "workspace")?.into(),
                 slug: text(&client.repository, "slug")?.into(),
             }),
+            Self::GitHub(client) => Ok(Remote::GitHub {
+                owner: text(&client.repository, "owner")?.into(),
+                name: text(&client.repository, "name")?.into(),
+            }),
         }
     }
     pub async fn verify_repository(&self) -> Result<Value> {
         match self {
             Self::Bitbucket(client) => client.verify_repository().await,
+            Self::GitHub(client) => client.verify_repository().await,
         }
     }
     pub async fn pull_requests(&self, branch: &str, target: &str) -> Result<Vec<Value>> {
         match self {
             Self::Bitbucket(client) => client.pull_requests(branch, target).await,
+            Self::GitHub(client) => client.pull_requests(branch, target).await,
         }
     }
     pub async fn pull_request(&self, id: i64) -> Result<Value> {
         match self {
             Self::Bitbucket(client) => client.pull_request(id).await,
+            Self::GitHub(client) => client.pull_request(id).await,
         }
     }
     pub async fn comments(&self, id: i64) -> Result<Value> {
         match self {
             Self::Bitbucket(client) => client.comments(id).await,
+            Self::GitHub(client) => client.comments(id).await,
         }
     }
     pub async fn observe(&self, id: i64) -> Result<Value> {
         match self {
             Self::Bitbucket(client) => client.observe(id).await,
+            Self::GitHub(client) => client.observe(id).await,
         }
     }
     pub async fn create_pull_request(
@@ -92,6 +122,7 @@ impl PullRequestHost {
     ) -> Result<Value> {
         match self {
             Self::Bitbucket(client) => client.create_pull_request(input, before).await,
+            Self::GitHub(client) => client.create_pull_request(input, before).await,
         }
     }
     pub async fn update_pull_request(
@@ -102,6 +133,7 @@ impl PullRequestHost {
     ) -> Result<Value> {
         match self {
             Self::Bitbucket(client) => client.update_pull_request(id, input, before).await,
+            Self::GitHub(client) => client.update_pull_request(id, input, before).await,
         }
     }
 }
@@ -142,8 +174,44 @@ mod tests {
                     ("fixture", "repository")
                 )
             }
-            Remote::Fixture(_) => panic!("A configured host must not resolve to a fixture remote"),
+            _ => panic!("A Bitbucket host must resolve to its Bitbucket remote"),
         }
+    }
+
+    #[test]
+    fn github_host_keeps_its_identity_and_transport_remote() {
+        let credentials: Credentials =
+            Arc::new(|| Box::pin(async { Ok(Credential::Bearer("ghp_synthetic".into())) }));
+        let host: PullRequestHost = GitHubPullClient::new(
+            &json!({"owner":"octo-fixture","name":"sandbox","id":42}),
+            credentials,
+            None,
+        )
+        .unwrap()
+        .into();
+        assert_eq!(host.provider(), PublicationProvider::GitHub);
+        assert_eq!(host.repository()["uuid"], "github:42");
+        match host.git_remote().unwrap() {
+            Remote::GitHub { owner, name } => {
+                assert_eq!((owner.as_str(), name.as_str()), ("octo-fixture", "sandbox"))
+            }
+            _ => panic!("A GitHub host must resolve to its GitHub remote"),
+        }
+        host.check_configured(&json!({"owner":"octo-fixture","name":"sandbox","id":42}))
+            .unwrap();
+        host.check_configured(host.repository()).unwrap();
+        assert_eq!(
+            host.check_configured(&json!({"owner":"octo-fixture","name":"sandbox","id":7}))
+                .unwrap_err()
+                .to_string(),
+            Error::Invalid("Configured GitHub client identity changed.".into()).to_string()
+        );
+        assert_eq!(
+            host.check_configured(&json!({"workspace":"fixture","slug":"repository","uuid":"{00000000-0000-4000-8000-000000000011}"}))
+                .unwrap_err()
+                .to_string(),
+            Error::Invalid("Invalid configured GitHub repository.".into()).to_string()
+        );
     }
 
     #[test]

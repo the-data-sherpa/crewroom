@@ -1488,7 +1488,7 @@ fn repository_publication_state_distinguishes_unsupported_remote_from_unconfigur
     );
     assert_eq!(
         publication_state(
-            &json!({"publicationAvailable":false,"publicationProvider":{"state":"unavailable","host":"github.com","reason":"synthetic"}})
+            &json!({"publicationAvailable":false,"publicationProvider":{"state":"unavailable","host":"gitlab.example","reason":"synthetic"}})
         ),
         "unavailable"
     );

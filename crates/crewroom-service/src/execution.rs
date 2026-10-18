@@ -9,10 +9,14 @@ use crewroom_runtime::{
     messaging::StoreAccess,
     model_catalog::{store::Catalog, unconfigured},
     providers::{
-        bitbucket::BitbucketClient, config, jira::JiraClient, remote::UnavailablePublication,
+        bitbucket::BitbucketClient,
+        config,
+        github_pulls::GitHubPullClient,
+        jira::JiraClient,
+        remote::{PublicationProvider, UnavailablePublication},
     },
     publication::Publication,
-    publication_remote::{Connection, PublicationRemote},
+    publication_remote::{Connection, PublicationRemote, PullRequestHost},
     repository::Repository,
     supervisor::{
         tasks::RunTasks,
@@ -75,9 +79,19 @@ impl ServiceOptions {
             .connections
             .into_iter()
             .map(|c| -> Result<Connection> {
-                let client = BitbucketClient::new(&c.repository, c.credentials, None)
-                    .map_err(std::io::Error::other)?;
-                Connection::new(&c.repository_path, &c.repository, client, &c.policy, None)
+                let host: PullRequestHost = match c.provider {
+                    PublicationProvider::Bitbucket => {
+                        BitbucketClient::new(&c.repository, c.credentials, None)
+                            .map_err(std::io::Error::other)?
+                            .into()
+                    }
+                    PublicationProvider::GitHub => {
+                        GitHubPullClient::new(&c.repository, c.credentials, None)
+                            .map_err(std::io::Error::other)?
+                            .into()
+                    }
+                };
+                Connection::new(&c.repository_path, &c.repository, host, &c.policy, None)
             })
             .collect::<Result<Vec<_>>>()?;
         let tmux = std::env::var_os("CREWROOM_TMUX")

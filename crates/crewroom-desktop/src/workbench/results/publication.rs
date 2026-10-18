@@ -42,6 +42,75 @@ pub(super) fn delivery_headline(record: &Value, fresh: bool) -> String {
         format!("Last observed: {headline} · observation not current")
     }
 }
+fn short(hash: &Value) -> String {
+    hash.as_str()
+        .map(|h| h.chars().take(12).collect())
+        .unwrap_or_else(|| "unavailable".into())
+}
+/// The PR host and repository a publication record names. GitHub identities
+/// carry their provider; every earlier record is Bitbucket.
+pub(super) fn repository_label(repository: &Value) -> String {
+    if repository["provider"] == "github" {
+        format!(
+            "GitHub {}/{} · repository {}",
+            repository["owner"].as_str().unwrap_or(""),
+            repository["name"].as_str().unwrap_or(""),
+            repository["uuid"].as_str().unwrap_or("")
+        )
+    } else {
+        format!(
+            "Bitbucket {}/{} · repository {}",
+            repository["workspace"].as_str().unwrap_or(""),
+            repository["slug"].as_str().unwrap_or(""),
+            repository["uuid"].as_str().unwrap_or("")
+        )
+    }
+}
+/// The provider's own PR state and the head it last reported, beside the
+/// published revision. Provider state is a separate fact from Crewroom's
+/// push/PR receipts and from readiness.
+pub(super) fn pr_facts(record: &Value) -> Option<String> {
+    if record["pr"]["state"] != "confirmed" {
+        return None;
+    }
+    let github = record["repository"]["provider"] == "github";
+    let observed = &record["observation"]["pr"];
+    let state = match record["pr"]["providerState"].as_str() {
+        Some("OPEN") if observed["draft"] == true => "open (draft)",
+        Some("OPEN") => "open",
+        Some("MERGED") => "merged",
+        Some("DECLINED") if github => "closed without merging",
+        Some("DECLINED") => "declined",
+        Some("SUPERSEDED") => "superseded",
+        _ => "state not observed",
+    };
+    let mut facts = format!(
+        "{} PR #{} · {state}",
+        if github { "GitHub" } else { "Bitbucket" },
+        record["pr"]["id"]
+    );
+    let published = &record["revision"]["head"];
+    if observed.is_object() {
+        let head = &observed["source"]["commit"]["hash"];
+        facts.push_str(&format!(
+            " · observed head {} on base {}",
+            short(head),
+            short(&observed["destination"]["commit"]["hash"])
+        ));
+        if head != published {
+            facts.push_str(&format!(
+                " · differs from the published revision {}",
+                short(published)
+            ));
+        }
+    } else {
+        facts.push_str(&format!(
+            " · head not yet observed (published {})",
+            short(published)
+        ));
+    }
+    Some(facts)
+}
 impl Workbench {
     pub(super) fn read_feedback(&mut self, run: &str, cx: &mut Context<Self>) {
         let path = format!("/runs/{run}/feedback");
@@ -96,6 +165,9 @@ impl Workbench {
                 )
                 .child(hint(text_lines(&record["blockers"])))
                 .child(hint(record["error"].as_str().unwrap_or("")));
+            if let Some(facts) = pr_facts(record) {
+                row = row.child(hint(facts).id("pr-provider-facts"));
+            }
             if record["merged"].is_object() {
                 row = row.child(hint(format!(
                     "Merge commit: {} · observed {}",
@@ -183,12 +255,7 @@ impl Workbench {
                 }
                 let mut feedback =
                     section(format!("PR feedback · #{}", value(&record["pr"]["id"]))).child(hint(
-                        format!(
-                            "Source: {}/{} · repository {}",
-                            value(&record["repository"]["workspace"]),
-                            value(&record["repository"]["slug"]),
-                            value(&record["repository"]["uuid"])
-                        ),
+                        format!("Source: {}", repository_label(&record["repository"])),
                     ));
                 let observed = &record["feedback"];
                 if observed.is_null() {
