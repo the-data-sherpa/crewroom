@@ -13,7 +13,7 @@ test('native Jira intents survive outage and lost create reply without duplicate
  await f.flush();assert.equal((await f.updates())[0].state,'pending');assert.equal(posts,0);
  offline=false;await f.flush();assert.equal((await f.updates())[0].state,'uncertain');assert.equal(posts,1);
  await f.reopen();await f.flush();await f.flush();assert.equal((await f.updates())[0].state,'confirmed');assert.equal((await f.updates())[0].externalId,'77');assert.equal(posts,1);
- const task=await f.c.command('task',{target:f.seed.task.id});assert.equal(task.description,'Keep buttons visible');assert.equal(task.jiraStatus,'To Do');assert.equal(JSON.stringify(await f.updates()).includes('private detail'),false);
+ const task=await f.c.command('task',{target:f.seed.task.id});assert.equal(task.description,'Keep buttons visible');assert.equal(task.sourceStatus,'To Do');assert.equal(JSON.stringify(await f.updates()).includes('private detail'),false);
 });
 
 test('native unknown comment outcome holds its agent lane even after inconclusive reads',async t=>{
@@ -30,7 +30,7 @@ test('native reporter authority and configured transitions do not invent importe
  await assert.rejects(f.report({kind:'done',eventKey:'close'}),/Invalid/);
  await assert.rejects(f.report({kind:'evidence',eventKey:'proof',candidateId:f.seed.run.id}),/evidence is unavailable/);
  await f.report({kind:'in_progress',eventKey:'execution-started'});await f.flush();assert.equal((await f.updates())[0].state,'uncertain');await f.flush();assert.equal((await f.updates())[0].state,'confirmed');assert.equal(posts,1);
- assert.equal((await f.c.command('task',{target:f.seed.task.id})).jiraStatus,'To Do');
+ assert.equal((await f.c.command('task',{target:f.seed.task.id})).sourceStatus,'To Do');
  denied=true;await f.report({...report,kind:'blocker'});await f.flush();const blocked=(await f.updates())[1];assert.equal(blocked.state,'blocked');assert.match(blocked.reason,/403/);assert.equal(JSON.stringify(blocked).includes('private permissions'),false);
 });
 

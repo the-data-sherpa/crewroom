@@ -148,7 +148,7 @@ Jira metadata is validated by [the native provider loader](../crates/crewroom-ru
 
 ## Migrations and retention
 
-`workflow.sqlite` currently uses schema 29. Native startup upgrades schemas 1–25 to 26 in ordered per-version transactions, refuses newer schemas and refuses a nonempty unversioned store. A failing version rolls back; earlier completed versions remain committed. Back up before upgrading. Do not lower `user_version`, delete a corrupt journal, or run an old build against a migrated database. A code rollback also needs the corresponding whole-state backup.
+`workflow.sqlite` currently uses schema 31. Schema 31 (FOR-40) renames each ticket's Jira-named `jiraStatus`/`jiraStatusId` to the provider-neutral `sourceStatus`/`sourceStatusId` in place and drops the derived "Not linked" placeholder from local tickets; historical run snapshots and message bodies keep their original fields. A schema-30 build refuses a migrated store, so roll back only with the matching whole-state backup. Native startup upgrades each older schema in ordered per-version transactions, refuses newer schemas and refuses a nonempty unversioned store. A failing version rolls back; earlier completed versions remain committed. Back up before upgrading. Do not lower `user_version`, delete a corrupt journal, or run an old build against a migrated database. A code rollback also needs the corresponding whole-state backup.
 
 SQLite uses WAL. Copying only the main database while it is running can lose committed work. The database alone also omits files needed to interpret it: evidence artifacts, worktrees, repository metadata, host journals, sessions, process receipts, provider reasoning budgets and Mail records.
 

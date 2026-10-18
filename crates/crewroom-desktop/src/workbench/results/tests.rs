@@ -134,7 +134,7 @@ fn open(
                     view.connected = true;
                     view.selected = Some("fixture".into());
                     view.tab = "Results";
-                    view.workspace = json!({"tasks":[{"id":"fixture","key":"SIM-1","source":"local","title":"Native fixture","brief":"","criteria":[],"revision":1,"sourceRevision":1,"jiraStatus":"Not linked"}],"runs":[{"id":"run-1","taskId":"fixture","purpose":"coding","status":"completed"}],"roles":[],"repositories":[]});
+                    view.workspace = json!({"tasks":[{"id":"fixture","key":"SIM-1","source":"local","title":"Native fixture","brief":"","criteria":[],"revision":1,"sourceRevision":1}],"runs":[{"id":"run-1","taskId":"fixture","purpose":"coding","status":"completed"}],"roles":[],"repositories":[]});
                     view.observe_run(Some("run-1".into()));
                     setup(&mut view);
                     view

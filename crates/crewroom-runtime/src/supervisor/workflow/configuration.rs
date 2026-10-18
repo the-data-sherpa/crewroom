@@ -597,7 +597,8 @@ pub fn assignment_prompt(
         String::new()
     };
     let reporter_prompt = if purpose == "research"
-        && run["taskSnapshot"]["source"] == "jira"
+        && crewroom_core::ticket_source::provider(&run["taskSnapshot"])
+            == Some(crewroom_core::ticket_source::JIRA)
         && jira
     {
         if assignment["role"]["id"] == "delivery-reporter" {

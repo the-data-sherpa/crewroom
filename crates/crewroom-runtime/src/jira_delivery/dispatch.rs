@@ -102,7 +102,7 @@ impl<S: StoreAccess> JiraDelivery<S> {
             for record in s.publications()? {
                 let run=s.get_run(text(&record,"runId")?)?;
                 let task=s.get_task(text(&run,"taskId")?)?;
-                if task["source"]!="jira" || task["sourceSite"]!=source["siteUrl"] {continue;}
+                if !crewroom_core::ticket_source::belongs_to(&task,crewroom_core::ticket_source::JIRA,&source["siteUrl"]) {continue;}
                 let updates=s.jira_updates(Some(text(&run,"id")?))?;
                 let intent=|kind:&str,status:&str,transition:&str|->Result<()> {
                     let key=format!("{}-{}",if kind=="done" {"merged"} else {"review"},text(&record,"id")?);

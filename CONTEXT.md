@@ -16,8 +16,12 @@ _Avoid_: Run, agent assignment
 The one repository assigned to a ticket as the destination for its coding work.
 _Avoid_: Jira project
 
-**Jira status**:
-The status of an imported issue in its Jira workflow.
+**Ticket source**:
+Where a ticket came from: its provider kind (Jira, GitHub, or local) and its identity at that provider (site or repository, issue id, key, URL). A local ticket has no provider.
+_Avoid_: Jira project, target repository
+
+**Source status**:
+The status of an imported issue in its provider's own workflow, shown with the provider name (for example "Jira In Progress"). **Jira status** is the source status of a Jira ticket. A local ticket has none and shows "Not linked".
 _Avoid_: Agent activity, Crewroom workflow state
 
 **Workflow state**:

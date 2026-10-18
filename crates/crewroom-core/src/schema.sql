@@ -79,7 +79,7 @@ CREATE TABLE implementation_plans (id TEXT PRIMARY KEY, task_id TEXT NOT NULL RE
 CREATE TABLE plan_decisions (plan_id TEXT PRIMARY KEY REFERENCES implementation_plans(id), data TEXT NOT NULL);
 CREATE TABLE intake_requests (id TEXT PRIMARY KEY, task_id TEXT NOT NULL REFERENCES tickets(id), data TEXT NOT NULL);
 CREATE UNIQUE INDEX one_active_intake ON intake_requests(task_id) WHERE json_extract(data,'$.state') NOT IN ('cancelled','handed_off');
-PRAGMA user_version=30;
+PRAGMA user_version=31;
 
 CREATE TABLE choreography_revisions (run_id TEXT NOT NULL REFERENCES runs(id), revision INTEGER NOT NULL, data TEXT NOT NULL, PRIMARY KEY(run_id,revision));
 

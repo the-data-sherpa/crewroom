@@ -64,6 +64,7 @@ gpui_kit::actions!(
     ]
 );
 use crate::client::{Client, Event};
+use crewroom_core::ticket_source;
 use gpui_kit::base::{Disableable, Selectable};
 use gpui_kit::component::WindowExt;
 use gpui_kit::component::{
@@ -751,11 +752,7 @@ impl Workbench {
                             .child(hint(format!(
                                 "{}  /  {}",
                                 string(&task, "key"),
-                                if task["source"] == "jira" {
-                                    "Jira ticket"
-                                } else {
-                                    "Local ticket"
-                                }
+                                ticket_source::ticket_label(&task)
                             )))
                             .child(
                                 div()
@@ -1342,7 +1339,7 @@ mod tests {
                 cx.new(|cx| {
                     let mut view = Workbench::new(None,None,window,cx);
                     view.connected = true;view.selected = Some("fixture".into());
-                    view.workspace = json!({"tasks":[{"id":"fixture","key":"SIM-1","source":"local","title":"Native fixture","brief":"","criteria":[],"revision":1,"sourceRevision":1,"jiraStatus":"Not linked"}],"runs":[],"roles":[],"repositories":[]});
+                    view.workspace = json!({"tasks":[{"id":"fixture","key":"SIM-1","source":"local","title":"Native fixture","brief":"","criteria":[],"revision":1,"sourceRevision":1}],"runs":[],"roles":[],"repositories":[]});
                     view
                 })
             }).unwrap()

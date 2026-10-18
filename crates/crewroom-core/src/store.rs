@@ -5,6 +5,9 @@ use rusqlite::{Connection, OptionalExtension, params};
 use serde_json::{Value, json};
 use std::{collections::HashSet, path::Path};
 use uuid::Uuid;
+/// Current workflow store schema. Version 31 moves ticket source status to the
+/// provider-neutral `sourceStatus`/`sourceStatusId` fields (FOR-40).
+pub const SCHEMA_VERSION: u32 = 31;
 
 pub struct Store {
     pub(crate) db: Connection,
@@ -151,7 +154,7 @@ impl Store {
         }
         db.busy_timeout(std::time::Duration::from_secs(5))?;
         let version: u32 = db.query_row("PRAGMA user_version", [], |r| r.get(0))?;
-        if version > 30 {
+        if version > SCHEMA_VERSION {
             return Err(conflict(
                 "Workflow database is newer than this application.",
             ));
@@ -175,7 +178,7 @@ impl Store {
             db,
             clock: std::sync::Arc::new(clock),
         };
-        if version > 0 && version < 30 {
+        if version > 0 && version < SCHEMA_VERSION {
             store.migrate(version)?;
         }
         let check: String = store.db.query_row("PRAGMA quick_check", [], |r| r.get(0))?;
@@ -320,7 +323,7 @@ impl Store {
         self.transaction(|s| {
             if let Some(repo) = repository.filter(|s| !s.is_empty()) { s.active_repository(repo)?; }
             let task_id = id(); let source = json!({"id":task_id,"key":format!("LOCAL-{}", &task_id[..8]), "title":title,"description":description,
-                "jiraStatus":"Not linked","priority":"Unspecified","source":"local","project":"","rank":0,"sourceRevision":1,"updatedAt":s.time()});
+                "priority":"Unspecified","source":"local","project":"","rank":0,"sourceRevision":1,"updatedAt":s.time()});
             let mut refinement = json!({"revision":1,"brief":"","criteria":[],"needsReacceptance":false});
             if let Some(repo) = body.get("repositoryId") { refinement["repositoryId"] = repo.clone(); }
             s.db.execute("INSERT INTO tickets VALUES(?,NULL,NULL,?,?)", params![task_id,source.to_string(),refinement.to_string()])?;

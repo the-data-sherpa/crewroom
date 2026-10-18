@@ -356,7 +356,7 @@ impl Store {
             if remaining==0 {return Err(conflict("The comparison active allowance is exhausted."));}
             let case=manifest["cases"].as_array().unwrap().iter().find(|c|c["id"]==cell["caseId"]).unwrap();
             let task_id=id();
-            let task=json!({"id":task_id,"key":format!("WORK-{}",&task_id[..8]),"title":case["title"].as_str().unwrap_or("Workspace assignment"),"description":case["prompt"],"source":"evaluation","internal":true,"jiraStatus":"Not linked","priority":"Unspecified","project":"","rank":0,"sourceRevision":1,"updatedAt":s.time()});
+            let task=json!({"id":task_id,"key":format!("WORK-{}",&task_id[..8]),"title":case["title"].as_str().unwrap_or("Workspace assignment"),"description":case["prompt"],"source":"evaluation","internal":true,"priority":"Unspecified","project":"","rank":0,"sourceRevision":1,"updatedAt":s.time()});
             let refinement=json!({"revision":1,"brief":case["prompt"],"criteria":case["requirements"]["criteria"].as_array().cloned().unwrap_or_default(),"needsReacceptance":false});
             s.db.execute("INSERT INTO tickets VALUES(?,NULL,NULL,?,?)",params![task_id,task.to_string(),refinement.to_string()])?;
             let limit=remaining.min(manifest["design"]["perCellActiveMs"].as_u64().unwrap());

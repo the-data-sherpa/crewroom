@@ -137,7 +137,7 @@ fn native_external_intake_restart(cx: &mut gpui::TestAppContext) {
     });
     assert_eq!(task["description"], "Refreshed source");
     assert_eq!(task["brief"], "Keep zero behavior correct");
-    assert_eq!(task["jiraStatus"], "Backlog");
+    assert_eq!(task["sourceStatus"], "Backlog");
     assert_eq!(task["criteria"], json!(["0 + 0 returns 0"]));
     assert_eq!(run["status"], "awaiting_runner");
     cx.read(|cx| assert!(records(&v.read(cx).observation.runtime, "attempts").is_empty()));

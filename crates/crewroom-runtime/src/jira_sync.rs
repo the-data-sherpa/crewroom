@@ -59,9 +59,11 @@ impl<S: StoreAccess> JiraSync<S> {
                     .iter()
                     .find(|t| t["id"] == run["taskId"])
                     .ok_or_else(invalid)?;
-                if task["source"] == "jira"
-                    && task["sourceSite"] == self.client.source["siteUrl"]
-                    && let Some(id) = task["sourceId"].as_str().filter(|s| !s.is_empty())
+                if crewroom_core::ticket_source::belongs_to(
+                    task,
+                    crewroom_core::ticket_source::JIRA,
+                    &self.client.source["siteUrl"],
+                ) && let Some(id) = task["sourceId"].as_str().filter(|s| !s.is_empty())
                     && !ids.contains(id)
                 {
                     retained.push(self.client.issue(id).await?);

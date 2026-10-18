@@ -86,13 +86,15 @@ impl<S: StoreAccess> JiraDelivery<S> {
     pub fn needs_research_summary(&self, run_id: &str, revision: u64) -> Result<bool> {
         self.store.with_store(|s| {
             let task = s.get_task(text(&s.get_run(run_id)?, "taskId")?)?;
-            Ok(task["source"] == "jira"
-                && task["sourceSite"] == self.client.source["siteUrl"]
-                && !s.jira_updates(Some(run_id))?.iter().any(|u| {
-                    u["kind"] == "research_outcome"
-                        && u["eventKey"] == format!("research-outcome-{revision}")
-                        && u["state"] != "blocked"
-                }))
+            Ok(crewroom_core::ticket_source::belongs_to(
+                &task,
+                crewroom_core::ticket_source::JIRA,
+                &self.client.source["siteUrl"],
+            ) && !s.jira_updates(Some(run_id))?.iter().any(|u| {
+                u["kind"] == "research_outcome"
+                    && u["eventKey"] == format!("research-outcome-{revision}")
+                    && u["state"] != "blocked"
+            }))
         })
     }
     pub async fn flush(&self) -> Result<()> {

@@ -78,7 +78,11 @@ impl<S: StoreAccess> JiraDelivery<S> {
             ));
         }
         let task = s.get_task(text(&run, "taskId")?)?;
-        if task["source"] != "jira" || task["sourceSite"] != self.client.source["siteUrl"] {
+        if !crewroom_core::ticket_source::belongs_to(
+            &task,
+            crewroom_core::ticket_source::JIRA,
+            &self.client.source["siteUrl"],
+        ) {
             return Err(conflict(
                 "This run does not belong to the configured Jira site.",
             ));

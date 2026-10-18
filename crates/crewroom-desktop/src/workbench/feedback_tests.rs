@@ -35,7 +35,7 @@ fn offline(
     (handle.into(), view)
 }
 fn task(id: &str) -> Value {
-    json!({"id":id,"key":id.to_uppercase(),"source":"local","title":format!("Ticket {id}"),"brief":"","criteria":[],"revision":1,"sourceRevision":1,"jiraStatus":"Not linked"})
+    json!({"id":id,"key":id.to_uppercase(),"source":"local","title":format!("Ticket {id}"),"brief":"","criteria":[],"revision":1,"sourceRevision":1})
 }
 /// Records a command as the production send path does, then applies the service result.
 fn finish(

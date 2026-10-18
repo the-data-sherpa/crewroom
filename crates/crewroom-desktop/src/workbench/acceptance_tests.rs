@@ -1250,3 +1250,52 @@ fn native_packages_keep_plans_receipts_handoff_and_drafts_distinct_at_390(
     })
     .unwrap();
 }
+#[gpui::test]
+fn native_jira_ticket_labels_source_status_with_provider_name_apart_from_workflow_and_activity(
+    cx: &mut gpui::TestAppContext,
+) {
+    // FOR-40: the provider-neutral source model drives the Jira label.
+    let mut task = Value::Null;
+    let f = Fixture::projected(|s, _| {
+        let imported = s.import_jira(&json!({"siteUrl":"https://fixture.atlassian.net/","issues":[{"id":"700","key":"SIM-7","fields":{"summary":"Imported fixture","description":"Source text","status":{"id":"3","name":"Backlog"}}}]})).unwrap();
+        task = imported[0].clone();
+        s.queue_refinement(&id(&task), &json!({"revision":1,"purpose":"explore"}))
+            .unwrap();
+    });
+    assert_eq!(task["sourceStatus"], "Backlog");
+    let (h, v, e) = open(cx, &f);
+    select(cx, h, &v, &e, &task);
+    let row = |cx: &mut gpui::TestAppContext, kind: &str| {
+        labels(cx, h, Some(&format!("row-{kind}-{}", id(&task))))
+    };
+    assert_eq!(row(cx, "jira"), ["Jira Backlog"]);
+    assert_eq!(
+        labels(cx, h, Some(&format!("row-key-{}", id(&task)))),
+        ["SIM-7 · jira"]
+    );
+    let workflow = row(cx, "workflow");
+    let activity = row(cx, "activity");
+    assert!(!workflow.is_empty() && !activity.is_empty());
+    assert!(
+        !workflow
+            .iter()
+            .chain(&activity)
+            .any(|l| l.contains("Backlog"))
+    );
+    assert_eq!(labels(cx, h, Some("fact-jira")), ["Backlog"]);
+    let header = labels(cx, h, None);
+    for caption in [
+        "JIRA STATUS",
+        "Imported Jira field",
+        "SIM-7  /  Jira ticket",
+    ] {
+        contains(&header, caption);
+    }
+    for fact in ["fact-workflow", "fact-activity"] {
+        assert!(
+            !labels(cx, h, Some(fact))
+                .iter()
+                .any(|l| l.contains("Backlog"))
+        );
+    }
+}

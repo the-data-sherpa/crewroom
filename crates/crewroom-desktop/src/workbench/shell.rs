@@ -122,13 +122,12 @@ impl Workbench {
         let id = string(task, "id");
         let select = id.clone();
         let selected = self.sidebar_current().as_deref() == Some(&format!("ticket-{id}"));
-        let local = task["source"] != "jira";
         let workflow = Self::workflow_label(task, run);
         let (activity, _, activity_tone) = self.activity_summary(run);
         let mut key = format!(
             "{} · {}",
             string(task, "key"),
-            if local { "local" } else { "jira" }
+            ticket_source::kind_tag(task)
         );
         if let Some(position) = run
             .filter(|r| r["status"] == "awaiting_runner")
@@ -178,11 +177,8 @@ impl Workbench {
                     .gap_1()
                     .child(chip(
                         format!("row-jira-{id}"),
-                        if local {
-                            "Not linked".to_owned()
-                        } else {
-                            format!("Jira {}", string(task, "jiraStatus"))
-                        },
+                        // Source status is the provider's fact, labelled with its name.
+                        ticket_source::status_label(task),
                         0x9eacb9,
                     ))
                     .child(chip(
@@ -523,7 +519,7 @@ impl Workbench {
 
     /// Four separate facts. None of them is derived from another.
     pub(super) fn facts_bar(&self, task: &Value, run: Option<&Value>) -> Div {
-        let local = task["source"] != "jira";
+        let provider = ticket_source::provider(task);
         let (activity, detail, _) = self.activity_summary(run);
         let (ready, why, tone) = self.readiness(run);
         let cell = |id: &str, label: &str, value: String, small: String, tone: u32, first: bool| {
@@ -554,16 +550,13 @@ impl Workbench {
             .bg(rgb(0x17212a))
             .child(cell(
                 "jira",
-                "Jira status",
-                if local {
-                    "Not linked".into()
-                } else {
-                    string(task, "jiraStatus")
-                },
-                if local {
-                    "Local ticket".into()
-                } else {
-                    "Imported Jira field".into()
+                // Local tickets keep their pre-FOR-40 caption until a second
+                // provider can be configured (FOR-45).
+                &format!("{} status", provider.map_or("Jira", |p| p.name)),
+                ticket_source::status_value(task),
+                match provider {
+                    Some(p) => format!("Imported {} field", p.name),
+                    None => ticket_source::ticket_label(task),
                 },
                 0xe2e8ed,
                 true,

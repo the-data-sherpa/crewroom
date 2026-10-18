@@ -13,7 +13,7 @@ mod proof;
 impl Store {
     pub(crate) fn migrate(&self, from: u32) -> Result<()> {
         let schema: Value = serde_json::from_str(include_str!("migrations/schema.json"))?;
-        for version in from + 1..=30 {
+        for version in from + 1..=crate::store::SCHEMA_VERSION {
             self.transaction(|s| {
                 if let Some(sql) = schema[version.to_string()].as_str() {
                     s.db.execute_batch(sql)?;
@@ -27,6 +27,7 @@ impl Store {
                     22 => s.migrate_retries()?,
                     23 => s.migrate_ownership()?,
                     24 => s.migrate_steering()?,
+                    31 => s.migrate_ticket_sources()?,
                     _ => (),
                 }
                 s.db.pragma_update(None, "user_version", version)?;
@@ -436,6 +437,53 @@ impl Store {
                     params![message.to_string(), message["id"].as_str()],
                 )?;
             }
+        }
+        Ok(())
+    }
+    /// Version 31 (FOR-40): rename the Jira-named source status to the
+    /// provider-neutral `sourceStatus`/`sourceStatusId`, keeping key order.
+    /// The "Not linked" placeholder on a local ticket was never a provider fact
+    /// and is derived from the source kind, so it is dropped. Any other value is
+    /// carried over unchanged. Historical run snapshots and message bodies are
+    /// immutable records and are left as written.
+    fn migrate_ticket_sources(&self) -> Result<()> {
+        let rows = self
+            .db
+            .prepare("SELECT id,imported FROM tickets ORDER BY rowid")?
+            .query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?)))?
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+        for (ticket, imported) in rows {
+            let Value::Object(fields) = parse(imported)? else {
+                return Err(conflict("Ticket source record is not an object."));
+            };
+            if !fields.contains_key("jiraStatus") && !fields.contains_key("jiraStatusId") {
+                continue;
+            }
+            if fields.contains_key("sourceStatus") || fields.contains_key("sourceStatusId") {
+                return Err(conflict(
+                    "Ticket has both Jira-named and neutral source status fields.",
+                ));
+            }
+            let external = crate::ticket_source::provider(&Value::Object(fields.clone())).is_some();
+            let mut neutral = serde_json::Map::new();
+            for (key, value) in fields {
+                match key.as_str() {
+                    "jiraStatus" if !external && value == crate::ticket_source::NOT_LINKED => {}
+                    "jiraStatus" => {
+                        neutral.insert("sourceStatus".into(), value);
+                    }
+                    "jiraStatusId" => {
+                        neutral.insert("sourceStatusId".into(), value);
+                    }
+                    _ => {
+                        neutral.insert(key, value);
+                    }
+                }
+            }
+            self.db.execute(
+                "UPDATE tickets SET imported=? WHERE id=?",
+                params![Value::Object(neutral).to_string(), ticket],
+            )?;
         }
         Ok(())
     }

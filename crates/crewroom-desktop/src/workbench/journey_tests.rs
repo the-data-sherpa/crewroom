@@ -426,7 +426,7 @@ fn native_journey_jira_refresh_outage_retains_operator_brief_and_never_queues(
     });
     let workspace = f.get("/workspace");
     assert_eq!(workspace["tasks"][0]["brief"], "Keep my accepted direction");
-    assert_eq!(workspace["tasks"][0]["jiraStatus"], "In Progress");
+    assert_eq!(workspace["tasks"][0]["sourceStatus"], "In Progress");
     assert!(records(&workspace, "runs").is_empty());
     mode.store(2, Ordering::SeqCst);
     click(cx, h, "refresh-jira");

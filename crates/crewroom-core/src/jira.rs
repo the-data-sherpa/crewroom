@@ -1,11 +1,10 @@
 //! Jira intake records. Provider transport and credentials are separate concerns.
 use crate::{
     Result,
-    lifecycle::{Transition, transition},
     source_time::parse as source_timestamp,
-    store::{Store, conflict, id, invalid, parse, trim_text},
+    store::{Store, conflict, invalid, trim_text},
+    ticket_source::{JIRA, SourceObservation},
 };
-use rusqlite::{OptionalExtension, params};
 use serde_json::{Value, json};
 use std::collections::HashSet;
 
@@ -145,95 +144,29 @@ impl Store {
         self.transaction(|s| Ok(json!(s.import_jira_rows(&site, &issues)?)))
     }
     fn import_jira_rows(&self, site: &str, issues: &[Value]) -> Result<Vec<Value>> {
-        let mut saved = vec![];
-        for (rank, issue) in issues.iter().enumerate() {
-            let prior_id: Option<String> = self
-                .db
-                .query_row(
-                    "SELECT id FROM tickets WHERE source_site=? AND source_id=?",
-                    params![site, issue["id"].as_str()],
-                    |r| r.get(0),
-                )
-                .optional()?;
-            let previous = prior_id
-                .as_deref()
-                .map(|id| self.get_task(id))
-                .transpose()?;
-            let fields = &issue["fields"];
-            if let (Some(old), Some(new)) = (
-                previous
-                    .as_ref()
-                    .and_then(|p| p["sourceUpdatedAt"].as_str()),
-                fields["updated"].as_str(),
-            ) && source_timestamp(new)
-                .zip(source_timestamp(old))
-                .is_some_and(|(new, old)| new < old)
-            {
-                return Err(conflict("Jira returned an older issue observation."));
-            }
-            let title = fields["summary"].as_str().unwrap();
-            let description = description(&fields["description"], 0);
-            let description = trim_text(&description);
-            let changed = previous
-                .as_ref()
-                .is_some_and(|p| p["title"] != title || p["description"] != description);
-            let task_id = prior_id.unwrap_or_else(id);
-            if changed && let Some(run) = self.open_run(&task_id)? {
-                let runtime = self.runtime(run["id"].as_str().unwrap())?;
-                let active = runtime["attempts"]
-                    .as_array()
-                    .unwrap()
-                    .iter()
-                    .any(|a| a["state"] != "admitted" && a["ownership"] != "stopped");
-                self.save_run(&transition(&run,&Transition::SourceChanged{reason:"Jira requirements changed. Compare and accept the new requirements before continuing this run.".into(),active},self.clock_ms())?)?;
-            }
-            // Preserve the legacy field order too: adopted requirement messages
-            // embed a serialized task snapshot in their immutable body.
-            let mut source = json!({"key":issue["key"],"title":title,"description":description,"jiraStatus":fields["status"]["name"],"priority":fields["priority"]["name"].as_str().unwrap_or("Unspecified"),"project":fields["project"]["name"].as_str().unwrap_or(""),"rank":rank});
-            if let Some(value) = fields["status"].get("id") {
-                source["jiraStatusId"] = value.clone();
-            }
-            if let Some(value) = fields.get("updated") {
-                source["sourceUpdatedAt"] = value.clone();
-            }
-            source["id"] = json!(task_id);
-            source["source"] = json!("jira");
-            source["sourceSite"] = json!(site);
-            source["sourceId"] = issue["id"].clone();
-            source["sourceUrl"] =
-                json!(format!("{site}/browse/{}", issue["key"].as_str().unwrap()));
-            source["sourceRevision"] = json!(
-                previous
-                    .as_ref()
-                    .and_then(|p| p["sourceRevision"].as_u64())
-                    .unwrap_or(0)
-                    + u64::from(changed || previous.is_none())
-            );
-            source["updatedAt"] = json!(self.time());
-            let mut refinement = if previous.is_some() {
-                parse(self.db.query_row(
-                    "SELECT refinement FROM tickets WHERE id=?",
-                    [&task_id],
-                    |r| r.get(0),
-                )?)?
-            } else {
-                json!({"revision":1,"brief":"","criteria":[],"needsReacceptance":false})
-            };
-            if changed && !refinement["brief"].as_str().unwrap_or("").is_empty() {
-                // Keep the text the operator last accepted so re-acceptance can show what
-                // Jira changed; later changes before re-acceptance keep the first baseline.
-                if refinement["needsReacceptance"] != true
-                    && let Some(p) = previous.as_ref()
-                {
-                    refinement["acceptedSource"] =
-                        json!({"title":p["title"],"description":p["description"]});
+        let observations = issues
+            .iter()
+            .map(|issue| {
+                let fields = &issue["fields"];
+                let description = description(&fields["description"], 0);
+                SourceObservation {
+                    id: issue["id"].clone(),
+                    key: issue["key"].clone(),
+                    title: fields["summary"].as_str().unwrap().to_owned(),
+                    description: trim_text(&description).to_owned(),
+                    status: fields["status"]["name"].clone(),
+                    status_id: fields["status"].get("id").cloned(),
+                    priority: fields["priority"]["name"]
+                        .as_str()
+                        .unwrap_or("Unspecified")
+                        .to_owned(),
+                    project: fields["project"]["name"].as_str().unwrap_or("").to_owned(),
+                    updated_at: fields.get("updated").cloned(),
+                    url: format!("{site}/browse/{}", issue["key"].as_str().unwrap()),
                 }
-                refinement["needsReacceptance"] = json!(true);
-            }
-            self.db.execute("INSERT INTO tickets VALUES(?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET imported=excluded.imported,refinement=excluded.refinement",params![task_id,site,issue["id"].as_str(),source.to_string(),refinement.to_string()])?;
-            saved.push(self.get_task(&task_id)?);
-        }
-        Ok(saved)
+            })
+            .collect::<Vec<_>>();
+        self.import_source_rows(JIRA, site, &observations)
     }
     pub fn jira_state(&self) -> Result<Option<Value>> {
         self.record("jira_sync", "id", "1")

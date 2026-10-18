@@ -41,6 +41,7 @@ pub mod source_time;
 pub mod store;
 mod target_recovery;
 mod teams;
+pub mod ticket_source;
 pub use teams::insertion_request as parse_insertion_request;
 mod workflow;
 
