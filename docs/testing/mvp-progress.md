@@ -52,6 +52,14 @@ So the signal comes from outside the test's process tree, or from the kernel. An
 
 **Other checks at `58580c3`.** `npm test` **334/334** on rerun; the first run is described above. `npm run build` passes. `npm run test:e2e` is left to the integrator.
 
+**Integration (2026-10-18).** Rebased without code changes onto main `ed05621` (FOR-57) as code `8f39564`; only this file's and `docs/status.md`'s entries conflicted, and every other ticket's entries were kept. Checks at `8f39564`, in a worktree prepared with `python3 scripts/prepare_worktree.py` and a private `CARGO_TARGET_DIR` (load 0.8 / 4.0 / 7.8 at the start):
+
+- `cargo test --locked --no-fail-fast -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop -j6` at default test threads: **544 passed, 0 failed, 17 ignored** (one run; the desktop binary was not killed in it). This is one more run, not the 5-run desktop evidence the acceptance criterion asks for.
+- `cargo clippy --locked` for the four crates `--all-targets -- -D warnings`: clean. `cargo fmt --check` for the four crates: clean.
+- `npm test` **340/340**; `npm run build` passes (existing Vite chunk-size warning); `npm run test:e2e` **31 passed** with the fixture-only OMP and Rust Mail runtime linked by the preparation step.
+
+Still open: the desktop 5-consecutive-run criterion (blocked on FOR-68) and a reproduction of the workbench-ownership race.
+
 ## FOR-57 — Docker-backed verification finds the Docker socket on Linux (2026-10-18)
 
 Branch `for-57-docker-socket-resolver` from main `aa2d619`. Code `6c754fa` (resolver and consumers), `46c4765` (resolver bound into feature-recipe source hashes). Checks below ran on `6c754fa` on Linux x86_64, Docker Engine 29.7.2 (rootful, `default` context only), Node 26. `46c4765` changes only `scripts/verify-feature.py`; its guard tests passed again there.
