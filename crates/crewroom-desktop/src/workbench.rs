@@ -48,6 +48,9 @@ mod plan_authoring_tests;
 mod plan_disclosure_tests;
 mod planning;
 mod playbooks;
+mod project_source;
+#[cfg(test)]
+mod project_source_tests;
 mod results;
 mod run_actions;
 mod settings;
@@ -143,6 +146,10 @@ pub struct Workbench {
     import: Entity<TextareaState>,
     credential_inputs: credentials::CredentialInputs,
     issue_inputs: github_issues::IssueSourceInputs,
+    /// Ticket-source inputs per repository, and repositories whose confirmed
+    /// source the operator opened to change (FOR-47).
+    source_inputs: HashMap<String, project_source::SourceInputs>,
+    source_open: std::collections::HashSet<String>,
     steering: HashMap<String, Entity<TextareaState>>,
     settings: settings::Settings,
     comparisons: comparisons::Comparisons,
@@ -303,6 +310,8 @@ impl Workbench {
             }),
             credential_inputs: credentials::CredentialInputs::new(window, cx),
             issue_inputs: github_issues::IssueSourceInputs::new(window, cx),
+            source_inputs: HashMap::new(),
+            source_open: Default::default(),
             settings: settings::Settings::default(),
             comparisons: comparisons::Comparisons::default(),
             planning: planning::Planning::default(),
@@ -442,6 +451,14 @@ impl Workbench {
                             self.notice = text;
                             if let Some(facts) = value.get("githubIssues") {
                                 self.workspace["githubIssues"] = facts.clone();
+                            }
+                        }
+                        if let Some(text) = project_source::notice(&path) {
+                            self.notice = text;
+                            // Collapse the editor and re-prefill from the saved source.
+                            if let Some(id) = value["repository"]["id"].as_str() {
+                                self.source_open.remove(id);
+                                self.source_inputs.remove(id);
                             }
                         }
                         if let Some(text) = credentials::github_notice(&path, &value) {
