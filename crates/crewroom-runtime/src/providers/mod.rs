@@ -5,6 +5,7 @@ mod bitbucket_schema;
 pub mod config;
 pub mod jira;
 mod schema;
+pub mod secrets;
 mod singleflight;
 mod transport;
 use serde::Serialize;

@@ -1,5 +1,10 @@
 //! Metadata is public; credential values stay in private callbacks and memory.
-use super::{schema::*, singleflight::SingleFlight, *};
+use super::{
+    schema::*,
+    secrets::{Integration, SecretStore, StoredToken},
+    singleflight::SingleFlight,
+    *,
+};
 use async_compression::tokio::bufread::GzipDecoder;
 use base64::{
     Engine, alphabet,
@@ -28,6 +33,27 @@ pub struct CredentialCommand {
 pub type Command =
     Arc<dyn Fn(CredentialCommand) -> BoxFuture<'static, Result<String>> + Send + Sync>;
 pub type TokenEnvironment = Arc<dyn Fn() -> Option<String> + Send + Sync>;
+/// Reads the encrypted install store on each request, so a token saved in
+/// Settings applies without a restart and plaintext is never cached on disk.
+pub type StoredTokens = Arc<dyn Fn() -> StoredToken + Send + Sync>;
+pub fn stored_tokens(store: SecretStore, integration: Integration) -> StoredTokens {
+    Arc::new(move || store.token(integration))
+}
+/// Resolves a saved token. `Ok(None)` falls through to the platform route.
+fn stored_credential(
+    stored: Option<&StoredTokens>,
+    provider: Provider,
+) -> Result<Option<Credential>> {
+    match stored.map(|s| s()) {
+        Some(StoredToken::Present(token)) => Ok(Some(Credential::Bearer(token.to_string()))),
+        Some(StoredToken::Unreadable) => Err(unavailable(format!(
+            "{}: {}. Save the token again in Settings → Integrations, or restore crewroom.secret from the backup that holds credentials.json.",
+            provider.name(),
+            secrets::UNREADABLE
+        ))),
+        _ => Ok(None),
+    }
+}
 #[derive(Clone)]
 pub struct JiraConnection {
     pub source: Value,
@@ -184,6 +210,7 @@ struct JiraCredentials {
     command: Command,
     clock: Clock,
     environment: TokenEnvironment,
+    stored: Option<StoredTokens>,
     keychain: bool,
     renewing: SingleFlight<Credential>,
 }
@@ -240,9 +267,12 @@ impl JiraCredentials {
         if let Some(token) = (self.environment)().filter(|s| !s.is_empty()) {
             return Ok(Credential::Bearer(token));
         }
+        if let Some(credential) = stored_credential(self.stored.as_ref(), Provider::Jira)? {
+            return Ok(credential);
+        }
         if !self.keychain {
             return Err(unavailable(
-                "Jira credentials are unavailable. Set CREWROOM_JIRA_TOKEN in the server environment and restart the service. The macOS ACLI keychain is not available on this platform.",
+                "Jira credentials are unavailable. Save a Jira token in Settings → Integrations, or set CREWROOM_JIRA_TOKEN in the server environment and restart the service. The macOS ACLI keychain is not available on this platform.",
             ));
         }
         let result = async {
@@ -277,12 +307,27 @@ impl JiraCredentials {
         result.map_err(|_| credential_error(Provider::Jira))
     }
 }
-pub fn load_jira_connection(path: &Path) -> Result<Option<JiraConnection>> {
+/// Production route: environment override, then the encrypted install store,
+/// then (macOS only) the ACLI keychain.
+pub fn load_jira_connection(path: &Path, secrets: SecretStore) -> Result<Option<JiraConnection>> {
+    load_jira_connection_stored(
+        path,
+        Arc::new(|| std::env::var(Integration::Jira.environment()).ok()),
+        stored_tokens(secrets, Integration::Jira),
+    )
+}
+/// The production route with an explicit environment, without keychain commands.
+pub fn load_jira_connection_stored(
+    path: &Path,
+    environment: TokenEnvironment,
+    stored: StoredTokens,
+) -> Result<Option<JiraConnection>> {
     load_jira_connection_options(
         path,
         command(),
         Arc::new(crewroom_core::now_ms),
-        Arc::new(|| std::env::var("CREWROOM_JIRA_TOKEN").ok()),
+        environment,
+        Some(stored),
         cfg!(target_os = "macos"),
     )
 }
@@ -291,13 +336,14 @@ pub fn load_jira_connection_with(
     command: Command,
     clock: Clock,
 ) -> Result<Option<JiraConnection>> {
-    load_jira_connection_options(path, command, clock, Arc::new(|| None), true)
+    load_jira_connection_options(path, command, clock, Arc::new(|| None), None, true)
 }
 fn load_jira_connection_options(
     path: &Path,
     command: Command,
     clock: Clock,
     environment: TokenEnvironment,
+    stored: Option<StoredTokens>,
     keychain: bool,
 ) -> Result<Option<JiraConnection>> {
     let Some(mut metadata) = json_file(path)? else {
@@ -313,6 +359,7 @@ fn load_jira_connection_options(
         command,
         clock,
         environment,
+        stored,
         keychain,
         renewing: SingleFlight::default(),
     });
@@ -332,6 +379,7 @@ struct BitbucketCredentials {
     command: Command,
     clock: Clock,
     environment: TokenEnvironment,
+    stored: Option<StoredTokens>,
     keychain: bool,
     cached: Mutex<Option<Cached>>,
     unavailable: AtomicBool,
@@ -342,9 +390,12 @@ impl BitbucketCredentials {
         if let Some(token) = (self.environment)().filter(|s| !s.is_empty()) {
             return Ok(Credential::Bearer(token));
         }
+        if let Some(credential) = stored_credential(self.stored.as_ref(), Provider::Bitbucket)? {
+            return Ok(credential);
+        }
         if !self.keychain {
             return Err(unavailable(
-                "Bitbucket credentials are unavailable. Set CREWROOM_BITBUCKET_TOKEN in the server environment and restart the service. The macOS bkt keychain is not available on this platform.",
+                "Bitbucket credentials are unavailable. Save a Bitbucket token in Settings → Integrations, or set CREWROOM_BITBUCKET_TOKEN in the server environment and restart the service. The macOS bkt keychain is not available on this platform.",
             ));
         }
         if let Some(cached) = self
@@ -500,12 +551,18 @@ impl BitbucketCredentials {
         }
     }
 }
-pub fn load_publication_connections(path: &Path) -> Result<Vec<PublicationConnection>> {
+/// Production route: environment override, then the encrypted install store,
+/// then (macOS only) the bkt keychain.
+pub fn load_publication_connections(
+    path: &Path,
+    secrets: SecretStore,
+) -> Result<Vec<PublicationConnection>> {
     load_publication_connections_options(
         path,
         command(),
         Arc::new(crewroom_core::now_ms),
-        Arc::new(|| std::env::var("CREWROOM_BITBUCKET_TOKEN").ok()),
+        Arc::new(|| std::env::var(Integration::Bitbucket.environment()).ok()),
+        Some(stored_tokens(secrets, Integration::Bitbucket)),
         cfg!(target_os = "macos"),
     )
 }
@@ -515,13 +572,14 @@ pub fn load_publication_connections_with(
     clock: Clock,
     environment: TokenEnvironment,
 ) -> Result<Vec<PublicationConnection>> {
-    load_publication_connections_options(path, command, clock, environment, true)
+    load_publication_connections_options(path, command, clock, environment, None, true)
 }
 fn load_publication_connections_options(
     path: &Path,
     command: Command,
     clock: Clock,
     environment: TokenEnvironment,
+    stored: Option<StoredTokens>,
     keychain: bool,
 ) -> Result<Vec<PublicationConnection>> {
     let Some(metadata) = json_file(path)? else {
@@ -535,6 +593,7 @@ fn load_publication_connections_options(
         command,
         clock,
         environment,
+        stored,
         keychain,
         cached: Mutex::new(None),
         unavailable: AtomicBool::new(false),
@@ -610,6 +669,7 @@ mod tests {
                 no_credential_commands(),
                 Arc::new(|| 0),
                 environment.clone(),
+                None,
                 keychain,
             )
             .unwrap()
@@ -658,6 +718,7 @@ mod tests {
                 no_credential_commands(),
                 Arc::new(|| 0),
                 Arc::new(move || token.map(str::to_owned)),
+                None,
                 false,
             )
             .unwrap()
@@ -674,6 +735,98 @@ mod tests {
                 _ => panic!("Unexpected token authentication result"),
             }
         }
+    }
+
+    #[tokio::test]
+    async fn stored_tokens_authenticate_on_linux_and_environment_overrides_them() {
+        let root = tempfile::tempdir().unwrap();
+        let jira = root.path().join("jira.json");
+        std::fs::write(&jira, serde_json::to_vec(&json!({
+            "siteUrl":"https://fixture.atlassian.net",
+            "cloudId":"00000000-0000-4000-8000-000000000022",
+            "filterId":"1","assigneeAccountId":"operator","name":"Fixture","accountId":"operator"
+        })).unwrap()).unwrap();
+        let bitbucket = root.path().join("bitbucket.json");
+        std::fs::write(&bitbucket, serde_json::to_vec(&json!([{
+            "repositoryPath":"/disposable/repository",
+            "repository":{"workspace":"fixture","slug":"repository","uuid":"{00000000-0000-4000-8000-000000000011}"},
+            "policy":{"statusKeys":["pr"],"pipelineSteps":["Test"]}
+        }])).unwrap()).unwrap();
+        let store = SecretStore::open(root.path()).unwrap();
+        let environment = Arc::new(Mutex::new(None::<String>));
+        let env = |integration| -> TokenEnvironment {
+            let _ = integration;
+            let environment = environment.clone();
+            Arc::new(move || environment.lock().unwrap().clone())
+        };
+        let jira_connection = load_jira_connection_options(
+            &jira,
+            no_credential_commands(),
+            Arc::new(|| 0),
+            env(Integration::Jira),
+            Some(stored_tokens(store.clone(), Integration::Jira)),
+            false,
+        )
+        .unwrap()
+        .unwrap();
+        let publication = load_publication_connections_options(
+            &bitbucket,
+            no_credential_commands(),
+            Arc::new(|| 0),
+            env(Integration::Bitbucket),
+            Some(stored_tokens(store.clone(), Integration::Bitbucket)),
+            false,
+        )
+        .unwrap()
+        .remove(0);
+        // Nothing saved yet: the Linux message names both routes.
+        match (jira_connection.credentials)().await {
+            Err(Error::Unavailable(e)) => {
+                assert!(e.message.contains("Settings → Integrations"));
+                assert!(e.message.contains("CREWROOM_JIRA_TOKEN"));
+                assert!(!e.request_sent);
+            }
+            _ => panic!("Missing stored token must be unavailable"),
+        }
+        // A token saved after connection load applies without a restart.
+        store
+            .save(Integration::Jira, "synthetic-stored-jira", false)
+            .unwrap();
+        store
+            .save(Integration::Bitbucket, "synthetic-stored-bitbucket", false)
+            .unwrap();
+        assert!(
+            matches!((jira_connection.credentials)().await.unwrap(), Credential::Bearer(v) if v == "synthetic-stored-jira")
+        );
+        assert!(
+            matches!((publication.credentials)().await.unwrap(), Credential::Bearer(v) if v == "synthetic-stored-bitbucket")
+        );
+        // The environment variable wins over the stored value.
+        *environment.lock().unwrap() = Some("synthetic-env-override".into());
+        assert!(
+            matches!((jira_connection.credentials)().await.unwrap(), Credential::Bearer(v) if v == "synthetic-env-override")
+        );
+        assert!(
+            matches!((publication.credentials)().await.unwrap(), Credential::Bearer(v) if v == "synthetic-env-override")
+        );
+        *environment.lock().unwrap() = None;
+        // A lost install key makes both integrations unreadable, without a crash.
+        std::fs::remove_file(store.secret_path()).unwrap();
+        for credentials in [&jira_connection.credentials, &publication.credentials] {
+            match credentials().await {
+                Err(Error::Unavailable(e)) => {
+                    assert!(e.message.contains(secrets::UNREADABLE), "{}", e.message);
+                    assert!(!e.message.contains("synthetic"));
+                    assert!(!e.request_sent);
+                }
+                _ => panic!("Unreadable stored token must be unavailable"),
+            }
+        }
+        // An environment override still works while the store is unreadable.
+        *environment.lock().unwrap() = Some("synthetic-env-override".into());
+        assert!(
+            matches!((jira_connection.credentials)().await.unwrap(), Credential::Bearer(v) if v == "synthetic-env-override")
+        );
     }
 
     #[tokio::test]

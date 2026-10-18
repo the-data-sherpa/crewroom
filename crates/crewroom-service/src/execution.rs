@@ -57,18 +57,20 @@ impl ServiceOptions {
                 Ok(serde_json::from_slice(&std::fs::read(path)?)?)
             })
             .transpose()?;
-        let jira = config::load_jira_connection(&data.join("jira.json"))?
+        let secrets = crewroom_runtime::providers::secrets::SecretStore::at(data);
+        let jira = config::load_jira_connection(&data.join("jira.json"), secrets.clone())?
             .map(|c| JiraClient::new(&c.source, c.credentials, None))
             .transpose()
             .map_err(std::io::Error::other)?;
-        let publication = config::load_publication_connections(&data.join("bitbucket.json"))?
-            .into_iter()
-            .map(|c| -> Result<Connection> {
-                let client = BitbucketClient::new(&c.repository, c.credentials, None)
-                    .map_err(std::io::Error::other)?;
-                Connection::new(&c.repository_path, &c.repository, client, &c.policy, None)
-            })
-            .collect::<Result<Vec<_>>>()?;
+        let publication =
+            config::load_publication_connections(&data.join("bitbucket.json"), secrets)?
+                .into_iter()
+                .map(|c| -> Result<Connection> {
+                    let client = BitbucketClient::new(&c.repository, c.credentials, None)
+                        .map_err(std::io::Error::other)?;
+                    Connection::new(&c.repository_path, &c.repository, client, &c.policy, None)
+                })
+                .collect::<Result<Vec<_>>>()?;
         let tmux = std::env::var_os("CREWROOM_TMUX")
             .map(PathBuf::from)
             .or_else(|| {

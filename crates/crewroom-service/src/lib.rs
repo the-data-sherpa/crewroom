@@ -5,6 +5,7 @@ mod routes;
 mod scheduler;
 mod views;
 use crewroom_runtime::messaging::StoreAccess;
+use crewroom_runtime::providers::secrets::{Integration, SecretStore};
 use execution::Execution;
 pub use execution::ServiceOptions;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -57,6 +58,8 @@ struct AppState {
     inner: Arc<Mutex<Option<AuthorityState>>>,
     info: ConnectionInfo,
     changes: watch::Sender<u64>,
+    /// Encrypted provider tokens; plaintext never leaves the service.
+    secrets: SecretStore,
 }
 #[derive(Clone)]
 struct Access(Arc<Mutex<Option<AuthorityState>>>);
@@ -200,6 +203,8 @@ impl Service {
             Authority::acquire(data)?
         });
         let data = std::fs::canonicalize(data)?;
+        // First run creates the install key; existing encrypted values keep theirs.
+        let secrets = SecretStore::open(&data)?;
         let store = Store::open(&data.join("workflow.sqlite"))?;
         let roles = Roles::new(role_path);
         Learning::new(&store, &roles).reconcile()?;
@@ -239,6 +244,7 @@ impl Service {
             changes,
             execution,
             stopping: Arc::new(AtomicBool::new(false)),
+            secrets,
         };
         let app = Router::new()
             .route("/api/health", get(health))
@@ -531,8 +537,66 @@ async fn health(State(state): State<AppState>) -> Result<Json<Value>, ApiError> 
         .and_then(|s| s.error());
     operation(&state, move |_| Ok(json!({"service":"crewroom-rust","protocol":1,"executionAvailable":available,"schedulingError":scheduling}))).await.map(Json)
 }
+/// Where each integration's credential comes from. Never the value itself.
+fn credentials_view(secrets: &SecretStore) -> Value {
+    let mut view = json!({});
+    for integration in Integration::ALL {
+        let environment = std::env::var(integration.environment()).ok();
+        view[integration.id()] = secrets.status(integration, environment.as_deref());
+    }
+    view
+}
+/// Saves or clears one integration's token in the encrypted install store.
+async fn credentials_mutation(
+    state: &AppState,
+    integration: &str,
+    clear: bool,
+    body: Value,
+) -> Result<Value, ApiError> {
+    let integration = Integration::parse(integration)?;
+    let secrets = state.secrets.clone();
+    let result = tokio::task::spawn_blocking(move || {
+        if clear {
+            if body != json!({}) {
+                return Err(Error::Invalid("Clear accepts no fields.".into()));
+            }
+            return secrets.clear(integration);
+        }
+        let fields = body
+            .as_object()
+            .ok_or_else(|| Error::Invalid("Send a token object.".into()))?;
+        if fields
+            .keys()
+            .any(|k| k != "token" && k != "replaceUnreadable")
+        {
+            return Err(Error::Invalid(
+                "Credentials accept only token and replaceUnreadable.".into(),
+            ));
+        }
+        let token = fields
+            .get("token")
+            .and_then(Value::as_str)
+            .ok_or_else(|| Error::Invalid("Enter a token.".into()))?;
+        let replace = match fields.get("replaceUnreadable") {
+            None => false,
+            Some(Value::Bool(value)) => *value,
+            Some(_) => {
+                return Err(Error::Invalid(
+                    "replaceUnreadable must be a boolean.".into(),
+                ));
+            }
+        };
+        secrets.save(integration, token, replace)
+    })
+    .await
+    .map_err(|_| ApiError::from(Error::Conflict("Credential update was interrupted.".into())))?;
+    result?;
+    state.changes.send_modify(|v| *v += 1);
+    Ok(json!({"credentials": credentials_view(&state.secrets)}))
+}
 async fn workspace_value(state: &AppState) -> Result<Value, ApiError> {
     let mut value = operation(state, |s| snapshot(s)).await?;
+    value["credentials"] = credentials_view(&state.secrets);
     if let Some(e) = &state.execution {
         if let Some(runs) = value["runs"].as_array_mut() {
             runs.retain(|r| r["purpose"] != "evaluation");
@@ -672,6 +736,15 @@ async fn mutate_inner(state: AppState, path: String, body: Value) -> Result<Valu
         return Err(Error::Conflict("Crewroom is stopping. Saved work is retained.".into()).into());
     }
     let segments = path.split('/').collect::<Vec<_>>();
+    match segments.as_slice() {
+        ["credentials", integration] => {
+            return credentials_mutation(&state, integration, false, body).await;
+        }
+        ["credentials", integration, "clear"] => {
+            return credentials_mutation(&state, integration, true, body).await;
+        }
+        _ => {}
+    }
     if segments.len() >= 3 && segments[0] == "runs" && segments[2] != "steering" {
         let id = segments[1].to_owned();
         let evaluation = operation(&state, move |s| match s.store.get_run(&id) {
