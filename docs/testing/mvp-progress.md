@@ -223,6 +223,13 @@ Checks on `df61cab` (simulated providers only):
 - `npm test` **332/332**; `npm run build` passes (existing Vite chunk warning).
 - `npm run test:e2e` was not run here; the integrator runs it on the fixed port.
 
+Integration checks after rebasing onto FOR-48 main `d1d4701` (code and tests now `01eba6d`, evidence `b0bdb03`; the checks above name the pre-rebase `df61cab`). The rebase had no conflicts. Simulated providers only; the Cargo target was private to this run, because parallel worktrees sharing one target dir reused each other's `crewroom-core` artifacts.
+- `cargo test --locked -p crewroom-core -p crewroom-service -j6 -- --test-threads=4`: **189 passed, 0 failed** (`ticket_sources` 5/5). The service daemon tests need the workspace's `crewroom-process` and `crewroom-host` binaries beside `crewroomd`; in a fresh target they fail with "Detached daemon did not become healthy" until those are built.
+- `cargo test --locked -p crewroom-desktop -j6 -- --test-threads=4`: **146 passed, 0 failed, 15 ignored**.
+- `cargo clippy --locked -p crewroom-core --tests -- -D warnings` and `-p crewroom-desktop -- -D warnings`: clean. `cargo fmt -p crewroom-core -p crewroom-desktop -- --check`: clean. (Desktop with `--tests` reports one `useless_conversion` in `feedback_tests.rs`, which this ticket does not touch.)
+- `npm test` **332/332**; `npm run build` passes.
+- `npm run test:e2e`: **31/31** with the fixture-only OMP and Rust Mail runtime present. Earlier attempts on the same revision were not counted as passes: one lacked the Mail runtime link (INT-03 and INT-07/EVD-08 failed in fixture setup), and others failed under shared-machine load (`/tmp` git init errors and headless Chromium crashes).
+
 ## FOR-40 — Provider-neutral ticket source and status (2026-10-18 UTC)
 
 Implementation revision `0afdf129548abf02161a60e29df27e81b65080c0` on branch `for-40-neutral-ticket-source`, rebased onto main `d08fc59` (FOR-39); the pre-rebase revision `f7805e4` was on `93ebcd6`. The pre-rebase checks below were executed on `f7805e4`; the integration checks were executed on the rebased revision. This is a pure prefactor for FOR-45 (GitHub Issues).
