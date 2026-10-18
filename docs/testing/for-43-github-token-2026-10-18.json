@@ -1,9 +1,9 @@
 {
   "issue": "FOR-43",
   "observedAt": "2026-10-18",
-  "implementationRevision": "07f2086c7984dc29d1cb09390f437aeff2b85032",
-  "documentationRevision": "2e8a50082d8232637d759dc65a8eea930e33b32a",
-  "baseRevision": "ec08de4874efd0cfc8c6be2d33e9495bb9f09ed2",
+  "implementationRevision": "8babc7ab7c587e17ae07cd129b1113a7a762298a",
+  "documentationRevision": "203e2a57a5e4613a5eb9511188e4ace0793b066a",
+  "baseRevision": "60be15ef1497ab8cf0718185a6a8d30fb3787ce9",
   "scope": "Connect github.com with a personal access token: validation with GET /user before an encrypted save, status-only projection, repository visibility check, disconnect, CREWROOM_GITHUB_TOKEN override, same-origin mutations. GitHub App device sign-in is deferred to FOR-51; GitHub Enterprise Server to FOR-50.",
   "simulated": {
     "provider": "Loopback GitHub API fixtures (axum in crates/crewroom-service/tests/github.rs; std TcpListener in crates/crewroom-desktop/src/workbench/credentials_tests.rs); not github.com.",
@@ -23,7 +23,7 @@
     ]
   },
   "live": {
-    "endpoint": "https://api.github.com through a debug crewroomd built from the implementation revision 07f2086 (sha256 1ffa1430874de0577974a4f3d440e36d30ef86f3b87bbe147b3a217b153b6cbd); an identical receipt was first observed on the pre-rebase revision 772cc5a (base d08fc59, binary sha256 95ce0d24fc96e429f332efd2670609656fcf2bf0c1625c57e99817742d3eaffc), loopback port 4347, isolated temporary --data-dir (deleted afterwards)",
+    "endpoint": "https://api.github.com through a debug crewroomd built from the implementation revision 8babc7a (sha256 8e67f1581f88c2b4b0c5cf7a92f0f967cd7aaae88e0290450cee8b473aa59ccf); identical receipts were observed earlier on the same change at 772cc5a (base d08fc59, binary sha256 95ce0d24fc96e429f332efd2670609656fcf2bf0c1625c57e99817742d3eaffc) and 07f2086 (base ec08de4, binary sha256 1ffa1430874de0577974a4f3d440e36d30ef86f3b87bbe147b3a217b153b6cbd), loopback port 4347, isolated temporary --data-dir (deleted afterwards)",
     "credential": "The operator's gh CLI login token, read in-process and never printed. It is a gh OAuth token (reported kind 'other'), not a fine-grained or classic personal access token.",
     "redaction": "Account login replaced with <login>; no token, scopes list or account id retained.",
     "cases": [
@@ -42,7 +42,7 @@
     "tokenAbsentFromResponsesReceiptAndDaemonLog": true
   },
   "commands": {
-    "cargo test --locked -p crewroom-runtime -p crewroom-service -p crewroom-desktop --no-fail-fast": "pass on 2e8a500 (desktop 135 passed / 15 ignored; runtime lib 56 passed / 1 ignored plus integration suites; service lib 4 plus integration suites including github 2/2 and credentials 1/1)",
+    "cargo test --locked -p crewroom-runtime -p crewroom-service -p crewroom-desktop --no-fail-fast": "pass on 78995e4 (desktop 136 passed / 15 ignored; runtime lib 62 passed / 1 ignored plus integration suites; service lib 4 plus integration suites including github 2/2 and credentials 1/1)",
     "cargo clippy --locked -p crewroom-runtime -p crewroom-service --all-targets -- -D warnings": "clean",
     "cargo clippy --locked -p crewroom-desktop -- -D warnings": "clean (with --all-targets, the pre-existing useless_conversion in untouched feedback_tests.rs remains)",
     "cargo fmt -p crewroom-runtime -p crewroom-service -p crewroom-desktop --check": "clean",
