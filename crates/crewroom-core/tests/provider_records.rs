@@ -118,6 +118,73 @@ fn failed_feedback_save_retains_prior_observation_then_replays_after_reopen() {
         saved
     );
 }
+fn review(id: i64, state: &str, body: &str) -> Value {
+    json!({"id":id,"kind":"review","created_on":"2026-09-28T01:00:00Z","updated_on":"2026-09-28T01:00:00Z","deleted":false,"content":{"raw":body},"user":{"uuid":"github:7","display_name":"reviewer-fixture"},"review":{"state":state,"commit":"a".repeat(40)}})
+}
+#[test]
+fn github_reviews_are_feedback_with_their_own_identity_and_reobserve_without_duplicates() {
+    let (_root, store, run) = setup();
+    store.save_publication(&publication(&run)).unwrap();
+    // Review 1 shares its number with conversation comment 1: separate GitHub id spaces.
+    let mut read = comments("Conversation note");
+    read["comments"].as_array_mut().unwrap().push(review(
+        1,
+        "CHANGES_REQUESTED",
+        "Add a regression test",
+    ));
+    let first = store
+        .save_publication_feedback(id(&run), 9, &read, "2026-09-28T02:00:00Z")
+        .unwrap();
+    assert_eq!(first["state"], "complete");
+    let items = first["comments"].as_array().unwrap();
+    assert_eq!(items.len(), 2);
+    assert_eq!(items[0]["content"]["raw"], "Conversation note");
+    assert_eq!(items[1]["kind"], "review");
+    assert_eq!(items[1]["review"]["state"], "CHANGES_REQUESTED");
+    assert_eq!(items[1]["currentness"], "known");
+
+    // Re-observation adds nothing new.
+    let again = store
+        .save_publication_feedback(id(&run), 9, &read, "2026-09-28T03:00:00Z")
+        .unwrap();
+    assert_eq!(again["comments"].as_array().unwrap().len(), 2);
+    assert_eq!(again["state"], "complete");
+
+    // GitHub keeps no edit time for a review: a dismissal or an edited summary
+    // replaces the retained version instead of reading as a conflict. The same
+    // change to a versioned comment is still a conflict.
+    let mut changed = comments("Conversation note, edited without a new time");
+    changed["comments"].as_array_mut().unwrap().push(review(
+        1,
+        "DISMISSED",
+        "Add a regression test, please",
+    ));
+    let next = store
+        .save_publication_feedback(id(&run), 9, &changed, "2026-09-28T04:00:00Z")
+        .unwrap();
+    let items = next["comments"].as_array().unwrap();
+    assert_eq!(items.len(), 2);
+    assert_eq!(next["state"], "partial");
+    assert_eq!(items[0]["currentness"], "conflict");
+    assert_eq!(items[0]["content"]["raw"], "Conversation note");
+    assert_eq!(items[1]["currentness"], "known");
+    assert_eq!(items[1]["review"]["state"], "DISMISSED");
+    assert_eq!(items[1]["content"]["raw"], "Add a regression test, please");
+
+    // A review missing from a later read keeps its history with unknown currentness.
+    let gone = store
+        .save_publication_feedback(
+            id(&run),
+            9,
+            &comments("Conversation note"),
+            "2026-09-28T05:00:00Z",
+        )
+        .unwrap();
+    let items = gone["comments"].as_array().unwrap();
+    assert_eq!(items.len(), 2);
+    assert_eq!(items[1]["kind"], "review");
+    assert_eq!(items[1]["currentness"], "unknown");
+}
 #[test]
 fn failed_sync_receipt_rolls_back_filtered_retained_and_run_changes() {
     let (root, store, _) = setup();

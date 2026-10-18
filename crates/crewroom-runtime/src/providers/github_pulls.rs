@@ -395,25 +395,70 @@ impl GitHubPullClient {
         }
         Ok(result)
     }
-    /// Conversation and review comments. A failed read keeps what was read and
-    /// reports it as partial or unavailable rather than as an empty review.
+    /// One submitted pull request review as feedback (FOR-55). Reviews live in
+    /// their own GitHub id space, so they carry `kind: "review"` and are matched
+    /// by kind and id. A pending review is the reader's unsubmitted draft and is
+    /// not feedback. GitHub records no edit time for a review, so `updated_on`
+    /// is its submission time.
+    fn review(value: &Value) -> Result<Option<Value>> {
+        let state = match value["state"].as_str() {
+            Some("PENDING") => return Ok(None),
+            Some(s @ ("APPROVED" | "CHANGES_REQUESTED" | "COMMENTED" | "DISMISSED")) => s,
+            _ => return Err(invalid()),
+        };
+        let submitted = date(&value["submitted_at"])?;
+        let body = match &value["body"] {
+            Value::Null => String::new(),
+            body => text(body, 0, 65536, false)?,
+        };
+        let commit = match &value["commit_id"] {
+            Value::Null => Value::Null,
+            sha => json!(hash(sha, false)?),
+        };
+        let mut result = json!({"id":integer(&value["id"],1)?,"kind":"review","created_on":submitted,"updated_on":submitted,"deleted":false,"content":{"raw":body},"review":{"state":state,"commit":commit}});
+        if value["user"].is_object() {
+            result["user"] = json!({"uuid":identity(integer(&value["user"]["id"],1)?),"display_name":string(&value["user"]["login"])?});
+        }
+        Ok(Some(result))
+    }
+    /// Conversation comments, inline review comments and submitted reviews. A
+    /// failed read keeps what was read and reports it as partial or unavailable
+    /// rather than as an empty review.
     pub async fn comments(&self, id: i64) -> Result<Value> {
         integer(&json!(id), 1)?;
         let mut comments = vec![];
         let mut ids = HashSet::new();
         let mut result = Ok(());
-        for (path, review) in [
-            (format!("/issues/{id}/comments"), false),
-            (format!("/pulls/{id}/comments"), true),
+        for (path, kind) in [
+            (format!("/issues/{id}/comments"), "conversation"),
+            (format!("/pulls/{id}/comments"), "inline"),
+            (format!("/pulls/{id}/reviews"), "review"),
         ] {
             result = self
                 .pages(&path, None, |rows| {
+                    let bad = || unavailable("GitHub returned inconsistent PR comments.");
                     for row in rows {
-                        let comment = Self::comment(row, review).map_err(|_| {
-                            unavailable("GitHub returned inconsistent PR comments.")
-                        })?;
-                        if !ids.insert(comment["id"].as_i64().unwrap()) {
-                            return Err(unavailable("GitHub returned inconsistent PR comments."));
+                        let comment = if kind == "review" {
+                            match Self::review(row).map_err(|_| bad())? {
+                                // A comment-only review without a summary is the
+                                // container of its inline comments, read above.
+                                Some(r)
+                                    if r["review"]["state"] != "COMMENTED"
+                                        || !r["content"]["raw"]
+                                            .as_str()
+                                            .unwrap()
+                                            .trim()
+                                            .is_empty() =>
+                                {
+                                    r
+                                }
+                                _ => continue,
+                            }
+                        } else {
+                            Self::comment(row, kind == "inline").map_err(|_| bad())?
+                        };
+                        if !ids.insert((kind == "review", comment["id"].as_i64().unwrap())) {
+                            return Err(bad());
                         }
                         comments.push(comment);
                     }
@@ -431,6 +476,48 @@ impl GitHubPullClient {
                 json!({"state":if comments.is_empty(){"unavailable"}else{"partial"},"comments":comments,"reason":error.to_string()})
             }
         })
+    }
+    /// Each reviewer's standing decision, as GitHub derives it: the latest
+    /// approving, changes-requested or dismissed review per reviewer (a
+    /// comment-only review changes nothing). Dismissed decisions are dropped.
+    /// Every page is read; a failed or malformed read fails the observation.
+    async fn review_decisions(&self, id: i64) -> Result<Vec<Value>> {
+        let bad = || unavailable("GitHub returned an unexpected pull request review.");
+        let mut latest: HashMap<String, Value> = HashMap::new();
+        let mut ids = HashSet::new();
+        for raw in self.all(&format!("/pulls/{id}/reviews"), None).await? {
+            let Some(review) = Self::review(&raw).map_err(|_| bad())? else {
+                continue;
+            };
+            if !ids.insert(review["id"].as_i64().unwrap()) {
+                return Err(bad());
+            }
+            if review["review"]["state"] == "COMMENTED" {
+                continue;
+            }
+            let reviewer = review["user"]["uuid"]
+                .as_str()
+                .map_or_else(|| format!("review:{}", review["id"]), str::to_owned);
+            let key = |r: &Value| {
+                (
+                    crewroom_core::source_time::parse(r["created_on"].as_str().unwrap()),
+                    r["id"].as_i64().unwrap(),
+                )
+            };
+            if latest
+                .get(&reviewer)
+                .is_none_or(|old| key(old) < key(&review))
+            {
+                latest.insert(reviewer, review);
+            }
+        }
+        let mut decisions = latest
+            .into_values()
+            .filter(|r| r["review"]["state"] != "DISMISSED")
+            .map(|r| json!({"id":r["id"],"user":r["user"],"state":r["review"]["state"],"commit":r["review"]["commit"],"submitted_on":r["created_on"]}))
+            .collect::<Vec<_>>();
+        decisions.sort_by_key(|d| d["id"].as_i64());
+        Ok(decisions)
     }
     /// Hosted evidence for the PR's current head: commit statuses and check
     /// runs, plus the check runs as one PR pipeline bound to head and base.
@@ -557,6 +644,7 @@ impl GitHubPullClient {
                 .unwrap();
             pipelines.push(json!({"uuid":format!("github-checks:{head}"),"build_number":build,"created_on":started,"state":state,"target":target,"steps":steps}));
         }
+        let reviews = self.review_decisions(id).await?;
         let current = self.pull_request(id).await?;
         if crewroom_core::serialized::stringify(&current)
             != crewroom_core::serialized::stringify(&pr)
@@ -568,7 +656,7 @@ impl GitHubPullClient {
         let mut statuses = statuses.into_values().collect::<Vec<_>>();
         statuses.sort_by(|a, b| a["key"].as_str().cmp(&b["key"].as_str()));
         Ok(
-            json!({"observedAt":crewroom_core::timestamp(crewroom_core::now_ms()),"pr":pr,"statuses":statuses,"pipelines":pipelines}),
+            json!({"observedAt":crewroom_core::timestamp(crewroom_core::now_ms()),"pr":pr,"statuses":statuses,"pipelines":pipelines,"reviews":reviews}),
         )
     }
     pub async fn create_pull_request(

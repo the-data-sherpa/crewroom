@@ -59,6 +59,17 @@ fn short(hash: &Value) -> String {
         .map(|h| h.chars().take(12).collect())
         .unwrap_or_else(|| "unavailable".into())
 }
+/// A GitHub review's decision and the revision it was submitted at.
+fn review_label(review: &Value) -> String {
+    let state = match review["state"].as_str() {
+        Some("APPROVED") => "Approved",
+        Some("CHANGES_REQUESTED") => "Changes requested",
+        Some("COMMENTED") => "Commented",
+        Some("DISMISSED") => "Dismissed",
+        _ => "Review state unavailable",
+    };
+    format!("{state} at revision {}", short(&review["commit"]))
+}
 /// The PR host and repository a publication record names. GitHub identities
 /// carry their provider; every earlier record is Bitbucket.
 pub(super) fn repository_label(repository: &Value) -> String {
@@ -290,8 +301,11 @@ impl Workbench {
                         }));
                     }
                     for comment in comments {
+                        // GitHub reviews (FOR-55) have their own id space and a decision.
+                        let review = comment["kind"] == "review";
                         let mut line = section(format!(
-                            "Comment #{} · {}",
+                            "{} #{} · {}",
+                            if review { "Review" } else { "Comment" },
                             value(&comment["id"]),
                             comment["user"]["display_name"]
                                 .as_str()
@@ -299,7 +313,8 @@ impl Workbench {
                                 .unwrap_or("Author unavailable")
                         ))
                         .id(SharedString::from(format!(
-                            "feedback-comment-{}",
+                            "feedback-{}-{}",
+                            if review { "review" } else { "comment" },
                             value(&comment["id"])
                         )))
                         .child(hint(format!(
@@ -336,6 +351,9 @@ impl Workbench {
                                 value(&comment["parent"]["id"])
                             )));
                         }
+                        if review {
+                            line = line.child(hint(review_label(&comment["review"])));
+                        }
                         for (flag_index, (yes, label)) in [
                             (comment["deleted"] == true, "Deleted at source"),
                             (!comment["resolution"].is_null(), "Resolved"),
@@ -363,10 +381,15 @@ impl Workbench {
                         {
                             if let Some(saved) = records(&continuation["feedback"], "comments")
                                 .iter()
-                                .find(|c| c["id"] == comment["id"])
+                                .find(|c| c["id"] == comment["id"] && c["kind"] == comment["kind"])
                             {
                                 line=line.child(hint(format!("Captured by continuation {} · comment version {} · {} read · {}",value(&continuation["id"]),value(&saved["updated_on"]),value(&continuation["feedback"]["state"]),value(&continuation["state"]))).id(SharedString::from(format!("continuation-{}", value(&continuation["id"])))));
-                                if saved["updated_on"] != comment["updated_on"] {
+                                // A review has no edit time; its text or decision is compared directly.
+                                if saved["updated_on"] != comment["updated_on"]
+                                    || (review
+                                        && (saved["content"] != comment["content"]
+                                            || saved["review"] != comment["review"]))
+                                {
                                     line = line.child(
                                         hint(format!(
                                             "Earlier captured text: {}",

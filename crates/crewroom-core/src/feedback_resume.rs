@@ -21,7 +21,12 @@ fn versions(feedback: &Value) -> Value {
     for comment in &mut comments {
         remove(comment, "currentness");
     }
-    comments.sort_by_key(|c| c["id"].as_i64().unwrap_or(0));
+    comments.sort_by_key(|c| {
+        (
+            c["id"].as_i64().unwrap_or(0),
+            c["kind"].as_str().map(str::to_owned),
+        )
+    });
     json!(comments)
 }
 /// Read-only mirror of `queue_feedback_resume`'s gate: captured PR feedback that only an

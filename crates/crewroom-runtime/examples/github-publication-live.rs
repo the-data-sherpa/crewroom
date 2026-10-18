@@ -9,7 +9,9 @@
 //!
 //! `stage` is `create` (first publication), `continue <pr-id>` (keyed
 //! continuation after a new push to the branch) or `observe <pr-id>` (provider
-//! state, head/base, hosted evidence and feedback).
+//! state, head/base, hosted evidence and feedback). `reviews <pr-id>` (FOR-55)
+//! reads feedback twice, including submitted reviews, and reports the standing
+//! review decisions and the readiness policy's blockers at the PR's head.
 use crewroom_runtime::{
     providers::{Credential, Credentials, Error, github_pulls::GitHubPullClient},
     publication_remote::PullRequestHost,
@@ -151,6 +153,33 @@ async fn main() {
             receipt["pipelines"] = observed["pipelines"].clone();
             let comments = github.comments(id).await.unwrap();
             receipt["comments"] = json!({"state":comments["state"],"count":comments["comments"].as_array().map(Vec::len)});
+        }
+        "reviews" => {
+            // FOR-55: submitted reviews as feedback and standing decisions in
+            // the hosted observation. Attribution is reported as present, not
+            // by account name.
+            let id = rest[0].parse::<i64>().unwrap();
+            let summary = |items: &Value| {
+                json!(items.as_array().unwrap().iter().map(|c| json!({"kind":c["kind"],"id":c["id"],"state":c["review"]["state"],"commit":c["review"]["commit"],"submitted":c["created_on"],"attributed":c["user"]["uuid"].is_string(),"inline":c["inline"].is_object(),"bodyChars":c["content"]["raw"].as_str().map(|s| s.chars().count())})).collect::<Vec<_>>())
+            };
+            let first = github.comments(id).await.unwrap();
+            let second = github.comments(id).await.unwrap();
+            receipt["feedback"] =
+                json!({"state":first["state"],"items":summary(&first["comments"])});
+            receipt["reobservedIdentical"] =
+                json!(summary(&first["comments"]) == summary(&second["comments"]));
+            let observed = github.observe(id).await.unwrap();
+            receipt["pr"] = pr_summary(&observed["pr"]);
+            receipt["decisions"] = json!(observed["reviews"].as_array().unwrap().iter().map(|r| json!({"id":r["id"],"state":r["state"],"commit":r["commit"],"attributed":r["user"]["uuid"].is_string()})).collect::<Vec<_>>());
+            let head = observed["pr"]["source"]["commit"]["hash"].clone();
+            let record = json!({"candidateId":"live","revision":{"head":head,"base":observed["pr"]["destination"]["commit"]["hash"]},"branch":branch,"target":target,"description":observed["pr"]["description"],
+                "repository":crewroom_runtime::providers::github_pulls::repository(&repository).unwrap(),"policy":{"statusKeys":[],"pipelineSteps":[],"optionalSteps":[]},
+                "push":{"state":"confirmed"},"pr":{"state":"confirmed","id":id,"providerState":"OPEN","describedSha256":observed["pr"]["description"].as_str().map(|d| format!("{:x}", Sha256::digest(d.as_bytes())))},
+                "remoteSourceHead":head,"remoteTargetHead":observed["pr"]["destination"]["commit"]["hash"],"observation":observed});
+            let local =
+                json!({"ready":true,"candidate":{"id":"live","revision":record["revision"]}});
+            receipt["readiness"] =
+                crewroom_runtime::publication::assess(&record, Some(&local), false);
         }
         other => panic!("unknown stage {other}"),
     }

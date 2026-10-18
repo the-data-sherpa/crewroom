@@ -10,6 +10,11 @@ use crate::source_time::parse as source_timestamp;
 fn array(value: &Value) -> &[Value] {
     value.as_array().map(Vec::as_slice).unwrap_or(&[])
 }
+/// Feedback identity: GitHub reviews (`kind: "review"`) have their own id space,
+/// so an item matches only by kind and id. Comments carry no kind.
+fn same_feedback(a: &Value, b: &Value) -> bool {
+    a["id"] == b["id"] && a["kind"] == b["kind"]
+}
 impl Store {
     pub fn coding_record(&self, run_id: &str) -> Result<Option<Value>> {
         self.get_run(run_id)?;
@@ -58,23 +63,25 @@ impl Store {
             if previous["observedAt"].as_str().is_some_and(|at|at>observed_at) {return Ok(previous.clone());}
             let mut known=array(&previous["comments"]).to_vec();let mut inconsistent=false;
             for comment in array(&read["comments"]) {
-                let index=known.iter().position(|c|c["id"]==comment["id"]);
+                let index=known.iter().position(|c|same_feedback(c,comment));
                 if let Some(index)=index {
                     let prior=&known[index];let old=prior["updated_on"].as_str().and_then(source_timestamp);let new=comment["updated_on"].as_str().and_then(source_timestamp);
-                    let earlier=matches!((new,old),(Some(new),Some(old)) if new<old);
+                    // A review has no edit time, so its version cannot be compared: the newer observation wins.
+                    let versioned=comment["kind"]!="review";
+                    let earlier=versioned && matches!((new,old),(Some(new),Some(old)) if new<old);
                     let same=matches!((new,old),(Some(new),Some(old)) if new==old);
-                    let conflict=same && (prior["content"]["raw"]!=comment["content"]["raw"] || prior["deleted"]!=comment["deleted"]);
+                    let conflict=versioned && same && (prior["content"]["raw"]!=comment["content"]["raw"] || prior["deleted"]!=comment["deleted"]);
                     if earlier || conflict {known[index]["currentness"]=json!(if conflict {"conflict"} else {"unknown"});inconsistent=true;}
                     else {known[index]=comment.clone();known[index]["currentness"]=json!("known");}
                 } else {let mut comment=comment.clone();comment["currentness"]=json!("known");known.push(comment);}
             }
-            for comment in &mut known {if !array(&read["comments"]).iter().any(|c|c["id"]==comment["id"]) {comment["currentness"]=json!("unknown");}}
+            for comment in &mut known {if !array(&read["comments"]).iter().any(|c|same_feedback(c,comment)) {comment["currentness"]=json!("unknown");}}
             known.sort_by(|a,b| {
                 let created=match (a["created_on"].as_str().and_then(source_timestamp),b["created_on"].as_str().and_then(source_timestamp)) {(Some(a),Some(b))=>a.cmp(&b),_=>std::cmp::Ordering::Equal};
-                created.then_with(||a["id"].as_u64().cmp(&b["id"].as_u64()))
+                created.then_with(||a["id"].as_u64().cmp(&b["id"].as_u64())).then_with(||a["kind"].as_str().cmp(&b["kind"].as_str()))
             });
             let mut feedback=json!({"observedAt":observed_at,"state":if inconsistent {json!("partial")} else {read["state"].clone()}});
-            if inconsistent {feedback["reason"]=json!("Bitbucket returned an older or conflicting comment version; prior content was retained.");} else if let Some(reason)=read.get("reason") {feedback["reason"]=reason.clone();}
+            if inconsistent {feedback["reason"]=json!("The PR host returned an older or conflicting comment version; prior content was retained.");} else if let Some(reason)=read.get("reason") {feedback["reason"]=reason.clone();}
             feedback["comments"]=json!(known);record["feedback"]=feedback.clone();s.db.execute("UPDATE publications SET data=? WHERE run_id=?",params![record.to_string(),run_id])?;Ok(feedback)
         })
     }

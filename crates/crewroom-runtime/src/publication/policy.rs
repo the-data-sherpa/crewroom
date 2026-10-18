@@ -100,6 +100,35 @@ pub fn assess(record: &Value, local: Option<&Value>, source_conflict: bool) -> V
             }
         }
     }
+    // GitHub reviewer decisions (FOR-55). A changes-requested review stands on
+    // GitHub until that reviewer approves or it is dismissed, whichever revision
+    // it was submitted at, so it holds readiness and names that revision. A
+    // GitHub observation without decisions is unknown evidence, not approval.
+    if present(observed)
+        && (crate::providers::github_pulls::is_github(&record["repository"])
+            || observed.get("reviews").is_some())
+    {
+        match observed["reviews"].as_array() {
+            None => blockers.push("GitHub review decisions have not been observed.".into()),
+            Some(reviews) => {
+                for review in reviews.iter().filter(|r| r["state"] == "CHANGES_REQUESTED") {
+                    let who = review["user"]["display_name"]
+                        .as_str()
+                        .map_or_else(|| "A reviewer".to_owned(), |n| format!("Reviewer {n}"));
+                    let at = match review["commit"].as_str() {
+                        Some(c) if record["revision"]["head"] == c => {
+                            format!("at this revision {}", &c[..c.len().min(12)])
+                        }
+                        Some(c) => format!("at earlier revision {}", &c[..c.len().min(12)]),
+                        None => "at an unrecorded revision".into(),
+                    };
+                    blockers.push(format!(
+                        "{who} requested changes on GitHub {at}. It stands until they approve or the review is dismissed."
+                    ));
+                }
+            }
+        }
+    }
     let failed_hosted = present(observed)
         && pr["source"]["commit"]["hash"] == record["revision"]["head"]
         && (array(&policy["statusKeys"]).iter().any(|key| {

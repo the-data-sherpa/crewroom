@@ -41,6 +41,7 @@ struct World {
     checks: HashMap<String, Vec<Value>>,
     issue_comments: Vec<Value>,
     review_comments: Vec<Value>,
+    reviews: Vec<Value>,
     requests: Vec<String>,
 }
 type Fixture = Arc<Mutex<World>>;
@@ -186,6 +187,21 @@ async fn comments(
     };
     Json(page(rows, &query)).into_response()
 }
+async fn reviews(
+    State(f): State<Fixture>,
+    headers: HeaderMap,
+    Path(number): Path<i64>,
+    Query(query): Query<HashMap<String, String>>,
+) -> Response {
+    if let Some(r) = authorized(&f, &headers, "reviews") {
+        return r;
+    }
+    assert_eq!(number, 5);
+    Json(page(&f.lock().unwrap().reviews, &query)).into_response()
+}
+fn review(id: i64, user: (&str, i64), state: &str, body: &str, commit: &str, at: &str) -> Value {
+    json!({"id":id,"user":{"login":user.0,"id":user.1},"state":state,"body":body,"commit_id":commit,"submitted_at":at})
+}
 async fn statuses(
     State(f): State<Fixture>,
     headers: HeaderMap,
@@ -230,6 +246,7 @@ async fn serve() -> (Fixture, String) {
             &format!("{base}/{{kind}}/{{number}}/comments"),
             get(comments),
         )
+        .route(&format!("{base}/pulls/{{number}}/reviews"), get(reviews))
         .route(&format!("{base}/commits/{{sha}}/statuses"), get(statuses))
         .route(&format!("{base}/commits/{{sha}}/check-runs"), get(checks))
         .with_state(fixture.clone());
@@ -422,6 +439,103 @@ async fn github_pull_requests_publish_continue_and_report_readiness_at_a_named_r
     assert_eq!(failed["ready"], false);
     assert_eq!(failed["reviewInvalidated"], true);
 
+    // FOR-55: a reviewer's standing changes-requested decision holds readiness
+    // at the named revision; a comment-only review does not change it, and a
+    // later approval or a dismissal releases it.
+    fixture.lock().unwrap().checks.insert(
+        NEXT.into(),
+        vec![
+            check(105, "test", Some("success"), NEXT, Some(BASE)),
+            check(106, "build", Some("success"), NEXT, Some(BASE)),
+        ],
+    );
+    let assess_now = |observation: Value| {
+        let mut current = record.clone();
+        current["observation"] = observation;
+        assess(&current, Some(&local), false)
+    };
+    let alice = ("reviewer-fixture", 7);
+    let bob = ("second-reviewer", 9);
+    fixture.lock().unwrap().reviews = vec![
+        review(
+            700,
+            alice,
+            "CHANGES_REQUESTED",
+            "Add a regression test.",
+            NEXT,
+            "2026-10-18T09:20:00Z",
+        ),
+        review(701, alice, "COMMENTED", "", NEXT, "2026-10-18T09:21:00Z"),
+        review(702, bob, "APPROVED", "", NEXT, "2026-10-18T09:22:00Z"),
+        json!({"id":703,"user":{"login":"author-fixture","id":8},"state":"PENDING","body":"draft","commit_id":NEXT}),
+    ];
+    let observed = host.observe(5).await.unwrap();
+    assert_eq!(
+        observed["reviews"],
+        json!([
+            {"id":700,"user":{"uuid":"github:7","display_name":"reviewer-fixture"},"state":"CHANGES_REQUESTED","commit":NEXT,"submitted_on":"2026-10-18T09:20:00Z"},
+            {"id":702,"user":{"uuid":"github:9","display_name":"second-reviewer"},"state":"APPROVED","commit":NEXT,"submitted_on":"2026-10-18T09:22:00Z"}
+        ])
+    );
+    let held = assess_now(observed);
+    assert_eq!(held["ready"], false);
+    assert_eq!(
+        held["blockers"],
+        json!([format!(
+            "Reviewer reviewer-fixture requested changes on GitHub at this revision {}. It stands until they approve or the review is dismissed.",
+            &NEXT[..12]
+        )])
+    );
+    assert_eq!(
+        held["reviewInvalidated"], false,
+        "a human decision is not a regression of local evidence"
+    );
+    // Submitted at an earlier revision, the decision still stands on GitHub and
+    // is named as such.
+    fixture.lock().unwrap().reviews[0]["commit_id"] = json!(HEAD);
+    let earlier = assess_now(host.observe(5).await.unwrap());
+    assert!(
+        earlier["blockers"][0]
+            .as_str()
+            .unwrap()
+            .contains(&format!("at earlier revision {}", &HEAD[..12])),
+        "{earlier}"
+    );
+    // The same reviewer's later approval releases readiness.
+    fixture.lock().unwrap().reviews.push(review(
+        704,
+        alice,
+        "APPROVED",
+        "Thanks.",
+        NEXT,
+        "2026-10-18T09:30:00Z",
+    ));
+    assert_eq!(assess_now(host.observe(5).await.unwrap())["ready"], true);
+    // A dismissed changes request no longer stands.
+    {
+        let mut world = fixture.lock().unwrap();
+        world.reviews.pop();
+        world.reviews[0]["state"] = json!("DISMISSED");
+    }
+    let dismissed = host.observe(5).await.unwrap();
+    assert_eq!(dismissed["reviews"].as_array().unwrap().len(), 1);
+    assert_eq!(assess_now(dismissed.clone())["ready"], true);
+    // A GitHub observation without review decisions is unknown, not approval.
+    let mut unread = dismissed;
+    unread.as_object_mut().unwrap().remove("reviews");
+    assert_eq!(
+        assess_now(unread)["blockers"],
+        json!(["GitHub review decisions have not been observed."])
+    );
+    // A malformed review fails the observation instead of being skipped.
+    fixture.lock().unwrap().reviews[0]["state"] = json!("SURPRISE");
+    let (_, _, message) = unavailable(host.observe(5).await.unwrap_err());
+    assert!(
+        message.contains("unexpected pull request review"),
+        "{message}"
+    );
+    fixture.lock().unwrap().reviews.clear();
+
     // Merged state is GitHub's own fact, with its merge commit.
     {
         let mut world = fixture.lock().unwrap();
@@ -473,6 +587,91 @@ async fn github_feedback_reads_every_page_of_conversation_and_review_comments() 
         .filter(|r| *r == "comments")
         .count();
     assert_eq!(pages, 3, "two conversation pages and one review page");
+}
+
+#[tokio::test]
+async fn github_feedback_includes_submitted_reviews_with_and_without_inline_comments() {
+    let (fixture, origin) = serve().await;
+    let host = host(&origin, TOKEN);
+    let reviewer = ("reviewer-fixture", 7);
+    {
+        let mut world = fixture.lock().unwrap();
+        world.issue_comments = vec![
+            json!({"id":1,"body":"Conversation note","user":{"login":"reviewer-fixture","id":7},"created_at":"2026-10-18T09:00:00Z","updated_at":"2026-10-18T09:00:00Z"}),
+        ];
+        // An inline comment belongs to a comment-only review with no summary.
+        world.review_comments = vec![
+            json!({"id":5001,"pull_request_review_id":100,"body":"Inline note","user":{"login":"reviewer-fixture","id":7},"created_at":"2026-10-18T09:10:00Z","updated_at":"2026-10-18T09:10:00Z","path":"src/lib.rs","line":14,"original_line":14}),
+        ];
+        // 100 summary-less comment-only reviews fill the first page; the
+        // decisions follow on the second page.
+        world.reviews = (100..200)
+            .map(|id| review(id, reviewer, "COMMENTED", "", HEAD, "2026-10-18T09:10:00Z"))
+            .collect();
+        world.reviews.extend([
+            // A changes request with only a summary and no inline comments.
+            // Its id equals conversation comment 1: a separate GitHub id space.
+            review(1, reviewer, "CHANGES_REQUESTED", "Please add a regression test.", HEAD, "2026-10-18T09:20:00Z"),
+            review(201, reviewer, "COMMENTED", "Overall this reads well.", HEAD, "2026-10-18T09:25:00Z"),
+            review(202, ("second-reviewer", 9), "APPROVED", "", NEXT, "2026-10-18T09:30:00Z"),
+            json!({"id":203,"user":{"login":"author-fixture","id":8},"state":"PENDING","body":"Unsubmitted draft","commit_id":NEXT}),
+        ]);
+    }
+    let read = host.comments(5).await.unwrap();
+    assert_eq!(read["state"], "complete");
+    let items = read["comments"].as_array().unwrap();
+    let reviews = items
+        .iter()
+        .filter(|c| c["kind"] == "review")
+        .collect::<Vec<_>>();
+    assert_eq!(
+        items.len() - reviews.len(),
+        2,
+        "conversation and inline comments"
+    );
+    assert_eq!(
+        reviews[0],
+        &json!({"id":1,"kind":"review","created_on":"2026-10-18T09:20:00Z","updated_on":"2026-10-18T09:20:00Z","deleted":false,
+            "content":{"raw":"Please add a regression test."},"review":{"state":"CHANGES_REQUESTED","commit":HEAD},
+            "user":{"uuid":"github:7","display_name":"reviewer-fixture"}})
+    );
+    assert_eq!(
+        reviews
+            .iter()
+            .map(|r| (
+                r["id"].as_i64().unwrap(),
+                r["review"]["state"].as_str().unwrap()
+            ))
+            .collect::<Vec<_>>(),
+        [
+            (1, "CHANGES_REQUESTED"),
+            (201, "COMMENTED"),
+            (202, "APPROVED")
+        ],
+        "summary-less comment-only reviews and pending drafts are not feedback"
+    );
+    assert_eq!(reviews[2]["content"]["raw"], "");
+    assert_eq!(reviews[2]["review"]["commit"], NEXT);
+    let pages = fixture
+        .lock()
+        .unwrap()
+        .requests
+        .iter()
+        .filter(|r| *r == "reviews")
+        .count();
+    assert_eq!(pages, 2, "every review page is read");
+
+    // A review read that fails part-way keeps what was read as partial.
+    fixture.lock().unwrap().reviews[50]["submitted_at"] = json!("not a date");
+    let partial = host.comments(5).await.unwrap();
+    assert_eq!(partial["state"], "partial");
+    assert_eq!(partial["comments"].as_array().unwrap().len(), 2);
+    assert!(
+        partial["reason"]
+            .as_str()
+            .unwrap()
+            .contains("inconsistent PR comments")
+    );
 }
 
 #[tokio::test]
