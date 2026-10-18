@@ -97,7 +97,7 @@ The launcher requires explicit absolute data and role paths. The checkout wrappe
 | `CREWROOM_RUNTIME_CONFIG` | Private regular JSON file owned by this user, mode 0600; absent means unavailable runner |
 | `CREWROOM_TMUX` | Optional trusted tmux executable; otherwise discovered on daemon PATH |
 | `<data>/jira.json` | Jira source/account metadata read by the native daemon |
-| `<data>/bitbucket.json` | Repository publication/hosted-check metadata read by the native daemon. An optional per-repository `remote` (HTTPS or SSH publish remote, no credentials) selects the publication provider; without it the entry is Bitbucket. A remote on a host with no provider is shown as an unavailable publication provider. The legacy browser server rejects `remote` |
+| `<data>/bitbucket.json` | Repository publication/hosted-check metadata read by the native daemon. An optional per-repository `remote` (HTTPS or SSH publish remote, no credentials) selects the publication provider; without it the entry is Bitbucket. A `github.com` remote publishes to GitHub; see [GitHub pull requests](#github-pull-requests). A remote on a host with no provider is shown as an unavailable publication provider. The legacy browser server rejects `remote` |
 | `<data>/crewroom.secret` | Install key: 32 random bytes, mode 0600, created once on first start. Never regenerated while encrypted values exist. See [stored credentials](#stored-credentials) |
 | `<data>/credentials.json` | Jira/Bitbucket/GitHub tokens saved in **Settings → Integrations**, only as `$crewroom$v1$…` encrypted values |
 | `CREWROOM_JIRA_TOKEN` | Optional OAuth bearer access token for the configured Jira cloud, read server-side; overrides the saved Jira token |
@@ -140,6 +140,27 @@ Settings states what was last observed with the active token:
 
 **Disconnect** removes the saved token from `credentials.json`. A non-empty `CREWROOM_GITHUB_TOKEN` still wins over a saved token and stays active after Disconnect; Settings names it as the source. Connect, check and disconnect are mutations: like every other one they require the loopback service's own origin and bearer token.
 
+### GitHub pull requests
+
+A repository whose publish remote is on `github.com` opens its pull request on GitHub with the connected GitHub token (above, or `CREWROOM_GITHUB_TOKEN`). Add an entry to `<data>/bitbucket.json` (the file name is historical; it holds every publication entry):
+
+```json
+{
+  "repositoryPath": "/absolute/path/to/checkout",
+  "remote": "git@github.com:example-owner/example-repo.git",
+  "repository": { "owner": "example-owner", "name": "example-repo", "id": 123456789 },
+  "policy": { "statusKeys": ["test"], "pipelineSteps": ["test"], "optionalSteps": ["lint"] }
+}
+```
+
+`id` is GitHub's numeric repository id (`gh api repos/OWNER/REPO --jq .id`). It is the durable identity: a PR, its feedback and a continuation must name the same repository id, so a renamed or recreated repository is refused rather than matched by name. The remote must name the same `owner/name`. Entries without `remote` and `bitbucket.org` remotes keep the Bitbucket contract unchanged.
+
+- **Push.** The branch is pushed over SSH (`git@github.com:owner/name.git`) with the operator's SSH agent, exactly as for Bitbucket; `github.com` must already be in `known_hosts`. The token is used only for the REST API and is never passed to Git.
+- **Pull request.** Crewroom searches the branch's PRs, recognises its own by the `Crewroom publication <id>` marker in the body, and otherwise creates a ready-for-review PR. A keyed continuation updates the same PR's title and body after pushing the new revision; it never opens a second PR. Crewroom never merges.
+- **Closing the issue.** For a ticket imported from GitHub Issues, the PR body has `Closes #N` (or `Closes owner/name#N` for an issue in another repository), so GitHub closes the issue when the operator merges. Jira tickets keep the `KEY: title` format and get no closing keyword.
+- **Readiness.** GitHub's own PR state (open, draft, closed without merging, merged) and observed head and base are shown beside the published revision. `statusKeys` name commit-status contexts or check-run names; `pipelineSteps` name check runs, and every other check run must be listed in `optionalSteps`. A re-run replaces the earlier run of the same name. The check runs vouch for the base only when each names this PR with one base commit; otherwise readiness stays blocked with "The required PR pipeline has not validated this head and base." No check runs means not ready.
+- **Failures.** Every refusal is recorded on the publication with its remedy; nothing is skipped silently. HTTP 401: reconnect GitHub in **Settings → Integrations**. HTTP 403: grant the token Pull requests and Contents **Read and write**. HTTP 404: add the repository to the fine-grained token's repository access or fix the remote. A read-only account is refused before any write. These refusals keep the PR intent pending, so **Reconcile publication** retries after the fix. Rate limits stay pending. HTTP 422 (another open PR for the branch, a missing branch or a repository rule) blocks the PR for inspection. A refused push names branch protection or a repository rule, a missing write key, or an untrusted host key.
+
 Keep private configuration, backups and logs in operator-only directories. Runtime JSON contains provider/Mail credentials. It must not be committed or copied to the browser. A missing integration remains unavailable; saving a plan does not start an agent.
 
 The authoritative runtime shape is [native RuntimeConfig](../crates/crewroom-runtime/src/supervisor/workflow/configuration.rs). Configure a unique absolute runtime `root`, a short private tmux `socket` directly inside that root, and an absolute `ompBinary`. For example, root `/absolute/private/runtime` can use socket `/absolute/private/runtime/tmux.sock`. On macOS the socket path must be under 104 bytes. Optional `hostPorts` must be distinct, available loopback ports; omit them for ephemeral allocation. Four ports permit one coordinator and three specialists, but concurrent research or refinement may need more.
@@ -171,7 +192,7 @@ Set `commandEngine.socket` to the absolute path of the selected Docker engine so
 
 Configure each repository through the workbench with an explicit path, target branch, instruction files, and required checks. A check needs an existing pinned local Docker image (`sha256:…`), absolute executable, arguments and timeout. Crewroom does not pull arbitrary images to satisfy a check. Commands run without network. Do not replace required checks with ad-hoc shell output.
 
-Jira metadata is validated by [the native provider loader](../crates/crewroom-runtime/src/providers/config.rs): site/cloud identity, saved filter, assignee, account identity and optional allowed transition/status IDs. Bitbucket metadata is validated by [the native publication loader](../crates/crewroom-runtime/src/providers/config.rs): absolute repository path, workspace/slug/UUID, required status keys and pipeline steps. Verify account access read-only before starting a live run. The [historical pilot setup](live-pilot-setup.md) is evidence of the old account, not fresh account authorization.
+Jira metadata is validated by [the native provider loader](../crates/crewroom-runtime/src/providers/config.rs): site/cloud identity, saved filter, assignee, account identity and optional allowed transition/status IDs. Publication metadata is validated by [the native publication loader](../crates/crewroom-runtime/src/providers/config.rs): absolute repository path, Bitbucket workspace/slug/UUID or GitHub owner/name/id matching the remote, required status keys and pipeline steps. Verify account access read-only before starting a live run. The [historical pilot setup](live-pilot-setup.md) is evidence of the old account, not fresh account authorization.
 
 ## Migrations and retention
 
