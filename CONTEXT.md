@@ -113,7 +113,7 @@ The choice of model that performs a selected role's work.
 _Avoid_: Specialist selection
 
 **Billing route**:
-Which account pays for a model offering's inference: subscription, API, or unknown when the harness login does not establish one. It is part of the offering's identity.
+Which account pays for a model offering's inference: subscription, API, or unknown when the harness login does not establish one. It is part of the offering's identity. Usage is reported per billing route and never totalled across routes: API use shows a list-price estimate, subscription use shows runs and tokens with no dollar figure, and unknown use (including assignments admitted before routes were recorded) shows no cost.
 _Avoid_: Plan, tier, provider
 
 **Delivery reporter**:

@@ -5,8 +5,10 @@ mod publication;
 mod recovery;
 #[cfg(test)]
 mod tests;
+mod usage;
 use super::*;
 use gpui_kit::Stateful;
+pub(super) use usage::usage_numbers;
 pub(super) struct Detail {
     pub path: String,
     pub label: String,
@@ -326,95 +328,4 @@ impl Workbench {
             .child(self.usage_panel(&result["usage"]))
             .child(self.detail_panel(window, cx))
     }
-    pub(super) fn usage_panel(&self, usage: &Value) -> Div {
-        let mut panel = section("Recorded usage");
-        if usage.is_null() {
-            return panel.child(hint(
-                "Usage observation is unavailable. Missing reports are not zero usage.",
-            ));
-        }
-        panel = panel
-            .child(usage_numbers(&usage["total"]))
-            .child(hint(string(usage, "note")))
-            .child(hint(format!("Source: {}", string(usage, "source"))));
-        for row in records(usage, "rows") {
-            panel = panel.child(
-                section(format!(
-                    "{} · attempt {} · {}",
-                    value(&row["name"]),
-                    value(&row["generation"]),
-                    value(&row["model"])
-                ))
-                .id(SharedString::from(format!(
-                    "usage-attempt-{}",
-                    value(&row["attemptId"])
-                )))
-                .child(usage_numbers(&row))
-                .child(hint(text_lines(&row["unavailableReasons"]))),
-            );
-        }
-        panel
-    }
-}
-pub(super) fn usage_numbers(row: &Value) -> Div {
-    let label = if row["awaitingStart"] == true {
-        "Awaiting start"
-    } else {
-        match row["state"].as_str() {
-            Some("actual") => "Provider-reported usage",
-            Some("partial") => "Partial provider usage",
-            _ => "Usage unavailable",
-        }
-    };
-    let mut view = div().child(crate::accessibility::text(label));
-    if !row["tokens"].is_null() {
-        view = view.child(hint(format!(
-            "Input {} · output {} · cache read {} · cache write {} · reasoning {} · total {}",
-            value(&row["tokens"]["input"]),
-            value(&row["tokens"]["output"]),
-            value(&row["tokens"]["cacheRead"]),
-            value(&row["tokens"]["cacheWrite"]),
-            value(&row["tokens"]["reasoning"]),
-            value(&row["tokens"]["total"])
-        )));
-    }
-    let partial = row["state"] != "actual" || row["costResponses"] != row["responses"];
-    let requests = match row["requestCounts"].as_str() {
-        Some("unavailable") => "Provider request counts unavailable".into(),
-        state => format!(
-            "Reported responses: {} / {} provider requests{}",
-            value(&row["actualResponses"]),
-            value(&row["providerRequests"]),
-            if state == Some("partial") {
-                " · partial counts; native requests unavailable"
-            } else {
-                ""
-            }
-        ),
-    };
-    view.child(hint(format!(
-        "{requests} · runner cost estimate: {}{} · provider billing unavailable",
-        row["costUsd"]
-            .as_f64()
-            .map(|n| format!("${n:.6}"))
-            .unwrap_or_else(|| "unavailable".into()),
-        if partial && row["costUsd"].is_number() {
-            " · partial"
-        } else {
-            ""
-        }
-    )))
-    .child(hint(
-        if row["costBasis"] == "cumulative-list-price-estimate" {
-            "Includes cumulative list-price estimates; subscription charges unavailable".into()
-        } else if row["requestCounts"] == "unavailable" {
-            "Response cost coverage unavailable".into()
-        } else {
-            format!(
-                "Runner pricing reports: {} / {} responses",
-                value(&row["costResponses"]),
-                value(&row["responses"])
-            )
-        },
-    ))
 }

@@ -290,3 +290,74 @@ fn provider_pr_state_and_observed_head_are_named_beside_the_published_revision()
         "Bitbucket fixture/repository · repository {00000000-0000-4000-8000-000000000011}"
     );
 }
+
+/// FOR-44: usage groups by billing route. API shows a list-price estimate,
+/// subscription shows runs and tokens with no dollar figure, unknown and
+/// unrecorded routes show no cost, and nothing is totalled across routes.
+fn usage_by_route() -> Value {
+    let row = |name: &str, billing: &str, recorded: bool, cost: Value, withheld: bool| {
+        json!({"attemptId":format!("attempt-{name}"),"assignmentId":format!("assignment-{name}"),"name":name,"generation":1,"model":"claude-code/fixture",
+            "awaitingStart":false,"state":"partial","providerRequests":0,"actualResponses":0,"requestCounts":"unavailable",
+            "tokens":{"input":40.0,"total":40.0},"unavailableReasons":["Native harness reports cumulative tokens only."],
+            "responses":0,"costResponses":0,"costUsd":cost,"billing":billing,"billingRecorded":recorded,"estimateWithheld":withheld})
+    };
+    let group = |billing: &str, cost: Value, unrecorded: u64, withheld: bool| {
+        json!({"billing":billing,"state":"partial","requestCounts":"unavailable","providerRequests":0,"actualResponses":0,
+            "responses":0,"costResponses":0,"costUsd":cost,"tokens":{"input":40.0,"total":40.0},"attempts":1,"assignments":1,
+            "tokenAttempts":1,"unrecordedAttempts":unrecorded,"awaitingStart":false,"estimateWithheld":withheld,"incompleteAttempts":[]})
+    };
+    json!({"source":"Fixture","note":"Usage is grouped by billing route and never totalled across routes.","billedUsd":null,
+        "routes":[group("api",json!(0.25),0,false),group("subscription",Value::Null,0,true),group("unknown",Value::Null,1,false)],
+        "rows":[row("Coordinator","api",true,json!(0.25),false),row("Implementer","subscription",true,Value::Null,true),row("Legacy","unknown",false,Value::Null,false)]})
+}
+
+#[gpui::test]
+fn usage_is_grouped_by_billing_route_without_a_dollar_figure_for_subscription(
+    cx: &mut gpui::TestAppContext,
+) {
+    let h = open(cx, |view| {
+        let mut fixture = result(NEW, false);
+        fixture["usage"] = usage_by_route();
+        view.observation.result = fixture;
+        view.observation.result_fresh = true;
+    });
+    let shown = labels(cx, h);
+    for expected in [
+        "Usage by billing route · never totalled across routes",
+        "API · estimated cost",
+        "Subscription · runs and tokens",
+        "Unknown billing route",
+        "Estimated cost (runner list price, not provider billing): $0.250000",
+        "Subscription use · no dollar figure is shown",
+        "it is not a subscription charge and is not shown",
+        "Billing route unknown · no cost estimate is shown",
+        "Billing route not recorded: assigned before billing routes were detected.",
+        "1 attempt(s) were assigned before billing routes were recorded.",
+        "Provider request counts unavailable (not zero)",
+        "Coordinator · attempt 1 · claude-code/fixture · API",
+        "Implementer · attempt 1 · claude-code/fixture · subscription",
+        "Legacy · attempt 1 · claude-code/fixture · unknown billing",
+    ] {
+        assert!(has(&shown, expected), "missing {expected:?}: {shown:#?}");
+    }
+    // Exactly one dollar figure, shown on the API group and its API row:
+    // never a subscription, unknown or cross-route amount.
+    let dollars: Vec<_> = shown.iter().filter(|l| l.contains('$')).collect();
+    assert_eq!(dollars.len(), 2, "{dollars:#?}");
+    assert!(
+        dollars.iter().all(|l| l.contains("$0.250000")),
+        "{dollars:#?}"
+    );
+}
+
+#[test]
+fn route_headings_name_each_billing_route() {
+    use super::usage::route_heading;
+    assert_eq!(route_heading(&json!("api")), "API · estimated cost");
+    assert_eq!(
+        route_heading(&json!("subscription")),
+        "Subscription · runs and tokens"
+    );
+    assert_eq!(route_heading(&json!("unknown")), "Unknown billing route");
+    assert_eq!(route_heading(&Value::Null), "Unknown billing route");
+}

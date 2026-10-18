@@ -154,7 +154,7 @@ pub(super) fn usage(store: &Store, id: &str) -> Result<Value> {
                 "unavailable"
             });
             row["unavailableReasons"] = json!([
-                "Native harness reports cumulative tokens. Request counts and unreported in-flight usage are unavailable. Any cost shown is a list-price estimate, not a subscription charge or billing. Recovered totals are attributed when first observed."
+                "Native harness reports cumulative tokens only. Request counts and unreported in-flight usage are unavailable, so these figures are partial: not zero and not complete. Recovered totals are attributed when first observed."
             ]);
             continue;
         }
@@ -195,8 +195,71 @@ pub(super) fn usage(store: &Store, id: &str) -> Result<Value> {
             "unavailable"
         });
     }
-    let started: Vec<_> = rows.iter().filter(|r| r["awaitingStart"] != true).collect();
-    let mut total = json!({"providerRequests":0,"actualResponses":0,"tokens":null,"costUsd":null,"responses":0,"costResponses":0});
+    for row in &mut rows {
+        let attempt = array(&runtime["attempts"])
+            .iter()
+            .find(|a| a["id"] == row["attemptId"])
+            .cloned()
+            .unwrap_or(Value::Null);
+        let (route, recorded) = billing_route(&model(&runtime, &attempt));
+        row["billing"] = json!(route);
+        row["billingRecorded"] = json!(recorded);
+        if route == "api"
+            && row["costUsd"].is_null()
+            && row["awaitingStart"] != true
+            && let Some(reasons) = row["unavailableReasons"].as_array_mut()
+        {
+            reasons.push(json!(
+                "No list-price estimate was reported; the cost estimate is unavailable, not zero."
+            ));
+        }
+        if route != "api" {
+            // Dollar figures belong to API use only. Subscription and unknown
+            // routes never show a list-price estimate as a cost.
+            if row["costUsd"].is_number() {
+                row["estimateWithheld"] = json!(true);
+            }
+            row["costUsd"] = Value::Null;
+            row["costResponses"] = json!(0);
+            if let Some(object) = row.as_object_mut() {
+                object.remove("costBasis");
+            }
+        }
+    }
+    let routes: Vec<Value> = ["api", "subscription", "unknown"]
+        .iter()
+        .filter_map(|route| {
+            let members: Vec<&Value> = rows.iter().filter(|r| r["billing"] == *route).collect();
+            (!members.is_empty()).then(|| route_total(route, &members))
+        })
+        .collect();
+    Ok(
+        json!({"routes":routes,"source":"Host gateway reports and native harness cumulative snapshots","billedUsd":null,"rows":rows,"note":"Usage is grouped by billing route and never totalled across routes. API use shows a runner list-price estimate, not provider billing. Subscription use shows runs and tokens only, with no dollar figure. Unknown-route use shows no cost estimate. Missing usage is unavailable, never zero. Native snapshots are deduplicated across attempts; recovered increments are attributed when first observed."}),
+    )
+}
+/// The billing route frozen with the attempt's model selection. Assignments
+/// admitted before billing routes were recorded read as unknown.
+fn billing_route(model: &Value) -> (&'static str, bool) {
+    let offering = &model["selection"]["offering"]["billing"];
+    let recorded = if offering.is_string() {
+        offering
+    } else {
+        &model["selection"]["billingRoute"]
+    };
+    match recorded.as_str() {
+        Some("api") => ("api", true),
+        Some("subscription") => ("subscription", true),
+        Some(_) => ("unknown", true),
+        None => ("unknown", false),
+    }
+}
+/// One billing route's usage. Totals never mix routes.
+fn route_total(route: &str, members: &[&Value]) -> Value {
+    let started: Vec<_> = members
+        .iter()
+        .filter(|r| r["awaitingStart"] != true)
+        .collect();
+    let mut total = json!({"billing":route,"providerRequests":0,"actualResponses":0,"tokens":null,"costUsd":null,"responses":0,"costResponses":0});
     for row in &started {
         for key in [
             "providerRequests",
@@ -209,11 +272,16 @@ pub(super) fn usage(store: &Store, id: &str) -> Result<Value> {
         if !row["tokens"].is_null() {
             tokens(&mut total["tokens"], &row["tokens"]);
         }
-        if let Some(cost) = row["costUsd"].as_f64() {
+        if route == "api"
+            && let Some(cost) = row["costUsd"].as_f64()
+        {
             add(&mut total, "costUsd", cost);
         }
-        if row["costBasis"] == "cumulative-list-price-estimate" {
+        if route == "api" && row["costBasis"] == "cumulative-list-price-estimate" {
             total["costBasis"] = row["costBasis"].clone();
+        }
+        if row["estimateWithheld"] == true {
+            total["estimateWithheld"] = json!(true);
         }
     }
     let unknown = started
@@ -237,10 +305,24 @@ pub(super) fn usage(store: &Store, id: &str) -> Result<Value> {
             "unavailable"
         }
     );
+    total["awaitingStart"] = json!(started.is_empty());
+    total["attempts"] = json!(started.len());
+    total["assignments"] = json!(
+        started
+            .iter()
+            .map(|r| r["assignmentId"].to_string())
+            .collect::<HashSet<_>>()
+            .len()
+    );
+    total["tokenAttempts"] = json!(started.iter().filter(|r| !r["tokens"].is_null()).count());
+    total["unrecordedAttempts"] = json!(
+        members
+            .iter()
+            .filter(|r| r["billingRecorded"] != true)
+            .count()
+    );
     total["incompleteAttempts"]=json!(started.iter().filter(|r|r["state"]!="actual").map(|r|json!({"attemptId":r["attemptId"],"name":r["name"],"generation":r["generation"]})).collect::<Vec<_>>());
-    Ok(
-        json!({"total":total,"source":"Host gateway reports and native harness cumulative snapshots","billedUsd":null,"rows":rows,"note":"Missing usage is unavailable, never zero. Native snapshots are deduplicated across attempts; recovered increments are attributed when first observed. Runner cost estimates are not provider billing or subscription charges; native Codex cost is unavailable."}),
-    )
+    total
 }
 fn string(v: &Value) -> String {
     v.as_str()
@@ -511,7 +593,7 @@ mod native_usage_tests {
                 .read()
                 .unwrap()
                 .remove(0);
-            let model = json!({"resolved":{"adapter":adapter,"provider":adapter,"api":if adapter=="codex"{"codex-app-server"}else{"claude-code-stream"},"id":"fixture","resolvedModel":"fixture-resolved","selector":format!("{adapter}/fixture")}});
+            let model = json!({"resolved":{"adapter":adapter,"provider":adapter,"api":if adapter=="codex"{"codex-app-server"}else{"claude-code-stream"},"id":"fixture","resolvedModel":"fixture-resolved","selector":format!("{adapter}/fixture")},"selection":{"offering":{"billing":"api"}}});
             let admitted=store.admit_assignment(run,&json!({"name":"Coordinator","coordinator":true,"role":role,"model":model,"input":"Read usage"})).unwrap();
             let first = admitted["attempt"]["id"].as_str().unwrap();
             let claim = |id: &str| {
@@ -547,10 +629,10 @@ mod native_usage_tests {
             wrong["sessionId"] = json!("another-session");
             store.record_agent_event(next, 5, &wrong).unwrap();
             let result = usage(&store, run).unwrap();
-            assert!(result["total"]["tokens"].get("reasoning").is_none());
-            assert_eq!(result["total"]["tokens"]["total"], 200.0);
-            assert_eq!(result["total"]["state"], "partial");
-            assert_eq!(result["total"]["requestCounts"], "unavailable");
+            assert!(result["routes"][0]["tokens"].get("reasoning").is_none());
+            assert_eq!(result["routes"][0]["tokens"]["total"], 200.0);
+            assert_eq!(result["routes"][0]["state"], "partial");
+            assert_eq!(result["routes"][0]["requestCounts"], "unavailable");
             assert!(
                 result["rows"]
                     .as_array()
@@ -559,17 +641,163 @@ mod native_usage_tests {
                     .all(|r| r["requestCounts"] == "unavailable")
             );
             if adapter == "codex" {
-                assert!(result["total"]["costUsd"].is_null());
+                assert!(result["routes"][0]["costUsd"].is_null());
             } else {
-                assert!((result["total"]["costUsd"].as_f64().unwrap() - 0.2).abs() < 1e-12);
+                assert!((result["routes"][0]["costUsd"].as_f64().unwrap() - 0.2).abs() < 1e-12);
                 assert_eq!(
-                    result["total"]["costBasis"],
+                    result["routes"][0]["costBasis"],
                     "cumulative-list-price-estimate"
                 );
             }
-            assert_eq!(result["total"]["providerRequests"], 0.0);
+            assert_eq!(result["routes"][0]["providerRequests"], 0.0);
             assert_eq!(result["rows"][0]["tokens"]["total"], 100.0);
             assert_eq!(result["rows"][1]["tokens"]["total"], 100.0);
+            assert_eq!(result["routes"].as_array().unwrap().len(), 1);
+            assert_eq!(result["routes"][0]["billing"], "api");
+            assert!(result.get("total").is_none());
         }
+    }
+
+    /// One run with an assignment per billing shape. Each assignment reports a
+    /// Claude-native cumulative snapshot of `tokens` and a list-price cost.
+    fn mixed_run(assignments: &[(&str, Value, u64)]) -> (tempfile::TempDir, Value) {
+        let root = tempfile::tempdir().unwrap();
+        let store = Store::open(&root.path().join("workflow.sqlite")).unwrap();
+        let task = store
+            .create_task(&json!({"title":"Usage by route","description":""}))
+            .unwrap();
+        let task = task["id"].as_str().unwrap();
+        store.refine(task,&json!({"revision":1,"sourceRevision":1,"brief":"Inspect usage","criteria":["Explain usage"]})).unwrap();
+        // Research runs admit specialists beside the coordinator.
+        let run = store
+            .queue_research(
+                task,
+                &json!({"revision":2,"requestId":uuid::Uuid::new_v4().to_string()}),
+            )
+            .unwrap();
+        let run = run["id"].as_str().unwrap().to_owned();
+        let role = crewroom_core::roles::Roles::new(root.path().join("roles.json"))
+            .read()
+            .unwrap()
+            .remove(0);
+        let mut attempts = Vec::new();
+        for (index, (name, selection, _)) in assignments.iter().enumerate() {
+            let mut model = json!({"resolved":{"adapter":"claude-code","provider":"claude-code","api":"claude-code-stream","id":"fixture","resolvedModel":"fixture-resolved","selector":"claude-code/fixture"}});
+            if !selection.is_null() {
+                model["selection"] = selection.clone();
+            }
+            let admitted = store
+                .admit_assignment(
+                    &run,
+                    &json!({"name":name,"coordinator":index==0,"role":role,"model":model,"input":"Read usage"}),
+                )
+                .unwrap();
+            let id = admitted["attempt"]["id"].as_str().unwrap().to_owned();
+            store.claim_attempt(&id).unwrap();
+            // Stored identity fixture; this test starts no OS processes.
+            store.record_attempt_identity(&id,&json!({"hostPid":101,"runnerKind":"claude-code","runnerPid":102,"sessionId":format!("session-{index}"),"hostUrl":"http://127.0.0.1:9","pane":"%1"})).unwrap();
+            attempts.push(id);
+        }
+        store.set_desired_state(&run, "running").unwrap();
+        store.start_execution(&run).unwrap();
+        for (index, (_, _, tokens)) in assignments.iter().enumerate() {
+            store
+                .record_agent_event(
+                    &attempts[index],
+                    1,
+                    &json!({"type":"provider_usage","state":"snapshot","source":"claude-native","accounting":"cumulative","sessionId":format!("session-{index}"),"usage":{"input":tokens,"total":tokens},"cost":*tokens as f64/1000.}),
+                )
+                .unwrap();
+        }
+        let result = usage(&store, &run).unwrap();
+        (root, result)
+    }
+    fn route<'a>(result: &'a Value, billing: &str) -> &'a Value {
+        array(&result["routes"])
+            .iter()
+            .find(|r| r["billing"] == billing)
+            .unwrap_or_else(|| panic!("no {billing} route in {result}"))
+    }
+
+    #[test]
+    fn usage_groups_by_billing_route_without_cross_route_totals() {
+        let (_root, result) = mixed_run(&[
+            ("Coordinator", json!({"offering":{"billing":"api"}}), 100),
+            (
+                "Implementer",
+                json!({"offering":{"billing":"subscription"}}),
+                300,
+            ),
+            ("Reviewer", json!({"offering":{"billing":"unknown"}}), 50),
+        ]);
+        assert!(result.get("total").is_none(), "no cross-route total");
+        let order: Vec<_> = array(&result["routes"])
+            .iter()
+            .map(|r| r["billing"].clone())
+            .collect();
+        assert_eq!(order, vec!["api", "subscription", "unknown"]);
+        let api = route(&result, "api");
+        assert!((api["costUsd"].as_f64().unwrap() - 0.1).abs() < 1e-12);
+        assert_eq!(api["costBasis"], "cumulative-list-price-estimate");
+        assert_eq!(api["tokens"]["total"], 100.0);
+        assert_eq!(api["attempts"], 1);
+        // Subscription: runs and tokens, never a dollar figure.
+        let subscription = route(&result, "subscription");
+        assert!(subscription["costUsd"].is_null());
+        assert!(subscription.get("costBasis").is_none());
+        assert_eq!(subscription["estimateWithheld"], true);
+        assert_eq!(subscription["tokens"]["total"], 300.0);
+        assert_eq!(subscription["attempts"], 1);
+        assert_eq!(subscription["assignments"], 1);
+        // Native accounting is partial: request counts are unavailable, not zero.
+        assert_eq!(subscription["state"], "partial");
+        assert_eq!(subscription["requestCounts"], "unavailable");
+        let unknown = route(&result, "unknown");
+        assert!(unknown["costUsd"].is_null());
+        assert_eq!(unknown["tokens"]["total"], 50.0);
+        assert_eq!(unknown["unrecordedAttempts"], 0);
+        for row in array(&result["rows"]) {
+            assert_eq!(row["billingRecorded"], true);
+            if row["billing"] != "api" {
+                assert!(row["costUsd"].is_null(), "{row}");
+                assert!(row.get("costBasis").is_none(), "{row}");
+            }
+            assert!(
+                array(&row["unavailableReasons"])
+                    .iter()
+                    .any(|r| r.as_str().unwrap().contains("not zero")),
+                "{row}"
+            );
+        }
+    }
+
+    #[test]
+    fn historical_assignment_without_a_recorded_route_is_unknown() {
+        let (_root, result) = mixed_run(&[
+            ("Coordinator", Value::Null, 120),
+            (
+                "Implementer",
+                json!({"billingRoute":"subscription","offering":{}}),
+                80,
+            ),
+        ]);
+        let unknown = route(&result, "unknown");
+        assert_eq!(unknown["unrecordedAttempts"], 1);
+        assert!(unknown["costUsd"].is_null());
+        assert_eq!(unknown["estimateWithheld"], true);
+        assert_eq!(unknown["tokens"]["total"], 120.0);
+        let legacy = array(&result["rows"])
+            .iter()
+            .find(|r| r["name"] == "Coordinator")
+            .unwrap();
+        assert_eq!(legacy["billing"], "unknown");
+        assert_eq!(legacy["billingRecorded"], false);
+        // The selection-level route is read when the offering omits it.
+        assert_eq!(route(&result, "subscription")["tokens"]["total"], 80.0);
+        assert!(
+            array(&result["routes"])
+                .iter()
+                .all(|r| r["billing"] != "api")
+        );
     }
 }
