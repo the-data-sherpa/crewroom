@@ -16,6 +16,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+import system_limits
+
 PROJECT = Path(__file__).resolve().parent.parent
 STEP = 'python3 scripts/prepare_worktree.py'
 OMP_VERSION = '18.4.12'
@@ -131,6 +133,12 @@ def remove(root, source, out=print):
             out(f'removed  {item.path}')
 
 
+def limits_note(limits=None):
+    """A warning line when inherited resource limits would make the kernel SIGKILL tests (FOR-68)."""
+    problem = system_limits.hazard(system_limits.rttime_limits() if limits is None else limits)
+    return f'limits   {problem}' if problem else None
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--source', type=Path, help='checkout whose installed fixtures to link (default: the main Git worktree)')
@@ -145,6 +153,9 @@ def main(argv=None):
     if args.remove:
         remove(root, source)
         return 0
+    note = limits_note()
+    if note:
+        print(note, file=sys.stderr)
     if args.check:
         failures = [missing_message(item, root) for item, state, _ in plan(root, source) if state != 'ready']
         if not (root / 'node_modules').is_dir():

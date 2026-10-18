@@ -81,6 +81,23 @@ Cleanup inspects only processes owned by the current user. Before each individua
 
 An already detached process that has lost both its marker and fixture paths cannot be attributed safely. An unreadable process is also not selected. Do not interpret an empty list as proof about those processes. A scrubbed descendant observed during a stop stays eligible within that invocation after its parent exits; use `--force` in that invocation when escalation may be needed. Scope older detached fixtures by their retained paths when available. The process reader supports macOS and Linux; the recorded live validation is on macOS. Run `npm run test:cleanup-tool` for disposable cleanup checks.
 
+## Tests killed by SIGKILL with no failing test (Linux)
+
+If a test binary, a `node --test` file process or a Git child ends with SIGKILL and no test failed, check the inherited real-time CPU limit first:
+
+```sh
+python3 scripts/system_limits.py check
+```
+
+On Linux, a hard `RLIMIT_RTTIME` of 0 makes the kernel itself send SIGKILL when its CPU-timer check evaluates a thread; no process sends the signal, so signal loggers and process-tree isolation find no sender. Claude Code 2.1.302 runs with this limit (its parent shell does not), so every command it starts inherits it, including `systemd-run --user --scope` and `setsid` children. An unprivileged process cannot raise a hard limit. Run the command as a transient `systemd --user` service instead; the wrapper does that only when the limit is unsafe and otherwise runs the command directly:
+
+```sh
+python3 scripts/system_limits.py run -- cargo test --locked -p crewroom-desktop
+python3 scripts/system_limits.py run -- npm test
+```
+
+The service receives the working directory, arguments and environment through a private file that it deletes before the command starts, so no environment value appears on a command line. It returns the command's exit status. Without a systemd user manager the wrapper refuses to start and says why. `python3 scripts/system_limits.py probe` arms a per-thread CPU timer in the current process and is killed under a zero hard limit. `python3 scripts/prepare_worktree.py` prints the same warning.
+
 ## Configuration inventory
 
 The launcher requires explicit absolute data and role paths. The checkout wrapper supplies the following defaults; use explicit paths for durable installations. No entry point loads `.env` automatically.

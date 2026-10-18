@@ -92,6 +92,12 @@ class PrepareWorktreeTests(unittest.TestCase):
             names = [item.name for item, _, _ in prep.plan(self.worktree, self.source)]
         self.assertEqual(names, ['Rust Mail test runtime'])
 
+    def test_a_zero_rttime_hard_limit_is_named_with_the_way_around_it(self):
+        self.assertIsNone(prep.limits_note((prep.system_limits.resource.RLIM_INFINITY,) * 2))
+        note = prep.limits_note((0, 0))
+        self.assertTrue(note.startswith('limits'), note)
+        self.assertIn('system_limits.py run', note)
+
 
 if __name__ == '__main__':
     unittest.main()
