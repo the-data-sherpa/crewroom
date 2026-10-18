@@ -206,6 +206,23 @@ Integration checks on the rebased branch at `ce8797cc4f67c8a923778b36840a6259d3b
 - `npm test` **332/332**; `npm run build` passes (existing Vite chunk warning).
 - `npm run test:e2e`: **29 passed, 2 failed**. The failures (`refinement.spec.ts:28` INT-03, `research.spec.ts:27` INT-07/EVD-08) stop in fixture setup with "Install fixture-only OMP 18.4.12". They are the same two failures recorded for main in the FOR-40 entry, and this ticket changes no TypeScript server, client or e2e code.
 
+### FOR-41 follow-up: Docker-backed publication journeys on Linux (2026-10-18)
+
+Revision `d9d748e` on branch `for-41-bitbucket-continuation-linux`, based on main `3a2add0`. This closes the gap recorded above, where keyed continuation keeping the same PR had not been re-run end to end.
+
+- **Cause.** The journeys failed on Linux because of the fixture, not because of publication code. `publication-workflow-fixture.ts` gave the repository fixture no socket, so the fixture fell back to `$HOME/.docker/run/docker.sock` (macOS Docker Desktop). It also pinned check image `sha256:9d2e5553…`, an arm64 image ID that cannot be pulled. The new `scripts/rust/docker-engine.ts` resolves the socket from `CREWROOM_DOCKER_SOCKET`, then a `unix://` `DOCKER_HOST`, then the platform default (`/var/run/docker.sock` on Linux). It resolves the check image from `CREWROOM_CHECK_IMAGE`, then the historical pin on macOS, otherwise `busybox@sha256:bdf57e528e45e4433820e045b29b4597825a1c9e38353532d90a01445013f82e`, pulled on demand and used by image ID. The fixture passes the socket to the native process and uses it for teardown. `tests/docker-engine.test.ts` covers the resolution order.
+- **Drift, not FOR-41 regressions.** After the Docker fix, two cases still failed. Both fail identically when built from a source export of pre-FOR-41 main `ec08de4` with only the Docker resolver applied:
+  - `native cancelled continuation retains its PR…` failed with "Needs an accepted implementation plan." The continuation run admits new coding assignments, so it is subject to the implementation-plan admission gate. The test now accepts a plan through the store's `plan_source`/`plan_save`/`plan_decide` (exposed by `repository-fixture`, as `workflow-fixture` already does) before `queue_later`. It also asserts that the continuation carries that plan.
+  - `Stop fences a pending second run…` seeded its second run through the legacy TypeScript `Workbench`, which now refuses the native schema ("Workflow database is newer than this application."). It now seeds through native `create_task`/`refine`/`queue`.
+- **Checks executed on `d9d748e`** (Linux x86_64, Docker Engine 29.7.2, Node 26.10.0). `crewroom-process` and the `repository-fixture`, `publication-git-fixture` and `container-fixture` examples were built in an isolated target directory from this revision. The shared target was not used, because worktrees with identical relative paths share artifact names there and a fresh build can pick up another tree's binary. Fixture temporary directories were on disk, because the shared `/tmp` quota was exhausted during the first attempt.
+  - `tsx --test scripts/rust/publication-service.test.ts`: **20/20** (log SHA-256 `8cf3fd4f…`).
+  - `tsx --test scripts/rust/publication-recovery.test.ts`: **13/13** (`cc9c98d9…`).
+  - `tsx --test scripts/rust/publication-successors.test.ts`: **4/4** (`6d74f8ec…`). These cases cover target refresh on the same PR, captured feedback publishing a successor on its existing PR, and a cancelled keyed continuation (`continuedFrom.publicationId`) that keeps the first PR's id with exactly one POST and one PUT.
+  - Strict `tsc --noEmit` over the touched journey files passes. `cargo fmt -p crewroom-runtime --check` and `cargo clippy -p crewroom-runtime --example repository-fixture -- -D warnings` are clean.
+  - `npm test` **334/334** and `npm run build` pass.
+  - No check container was left behind (`docker ps -a --filter label=io.crewroom.command` is empty).
+- **Boundary.** The provider is the local simulated Bitbucket HTTP fixture with a synthetic token. Git, the Docker check containers, the native store and the process supervision are real. No live Bitbucket request was made. `npm run test:e2e` is left to the integrator.
+
 ## FOR-40 — Whole-state restore across the source migration (2026-10-18)
 
 Branch `for-40-restore-across-migration` from main `3a2add0`; code and tests `df61cab`. This closes the gap left at the FOR-40 integration, where restore across the migration had been checked only by an in-process SQLite file restore. Simulated providers only: Jira issues enter through the daemon's own import operation. No live Jira site, credentials or packaged release build were used.
