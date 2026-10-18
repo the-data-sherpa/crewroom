@@ -14,6 +14,7 @@
       "an_unknown_write_stays_uncertain_without_duplicates_until_the_operator_retries: a write that never landed (502) stays uncertain over three passes with one POST and the next update waits in order; a pending update cannot be retried; operator retry re-reads, posts once and both updates confirm (3 POSTs, 2 comments)",
       "refusals_and_missing_credentials_are_undelivered_with_a_reason_and_retry: GitHub not connected leaves the update pending with the reason and no request; HTTP 403 blocks with 'Issues: Read and write' and the token is absent from the record; a blocked update is not resent by itself; retry after the fix confirms one comment",
       "labels_apply_only_when_configured_and_the_merge_closes_the_issue_as_a_separate_fact: with labels off, in_progress is refused and a confirmed open PR derives nothing (no label writes); after configuring labels, in_progress adds the in-progress label and the open PR derives in_review (adds in-review, removes in-progress); after a merged publication the labels are removed and the merge observation stays pending 'Waiting for GitHub to close #1' with source status open; an unforced pass within a minute does not re-read; after the fixture closes the issue a reconcile confirms issueState closed, the ticket's sourceStatus becomes closed with GitHub's update time, run status/desiredState/purpose are unchanged and no comment was posted for labels or closure",
+      "Review fix (5f15de6), verified kinds against a ready Evidence/Research fixture (real run worktree through crewroom-process; the required check and passing review receipts recorded directly, no container runtime; readiness still assessed by Evidence::assess): evidence_and_pr_link_post_once_with_the_closing_sentence_across_a_lost_reply_and_a_reopen: evidence names the candidate revision and passed checks; pr_link is refused until a confirmed open GitHub PR exists, then links https://github.com/fixture/issues/pull/9 and ends with the GitHub closing sentence; the evidence reply is lost (uncertain) and the PR link waits in order; after a store reopen with new services the evidence is confirmed by marker and the PR link is recomputed at send time, matches what was queued (closing sentence included) and is posted once (2 POSTs, 2 comments, both labelled verified evidence). a_pr_link_whose_publication_changed_is_blocked_instead_of_posted: a queued PR link whose PR observation is no longer OPEN is blocked with 'The recorded evidence is no longer current.' and nothing is posted. a_research_outcome_holds_completion_until_queued_and_posts_once_after_completion: no outcome before completion is requested; after the coordinator requests completion needs_research_summary (the workflow's completion gate predicate) is true and the run stays running; once the reporter queues research-outcome-<revision> it is false; a flush while running leaves it pending with 'Waiting for confirmed research completion.' and no POST; after the team is stopped and research completes, a lost reply leaves it uncertain and a store reopen confirms it by marker (1 POST, 1 comment with the revision and artifact SHA-256 line)",
       "Unit tests: every comment kind's label (agent report vs verified evidence), run line and stable marker; issue numbers only from #N keys; GitHub and Bitbucket PR links; provider-named refusals; issue-delivery remedies for 401/403/404/410/429 keep status and GitHub's message; loopback-only fixture origins; github_report/github_updates offered only with GitHub delivery, report only to the reporter or research-coordinator fallback; GitHub tickets use GitHub delivery and every other ticket keeps Jira",
       "crewroom-core/tests/github_delivery.rs: labels off by default, validated, kept across a repository change and cleared; observed issue state changes only sourceStatus/sourceUpdatedAt and ignores older observations; GitHub receipts are kept apart from Jira and notify the coordinator; a schema-32 store gains the github_updates table",
       "crewroom-service/tests/github_delivery.rs: labels need a saved repository (409), invalid labels 400, saved labels and the labels note are projected; workspace carries githubUpdates; /github/delivery/reconcile answers the outbox; retry of an unknown update is 404; no response carries the token. needs.rs unit test: blocked/uncertain GitHub updates appear under Needs you with their reason, superseded ones do not",
@@ -33,8 +34,16 @@
       {
         "case": "first pass",
         "updates": [
-          {"kind": "milestone", "state": "confirmed", "externalId": 6248530982},
-          {"kind": "blocker", "state": "confirmed", "externalId": 6248531090}
+          {
+            "kind": "milestone",
+            "state": "confirmed",
+            "externalId": 6248530982
+          },
+          {
+            "kind": "blocker",
+            "state": "confirmed",
+            "externalId": 6248531090
+          }
         ],
         "crewroomComments": 2
       },
@@ -42,8 +51,16 @@
         "case": "restart with an unknown and an interrupted write",
         "setup": "Store reopened and a new outbox built; the confirmed milestone was set back to uncertain and the blocker to sending, both without receipts.",
         "updates": [
-          {"kind": "milestone", "state": "confirmed", "externalId": 6248530982},
-          {"kind": "blocker", "state": "confirmed", "externalId": 6248531090}
+          {
+            "kind": "milestone",
+            "state": "confirmed",
+            "externalId": 6248530982
+          },
+          {
+            "kind": "blocker",
+            "state": "confirmed",
+            "externalId": 6248531090
+          }
         ],
         "crewroomComments": 2,
         "result": "Both confirmed by their markers with the same GitHub comment ids; nothing was posted again."
@@ -51,20 +68,38 @@
       {
         "case": "invalid synthetic token, then operator retry",
         "blocked": "GitHub rejected the token (HTTP 401): it is invalid, expired or revoked. Reconnect GitHub in Settings → Integrations, or update CREWROOM_GITHUB_TOKEN, then retry the update. GitHub said: \"Bad credentials\".",
-        "afterRetry": {"state": "confirmed", "externalId": 6248531317},
+        "afterRetry": {
+          "state": "confirmed",
+          "externalId": 6248531317
+        },
         "crewroomComments": 3
       },
       {
         "case": "synthetic merged publication while the issue is open",
-        "mergeObservation": {"state": "pending", "issueState": "open", "reason": "Waiting for GitHub to close #5. GitHub closes it when the merged PR's closing reference reaches the default branch; Crewroom does not close it."},
+        "mergeObservation": {
+          "state": "pending",
+          "issueState": "open",
+          "reason": "Waiting for GitHub to close #5. GitHub closes it when the merged PR's closing reference reaches the default branch; Crewroom does not close it."
+        },
         "ticketSourceStatus": "open",
         "runStatus": "running"
       },
       {
         "case": "issue closed on github.com by the operator (gh issue close, completed), then reconcile",
-        "before": {"ticketSourceStatus": "open", "runStatus": "running", "runDesiredState": "running"},
-        "mergeObservation": {"state": "confirmed", "issueState": "closed"},
-        "after": {"ticketSourceStatus": "closed", "runStatus": "running", "runDesiredState": "running"},
+        "before": {
+          "ticketSourceStatus": "open",
+          "runStatus": "running",
+          "runDesiredState": "running"
+        },
+        "mergeObservation": {
+          "state": "confirmed",
+          "issueState": "closed"
+        },
+        "after": {
+          "ticketSourceStatus": "closed",
+          "runStatus": "running",
+          "runDesiredState": "running"
+        },
         "crewroomComments": 3
       }
     ],
@@ -78,13 +113,15 @@
     "cargo clippy -p crewroom-core -p crewroom-runtime -p crewroom-service --all-targets -- -D warnings: clean; cargo clippy -p crewroom-desktop --all-targets -- -D warnings: only the pre-existing useless_conversion in untouched feedback_tests.rs",
     "cargo fmt -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop --check: clean",
     "npm test: 332/332",
-    "npm run build: pass"
+    "npm run build: pass",
+    "Review fix (5f15de6): cargo test -p crewroom-runtime: all suites pass (github_delivery 7 passed; lib 84 passed / 1 ignored); cargo clippy -p crewroom-runtime --all-targets -- -D warnings clean; cargo fmt -p crewroom-runtime --check clean; npm test 332/332; npm run build pass"
   ],
   "limitations": [
     "No live merge: the operator approved comments and closing only, so the live merge is a synthetic publication record and the issue was closed by the operator with gh, not by GitHub's Closes #N handling. FOR-46 recorded GitHub's closingIssuesReferences for a live PR body; the merge-to-close step itself is not observed live.",
     "Workflow labels were not exercised live (writes beyond comments and closing were not approved); they are proved against the loopback fixture only.",
-    "Evidence, PR-link and research-outcome comments share the marker-based delivery proved here with milestone and blocker comments, and their composition is shared with Jira; they were not produced end to end from a real verified coding or research run in this branch, simulated or live.",
+    "Evidence, PR-link and research-outcome comments are proved against the loopback fixture with a ready Evidence/Research fixture whose check and review receipts are recorded directly; they were not produced from a real agent-driven verified run, and not live. The workflow research-completion gate is covered through its predicate (needs_research_summary) and the completion it then allows, not by driving the supervisor Workflow transition loop.",
     "No agent process used github_report live; the probe calls the same prepare path the host tool routes to.",
-    "npm run test:e2e was not run (left to the integrator)."
-  ]
+    "npm run test:e2e was not run on this branch: the workflow reserves the fixed port 4331 for the integrator, who must run it at the integrated head and record it here. Earlier integrations had two known fixture-setup failures (fixture-only OMP 18.4.12 not installed); if they recur they are to be named and not counted as a pass. Acceptance criterion 6 stays unmet until then."
+  ],
+  "reviewFixRevision": "5f15de6"
 }
