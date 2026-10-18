@@ -78,6 +78,7 @@ fn options(data: &Path, origin: &str) -> ServiceOptions {
             JiraClient::new(&connection.source, connection.credentials, Some(origin)).unwrap(),
         ),
         publication: vec![],
+        publication_unavailable: vec![],
         environment: json!({}),
     }
 }
