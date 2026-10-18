@@ -1,0 +1,169 @@
+{
+  "issue": "FOR-17",
+  "date": "2026-10-14",
+  "baseRevision": "b070f76c7c7a13f0cf0120e8d779d1f1b3b8a42c",
+  "implementationRevision": "63e94e762cadeb25736b8208e3a64acce825589c",
+  "publicationGate": "failed-private-content",
+  "repositoryVisibility": "private",
+  "sourceSha256": {
+    "CONTRIBUTING.md": "5106a1ea1969d1468e8048e7f5f1acb88d509a547605d2db741d86716f36fa92",
+    "Cargo.toml": "b0bf7886cac21b8f44202b0c3704649dd4a3ccea5f096bbab503872022804127",
+    "LICENSE": "add9de1067ef8bd6a847fb45d1dfe7ae7d4a03ccd97fcf2b738ed1e64987ab58",
+    "README.md": "190e7ed6f407bf37ee4effd326b50414ebce4920b2cffd33cfc74357b4400c1e",
+    "SECURITY.md": "fc6eae9661979ccfcf66f3cdefc11595240f74cddcb04ceedce751aa5b2190df",
+    "THIRD_PARTY_NOTICES.md": "c6b0dab79eda2fe14b1f0fb0c4a8b1e8ec7c625953c0cd447540c8ad5416b772",
+    "crates/crewroom-core/Cargo.toml": "b66bbe506fdf97d6d1d99b9812a54495ab5dba504fddaab7a2f45d88e7cfc7c4",
+    "crates/crewroom-core/licenses/V8-NOTICE": "02456c69787e2ceff7b0d0ba6c781c1081cbfb639b1675ce71b8d9b86f9262a5",
+    "crates/crewroom-desktop/Cargo.toml": "10efbadd10a07c4b857d01ae769bbc563b3d0444d98d1a351dcbdd08bcc0589b",
+    "crates/crewroom-runtime/Cargo.toml": "ca60a89d276923d2aa7da74d46d94af23a5980ad6f160260eead48a1544cb1ac",
+    "crates/crewroom-service/Cargo.toml": "30d5cf365ba50b67b310e342528405aae14cece3735e447553a39587119c0e19",
+    "docs/linux.md": "c1bc8d83d844bbb09b22e50b787ca296c35b0e829b79e53bfac91c909ee89ab3",
+    "package-lock.json": "48b5ed90cf261c3705d6c40b498a32a8c1eaa475c14ef65fa62c7367517bf719",
+    "package.json": "67d9cb13ea9a5dcdd38cf6bf36c73b4032cbfa58309f60638aea740820a6db83",
+    "scripts/package-native.py": "0163ac107e672337342e766b032a27a4809624cee84b0ce12aff12644ce0c684",
+    "scripts/test-native-package.py": "7abdb3f5e54e339909be241c1b9fd46cf363dc1194e85a768e3c0e11023bf0af"
+  },
+  "checks": {
+    "nativeScriptUnitTests": {
+      "passed": 22,
+      "command": "python3 -m unittest discover -s scripts -p test_native_scripts.py"
+    },
+    "nativePackageFixture": {
+      "passed": true,
+      "finalBinaryHashesMatch": 4,
+      "outerSignatureChangeReproduced": false,
+      "deepSignatureVerified": false,
+      "packageFormat": "linux-directory",
+      "existingOutputRefused": true,
+      "vendoredDependencyNoticesPreserved": 10,
+      "sourceNoticesPreserved": 4,
+      "missingSourceNoticesRefused": 4,
+      "scope": "Synthetic native executable packaging regression; no Crewroom workflow, GUI or release acceptance claim."
+    },
+    "npmBuild": {
+      "passed": true,
+      "node": "26.10.0",
+      "warning": "Existing Vite large-chunk warning"
+    },
+    "cargoMetadata": {
+      "passed": true,
+      "coreLicense": "MIT AND BSD-3-Clause",
+      "otherWorkspaceCratesLicense": "MIT",
+      "locked": true
+    },
+    "shellSyntax": {
+      "passed": true,
+      "scope": "Both native shell scripts and shell blocks in the five public Markdown guides"
+    },
+    "documentationLinks": {
+      "passed": true,
+      "localFilesAndAnchorsChecked": 53
+    },
+    "proseLint": {
+      "bannedWords": 0,
+      "readmeFlavoredPer100Words": 1.35,
+      "linuxStrictPer100Words": 0.57
+    },
+    "independentReview": {
+      "standards": "No remaining implementation findings; core combined-license metadata corrected after targeted follow-up",
+      "spec": "No implementation defects; privacy gate failed; initial pending scanner triage resolved separately"
+    }
+  },
+  "privacyReview": {
+    "scanner": "Gitleaks 8.30.1",
+    "archiveSha256": "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb",
+    "configuration": "Default rules, no project ignore/config; allow comments ignored; redaction 100%; archive depth 2",
+    "history": {
+      "reachableCommits": 233,
+      "originMainCommits": 231,
+      "diffScanReportedCommits": 230,
+      "diffScanFindings": 418,
+      "uniqueBlobsExported": 4744,
+      "uniqueBlobBytes": 132521947,
+      "allBlobFindings": 418,
+      "newAllBlobFileMatchShapes": 0
+    },
+    "preparedTree": {
+      "files": 2713,
+      "findings": 417,
+      "classificationCounts": {
+        "recorded source SHA-256": 398,
+        "public package signing key identifier": 1,
+        "synthetic process ownership UUID": 10,
+        "disposable local Git-operation capability; retained publication hygiene finding": 5,
+        "vendor syntax/string false positive, manually inspected": 3
+      }
+    },
+    "implementationCommitDiff": {
+      "findings": 0,
+      "revision": "63e94e762cadeb25736b8208e3a64acce825589c"
+    },
+    "manualPrivatePatternInventory": {
+      "blobRevisions": 348,
+      "historicalPaths": 18
+    },
+    "manualFindings": [
+      "Private employer Jira/account and repository/delivery data in documentation and history",
+      "Five retained disposable local Git-operation capabilities; no active external credential claim",
+      "Personal/work email addresses in commit metadata; public-copy policy unresolved"
+    ],
+    "imageReview": "The tracked Crewroom screenshot shows synthetic fixture work; no provider credentials observed.",
+    "githubSurfaces": "Remote main only; no tags, releases or workflow runs observed. Repository view reports zero issues/PRs.",
+    "originalHistoryRewritten": false,
+    "privateBackupVerified": true
+  },
+  "privateArtifacts": {
+    "history-gitleaks.json": {
+      "path": ".crewroom/publication-review/history-gitleaks.json",
+      "sha256": "c12c52afbcb50b18edf9491aaf231958b5ceed3c3657f1ebcdd586c993c85bd7"
+    },
+    "gitleaks-triage.json": {
+      "path": ".crewroom/publication-review/gitleaks-triage.json",
+      "sha256": "1e832e2e461f7fd0c3d864b7924b712486e4a000afd05b3ff8221920e1e13250"
+    },
+    "tree-gitleaks.json": {
+      "path": ".crewroom/publication-review/tree-gitleaks.json",
+      "sha256": "48214f2b6c75797f2b4291c8102252606d37bf4fb01b89143aeb266f5994848c"
+    },
+    "tree-triage-summary.json": {
+      "path": ".crewroom/publication-review/tree-triage-summary.json",
+      "sha256": "190d20783940a149b1b06a7969ba9e07e8c8e382da4f6f74c9832d5b8331d76e"
+    },
+    "blobs-gitleaks.json": {
+      "path": ".crewroom/publication-review/blobs-gitleaks.json",
+      "sha256": "da9fcd941e656ca09347f9e5842dbb6dbfd79745a7e1c70824aaf7338b840bcb"
+    },
+    "history-blob-index.json": {
+      "path": ".crewroom/publication-review/history-blob-index.json",
+      "sha256": "1ecb6ccda1cc2e12dfe54b1f4731696e3f9e148909812450fa1cb9623af2d03c"
+    },
+    "private-content-inventory.json": {
+      "path": ".crewroom/publication-review/private-content-inventory.json",
+      "sha256": "63cf30c36d5299f62cfd3de8a5ec0430f6d2a21225cc01ebfefaf8f23e6b9b27"
+    },
+    "pre-publication.bundle": {
+      "path": ".crewroom/publication-review/pre-publication.bundle",
+      "sha256": "1950161741369451a6a6b8073fe401b0ab7aca5f17c700428683147464218216"
+    },
+    "changes-gitleaks.json": {
+      "path": ".crewroom/publication-review/changes-gitleaks.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    "npm-build.log": {
+      "path": ".crewroom/publication-review/npm-build.log",
+      "sha256": "00c8bfd01605eec98531672e8634a1490a71a1d556f125f908b291859fc38497"
+    },
+    "package-check/report.json": {
+      "path": ".crewroom/publication-review/package-check/report.json",
+      "sha256": "10f3cb49e4ac3ca9d9cdc30efe180419547b06a8b8eb66075ea0f24196b1f3c4"
+    }
+  },
+  "limits": [
+    "Publication review failed; repository was not made public.",
+    "No history rewrite, private-content removal or new repository creation authorized by this receipt.",
+    "No new native GUI, optimized Linux release, full Rust/domain/browser workflow or live provider acceptance executed for this docs/package change.",
+    "Default secret rules and targeted manual inspection are not proof that arbitrary private information is absent.",
+    "Compiled-release transitive license inventory remains outside this source-publication task.",
+    "Reachable Git content was exported; scanner-supported content was inspected. Unreachable objects, hosted caches and arbitrary binary content are not certified."
+  ]
+}

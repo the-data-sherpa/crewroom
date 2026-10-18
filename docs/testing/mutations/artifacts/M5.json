@@ -1,0 +1,9 @@
+{
+  "id": "M5",
+  "name": "reject-exact-write-limit",
+  "path": "crates/crewroom-runtime/src/evidence/artifacts.rs",
+  "preimageSha256": "283149d06fbcd73fb06f852892013d836df246c0fc8909735f7c9ef5bbebc763",
+  "old": "if body.len() > 4 * 1024 * 1024 {",
+  "new": "if body.len() >= 4 * 1024 * 1024 {",
+  "postimageSha256": "4e8c46784bacd16328175619452b3be5356496a5a01aa626fec3025c9d915b46"
+}

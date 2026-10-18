@@ -1,0 +1,1010 @@
+{
+  "schemaVersion": 1,
+  "issue": "FOR-12",
+  "status": "accepted within recorded scope",
+  "date": "2026-10-13",
+  "implementation": {
+    "baseline": "642a5b0674256f349001528d3203cabe5ebdadf7",
+    "commits": [
+      "df1bd42186da206cbf871182bb1e218c9bf32113",
+      "a3a984819b3f5fa31054649d9f1a5920536a9390"
+    ],
+    "testedSource": "a3a984819b3f5fa31054649d9f1a5920536a9390",
+    "trackedDiffAtAcceptance": "empty",
+    "laterChanges": "Evidence and roadmap documents only; no recipe/helper/driver edits after the four final native runs.",
+    "productionWorkflowSchemaOrAdapterChanged": false,
+    "featureIndex": "docs/testing/feature-map/README.md",
+    "manifest": {
+      "path": "docs/testing/feature-map/manifest.json",
+      "sha256": "d5e0835dcf5d26ad06a6a78c6bea79fa214227cc48bb774c4ceb01009850411b"
+    },
+    "caseIds": [
+      "E2E-05",
+      "E2E-09",
+      "EVD-04",
+      "LIF-05",
+      "LIF-06",
+      "UI-02",
+      "UI-04"
+    ],
+    "caseScope": "Only the named recipe portions of the existing cases; not full E2E-05/E2E-09 certification.",
+    "changedCodeAndInstructionHashes": {
+      "AGENTS.md": "9f2d564a1d22ee898b5acb3f912725fba930673e29e6743221f689046bc73fc2",
+      "crates/crewroom-desktop/src/workbench/journey_tests.rs": "a8f2a56a3a69928f824c14ce4967ccb801110068f50aeb6aba535eefd3df8512",
+      "crates/crewroom-desktop/src/workbench/journey_tests/feature_recipes.rs": "8bcf4266c0615da4957cab07eb847eac3f9c69504fa4cb4b3d513be6587640ca",
+      "scripts/rust/daemon-client.ts": "ee5ab5e6342b52dd150b6af5f61450ed8a57197ef5b8ff801b6ba7da6f61ac58",
+      "scripts/rust/feature-owned-process.test.ts": "2898da30adf9dc4de7f388cc888efb641b7e47b4cf7eb3539013eec9e96f01a8",
+      "scripts/rust/feature-owned-process.ts": "774fb5ea0bf6b66e98c76bb5fc44c3cb0fb98190592fa89eb9682e1dd93105a2",
+      "scripts/rust/feature-recipes.test.ts": "d70acbc474de2073a8523db687755cbd405c18b525e3fbb381cac4b70cabc6ef",
+      "scripts/rust/native-ui-driver.ts": "bf59b45398d95e43463ca3d98f211f0aa22137b6304fd8b1a03031211bf87a15",
+      "scripts/rust/workflow-support.ts": "56c9b8433105fdbb05a87d17548642d0eab3c3eb79a37a169706ab1ca5f9d7d9",
+      "scripts/test_verify_feature.py": "ed4c29b861d628da0db759e8aa976930aa5189f125d6b0d8d4e0169bad143acc",
+      "scripts/verify-feature.py": "1c19406af28adc3c8f40529b950847e7b99aa78d799c16678bcfbf1b29d162b3"
+    },
+    "recipeSourceHashes": {
+      "crates/crewroom-desktop/src/workbench/journey_tests/feature_recipes.rs": "8bcf4266c0615da4957cab07eb847eac3f9c69504fa4cb4b3d513be6587640ca",
+      "docs/testing/feature-map/README.md": "798df5763dbf918d13075ed58575abec9a03a541aaea26143b5e6a303ad3e335",
+      "docs/testing/feature-map/manifest.json": "d5e0835dcf5d26ad06a6a78c6bea79fa214227cc48bb774c4ceb01009850411b",
+      "docs/testing/feature-map/steering-reconnect.md": "c76ae771f6e41e590f814dedfe8ad11980a12069e162959eaf2c645eae42a22a",
+      "scripts/rust/daemon-client.ts": "ee5ab5e6342b52dd150b6af5f61450ed8a57197ef5b8ff801b6ba7da6f61ac58",
+      "scripts/rust/feature-owned-process.ts": "774fb5ea0bf6b66e98c76bb5fc44c3cb0fb98190592fa89eb9682e1dd93105a2",
+      "scripts/rust/feature-recipes.test.ts": "d70acbc474de2073a8523db687755cbd405c18b525e3fbb381cac4b70cabc6ef",
+      "scripts/rust/host-fixture-rpc.py": "f5d097740fd4293b340a0aceecefff0cb4100d746397df7b003269a7acabb7bb",
+      "scripts/rust/host-fixture.ts": "c2b5d2d43d41238456a543c02116997cfa5b33a9e39ca77d57ad5074f76ce2f0",
+      "scripts/rust/native-ui-driver.ts": "bf59b45398d95e43463ca3d98f211f0aa22137b6304fd8b1a03031211bf87a15",
+      "scripts/rust/process-adapter.ts": "66d01f1f3b4f4addcf7cae835e77ab6ee14aa8b853ae5b2c21ae119005db8c1e",
+      "scripts/rust/workflow-fixture-rpc.py": "06693db3668caeaf7cec54b2c6aeed2cb3a93c8a4a0afdd5d3e0423cc2d3df88",
+      "scripts/rust/workflow-support.ts": "56c9b8433105fdbb05a87d17548642d0eab3c3eb79a37a169706ab1ca5f9d7d9",
+      "scripts/test_processes.py": "b71e9a4b5655ce1c5193c7bbfe2c518d654733405e981a48fbc4c663a34a3fd5",
+      "scripts/verify-feature.py": "1c19406af28adc3c8f40529b950847e7b99aa78d799c16678bcfbf1b29d162b3",
+      "docs/testing/feature-map/pause-resume.md": "538002838a9a5ae5569b9c75567bddad83d09374374160317a4fbbe16d4f8e43",
+      "docs/testing/feature-map/readiness-invalidation.md": "6a474bb6ccb72d0a2e1bb19102ceb604934eda74531203aeb477447a9f862109",
+      "scripts/rust/container-adapter.ts": "96930eb597f47554a80a7e25b9461d945c300a79c554a1afb111ee95e452ad5a",
+      "scripts/rust/workflow-coding-fixture.ts": "b242c4f4da5d2b5eda2f78368f02091c342b4fe47241196d1cb48255f6ad47b2"
+    }
+  },
+  "platform": {
+    "system": "Linux",
+    "release": "7.2.5-3-omarchy",
+    "machine": "x86_64",
+    "python": "3.14.7",
+    "nativeMode": "GPUI test harness; no OS-input certification",
+    "display": {
+      "wayland": true,
+      "x11": true
+    }
+  },
+  "build": {
+    "outcome": "passed",
+    "receipt": {
+      "path": ".crewroom/test-results/for12-fresh-final-20261013/build-01/receipt.json",
+      "sha256": "5d9eb7b9d1855b3d0cc2ad88bcc5ddd0487a3d30f3c51d6f6504b8b07569a369"
+    },
+    "preflightBuildAlias": {
+      "path": ".crewroom/feature-verification/build.json",
+      "sha256": "5d9eb7b9d1855b3d0cc2ad88bcc5ddd0487a3d30f3c51d6f6504b8b07569a369"
+    },
+    "revision": {
+      "commit": "a3a984819b3f5fa31054649d9f1a5920536a9390",
+      "dirtyDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "?? .lavish/for-10-implementation-plan.html\n?? .lavish/for-11-implementation-plan.html"
+    },
+    "commands": [
+      {
+        "command": [
+          "/usr/bin/python3",
+          "scripts/bootstrap-native.py",
+          "--check-build-dependencies"
+        ],
+        "startedAt": 1791934806.3304029,
+        "timeoutSeconds": 600,
+        "log": ".crewroom/test-results/for12-fresh-final-20261013/build-01/00-bootstrap.log",
+        "state": "finished",
+        "pid": 4084102,
+        "endedAt": 1791934807.5475202,
+        "exitCode": 0
+      },
+      {
+        "command": [
+          "cargo",
+          "build",
+          "--workspace",
+          "--examples",
+          "--locked"
+        ],
+        "startedAt": 1791934807.5488691,
+        "timeoutSeconds": 1800,
+        "log": ".crewroom/test-results/for12-fresh-final-20261013/build-01/01-examples.log",
+        "state": "finished",
+        "pid": 4084181,
+        "endedAt": 1791934807.8646996,
+        "exitCode": 0
+      },
+      {
+        "command": [
+          "cargo",
+          "build",
+          "--workspace",
+          "--locked"
+        ],
+        "startedAt": 1791934807.8658412,
+        "timeoutSeconds": 1800,
+        "log": ".crewroom/test-results/for12-fresh-final-20261013/build-01/02-workspace.log",
+        "state": "finished",
+        "pid": 4084191,
+        "endedAt": 1791934808.2319627,
+        "exitCode": 0
+      },
+      {
+        "command": [
+          "cargo",
+          "test",
+          "-p",
+          "crewroom-desktop",
+          "--locked",
+          "--no-run",
+          "--message-format=json-render-diagnostics"
+        ],
+        "startedAt": 1791934808.2330134,
+        "timeoutSeconds": 1800,
+        "log": ".crewroom/test-results/for12-fresh-final-20261013/build-01/03-native-test.log",
+        "state": "finished",
+        "pid": 4084195,
+        "endedAt": 1791934808.599019,
+        "exitCode": 0
+      }
+    ],
+    "nativeSourceCount": 1956,
+    "nativeSourceSha256": "5f89d67bf966f49c496cab8423d457dab6ea402488503b9609c13c035644a861",
+    "binaries": {
+      "crewroomd": {
+        "path": "target/debug/crewroomd",
+        "sha256": "616c9264e497c8f23578d87bf9512b5c15a3bc0656b0322c78fc6288f4027edc"
+      },
+      "crewroom-host": {
+        "path": "target/debug/crewroom-host",
+        "sha256": "e05af2dd096ab3efe9f2ec752a8fdacbbd46c7763d3a2386d204e6515e4be2be"
+      },
+      "crewroom-process": {
+        "path": "target/debug/crewroom-process",
+        "sha256": "bc9b62bf09a210a7d1e6a46d20ff10c74a0391fc06739c328fc84bf0816c31ce"
+      },
+      "crewroom": {
+        "path": "target/debug/crewroom",
+        "sha256": "6fbd961b7a36dd75c4468b70282b4d1f486f171fca8835d8520d9ce228d3c08b"
+      },
+      "examples/workflow-fixture": {
+        "path": "target/debug/examples/workflow-fixture",
+        "sha256": "ca1a52816d2cc42790d0f2ba380997d4b39e62cf9d8305df6199434a69f2c949"
+      },
+      "examples/container-fixture": {
+        "path": "target/debug/examples/container-fixture",
+        "sha256": "90515f56fce68e946df8048c921c809638603d60c055deec9bec56d4554d2824"
+      },
+      "nativeTest": {
+        "path": "target/debug/deps/crewroom-af1759befbb280c8",
+        "sha256": "f7e42d54842263a02548e8d9f12a288cdf0255f248eab2a8986fa3d9595bf1da"
+      }
+    },
+    "toolchain": {
+      "cargo": "cargo 1.98.1 (797e8a9bc 2026-08-05) (Arch Linux rust 1:1.98.1-1)",
+      "rustc": "rustc 1.98.1 (48a229cea 2026-09-01) (Arch Linux rust 1:1.98.1-1)",
+      "node": "v26.10.0"
+    },
+    "zig": {
+      "path": ".crewroom/toolchains/zig-x86_64-linux-0.16.0/zig",
+      "sha256": "2317bbb91798556d9d0f38aabdac23db83f0979b25f767259ae474546724087c"
+    },
+    "privateBuildOverrides": false
+  },
+  "freshSpecialist": {
+    "assignment": {
+      "path": ".crewroom/test-results/for12-fresh-final-20261013/initial-assignment.txt",
+      "sha256": "21976a3f001ca29e34bdff59f18a0405d2c48f6d2341802b60d757d6df57460c"
+    },
+    "initialDiscovery": {
+      "path": ".crewroom/test-results/for12-fresh-final-20261013/initial-discovery-commands.json",
+      "sha256": "78b1fdbba64ae2bb32fae01ee00d2112e51ef1a8f905fd0d47f4e4ed1038e85d"
+    },
+    "discovery": {
+      "path": ".crewroom/test-results/for12-fresh-final-20261013/discovery.md",
+      "sha256": "289d43e1e77d3f82fef119131d65bb84b49ee3c96c92933a7932e5b5755179e7"
+    },
+    "summary": {
+      "path": ".crewroom/test-results/for12-fresh-final-20261013/summary.json",
+      "sha256": "94ffd2a8b6638ef1212a9bdeb006746e850c8f3ca154a7651d9ba348f05ec5a2"
+    },
+    "commandAndEvidenceInventory": {
+      "path": ".crewroom/test-results/for12-fresh-final-20261013/evidence-file-hashes.json",
+      "sha256": "d5b44a489fc9c7d9c2e5af9d78b62b13062157ea2b10e9942b992e2f3b5e2fc4"
+    },
+    "path": "AGENTS.md -> feature index -> recipes",
+    "privateSetupQuestions": [],
+    "privateSetupCoachingReceived": false,
+    "codeOrRecipeEdits": false,
+    "nonblockingDocumentationFinding": "Historical plan said helper commands did not exist; corrected in the evidence-only handoff."
+  },
+  "runs": [
+    {
+      "recipe": "steering-reconnect",
+      "outcome": "passed",
+      "testCounts": {
+        "tests": 1,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "assertionCounts": {
+        "expected": 6,
+        "executed": 6,
+        "passed": 6
+      },
+      "nativeActions": [
+        "steering-store",
+        "steering-reconnect-pending",
+        "steering-received",
+        "steering-reconnect-applied"
+      ],
+      "durablePhases": [
+        "running-coordinator",
+        "stored-pending",
+        "host-received",
+        "host-applied",
+        "final-steering"
+      ],
+      "assertions": [
+        {
+          "id": "native-stored-pending",
+          "passed": true,
+          "facts": {
+            "messageId": "45f7e494-17c4-4f80-a294-6aa8dccfe039"
+          }
+        },
+        {
+          "id": "reconnect-preserves-pending",
+          "passed": true,
+          "facts": {
+            "messageId": "45f7e494-17c4-4f80-a294-6aa8dccfe039",
+            "nativeClients": 2
+          }
+        },
+        {
+          "id": "host-received",
+          "passed": true,
+          "facts": {
+            "messageId": "45f7e494-17c4-4f80-a294-6aa8dccfe039",
+            "inputId": "steering:45f7e494-17c4-4f80-a294-6aa8dccfe039",
+            "exactlyOneRpcPrompt": true
+          }
+        },
+        {
+          "id": "native-received",
+          "passed": true,
+          "facts": {
+            "messageId": "45f7e494-17c4-4f80-a294-6aa8dccfe039"
+          }
+        },
+        {
+          "id": "host-applied",
+          "passed": true,
+          "facts": {
+            "messageId": "45f7e494-17c4-4f80-a294-6aa8dccfe039",
+            "transitions": [
+              "dispatched",
+              "received",
+              "applied"
+            ]
+          }
+        },
+        {
+          "id": "reconnect-preserves-applied",
+          "passed": true,
+          "facts": {
+            "messageId": "45f7e494-17c4-4f80-a294-6aa8dccfe039",
+            "applications": 1
+          }
+        }
+      ],
+      "cleanup": {
+        "daemonExitCode": 0,
+        "stoppedAttemptCount": 1,
+        "allOwnedProcessesStopped": true,
+        "registeredResourcesStopped": 7,
+        "remaining": [],
+        "fallback": false,
+        "passed": true
+      },
+      "caseSubset": [
+        "UI-02",
+        "E2E-05"
+      ],
+      "receipt": {
+        "path": ".crewroom/test-results/f12fs1/receipt.json",
+        "sha256": "f56f528f4351a019ce64526853b9fbaa4fbcf683ebd81515c10a45cccd868710"
+      },
+      "journey": {
+        "path": ".crewroom/test-results/f12fs1/journey.json",
+        "sha256": "889f4dd1d78f57a633c36cb49b04c6b07d83ad6a52b620a019aeb4ca8c930844"
+      },
+      "revision": {
+        "commit": "a3a984819b3f5fa31054649d9f1a5920536a9390",
+        "dirtyDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "status": "?? .lavish/for-10-implementation-plan.html\n?? .lavish/for-11-implementation-plan.html"
+      },
+      "recipeCommit": "a3a984819b3f5fa31054649d9f1a5920536a9390",
+      "manifestSha256": "d5e0835dcf5d26ad06a6a78c6bea79fa214227cc48bb774c4ceb01009850411b",
+      "durationSeconds": 16.406,
+      "selectedTests": [
+        "steering-reconnect"
+      ],
+      "commands": [
+        {
+          "command": [
+            "node",
+            "--import",
+            "tsx",
+            "--test",
+            "--test-reporter=tap",
+            "--test-concurrency=1",
+            "--test-name-pattern",
+            "^steering-reconnect$",
+            "scripts/rust/feature-recipes.test.ts"
+          ],
+          "startedAt": 1791934826.7427578,
+          "timeoutSeconds": 240,
+          "log": ".crewroom/test-results/f12fs1/00-journey.log",
+          "state": "finished",
+          "pid": 4084765,
+          "endedAt": 1791934842.332093,
+          "exitCode": 0
+        }
+      ],
+      "retainedArtifactCount": 84
+    },
+    {
+      "recipe": "pause-resume",
+      "outcome": "passed",
+      "testCounts": {
+        "tests": 1,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "assertionCounts": {
+        "expected": 6,
+        "executed": 6,
+        "passed": 6
+      },
+      "nativeActions": [
+        "pause-active",
+        "pause-reopen-history",
+        "pause-explicit-resume"
+      ],
+      "durablePhases": [
+        "active-progress",
+        "paused-owned-stop",
+        "service-reopen",
+        "reopened-history",
+        "resumed-progress"
+      ],
+      "assertions": [
+        {
+          "id": "owned-active-progress",
+          "passed": true,
+          "facts": {
+            "attemptId": "ae357f59-17d7-4680-b67b-2073ef599f5d",
+            "observedProgress": {
+              "path": ".crewroom/test-results/f12fp1/fixtures/cr-wf-7LggRs/runtime/ae357f59-17d7-4680-b67b-2073ef599f5d/rpc-requests.jsonl",
+              "observedBytes": 7118,
+              "observedSha256": "518a9c97de951c71c3c714f17936430e3ab98d6695ca0354360f651b37d9feef"
+            }
+          }
+        },
+        {
+          "id": "native-pausing-before-stopped",
+          "passed": true,
+          "facts": {
+            "attemptId": "ae357f59-17d7-4680-b67b-2073ef599f5d"
+          }
+        },
+        {
+          "id": "paused-owned-stop",
+          "passed": true,
+          "facts": {
+            "attemptId": "ae357f59-17d7-4680-b67b-2073ef599f5d",
+            "host": "stopped",
+            "runner": "stopped"
+          }
+        },
+        {
+          "id": "reopen-preserves-history",
+          "passed": true,
+          "facts": {
+            "runId": "948e7562-a30d-4cd1-9aab-b05aad12c2f8",
+            "attemptId": "ae357f59-17d7-4680-b67b-2073ef599f5d",
+            "observedProgress": {
+              "path": ".crewroom/test-results/f12fp1/fixtures/cr-wf-7LggRs/runtime/ae357f59-17d7-4680-b67b-2073ef599f5d/rpc-requests.jsonl",
+              "observedBytes": 7118,
+              "observedSha256": "518a9c97de951c71c3c714f17936430e3ab98d6695ca0354360f651b37d9feef"
+            }
+          }
+        },
+        {
+          "id": "native-explicit-resume",
+          "passed": true,
+          "facts": {
+            "runId": "948e7562-a30d-4cd1-9aab-b05aad12c2f8",
+            "previousAttempt": "ae357f59-17d7-4680-b67b-2073ef599f5d",
+            "replacementAttempt": "d22edab7-f005-474d-a14d-5b295dcda71a"
+          }
+        },
+        {
+          "id": "resumed-progress-no-old-writer",
+          "passed": true,
+          "facts": {
+            "previousAttempt": "ae357f59-17d7-4680-b67b-2073ef599f5d",
+            "replacementAttempt": "d22edab7-f005-474d-a14d-5b295dcda71a",
+            "observedProgress": {
+              "path": ".crewroom/test-results/f12fp1/fixtures/cr-wf-7LggRs/runtime/d22edab7-f005-474d-a14d-5b295dcda71a/rpc-requests.jsonl",
+              "observedBytes": 9429,
+              "observedSha256": "f80509eca132ab144fdfbdff19f5f13887de506a0573bf3c7345b9cbcea46d97"
+            }
+          }
+        }
+      ],
+      "cleanup": {
+        "daemonExitCode": 0,
+        "stoppedAttemptCount": 2,
+        "allOwnedProcessesStopped": true,
+        "registeredResourcesStopped": 9,
+        "remaining": [],
+        "fallback": false,
+        "passed": true
+      },
+      "caseSubset": [
+        "UI-04",
+        "LIF-05",
+        "LIF-06",
+        "E2E-05"
+      ],
+      "receipt": {
+        "path": ".crewroom/test-results/f12fp1/receipt.json",
+        "sha256": "59719cb0ff1e50d5213b828c37a256e49d307219984e3e2b658db3c04473943c"
+      },
+      "journey": {
+        "path": ".crewroom/test-results/f12fp1/journey.json",
+        "sha256": "1d2142f7e1331e2b1801ce335b48ac0642b65a48d4b00100fad8547abcac3615"
+      },
+      "revision": {
+        "commit": "a3a984819b3f5fa31054649d9f1a5920536a9390",
+        "dirtyDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "status": "?? .lavish/for-10-implementation-plan.html\n?? .lavish/for-11-implementation-plan.html"
+      },
+      "recipeCommit": "a3a984819b3f5fa31054649d9f1a5920536a9390",
+      "manifestSha256": "d5e0835dcf5d26ad06a6a78c6bea79fa214227cc48bb774c4ceb01009850411b",
+      "durationSeconds": 13.102,
+      "selectedTests": [
+        "pause-resume"
+      ],
+      "commands": [
+        {
+          "command": [
+            "node",
+            "--import",
+            "tsx",
+            "--test",
+            "--test-reporter=tap",
+            "--test-concurrency=1",
+            "--test-name-pattern",
+            "^pause-resume$",
+            "scripts/rust/feature-recipes.test.ts"
+          ],
+          "startedAt": 1791934853.4497561,
+          "timeoutSeconds": 240,
+          "log": ".crewroom/test-results/f12fp1/00-journey.log",
+          "state": "finished",
+          "pid": 4085860,
+          "endedAt": 1791934865.7341433,
+          "exitCode": 0
+        }
+      ],
+      "retainedArtifactCount": 99
+    },
+    {
+      "recipe": "readiness-invalidation",
+      "outcome": "passed",
+      "testCounts": {
+        "tests": 1,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "assertionCounts": {
+        "expected": 6,
+        "executed": 6,
+        "passed": 6
+      },
+      "nativeActions": [
+        "readiness-positive",
+        "readiness-target-refresh"
+      ],
+      "durablePhases": [
+        "ready-candidate",
+        "stopped-before-refresh",
+        "advanced-isolated-target",
+        "invalidated-assessment",
+        "historical-evidence-and-no-restart"
+      ],
+      "assertions": [
+        {
+          "id": "ready-candidate-real-check-review",
+          "passed": true,
+          "facts": {
+            "candidateId": "dbdf33ff-e15b-459c-9e29-c058036af786",
+            "revision": {
+              "base": "1876488fb88e2f242a8cee375348a750e9ee3fe1",
+              "head": "7c5f05248c5a21169bf55a5e22672f1b0513cc85",
+              "tree": "2ddc85c31aa70080bd4486d269692973ee92686d",
+              "worktreeHash": "fa132e10d8fe6c8ca8ba08e3ac9eb924141d4b28f1502ef6638b2a0fd39cc046",
+              "dirty": false,
+              "requirementsHash": "b9e18b3a48c919adc964ec0fe2750d50398219ec0a57e2c5fddf45322a50961c",
+              "instructionsHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+            },
+            "checkId": "abefa892-1311-4848-b811-2f1237733db5",
+            "reviewId": "ca8b154b-c4f3-4718-bb22-4aaf6facf0c0",
+            "reviewerAttemptId": "b5e6ed3c-822b-415e-97a5-ed1efc1cfdec"
+          }
+        },
+        {
+          "id": "native-ready-results",
+          "passed": true,
+          "facts": {
+            "candidateId": "dbdf33ff-e15b-459c-9e29-c058036af786"
+          }
+        },
+        {
+          "id": "stopped-before-refresh",
+          "passed": true,
+          "facts": {}
+        },
+        {
+          "id": "native-target-refresh",
+          "passed": true,
+          "facts": {
+            "control": "target-refresh",
+            "target": "bfb11356f18f262f6cfb93cf8ac750a933550f83"
+          }
+        },
+        {
+          "id": "revision-invalidates-readiness",
+          "passed": true,
+          "facts": {
+            "previousCandidate": "dbdf33ff-e15b-459c-9e29-c058036af786",
+            "nextCandidate": "5282d54f-c807-4316-b9d1-0af3c6cca4e3",
+            "blockers": [
+              "Required check required is missing or failed.",
+              "Independent review is missing for this revision."
+            ]
+          }
+        },
+        {
+          "id": "historical-evidence-retained",
+          "passed": true,
+          "facts": {
+            "candidateId": "dbdf33ff-e15b-459c-9e29-c058036af786",
+            "checks": [
+              "abefa892-1311-4848-b811-2f1237733db5"
+            ],
+            "reviews": [
+              "ca8b154b-c4f3-4718-bb22-4aaf6facf0c0"
+            ]
+          }
+        }
+      ],
+      "cleanup": {
+        "daemonExitCode": 0,
+        "stoppedAttemptCount": 11,
+        "allOwnedProcessesStopped": true,
+        "registeredResourcesStopped": 33,
+        "remaining": [],
+        "fallback": false,
+        "passed": true
+      },
+      "caseSubset": [
+        "EVD-04",
+        "E2E-09"
+      ],
+      "receipt": {
+        "path": ".crewroom/test-results/f12fr1/receipt.json",
+        "sha256": "754e00c8d376cd094ee4c6e99f282f3eef8b0e9053b03acedc511fccac002425"
+      },
+      "journey": {
+        "path": ".crewroom/test-results/f12fr1/journey.json",
+        "sha256": "34b8ef57ee599e7c7d789775ee719fca2cf55809dd8ea33fa96ef09a9dc55102"
+      },
+      "revision": {
+        "commit": "a3a984819b3f5fa31054649d9f1a5920536a9390",
+        "dirtyDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "status": "?? .lavish/for-10-implementation-plan.html\n?? .lavish/for-11-implementation-plan.html"
+      },
+      "recipeCommit": "a3a984819b3f5fa31054649d9f1a5920536a9390",
+      "manifestSha256": "d5e0835dcf5d26ad06a6a78c6bea79fa214227cc48bb774c4ceb01009850411b",
+      "durationSeconds": 32.6,
+      "selectedTests": [
+        "readiness-invalidation"
+      ],
+      "commands": [
+        {
+          "command": [
+            "node",
+            "--import",
+            "tsx",
+            "--test",
+            "--test-reporter=tap",
+            "--test-concurrency=1",
+            "--test-name-pattern",
+            "^readiness-invalidation$",
+            "scripts/rust/feature-recipes.test.ts"
+          ],
+          "startedAt": 1791934883.775577,
+          "timeoutSeconds": 240,
+          "log": ".crewroom/test-results/f12fr1/00-journey.log",
+          "state": "finished",
+          "pid": 4087083,
+          "endedAt": 1791934915.5410697,
+          "exitCode": 0
+        }
+      ],
+      "retainedArtifactCount": 330,
+      "revisionChange": {
+        "previous": {
+          "base": "1876488fb88e2f242a8cee375348a750e9ee3fe1",
+          "head": "7c5f05248c5a21169bf55a5e22672f1b0513cc85",
+          "tree": "2ddc85c31aa70080bd4486d269692973ee92686d",
+          "worktreeHash": "fa132e10d8fe6c8ca8ba08e3ac9eb924141d4b28f1502ef6638b2a0fd39cc046",
+          "dirty": false,
+          "requirementsHash": "b9e18b3a48c919adc964ec0fe2750d50398219ec0a57e2c5fddf45322a50961c",
+          "instructionsHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "next": {
+          "base": "bfb11356f18f262f6cfb93cf8ac750a933550f83",
+          "head": "1cbb46ab484de587d6959b3eff156ea16b879117",
+          "tree": "60ee8c55c6f7b7c913b62ab9f5c4d6be05bdfe0e",
+          "worktreeHash": "2db9797394b922214cfb393ed53a2ead134a9a11fee6fc9895facaa71a6502cc",
+          "dirty": false,
+          "requirementsHash": "b9e18b3a48c919adc964ec0fe2750d50398219ec0a57e2c5fddf45322a50961c",
+          "instructionsHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "readyAfter": false,
+        "blockers": [
+          "Required check required is missing or failed.",
+          "Independent review is missing for this revision."
+        ]
+      }
+    },
+    {
+      "recipe": "steering-reconnect",
+      "outcome": "passed",
+      "testCounts": {
+        "tests": 1,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "assertionCounts": {
+        "expected": 6,
+        "executed": 6,
+        "passed": 6
+      },
+      "nativeActions": [
+        "steering-store",
+        "steering-reconnect-pending",
+        "steering-received",
+        "steering-reconnect-applied"
+      ],
+      "durablePhases": [
+        "running-coordinator",
+        "stored-pending",
+        "host-received",
+        "host-applied",
+        "final-steering"
+      ],
+      "assertions": [
+        {
+          "id": "native-stored-pending",
+          "passed": true,
+          "facts": {
+            "messageId": "354f3f42-7489-4660-ba0a-c90763b984ef"
+          }
+        },
+        {
+          "id": "reconnect-preserves-pending",
+          "passed": true,
+          "facts": {
+            "messageId": "354f3f42-7489-4660-ba0a-c90763b984ef",
+            "nativeClients": 2
+          }
+        },
+        {
+          "id": "host-received",
+          "passed": true,
+          "facts": {
+            "messageId": "354f3f42-7489-4660-ba0a-c90763b984ef",
+            "inputId": "steering:354f3f42-7489-4660-ba0a-c90763b984ef",
+            "exactlyOneRpcPrompt": true
+          }
+        },
+        {
+          "id": "native-received",
+          "passed": true,
+          "facts": {
+            "messageId": "354f3f42-7489-4660-ba0a-c90763b984ef"
+          }
+        },
+        {
+          "id": "host-applied",
+          "passed": true,
+          "facts": {
+            "messageId": "354f3f42-7489-4660-ba0a-c90763b984ef",
+            "transitions": [
+              "dispatched",
+              "received",
+              "applied"
+            ]
+          }
+        },
+        {
+          "id": "reconnect-preserves-applied",
+          "passed": true,
+          "facts": {
+            "messageId": "354f3f42-7489-4660-ba0a-c90763b984ef",
+            "applications": 1
+          }
+        }
+      ],
+      "cleanup": {
+        "daemonExitCode": 0,
+        "stoppedAttemptCount": 1,
+        "allOwnedProcessesStopped": true,
+        "registeredResourcesStopped": 7,
+        "remaining": [],
+        "fallback": false,
+        "passed": true
+      },
+      "caseSubset": [
+        "UI-02",
+        "E2E-05"
+      ],
+      "receipt": {
+        "path": ".crewroom/test-results/f12fd1/receipt.json",
+        "sha256": "7cfdea58ff3c5d60bf9ded314a9fbe4dc50994003a98a24814bd04fbb03adb08"
+      },
+      "journey": {
+        "path": ".crewroom/test-results/f12fd1/journey.json",
+        "sha256": "9a81e765ebae320d53f0056a8b1ac088c8d52dedb9a818a63c2e1446719cc117"
+      },
+      "revision": {
+        "commit": "a3a984819b3f5fa31054649d9f1a5920536a9390",
+        "dirtyDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "status": "?? .lavish/for-10-implementation-plan.html\n?? .lavish/for-11-implementation-plan.html"
+      },
+      "recipeCommit": "a3a984819b3f5fa31054649d9f1a5920536a9390",
+      "manifestSha256": "d5e0835dcf5d26ad06a6a78c6bea79fa214227cc48bb774c4ceb01009850411b",
+      "durationSeconds": 16.46,
+      "selectedTests": [
+        "steering-reconnect"
+      ],
+      "commands": [
+        {
+          "command": [
+            "node",
+            "--import",
+            "tsx",
+            "--test",
+            "--test-reporter=tap",
+            "--test-concurrency=1",
+            "--test-name-pattern",
+            "^steering-reconnect$",
+            "scripts/rust/feature-recipes.test.ts"
+          ],
+          "startedAt": 1791934934.71801,
+          "timeoutSeconds": 240,
+          "log": ".crewroom/test-results/f12fd1/00-journey.log",
+          "state": "finished",
+          "pid": 4090982,
+          "endedAt": 1791934950.3581736,
+          "exitCode": 0
+        }
+      ],
+      "retainedArtifactCount": 84
+    }
+  ],
+  "freshnessDrill": {
+    "feature": "steering-reconnect",
+    "originalSha256": "d5e0835dcf5d26ad06a6a78c6bea79fa214227cc48bb774c4ceb01009850411b",
+    "staleSha256": "9aee0ddfe350cbb96e42a965f9c1546d5a2dd792a58d0c919aa513cbec1a7018",
+    "documentedSelector": "workbench::journey_tests::feature_recipes::native_feature_recipe_control",
+    "staleSelector": "workbench::journey_tests::feature_recipes::missing_fresh_specialist_drill",
+    "correctedSha256": "d5e0835dcf5d26ad06a6a78c6bea79fa214227cc48bb774c4ceb01009850411b",
+    "correctionMatchesVersionedManifest": true,
+    "stalePreflightOutcome": "stale",
+    "stalePreflightExitCode": 4,
+    "staleCommand": "check; no run subcommand was admitted",
+    "staleResult": {
+      "outcome": "stale",
+      "reason": "Manifest needs correction: Native selector differs from the fixed feature recipe driver; update the manifest/driver binding together."
+    },
+    "journeyStartedFromStaleCopy": false,
+    "correctedNativeRerun": ".crewroom/test-results/f12fd1",
+    "correctedNativeOutcome": "passed",
+    "stalePreflight": {
+      "path": ".crewroom/test-results/for12-fresh-final-20261013/16-stale-check.log",
+      "sha256": "4a23b3be5e195fa516c206a63faccb4fa1287c28b6299ca80135fef5eba37f27"
+    },
+    "originalManifest": {
+      "path": ".crewroom/test-results/for12-fresh-final-20261013/manifest-original.json",
+      "sha256": "d5e0835dcf5d26ad06a6a78c6bea79fa214227cc48bb774c4ceb01009850411b"
+    },
+    "staleManifest": {
+      "path": ".crewroom/test-results/for12-fresh-final-20261013/manifest-stale.json",
+      "sha256": "9aee0ddfe350cbb96e42a965f9c1546d5a2dd792a58d0c919aa513cbec1a7018"
+    },
+    "correctedManifest": {
+      "path": ".crewroom/test-results/for12-fresh-final-20261013/manifest-corrected.json",
+      "sha256": "d5e0835dcf5d26ad06a6a78c6bea79fa214227cc48bb774c4ceb01009850411b"
+    }
+  },
+  "regressions": {
+    "nodeEnvironment": "PATH prepended with /home/crewroom/.local/share/mise/installs/node/26/bin; Node v26.10.0",
+    "checks": [
+      {
+        "name": "helper-guards",
+        "command": "python3 scripts/test_verify_feature.py -v",
+        "outcome": "passed",
+        "log": {
+          "path": ".crewroom/test-results/for12/integration-checks/helper-guards-2.log",
+          "sha256": "ca5d2fe296eabae45ee07229aad8882cc53b25c8365d5d1e732e6bc0b8d65e3c"
+        },
+        "coverage": "Final helper and guard sources; fake toolchain exercises public CLI refusal/selection/ownership contracts, not native product behavior.",
+        "testsPassed": 8
+      },
+      {
+        "name": "owned-environment-guard",
+        "command": "node --import tsx --test --test-reporter=tap scripts/rust/feature-owned-process.test.ts",
+        "outcome": "passed",
+        "log": {
+          "path": ".crewroom/test-results/for12/integration-checks/environment-guard.log",
+          "sha256": "8d95d58b89127f64f359d81056e431d59e88871a45e3f0e58c4898673267a8b7"
+        },
+        "coverage": "Final allowlist; actual owned daemon and native-ui role subprocesses with benign credential sentinels.",
+        "testsPassed": 1
+      },
+      {
+        "name": "shared-daemon-lifecycle",
+        "command": "node --import tsx --test --test-reporter=tap --test-concurrency=1 scripts/rust/daemon-workflow.test.ts scripts/rust/workflow-lifecycle.test.ts",
+        "outcome": "passed",
+        "log": {
+          "path": ".crewroom/test-results/for12/integration-checks/shared-fixtures.log",
+          "sha256": "9a8424081cbf1bcb4397de81690b590047b6b23cf8b8eb609a3c3936a4f11e0b"
+        },
+        "coverage": "Run before final environment/path repairs. Ordinary unowned launch branch unchanged; final owned branch additionally covered by environment guard and four native journeys.",
+        "testsPassed": 8
+      },
+      {
+        "name": "typescript-build",
+        "command": "npm run build",
+        "outcome": "passed",
+        "log": {
+          "path": ".crewroom/test-results/for12/integration-checks/final-types-build-2.log",
+          "sha256": "bf46bd87b520acdeaf9da13977e3247a66de9549e082aedad28a4b565a70d9da"
+        },
+        "coverage": "Repository tsc/Vite build gate; scripts/rust/**/*.ts are outside tsconfig.json. Changed native fixture scripts are covered by their runtime tests and final native journeys. Vite chunk-size warning only."
+      },
+      {
+        "name": "rust-format",
+        "command": "cargo fmt --all -- --check",
+        "outcome": "passed",
+        "log": {
+          "path": ".crewroom/test-results/for12/integration-checks/fmt.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "coverage": "Native Rust driver unchanged since check."
+      }
+    ],
+    "pythonSyntax": {
+      "command": "python3 -m py_compile scripts/verify-feature.py scripts/test_verify_feature.py",
+      "outcome": "passed"
+    },
+    "staticMap": {
+      "path": ".crewroom/test-results/for12/integration-checks/static-map.json",
+      "sha256": "1707d3ce87967770ce043f6ad62e107b349c671f2e730d9878f35adcd682a229"
+    },
+    "staticCounts": {
+      "localLinks": 18,
+      "recipes": 3,
+      "existingCaseIds": 7
+    },
+    "scope": "Only documentation and verification helpers/drivers changed. No new production domain/user-flow change; no repeat of full npm test, browser E2E, live-model matrix, whole-state restore, or platform gates."
+  },
+  "historicalAttempts": {
+    "authorDiagnostics": {
+      "outcome": "All three passed six assertions and checked cleanup before final assertion-strengthening; not final acceptance.",
+      "journeys": [
+        {
+          "path": ".crewroom/for12-author-steering-1/journey.json",
+          "sha256": "6bb211b29786601afc6229f01d46ebc1676e5b2fd45eb16bcfc2b947f76035bb"
+        },
+        {
+          "path": ".crewroom/for12-author-pause-1/journey.json",
+          "sha256": "23f398aa008b133d39ed1da2b67c18a6dc8378d7d5b97a671a2070aabea46d4e"
+        },
+        {
+          "path": ".crewroom/for12-author-readiness-1/journey.json",
+          "sha256": "4cf9708fda394fe61d60b24e1d01a3d6463344994a1077cd4017f5134899118d"
+        }
+      ],
+      "sourceRecord": {
+        "path": ".crewroom/for12-author-source/source-identities.json",
+        "sha256": "9ae169de9e89f161e8a45fb533b26c51bf6dfd53a5add2e0effaf2b57666dc50"
+      },
+      "sourceRecordLimitation": "Reconstructed historical source identity, not exact final source-bound acceptance."
+    },
+    "initialFreshSpecialist": {
+      "source": "df1bd42186da206cbf871182bb1e218c9bf32113",
+      "summary": {
+        "path": ".crewroom/test-results/for12/fresh-specialist-20261013/summary.json",
+        "sha256": "627c4810f84cbc7a0178b352b4398e3988e69df3e211da5f1b74721b147cde7a"
+      },
+      "receipt": {
+        "path": ".crewroom/test-results/for12/fresh-specialist-20261013/steering-01/receipt.json",
+        "sha256": "3e3892ed1b1cc564a0dab85a800644b93ecf696a27634db9af884505f2747987"
+      },
+      "classification": "helper/documentation setup defect",
+      "result": "Build passed; first steering failed before native actions because the documented nested evidence path exceeded the Unix tmux socket limit. No pause/readiness/drill acceptance claimed.",
+      "cleanup": "passed without fallback or remaining owned resources",
+      "repair": "Encoded socket-path limit checked before launch; shorter documented paths. New specialist received fresh context and passed all four final runs."
+    }
+  },
+  "independentReview": {
+    "preAcceptance": {
+      "path": ".crewroom/test-results/for12/review.json",
+      "sha256": "5c064f68c0a67950f937ca44193509e6b0f66c30dd53a601baba14f0c633c355"
+    },
+    "finalEvidenceAudit": {
+      "path": ".crewroom/test-results/for12/review-final.json",
+      "sha256": "3962741092fd75ccdaf4ffadc86504b183151141a55327ae49185c4926f3e60c"
+    },
+    "outcome": "passed",
+    "remainingFindings": [],
+    "resolvedFindings": [
+      "Recovery cleanup handles running and stopped-retained owned Docker resources.",
+      "Manifest selector must match the exact native driver actually invoked.",
+      "Owned daemon/UI launch journals retain only allowed environment values.",
+      "Documented fixture paths fit tmux sockets and encoded lengths are checked before launch."
+    ],
+    "audit": "Independently rehashed 597 run artifacts, recipe/helper sources, 1,956 native build inputs and seven binaries; checked native/durable facts and empty owned process inventories."
+  },
+  "evidenceRetention": {
+    "rawArtifacts": "Private local .crewroom paths referenced above; not hosted or committed.",
+    "secrets": "Raw owned launch specifications remain private. Final allowlist guard used benign credential sentinels; this receipt contains no credential values.",
+    "cleanup": "Every final run has daemon exit 0, ownership-checked stopped processes, no remaining resources and no fallback. Evidence retained. No global cleanup used.",
+    "phaseSnapshots": "Assertion observedProgress fields describe bytes at that phase; active logs may subsequently grow. The raw receipt artifact inventory binds final retained bytes."
+  },
+  "limits": [
+    "Linux x86_64 source/debug headless GPUI native test platform; no OS-input/GPU/package/platform certification.",
+    "RPC/model, Mail and independent review are scripted local fixtures; no live-provider or real Jira/PR delivery claim.",
+    "Readiness invalidation uses real disposable Git and a real pinned local Docker check; restoring readiness remains outside scope.",
+    "Pause/resume replaces the attempt and retains history; no same-session recovery claim.",
+    "No production workflow/schema/runner adapter changes. No live model, Jira or PR delivery claim; no whole-state restore, terminal, package, GPU or cross-platform certification."
+  ],
+  "next": "FOR-13 / S9.2; FOR-14 / S9.3 follows. Separate requested work; not started here.",
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

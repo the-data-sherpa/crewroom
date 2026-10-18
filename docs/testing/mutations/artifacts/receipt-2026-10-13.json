@@ -1,0 +1,734 @@
+{
+  "schemaVersion": 1,
+  "issue": "FOR-13",
+  "date": "2026-10-13",
+  "sourceRevision": "a80ade02b821c228a96c006021ef1dcda192e222",
+  "scope": "One fixed five-mutation assessment of the artifact module through one selected native local fixture; not live provider/Docker delivery.",
+  "target": {
+    "path": "crates/crewroom-runtime/src/evidence/artifacts.rs",
+    "sha256": "283149d06fbcd73fb06f852892013d836df246c0fc8909735f7c9ef5bbebc763",
+    "mainSourceUnchanged": true
+  },
+  "configuration": {
+    "path": "docs/testing/mutations/artifacts/config.json",
+    "sha256": "7b2dd2ada96d80b9dcd3a6a1a2f56aca6db23324aa13af99f175f5c62dc000ab"
+  },
+  "budgetsSeconds": {
+    "baseline": 600,
+    "build": 180,
+    "test": 45,
+    "total": 1800
+  },
+  "workers": 1,
+  "cumulativeWallSeconds": 146.916,
+  "rawReceipts": [
+    {
+      "path": ".crewroom/test-results/for13/mutation-01/receipt.json",
+      "sha256": "0c67e32b02e5d8d3eccc16d78d41b8f38996ebbbee87e3e44cb592fffcd79a08",
+      "runId": "2fbeef5b-0fac-49db-8e43-c509adef3813",
+      "runnerSha256": "96f0265aeca0392ff302f47dbe2effded201ad6f4ff1d1f426fded41da478b89",
+      "runnerSnapshot": ".crewroom/test-results/for13/mutation-01/runner.py"
+    },
+    {
+      "path": ".crewroom/test-results/for13/mutation-02/receipt.json",
+      "sha256": "57214f2fcc457572e2cdeba9f70804c3adecc1b959f785b073da7ad776f23c5a",
+      "runId": "ba3a3f12-9ce4-4d91-a698-c00b7ac4d9f8",
+      "runnerSha256": "63f092c71b3e15a1b2658e6f28a1b723b0eac43fff7d9810317823e8b0a09ca9",
+      "runnerSnapshot": ".crewroom/test-results/for13/mutation-02/runner.py"
+    }
+  ],
+  "fixtures": {
+    "path": "scripts/rust/evidence.test.ts",
+    "beforeSha256": "2465e66f69d6d49447f4739dfc76b8f5b6d0f9abf50aed077b0cfbb2da572d71",
+    "afterSha256": "fe7559e06af3ccedc7a7740f857fb05989a72a914fe4b55dd9bc7957d53baf50",
+    "initialInstrumentation": "Unique rejection messages plus environment-gated fixture retention/normal-exit proof; original behavior assertions unchanged.",
+    "improvements": [
+      "Reject artifact.bytes+1 while retaining the correct content/hash.",
+      "Accept and roundtrip exactly 4 MiB, alongside the existing rejection of 4 MiB+1."
+    ]
+  },
+  "baselines": [
+    {
+      "phase": "original-assertions",
+      "build": {
+        "label": "baseline-build",
+        "argv": [
+          "cargo",
+          "build",
+          "-p",
+          "crewroom-runtime",
+          "--example",
+          "repository-fixture",
+          "--locked",
+          "--bin",
+          "crewroom-process"
+        ],
+        "cwd": "<checkout>",
+        "timeoutSeconds": 598.141,
+        "timedOut": false,
+        "exitCode": 0,
+        "seconds": 19.697,
+        "stdout": {
+          "path": "baseline-build.stdout",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "path": "baseline-build.stderr",
+          "sha256": "f215862112df88141b871313edb4ce478643b4335e603189c2eeefa3baa6936a"
+        },
+        "binaries": {
+          "target/debug/examples/repository-fixture": "235097d847ae5a67e6714375590b09a029d80fca84e9e40fff8e061bb0d81303",
+          "target/debug/crewroom-process": "c16aeb3c8350475327549d9ff91a091e407ae00189eeb5a50c7f017250fb3d90"
+        }
+      },
+      "test": {
+        "label": "baseline-test",
+        "argv": [
+          "/home/crewroom/.local/share/mise/installs/node/26/bin/node",
+          "--import",
+          "tsx",
+          "--test",
+          "--test-reporter=tap",
+          "--test-concurrency=1",
+          "--test-name-pattern",
+          "^native artifacts enforce byte hashes, identities, size and regular private files$",
+          "scripts/rust/evidence.test.ts"
+        ],
+        "cwd": "<checkout>",
+        "timeoutSeconds": 45,
+        "timedOut": false,
+        "exitCode": 0,
+        "seconds": 0.464,
+        "stdout": {
+          "path": "baseline-test.stdout",
+          "sha256": "f1397379fce0a0f5b6a05197c683239664412f3024cf54835e4349ccabef934d"
+        },
+        "stderr": {
+          "path": "baseline-test.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "selected": 1,
+        "passed": true,
+        "fixtureExitVerified": true,
+        "sourceSha256": "283149d06fbcd73fb06f852892013d836df246c0fc8909735f7c9ef5bbebc763",
+        "testSha256": "2465e66f69d6d49447f4739dfc76b8f5b6d0f9abf50aed077b0cfbb2da572d71",
+        "retainedFixture": true,
+        "signals": [],
+        "remaining": []
+      }
+    },
+    {
+      "phase": "improved-assertions",
+      "build": {
+        "label": "baseline-build",
+        "argv": [
+          "cargo",
+          "build",
+          "-p",
+          "crewroom-runtime",
+          "--example",
+          "repository-fixture",
+          "--locked",
+          "--bin",
+          "crewroom-process"
+        ],
+        "cwd": "<checkout>",
+        "timeoutSeconds": 598.27,
+        "timedOut": false,
+        "exitCode": 0,
+        "seconds": 19.248,
+        "stdout": {
+          "path": "baseline-build.stdout",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "path": "baseline-build.stderr",
+          "sha256": "3ad35bba75982466629ee45aa0133845ba1048d1f75748826d679e5f31c30a27"
+        },
+        "binaries": {
+          "target/debug/examples/repository-fixture": "235097d847ae5a67e6714375590b09a029d80fca84e9e40fff8e061bb0d81303",
+          "target/debug/crewroom-process": "c16aeb3c8350475327549d9ff91a091e407ae00189eeb5a50c7f017250fb3d90"
+        }
+      },
+      "test": {
+        "label": "baseline-test",
+        "argv": [
+          "/home/crewroom/.local/share/mise/installs/node/26/bin/node",
+          "--import",
+          "tsx",
+          "--test",
+          "--test-reporter=tap",
+          "--test-concurrency=1",
+          "--test-name-pattern",
+          "^native artifacts enforce byte hashes, identities, size and regular private files$",
+          "scripts/rust/evidence.test.ts"
+        ],
+        "cwd": "<checkout>",
+        "timeoutSeconds": 45,
+        "timedOut": false,
+        "exitCode": 0,
+        "seconds": 0.715,
+        "stdout": {
+          "path": "baseline-test.stdout",
+          "sha256": "0e33a46591f66d9a75199533b1b59f0c7e73e6a76ae41ad3d5c8693a4810bae7"
+        },
+        "stderr": {
+          "path": "baseline-test.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "selected": 1,
+        "passed": true,
+        "fixtureExitVerified": true,
+        "sourceSha256": "283149d06fbcd73fb06f852892013d836df246c0fc8909735f7c9ef5bbebc763",
+        "testSha256": "fe7559e06af3ccedc7a7740f857fb05989a72a914fe4b55dd9bc7957d53baf50",
+        "retainedFixture": true,
+        "signals": [],
+        "remaining": []
+      }
+    }
+  ],
+  "matrix": [
+    {
+      "id": "M1",
+      "patchSha256": "381c4a9d7d27906876e32fa1ea2f3db5f15da4c4854e485343f8872546028470",
+      "sourceSha256": "409708eadac2b69be549b6692c3087ca86ca378e938a5aa88c40a15e38aa97f1",
+      "initialOutcome": "killed",
+      "initialBuild": {
+        "label": "M1-build",
+        "argv": [
+          "cargo",
+          "build",
+          "-p",
+          "crewroom-runtime",
+          "--example",
+          "repository-fixture",
+          "--locked"
+        ],
+        "cwd": "<checkout>",
+        "timeoutSeconds": 180,
+        "timedOut": false,
+        "exitCode": 0,
+        "seconds": 3.42,
+        "stdout": {
+          "path": "M1-build.stdout",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "path": "M1-build.stderr",
+          "sha256": "dea70058c7d6541799629748f74ffd1a1555c5c5e70bbab2a19db58d5f06545d"
+        },
+        "binaries": {
+          "target/debug/examples/repository-fixture": "3379b23c61d80830ad25d7b641bccf9f5bd3eba74e93f2f407549925bd764028",
+          "target/debug/crewroom-process": "c16aeb3c8350475327549d9ff91a091e407ae00189eeb5a50c7f017250fb3d90"
+        }
+      },
+      "initialTest": {
+        "label": "M1-test",
+        "argv": [
+          "/home/crewroom/.local/share/mise/installs/node/26/bin/node",
+          "--import",
+          "tsx",
+          "--test",
+          "--test-reporter=tap",
+          "--test-concurrency=1",
+          "--test-name-pattern",
+          "^native artifacts enforce byte hashes, identities, size and regular private files$",
+          "scripts/rust/evidence.test.ts"
+        ],
+        "cwd": "<checkout>",
+        "timeoutSeconds": 45,
+        "timedOut": false,
+        "exitCode": 1,
+        "seconds": 0.314,
+        "stdout": {
+          "path": "M1-test.stdout",
+          "sha256": "9f1cb5070de2680bc24c3c619b0937f7fd094af5e335bfbafde9c16adde7ad08"
+        },
+        "stderr": {
+          "path": "M1-test.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "selected": 1,
+        "passed": false,
+        "fixtureExitVerified": true,
+        "sourceSha256": "409708eadac2b69be549b6692c3087ca86ca378e938a5aa88c40a15e38aa97f1",
+        "testSha256": "2465e66f69d6d49447f4739dfc76b8f5b6d0f9abf50aed077b0cfbb2da572d71",
+        "retainedFixture": true,
+        "signals": [],
+        "remaining": []
+      },
+      "restoredSha256": "283149d06fbcd73fb06f852892013d836df246c0fc8909735f7c9ef5bbebc763"
+    },
+    {
+      "id": "M2",
+      "patchSha256": "f9bbf9b10a36a6b7c18cec589cde768d1324d0e013fe27e5818d5ae69e08f146",
+      "sourceSha256": "95c3b1e0d4ef35a4b52a9ed94ff134525f23d74f92faa12af7127df95db5870a",
+      "initialOutcome": "survived",
+      "initialBuild": {
+        "label": "M2-build",
+        "argv": [
+          "cargo",
+          "build",
+          "-p",
+          "crewroom-runtime",
+          "--example",
+          "repository-fixture",
+          "--locked"
+        ],
+        "cwd": "<checkout>",
+        "timeoutSeconds": 180,
+        "timedOut": false,
+        "exitCode": 0,
+        "seconds": 3.27,
+        "stdout": {
+          "path": "M2-build.stdout",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "path": "M2-build.stderr",
+          "sha256": "d32a2083f6f8b4b00047d5baea52a82f22459a78205e19eabb6de7bab9866f6b"
+        },
+        "binaries": {
+          "target/debug/examples/repository-fixture": "1be40933f1bf05b825e3580c2aa624e544b9d25cb78615110d9c2f18b2a16b5c",
+          "target/debug/crewroom-process": "c16aeb3c8350475327549d9ff91a091e407ae00189eeb5a50c7f017250fb3d90"
+        }
+      },
+      "initialTest": {
+        "label": "M2-test",
+        "argv": [
+          "/home/crewroom/.local/share/mise/installs/node/26/bin/node",
+          "--import",
+          "tsx",
+          "--test",
+          "--test-reporter=tap",
+          "--test-concurrency=1",
+          "--test-name-pattern",
+          "^native artifacts enforce byte hashes, identities, size and regular private files$",
+          "scripts/rust/evidence.test.ts"
+        ],
+        "cwd": "<checkout>",
+        "timeoutSeconds": 45,
+        "timedOut": false,
+        "exitCode": 0,
+        "seconds": 0.364,
+        "stdout": {
+          "path": "M2-test.stdout",
+          "sha256": "f2cbfb619b1d672fa38fd9906c657e1a26832bae72986bae7dc12fe71bbabf05"
+        },
+        "stderr": {
+          "path": "M2-test.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "selected": 1,
+        "passed": true,
+        "fixtureExitVerified": true,
+        "sourceSha256": "95c3b1e0d4ef35a4b52a9ed94ff134525f23d74f92faa12af7127df95db5870a",
+        "testSha256": "2465e66f69d6d49447f4739dfc76b8f5b6d0f9abf50aed077b0cfbb2da572d71",
+        "retainedFixture": true,
+        "signals": [],
+        "remaining": []
+      },
+      "restoredSha256": "283149d06fbcd73fb06f852892013d836df246c0fc8909735f7c9ef5bbebc763",
+      "independentSurvivorReview": {
+        "reviewer": "/root (parent agent; independent of mutation implementation)",
+        "classification": "behavioral_coverage_gap",
+        "reason": "Actual selected-test coverage gap. The mutant accepts a false recorded byte count with unchanged valid bytes/hash. The original fixture never changed artifact.bytes; this change is neither equivalent nor irrelevant.",
+        "reviewedSourceSha256": "95c3b1e0d4ef35a4b52a9ed94ff134525f23d74f92faa12af7127df95db5870a",
+        "reviewedStdoutSha256": "f2cbfb619b1d672fa38fd9906c657e1a26832bae72986bae7dc12fe71bbabf05",
+        "baselineTestSha256": "2465e66f69d6d49447f4739dfc76b8f5b6d0f9abf50aed077b0cfbb2da572d71"
+      },
+      "recheckOutcome": "killed",
+      "recheckBuild": {
+        "label": "M2-build",
+        "argv": [
+          "cargo",
+          "build",
+          "-p",
+          "crewroom-runtime",
+          "--example",
+          "repository-fixture",
+          "--locked"
+        ],
+        "cwd": "<checkout>",
+        "timeoutSeconds": 180,
+        "timedOut": false,
+        "exitCode": 0,
+        "seconds": 3.37,
+        "stdout": {
+          "path": "M2-build.stdout",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "path": "M2-build.stderr",
+          "sha256": "40c318dbe55cf7594a46c8056d7b27d17ae13e0e626be3862d9cc32bd5aabd86"
+        },
+        "binaries": {
+          "target/debug/examples/repository-fixture": "1be40933f1bf05b825e3580c2aa624e544b9d25cb78615110d9c2f18b2a16b5c",
+          "target/debug/crewroom-process": "c16aeb3c8350475327549d9ff91a091e407ae00189eeb5a50c7f017250fb3d90"
+        }
+      },
+      "recheckTest": {
+        "label": "M2-test",
+        "argv": [
+          "/home/crewroom/.local/share/mise/installs/node/26/bin/node",
+          "--import",
+          "tsx",
+          "--test",
+          "--test-reporter=tap",
+          "--test-concurrency=1",
+          "--test-name-pattern",
+          "^native artifacts enforce byte hashes, identities, size and regular private files$",
+          "scripts/rust/evidence.test.ts"
+        ],
+        "cwd": "<checkout>",
+        "timeoutSeconds": 45,
+        "timedOut": false,
+        "exitCode": 1,
+        "seconds": 0.665,
+        "stdout": {
+          "path": "M2-test.stdout",
+          "sha256": "164455475e8d2022d353e9afe130c1963598c7c7b5f4fa048f6f28dd769800cc"
+        },
+        "stderr": {
+          "path": "M2-test.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "selected": 1,
+        "passed": false,
+        "fixtureExitVerified": true,
+        "sourceSha256": "95c3b1e0d4ef35a4b52a9ed94ff134525f23d74f92faa12af7127df95db5870a",
+        "testSha256": "fe7559e06af3ccedc7a7740f857fb05989a72a914fe4b55dd9bc7957d53baf50",
+        "retainedFixture": true,
+        "signals": [],
+        "remaining": []
+      }
+    },
+    {
+      "id": "M3",
+      "patchSha256": "5cf2aaeff78227e16e9995fd4ac777260e23ef49fdccf4f933af23389936b643",
+      "sourceSha256": "c79db527875aa6084c6e80c4637ba4f6f4baac119ee12a86b9cffad86095119b",
+      "initialOutcome": "killed",
+      "initialBuild": {
+        "label": "M3-build",
+        "argv": [
+          "cargo",
+          "build",
+          "-p",
+          "crewroom-runtime",
+          "--example",
+          "repository-fixture",
+          "--locked"
+        ],
+        "cwd": "<checkout>",
+        "timeoutSeconds": 180,
+        "timedOut": false,
+        "exitCode": 0,
+        "seconds": 2.869,
+        "stdout": {
+          "path": "M3-build.stdout",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "path": "M3-build.stderr",
+          "sha256": "4cf18910b2441e0ddbc610eb4bd510c985c79b3af30e9779842a8de1d0d4fa21"
+        },
+        "binaries": {
+          "target/debug/examples/repository-fixture": "0ab35bda6ce229d0d3d1dc1632207929c94e93bbdb50586797ee82b10f9f64d5",
+          "target/debug/crewroom-process": "c16aeb3c8350475327549d9ff91a091e407ae00189eeb5a50c7f017250fb3d90"
+        }
+      },
+      "initialTest": {
+        "label": "M3-test",
+        "argv": [
+          "/home/crewroom/.local/share/mise/installs/node/26/bin/node",
+          "--import",
+          "tsx",
+          "--test",
+          "--test-reporter=tap",
+          "--test-concurrency=1",
+          "--test-name-pattern",
+          "^native artifacts enforce byte hashes, identities, size and regular private files$",
+          "scripts/rust/evidence.test.ts"
+        ],
+        "cwd": "<checkout>",
+        "timeoutSeconds": 45,
+        "timedOut": false,
+        "exitCode": 1,
+        "seconds": 0.314,
+        "stdout": {
+          "path": "M3-test.stdout",
+          "sha256": "88ba693f8e9d5e41e0f33b7cbd7334c571e31fa53d0f94bd4d620d77418e8475"
+        },
+        "stderr": {
+          "path": "M3-test.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "selected": 1,
+        "passed": false,
+        "fixtureExitVerified": true,
+        "sourceSha256": "c79db527875aa6084c6e80c4637ba4f6f4baac119ee12a86b9cffad86095119b",
+        "testSha256": "2465e66f69d6d49447f4739dfc76b8f5b6d0f9abf50aed077b0cfbb2da572d71",
+        "retainedFixture": true,
+        "signals": [],
+        "remaining": []
+      },
+      "restoredSha256": "283149d06fbcd73fb06f852892013d836df246c0fc8909735f7c9ef5bbebc763"
+    },
+    {
+      "id": "M4",
+      "patchSha256": "33e4934684a6379b4eb0fad1d4d3a6df6a498cc26a810e6f85e7e77851517a18",
+      "sourceSha256": "31e6783267c5d58c103ab0b97eb437e57726342b582bbaf96ecff3c13aea83f5",
+      "initialOutcome": "killed",
+      "initialBuild": {
+        "label": "M4-build",
+        "argv": [
+          "cargo",
+          "build",
+          "-p",
+          "crewroom-runtime",
+          "--example",
+          "repository-fixture",
+          "--locked"
+        ],
+        "cwd": "<checkout>",
+        "timeoutSeconds": 180,
+        "timedOut": false,
+        "exitCode": 0,
+        "seconds": 3.119,
+        "stdout": {
+          "path": "M4-build.stdout",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "path": "M4-build.stderr",
+          "sha256": "42c5260747700cc67dcbbf0658d39e50b6eecd02b8aa6cdb1a54e6f038903f0e"
+        },
+        "binaries": {
+          "target/debug/examples/repository-fixture": "5c07848d0ac6274fc6aa0d62d5d86f287b5d0671216b5d335488d09137e01e51",
+          "target/debug/crewroom-process": "c16aeb3c8350475327549d9ff91a091e407ae00189eeb5a50c7f017250fb3d90"
+        }
+      },
+      "initialTest": {
+        "label": "M4-test",
+        "argv": [
+          "/home/crewroom/.local/share/mise/installs/node/26/bin/node",
+          "--import",
+          "tsx",
+          "--test",
+          "--test-reporter=tap",
+          "--test-concurrency=1",
+          "--test-name-pattern",
+          "^native artifacts enforce byte hashes, identities, size and regular private files$",
+          "scripts/rust/evidence.test.ts"
+        ],
+        "cwd": "<checkout>",
+        "timeoutSeconds": 45,
+        "timedOut": false,
+        "exitCode": 1,
+        "seconds": 0.465,
+        "stdout": {
+          "path": "M4-test.stdout",
+          "sha256": "dff43cf5b35ad65cda1baff22c8b65aab30202bf309cef481f0bea8f2b89b9cf"
+        },
+        "stderr": {
+          "path": "M4-test.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "selected": 1,
+        "passed": false,
+        "fixtureExitVerified": true,
+        "sourceSha256": "31e6783267c5d58c103ab0b97eb437e57726342b582bbaf96ecff3c13aea83f5",
+        "testSha256": "2465e66f69d6d49447f4739dfc76b8f5b6d0f9abf50aed077b0cfbb2da572d71",
+        "retainedFixture": true,
+        "signals": [],
+        "remaining": []
+      },
+      "restoredSha256": "283149d06fbcd73fb06f852892013d836df246c0fc8909735f7c9ef5bbebc763"
+    },
+    {
+      "id": "M5",
+      "patchSha256": "1b7a31d62d6e658cf4ca5a2facf019c4a1c7300ee88d0334ef42aa7c68c87472",
+      "sourceSha256": "4e8c46784bacd16328175619452b3be5356496a5a01aa626fec3025c9d915b46",
+      "initialOutcome": "survived",
+      "initialBuild": {
+        "label": "M5-build",
+        "argv": [
+          "cargo",
+          "build",
+          "-p",
+          "crewroom-runtime",
+          "--example",
+          "repository-fixture",
+          "--locked"
+        ],
+        "cwd": "<checkout>",
+        "timeoutSeconds": 180,
+        "timedOut": false,
+        "exitCode": 0,
+        "seconds": 2.969,
+        "stdout": {
+          "path": "M5-build.stdout",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "path": "M5-build.stderr",
+          "sha256": "fff0a3621569fa2550c8f7949e95bfa8866822a282973fbd3864a8eafcfc31f1"
+        },
+        "binaries": {
+          "target/debug/examples/repository-fixture": "2d549111ebbb4b317c1901d0775354e1b51c4e9add02f46fd4107402262a90eb",
+          "target/debug/crewroom-process": "c16aeb3c8350475327549d9ff91a091e407ae00189eeb5a50c7f017250fb3d90"
+        }
+      },
+      "initialTest": {
+        "label": "M5-test",
+        "argv": [
+          "/home/crewroom/.local/share/mise/installs/node/26/bin/node",
+          "--import",
+          "tsx",
+          "--test",
+          "--test-reporter=tap",
+          "--test-concurrency=1",
+          "--test-name-pattern",
+          "^native artifacts enforce byte hashes, identities, size and regular private files$",
+          "scripts/rust/evidence.test.ts"
+        ],
+        "cwd": "<checkout>",
+        "timeoutSeconds": 45,
+        "timedOut": false,
+        "exitCode": 0,
+        "seconds": 0.364,
+        "stdout": {
+          "path": "M5-test.stdout",
+          "sha256": "4121cf54ba66353f76a9f944ff2120a48b89925f463f85268a7678f8ac3e167a"
+        },
+        "stderr": {
+          "path": "M5-test.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "selected": 1,
+        "passed": true,
+        "fixtureExitVerified": true,
+        "sourceSha256": "4e8c46784bacd16328175619452b3be5356496a5a01aa626fec3025c9d915b46",
+        "testSha256": "2465e66f69d6d49447f4739dfc76b8f5b6d0f9abf50aed077b0cfbb2da572d71",
+        "retainedFixture": true,
+        "signals": [],
+        "remaining": []
+      },
+      "restoredSha256": "283149d06fbcd73fb06f852892013d836df246c0fc8909735f7c9ef5bbebc763",
+      "independentSurvivorReview": {
+        "reviewer": "/root (parent agent; independent of mutation implementation)",
+        "classification": "behavioral_coverage_gap",
+        "reason": "Actual selected-test boundary gap. The >= mutant rejects a legitimate exactly-4 MiB artifact accepted by the original > guard. The original fixture checked only limit+1; this change is neither equivalent nor irrelevant.",
+        "reviewedSourceSha256": "4e8c46784bacd16328175619452b3be5356496a5a01aa626fec3025c9d915b46",
+        "reviewedStdoutSha256": "4121cf54ba66353f76a9f944ff2120a48b89925f463f85268a7678f8ac3e167a",
+        "baselineTestSha256": "2465e66f69d6d49447f4739dfc76b8f5b6d0f9abf50aed077b0cfbb2da572d71"
+      },
+      "recheckOutcome": "killed",
+      "recheckBuild": {
+        "label": "M5-build",
+        "argv": [
+          "cargo",
+          "build",
+          "-p",
+          "crewroom-runtime",
+          "--example",
+          "repository-fixture",
+          "--locked"
+        ],
+        "cwd": "<checkout>",
+        "timeoutSeconds": 180,
+        "timedOut": false,
+        "exitCode": 0,
+        "seconds": 2.919,
+        "stdout": {
+          "path": "M5-build.stdout",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "path": "M5-build.stderr",
+          "sha256": "d2e05caebadcc6eaf1fd61032a35928f013511a6e88b141e0c0436b14924d369"
+        },
+        "binaries": {
+          "target/debug/examples/repository-fixture": "2d549111ebbb4b317c1901d0775354e1b51c4e9add02f46fd4107402262a90eb",
+          "target/debug/crewroom-process": "c16aeb3c8350475327549d9ff91a091e407ae00189eeb5a50c7f017250fb3d90"
+        }
+      },
+      "recheckTest": {
+        "label": "M5-test",
+        "argv": [
+          "/home/crewroom/.local/share/mise/installs/node/26/bin/node",
+          "--import",
+          "tsx",
+          "--test",
+          "--test-reporter=tap",
+          "--test-concurrency=1",
+          "--test-name-pattern",
+          "^native artifacts enforce byte hashes, identities, size and regular private files$",
+          "scripts/rust/evidence.test.ts"
+        ],
+        "cwd": "<checkout>",
+        "timeoutSeconds": 45,
+        "timedOut": false,
+        "exitCode": 1,
+        "seconds": 0.465,
+        "stdout": {
+          "path": "M5-test.stdout",
+          "sha256": "1d0f74123c598bf5778eeba28f9901664fb177f7bb3c34cb1c285bf8aeb68c9a"
+        },
+        "stderr": {
+          "path": "M5-test.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "selected": 1,
+        "passed": false,
+        "fixtureExitVerified": true,
+        "sourceSha256": "4e8c46784bacd16328175619452b3be5356496a5a01aa626fec3025c9d915b46",
+        "testSha256": "fe7559e06af3ccedc7a7740f857fb05989a72a914fe4b55dd9bc7957d53baf50",
+        "retainedFixture": true,
+        "signals": [],
+        "remaining": []
+      }
+    }
+  ],
+  "executedTests": 9,
+  "initialMutants": 5,
+  "survivorRechecks": 2,
+  "cleanup": [
+    {
+      "phase": "initial",
+      "owned": {
+        "signals": [],
+        "remaining": []
+      },
+      "worktreeRemoved": true,
+      "restoredSha256": "283149d06fbcd73fb06f852892013d836df246c0fc8909735f7c9ef5bbebc763"
+    },
+    {
+      "phase": "improved",
+      "owned": {
+        "signals": [],
+        "remaining": []
+      },
+      "worktreeRemoved": true,
+      "restoredSha256": "283149d06fbcd73fb06f852892013d836df246c0fc8909735f7c9ef5bbebc763"
+    }
+  ],
+  "toolchain": {
+    "/home/crewroom/.local/share/mise/installs/node/26/bin/node": "v26.10.0",
+    "cargo": "cargo 1.98.1 (797e8a9bc 2026-08-05) (Arch Linux rust 1:1.98.1-1)",
+    "rustc": "rustc 1.98.1 (48a229cea 2026-09-01) (Arch Linux rust 1:1.98.1-1)",
+    "git": "git version 2.55.0"
+  },
+  "dependencyReuse": {
+    "cargoLockSha256": "f46ccc4862856d7cfab215a88d35b688160897839d5f6b873608da813c3344ae",
+    "packageLockSha256": "247158e6a19bb432bacb696a1951f2e8e17dc2e71047cb22762f1dc3faf1a9df",
+    "nodeModules": "Read-only resolution through main lockfile-installed dependencies."
+  },
+  "limits": [
+    "All outcomes are deliberate mutant behavior, not observed production defects.",
+    "Independent review classified both survivors before improvements; no global score or threshold is claimed.",
+    "No production module, workflow database, queue, roles or active installation was modified.",
+    "Raw private fixture state, source snapshots, commands and logs are retained locally; committed receipt contains source-bound references and sanitized commands."
+  ],
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

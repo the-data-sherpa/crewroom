@@ -1,0 +1,334 @@
+{
+  "iteration": "Final original packaged GUI, controlled output and footprint acceptance",
+  "recordedAt": "2026-10-04T07:43:25.648324+00:00",
+  "passedWithinScope": true,
+  "scope": "Actual original signed native app and service with four actual OMP agents, real Mail, private scripted model gateways, no live provider delivery. Native GUI checks use CUA. Actual VoiceOver and OS IME remain separate pending gates.",
+  "candidate": {
+    "revision": "8f3e325870e40209f42c43ef0009e953f45398f5",
+    "cleanCheckout": true,
+    "package": "/private/tmp/cr-n7-1004a/Crewroom.app",
+    "packageReceiptSha256": "5f9b92bf3bda35bd549c1dc8902cd4e62bba48a347f12c9eb62f8051eedf835b",
+    "binariesBeforeAndAfter": {
+      "Contents/MacOS/crewroom": "141498a07d2cabd8717eb05dab7b7cd64cf36f5d902e8b92c755c1d3d1297e49",
+      "Contents/MacOS/crewroomd": "0b66c90c1ccef2ac2e53e4d7aab5ce083cc4d4fba59405fe4b6b7a91df79e97d",
+      "Contents/MacOS/crewroom-launcher": "eef0c15e3936fad9ac7f1a64550f9c45b6e89f8737a7f56763d32a6c1fa8142c",
+      "Contents/MacOS/crewroom-process": "90d335fc8ef295497ad4db8e4b4c76098681f6dffd6281af563a5d02c560988f",
+      "Contents/MacOS/crewroom-host": "318d41097d3c8d44dad8dda3ac54c5dfb52c909d02f3f954e12ca11a6ebc6ff3"
+    },
+    "unchanged": true,
+    "bundleFootprint": {
+      "path": "/private/tmp/cr-n7-1004a/Crewroom.app",
+      "fileBytes": 75243757,
+      "allocatedKiB": 73528,
+      "binaries": {
+        "crewroom": "141498a07d2cabd8717eb05dab7b7cd64cf36f5d902e8b92c755c1d3d1297e49",
+        "crewroomd": "0b66c90c1ccef2ac2e53e4d7aab5ce083cc4d4fba59405fe4b6b7a91df79e97d",
+        "crewroom-launcher": "eef0c15e3936fad9ac7f1a64550f9c45b6e89f8737a7f56763d32a6c1fa8142c",
+        "crewroom-process": "90d335fc8ef295497ad4db8e4b4c76098681f6dffd6281af563a5d02c560988f",
+        "crewroom-host": "318d41097d3c8d44dad8dda3ac54c5dfb52c909d02f3f954e12ca11a6ebc6ff3"
+      }
+    }
+  },
+  "gui": {
+    "initialPid": 95972,
+    "reopenedPid": 99560,
+    "runId": "858e1f3b-0190-4deb-a647-c5cabe1a0db7",
+    "visibilityPrerequisite": "The original workbench and wall each used their native green-button Zoom action, then resized to1240x880 at screen origin(0,30). Parent WindowServer metadata confirmed an exposed left strip. Resizing to390 retained this origin. This avoids the fully occluded capture condition documented by the earlier failed attempt; no OS preferences or other app windows were changed.",
+    "checks": [
+      {
+        "case": "Four live native terminal panes",
+        "result": "At1240px all four Ghostty panes visibly rendered actual host readiness, Mail/tool activity, and subsequent scripted Unicode replies. Native labels separately showed activity, process identity and per-attempt model provenance."
+      },
+      {
+        "case": "Read-only terminal input",
+        "result": "Typed NATIVE_OBSERVER_INPUT_PROBE into the focused terminal. It did not appear in any of four captured panes. Four actual tmux observer clients independently had read-only,ignore-size flags."
+      },
+      {
+        "case": "Selection and copy",
+        "result": "Dragged over Native observation in rendered terminal output and pressed Cmd-C. After closing the wall, Cmd-V into an unsaved Brief draft produced exactly Native observation; AX verified the copied text. The draft was later discarded without saving."
+      },
+      {
+        "case": "Narrow wall and transcript overlay",
+        "result": "At390px the retained run ID and wrapped controls were visible, with one selected pane. Selected Specialist3 and opened its read-only stored transcript. TRANSCRIPT_INPUT_PROBE was refused; stored text remained. Returning to All agents and1240px restored four panes."
+      },
+      {
+        "case": "Live updates and reflow",
+        "result": "During the60.675s load, visible Unicode lines and executing/idle labels updated in all four panes without forced resize. Narrow reflow and transcript inspection remained responsive."
+      },
+      {
+        "case": "Narrow hidden-field Quit guard",
+        "result": "After editing Brief via pasted copied text, navigated to History, resized the workbench to390px and pressed Cmd-Q. The readable Leave with unsaved work dialog displayed both buttons and the service-preservation explanation. Escape dismissed it; a second Cmd-Q reopened it. Discard drafts and close exited only the GUI."
+      },
+      {
+        "case": "UI close and reopen",
+        "result": "Initial GUI95972 exited normally. All11 fixture process identities, including all eight host/OMP processes, exactly matched the ready receipt. Root single-use controller invoked the original documented launcher, reusing the authenticated service and creating GUI99560. The reopened visible workbench showed Connected, the retained run/history, all four idle current attempts and the original accepted brief. After normal Cmd-Q,99560 exited and the same11 fixture identities remained unchanged."
+      }
+    ],
+    "boundaries": [
+      "Closing and reopening the GUI was observed. The daemon SIGKILL/reattachment that followed finish was backend evidence with the GUI closed, not an in-place GUI-outage claim.",
+      "Terminal text was used as observation, never as quality-gate evidence.",
+      "VoiceOver speech/captions and actual macOS IME composition were not exercised; system settings were not changed."
+    ]
+  },
+  "timing": {
+    "ready": "2026-10-04T07:34:10.117Z",
+    "initialGuiLaunch": "2026-10-04T07:34:51Z",
+    "startLoad": "2026-10-04T07:36:46.921Z",
+    "loadComplete": "2026-10-04T07:37:47.597Z",
+    "requestReopen": "2026-10-04T07:39:27.125658Z",
+    "reopenLaunch": "2026-10-04T07:39:27.381088Z",
+    "finish": "2026-10-04T07:40:14.820584Z",
+    "readyToStartSeconds": 156.804,
+    "loadCompleteToFinishSeconds": 147.223584,
+    "preferredReadyToStartSeconds": 90,
+    "preferredLoadCompleteToFinishSeconds": 120,
+    "automaticFinishFallbackSeconds": 150,
+    "hardLatchSeconds": 180,
+    "automaticFallbackUsed": false,
+    "assessment": "Both hard bounds were met and the driver passed. Preferred start and finish targets were exceeded; the single-use reopen controller and150s fallback limited the timing risk. No check waited beyond the hard deadline."
+  },
+  "load": {
+    "milliseconds": 60675.416708000004,
+    "rounds": 18,
+    "completedInputs": 72,
+    "perAgentOutput": {
+      "Coordinator": {
+        "replies": 18,
+        "lines": 432,
+        "utf8Bytes": 48438,
+        "unicodeCharacters": 41526
+      },
+      "Specialist1": {
+        "replies": 18,
+        "lines": 432,
+        "utf8Bytes": 48438,
+        "unicodeCharacters": 41526
+      },
+      "Specialist2": {
+        "replies": 18,
+        "lines": 432,
+        "utf8Bytes": 48438,
+        "unicodeCharacters": 41526
+      },
+      "Specialist3": {
+        "replies": 18,
+        "lines": 432,
+        "utf8Bytes": 48438,
+        "unicodeCharacters": 41526
+      }
+    },
+    "providerRequests": 82,
+    "providerErrors": [],
+    "externalMailMatches": true,
+    "scope": "Four actual OMP processes, real native daemon and Mail; private scripted provider replies. Synthetic token counts are not real cost evidence."
+  },
+  "footprint": {
+    "phases": {
+      "idle": {
+        "seconds": 15.582,
+        "groups": {
+          "gui": {
+            "processes": 1,
+            "medianRssMiB": 153.42,
+            "maxRssMiB": 153.5,
+            "cpuPercent": 2.76
+          },
+          "daemonAndHosts": {
+            "processes": 5,
+            "medianRssMiB": 57.5,
+            "maxRssMiB": 59.36,
+            "cpuPercent": 3.02
+          },
+          "omp": {
+            "processes": 4,
+            "medianRssMiB": 908.23,
+            "maxRssMiB": 914.3,
+            "cpuPercent": 2.12
+          },
+          "mail": {
+            "processes": 1,
+            "medianRssMiB": 73.7,
+            "maxRssMiB": 80.11,
+            "cpuPercent": 3.08
+          },
+          "tmuxServer": {
+            "processes": 1,
+            "medianRssMiB": 3.95,
+            "maxRssMiB": 3.95,
+            "cpuPercent": 0.0
+          },
+          "observerChildren": {
+            "processes": 8,
+            "medianRssMiB": 58.59,
+            "maxRssMiB": 58.59,
+            "cpuPercent": 0.0
+          }
+        },
+        "processCount": 20
+      },
+      "active": {
+        "seconds": 15.502,
+        "groups": {
+          "gui": {
+            "processes": 1,
+            "medianRssMiB": 143.89,
+            "maxRssMiB": 152.17,
+            "cpuPercent": 12.06
+          },
+          "daemonAndHosts": {
+            "processes": 5,
+            "medianRssMiB": 66.52,
+            "maxRssMiB": 67.8,
+            "cpuPercent": 19.55
+          },
+          "omp": {
+            "processes": 4,
+            "medianRssMiB": 1000.66,
+            "maxRssMiB": 1008.06,
+            "cpuPercent": 4.26
+          },
+          "mail": {
+            "processes": 1,
+            "medianRssMiB": 74.62,
+            "maxRssMiB": 75.12,
+            "cpuPercent": 3.23
+          },
+          "tmuxServer": {
+            "processes": 1,
+            "medianRssMiB": 3.64,
+            "maxRssMiB": 4.0,
+            "cpuPercent": 0.32
+          },
+          "observerChildren": {
+            "processes": 8,
+            "medianRssMiB": 39.22,
+            "maxRssMiB": 39.22,
+            "cpuPercent": 0.0
+          }
+        },
+        "processCount": 20
+      },
+      "postload": {
+        "seconds": 15.578,
+        "groups": {
+          "gui": {
+            "processes": 1,
+            "medianRssMiB": 181.91,
+            "maxRssMiB": 181.97,
+            "cpuPercent": 4.24
+          },
+          "daemonAndHosts": {
+            "processes": 5,
+            "medianRssMiB": 72.27,
+            "maxRssMiB": 72.27,
+            "cpuPercent": 6.87
+          },
+          "omp": {
+            "processes": 4,
+            "medianRssMiB": 1009.61,
+            "maxRssMiB": 1009.62,
+            "cpuPercent": 1.86
+          },
+          "mail": {
+            "processes": 1,
+            "medianRssMiB": 76.12,
+            "maxRssMiB": 76.64,
+            "cpuPercent": 3.08
+          },
+          "tmuxServer": {
+            "processes": 1,
+            "medianRssMiB": 5.52,
+            "maxRssMiB": 5.52,
+            "cpuPercent": 0.0
+          },
+          "observerChildren": {
+            "processes": 8,
+            "medianRssMiB": 39.94,
+            "maxRssMiB": 39.94,
+            "cpuPercent": 0.0
+          }
+        },
+        "processCount": 20
+      }
+    },
+    "scope": "Read-only explicit stable PIDs. Group RSS sums double-count shared pages; not PSS, GPU memory or total system memory. No Docker/VM/harness process overhead attributed. CPU is cumulative process time change during the15s sample; active phase includes GUI interaction and scripted output.",
+    "conditions": "All three samples included the same20 labelled processes: GUI, daemon, four hosts, four OMPs, Mail, tmux server, four login children and four read-only tmux clients. Idle and active samples showed the visible four-pane wall. Postload returned to the four-pane wall after narrow/transcript checks. No build, browser regression or other scripted fixture ran concurrently.",
+    "limits": "Short bounded samples do not establish leak freedom or long-duration scaling. RSS sums include shared pages. GPU, Docker/VM and harness resources are not attributed to this fixture. Mail and OMP overhead are reported separately from the GUI and Rust service/hosts."
+  },
+  "cleanup": {
+    "driverPassed": true,
+    "driverExitCode": 0,
+    "sameEightProcessesReattachedAfterDaemonSigkill": true,
+    "pausedAllStopped": true,
+    "ownedRecords": [
+      {
+        "path": "/private/tmp/cr-n7-observe2/cr-wf-TO8aZJ/runtime/8e6e8805-9b87-4d7a-a893-ca07f44e9b42/host-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-observe2/cr-wf-TO8aZJ/runtime/8e6e8805-9b87-4d7a-a893-ca07f44e9b42/omp-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-observe2/cr-wf-TO8aZJ/runtime/c9d60c68-d759-4116-8778-807695a353a0/host-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-observe2/cr-wf-TO8aZJ/runtime/c9d60c68-d759-4116-8778-807695a353a0/omp-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-observe2/cr-wf-TO8aZJ/runtime/5c6b3354-0723-4689-9ef0-907bb3e2bc62/host-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-observe2/cr-wf-TO8aZJ/runtime/5c6b3354-0723-4689-9ef0-907bb3e2bc62/omp-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-observe2/cr-wf-TO8aZJ/runtime/bf4e63c3-8ca7-401f-8a35-85480e8dd180/host-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-observe2/cr-wf-TO8aZJ/runtime/bf4e63c3-8ca7-401f-8a35-85480e8dd180/omp-process",
+        "state": "stopped"
+      }
+    ],
+    "allOwnedProcessesExited": true,
+    "all20ObservedInitialProcessesAndReopenedGuiAbsent": true,
+    "noDirectSignalsByTerminalAgent": true,
+    "method": "After finish-observation, the harness performed daemon interruption/recovery, verified the same eight owned processes, paused and cleaned its owned resources. Durable ownership receipts establish stopped state; independent PID absence is supplementary."
+  },
+  "fixtureSourceHashes": {
+    "scripts/rust/release-profiles-live.ts": "f064954b0a6b59bfc76ea9974d8cd2d06bb280ad291620b2a938c40e33cd9ef4",
+    "scripts/rust/verify-release-profiles.py": "f9cd8ca4a8c432d9b7da6ee56ada652e52465fc9b993505e63e43f27b662cf05",
+    "scripts/measure-native-footprint.py": "d465f6cc6f0d1107ce7b4373d8bcce7ce2f57da6addc0a521ba00515ec4b3641"
+  },
+  "evidence": {
+    "/private/tmp/cr-n7-observe2/observation-ready.json": "cc922c6c4880ac717fa4d464e21ffaeb1a9f18a5c2bf4943e8ae268e35e91525",
+    "/private/tmp/cr-n7-observe2/gui-launch.json": "299c22529b2ae5e48bf0aae4762fc6c5d8e16aee9a12e0354cfae6d89e416c52",
+    "/private/tmp/cr-n7-observe2/visible-window-geometry.json": "5c8b7afda23fb1090313310388bf95c5003d8bffef30b8473019d912b3103f68",
+    "/private/tmp/cr-n7-observe2/idle.json": "088a767b2ae4f1257c993dd848d11a5da84841e8e8b2862f956ac9e908dbbff7",
+    "/private/tmp/cr-n7-observe2/idle.inventory.json": "4ec93356f8719f86ae6ec1ff20d18f2a85be5bac6fc7b4d476c236e284ade042",
+    "/private/tmp/cr-n7-observe2/idle-clients.txt": "4d5c121a096268547b1a431a35a404bd29af7b3c597d9277446d6661c7e71971",
+    "/private/tmp/cr-n7-observe2/active.json": "4d2fd862ab997ca03639966fa761af33e2a14da45aa8b03b01f4317e92d4786f",
+    "/private/tmp/cr-n7-observe2/active.inventory.json": "4ec93356f8719f86ae6ec1ff20d18f2a85be5bac6fc7b4d476c236e284ade042",
+    "/private/tmp/cr-n7-observe2/readonly-input.json": "75400793781a3bdd1fcd8a167c47b403a311308297dd139b2b68dcb95d03170b",
+    "/private/tmp/cr-n7-observe2/load-started.json": "34a1342ca9c9cae3bda30b08475aa9cfa1ad64138d49a035d4424b88f738c3c4",
+    "/private/tmp/cr-n7-observe2/load-complete.json": "3160038986b7dbe9719e62c407bc695061fd813a8b862a6eae53c3100967dcb3",
+    "/private/tmp/cr-n7-observe2/postload.json": "cf701be033f501e0248b16f90221ffcf3c8fdaac3bfeaa47072ef574bd554cda",
+    "/private/tmp/cr-n7-observe2/postload.inventory.json": "4ec93356f8719f86ae6ec1ff20d18f2a85be5bac6fc7b4d476c236e284ade042",
+    "/private/tmp/cr-n7-observe2/footprint-summary.json": "37eab0060019afde3877fb55745fe9c7c0ded5cbc0ae2f30e7d27f6d955ef9d3",
+    "/private/tmp/cr-n7-observe2/gui-close-identities.json": "f4880ad8e1997c9b1c5100fd8adad1e3b360165864a1f9454c12f80674e3868a",
+    "/private/tmp/cr-n7-observe2/gui-reopen.json": "ff4b53cbf1aab69aafd72133229c2cb48759ff5864dac3cd2744553c5b08942c",
+    "/private/tmp/cr-n7-observe2/gui-reopen-identities.json": "809c9b6b05ba0e9f57a6d3a954bab59e2562ed874f8ea26ecef9ce695112f34d",
+    "/private/tmp/cr-n7-observe2/profile-report.json": "1dc071da43843b0056cd670e4576546ffc5a967ff385474eccdeb1df2db037ff",
+    "/private/tmp/cr-n7-observe2/report.json": "c3d8f3518e6808073139a931825c4e4a43039653133785afc0120ddf78fe7eaa",
+    "/private/tmp/cr-n7-observe2/independent-final-check.json": "83d7dcd1e566a8df18fdb7b8a823e1c4fd6c8549725eca1efbaad008d9e2c57a"
+  },
+  "remaining": [
+    "Actual VoiceOver navigation/readout verification with the user-authorized temporary setting change.",
+    "Actual Japanese\u2013Romaji macOS input-method composition, conversion/cancellation and focus retention, followed by restoration."
+  ],
+  "selfEvaluation": "The final original bundle passed the bounded visible GUI/load/close-reopen scope with verified ownership and cleanup. The earlier visibility error was resolved without a production patch and both attempts remain recorded. Timing stayed inside the hard bounds but exceeded the preferred targets; future runs should start the GUI sooner and use fewer intermediate observations."
+}

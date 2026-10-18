@@ -1,0 +1,1 @@
+Complete the current pagination helper. A cursor is a zero-based item offset; zero and null must both start at the first item. Return the selected items and a nextCursor only when more items remain. Reject invalid cursors and page sizes. Keep the exported function and return shape. Hand off the current change and its validation.

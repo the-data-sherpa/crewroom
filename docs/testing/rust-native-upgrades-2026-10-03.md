@@ -1,0 +1,17 @@
+# Native historical upgrades — N7.1a
+
+This slice ports schema versions 1–25 to the current schema 26. It does not switch the default runtime or accept N7 installation, restoration, packaging, or cutover. The machine-readable [evidence](rust-native-upgrades-2026-10-03.json) identifies the tested source and results.
+
+`Store::open` now applies the same ordered migrations as the retained TypeScript workbench. Each version runs in one immediate transaction. If a later version refuses ambiguous history, earlier completed versions remain committed, as in the retained migrator. Back up the whole stopped installation before upgrading; a source-code rollback alone does not roll back the database.
+
+The migrations preserve imported fields and local refinements, requirement source fallbacks, event cursor gaps and the AUTOINCREMENT high watermark, queue ordering, schedule identities, exact receipt clocks, retained branch history, and nullable operator proposal attribution. Completed-message compaction requires a matching durable final receipt. Migration never invents a steering delivery timestamp or treats a retained process as stopped.
+
+The historical oracle executes the retained constructor's actual DDL up to each version, then inserts representative records into the tables that existed at that version. It compares schema columns, indexes, foreign keys, all stored rows, generated lifecycle values, event ordering, and sequence state after the two migrators reopen the same starting database. It does not label a schema-26 database as an older version. Generated schedule IDs must be valid UUIDv4 values; all clocks are fixed before startup. Seven Rust tests retain independent historical DDL snapshots for fast regression coverage.
+
+Interrupted target retries require reciprocal, consistent links. A malformed later record rolls back every earlier hold and write in that migration version. Legacy add/rebase or conflict-workspace ownership stays held. The narrowly accepted sealed promotion outcome needs its exact candidate, claim, rejection, command, environment, canonical root, seal, and optional manifest. The environment keys match the retained checked-command allowlist. Missing or altered proof never becomes a stopped or completed claim.
+
+For an ownership hold, preserve the original worktree, temporary workspace, process directories, receipts, and corresponding backup. Inspect and stop only the exact verified owned process using the matching runtime. If the retained records cannot prove the outcome, keep the run held for an operator recovery decision, or restore the complete pre-upgrade installation at its original paths with the matching old build. Do not clear `legacyOwnershipUnknown`, fabricate a receipt, remove a workspace, or lower `user_version` to bypass a hold.
+
+Fresh runtime audits additionally exercise refusal of plain legacy publication directories, changed command identities, replaced transport locks, detached conflict workspaces, and redirected Git metadata. They use disposable repositories and real local Git. Scripted records do not prove a live model or provider delivery.
+
+Remaining N7 work: whole-state same-path restore with actual native processes, new installation and subsequent use, final Ghostty packaging/bootstrap and footprint, the combined native acceptance map, and the native-default cutover with rollback instructions. The primary active data, retained live pilot, operator repository, and retired OMP installation were not opened or changed by these fixtures.

@@ -1,0 +1,52 @@
+import { expect, test } from '@playwright/test';
+import { randomUUID } from 'node:crypto';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { Workbench } from '../../server/workbench';
+import { seedRepository, saveRepositoryFixture } from '../fixtures/repository';
+import { RoleCatalog } from '../../server/roles';
+import { Learning } from '../../server/learning';
+import { resolveAssignment } from '../../server/runtime/model-policy';
+import { startServer } from '../../server/app';
+
+test('the operator approves or rejects coordinator learning proposals; approval versions future guidance', async ({ page }) => {
+  const root = mkdtempSync(join(tmpdir(), 'crlearn-')); const rolePath = join(root, 'roles.json');
+  seedRepository(root);
+  const store = new Workbench(join(root, 'workflow.sqlite')); const roles = new RoleCatalog(rolePath); const learning = new Learning(store, roles);
+  const repo = saveRepositoryFixture(store, { name: 'Conductor', path: root, targetBranch: 'main' });
+  const task = store.createTask({ title: 'Scroll the investigator dialog', description: '', repositoryId: repo.id });
+  store.refine(task.id, { revision: 1, sourceRevision: 1, brief: 'Scroll', criteria: ['Start run stays reachable'] });
+  const run = store.queue(task.id, { revision: 2 });
+  const role = { ...roles.read().find(item => item.id === 'triage')!, model: 'fixture/model', effort: 'low' as const };
+  const { attempt } = store.admitAssignment(run.id, { name: 'Coordinator', role, model: resolveAssignment(role, [{ provider: 'fixture', id: 'model', api: 'openai-responses', inputs: ['text'], efforts: ['low'], tools: true }], {}, {}), coordinator: true, input: 'Coordinate' });
+  const steering = store.steer(run.id, { requestId: randomUUID(), body: 'Use the corrected browser image.' });
+  const evidence = [{ kind: 'steering' as const, id: steering.id }];
+  learning.propose(attempt.id, 'role', { target: { kind: 'role', roleId: 'implementer' }, change: 'Confirm the browser image before running checks.', rationale: 'Two image corrections were needed.', evidence });
+  learning.propose(attempt.id, 'project', { target: { kind: 'project' }, change: 'Always run the browser check at 390 px.', rationale: 'The narrow viewport failed first.', evidence });
+  store.close();
+  const app = await startServer({ port: 0, dataDir: root, production: true, rolePath });
+  try {
+    await page.goto(app.origin);
+    await page.getByRole('button', { name: 'Learning · 2 to decide' }).click();
+    const rolePanel = page.getByRole('article', { name: 'Role · Implementer' });
+    await expect(rolePanel.getByText('Proposed against version 1')).toBeVisible();
+    await expect(rolePanel.getByText('Two image corrections were needed.')).toBeVisible();
+    await expect(rolePanel.getByRole('button', { name: 'Approve' })).toBeDisabled();
+    await rolePanel.getByLabel('Decision reason').fill('The recorded steering supports this.');
+    await rolePanel.getByRole('button', { name: 'Approve' }).click();
+    await expect(page.getByRole('status')).toContainText('Learning update approved');
+    const guidance = page.getByRole('article', { name: 'Project guidance · Conductor' });
+    await guidance.getByLabel('Decision reason').fill('Covered by the check policy instead.');
+    await guidance.getByRole('button', { name: 'Reject' }).click();
+    await expect(page.getByRole('button', { name: 'Learning', exact: true })).toBeVisible();
+    await page.getByText('Decided proposals (2)').click();
+    await expect(page.getByText('Approved · version 2')).toBeVisible();
+    await expect(page.getByText('Rejected', { exact: true })).toBeVisible();
+    await page.screenshot({ path: '.crewroom/test-results/learning.png', fullPage: true });
+    await page.getByRole('button', { name: 'Roles' }).click();
+    await page.getByLabel('Role to edit').selectOption('implementer');
+    await expect(page.getByLabel('Instructions')).toHaveValue('Confirm the browser image before running checks.');
+    await expect(page.getByText(/Editing revision 2 · Saved by learning proposal/)).toBeVisible();
+  } finally { await app.close(); rmSync(root, { recursive: true, force: true }); }
+});

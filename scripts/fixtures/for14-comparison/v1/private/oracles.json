@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "policy": "Independently execute the declared acceptance check against final source after all cell ownership stops. This receipt measures source correctness; it never substitutes for a worker check.",
+  "cases": [
+    {"caseId": "task-01", "checkId": "acceptance"},
+    {"caseId": "task-02", "checkId": "acceptance"},
+    {"caseId": "task-03", "checkId": "acceptance"},
+    {"caseId": "task-04", "checkId": "browser"}
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "cases": [
+    {
+      "selector": "aperture-openai/openai.gpt-6-sol",
+      "effort": "low",
+      "identity": {
+        "model": {
+          "provider": "aperture-openai",
+          "id": "openai.gpt-6-sol",
+          "api": "openai-responses"
+        },
+        "thinkingLevel": "low",
+        "sessionId": "01a0e4ad-74f0-7281-b5fd-660623887ab8",
+        "isStreaming": false,
+        "autoCompactionEnabled": false
+      },
+      "providerRequests": 1,
+      "status": "passed"
+    },
+    {
+      "name": "429 recovery uses the same model",
+      "status": "passed",
+      "providerRequests": 2
+    },
+    {
+      "name": "403 exposes failure without fallback",
+      "status": "passed",
+      "providerRequests": 1
+    },
+    {
+      "selector": "aperture-anthropic/anthropic.claude-sonnet-5",
+      "effort": "medium",
+      "identity": {
+        "model": {
+          "provider": "aperture-anthropic",
+          "id": "anthropic.claude-sonnet-5",
+          "api": "anthropic-messages"
+        },
+        "thinkingLevel": "medium",
+        "sessionId": "01a0e4ad-79b8-7467-b772-eaebc105951b",
+        "isStreaming": false,
+        "autoCompactionEnabled": false
+      },
+      "providerRequests": 1,
+      "status": "passed"
+    },
+    {
+      "selector": "aperture-google/gemini-3.8-flash",
+      "effort": "low",
+      "identity": {
+        "model": {
+          "provider": "aperture-google",
+          "id": "gemini-3.8-flash",
+          "api": "google-generative-ai"
+        },
+        "thinkingLevel": "low",
+        "sessionId": "01a0e4ad-7c5c-747a-8295-46b0c4137340",
+        "isStreaming": false,
+        "autoCompactionEnabled": false
+      },
+      "providerRequests": 1,
+      "status": "passed"
+    },
+    {
+      "selector": "aperture-openai/zai-org/GLM-5.2",
+      "effort": "medium",
+      "status": "rejected-before-launch"
+    },
+    {
+      "selector": "aperture-openai/zai-org/GLM-5.2",
+      "effort": "medium",
+      "status": "rejected-by-runner-preflight"
+    },
+    {
+      "selector": "aperture-google/gemini-3.1-pro-preview",
+      "effort": "medium",
+      "status": "rejected-before-launch"
+    },
+    {
+      "selector": "aperture-google/gemini-3.1-pro-preview",
+      "effort": "medium",
+      "status": "rejected-by-runner-preflight"
+    },
+    {
+      "selector": "aperture-bedrock-compat/us.anthropic.claude-haiku-4-5-20251001-v1:0",
+      "effort": "high",
+      "status": "rejected-before-launch"
+    },
+    {
+      "selector": "aperture-bedrock-compat/us.anthropic.claude-haiku-4-5-20251001-v1:0",
+      "effort": "high",
+      "status": "rejected-by-runner-preflight"
+    }
+  ],
+  "guard": {
+    "fixture_port_allowed": true,
+    "external_denied": true,
+    "other_loopback_denied": true,
+    "child_egress_denied": true
+  },
+  "passed": true,
+  "allOwnedProcessesExited": true,
+  "providerRequests": 6,
+  "providerErrors": [],
+  "scope": "Production TypeScript assignment policy and preflight through a test RPC bridge to real, network-guarded OMP 18.3.1. Synthetic providers; no production tmux host or workflow integration claim.",
+  "sourceHashes": {
+    "server/runtime/model-policy.ts": "5c4357be49555633a9fbe4fb3d5c482f8952cf137bd5f0147d0c639b82570f61",
+    "scripts/model-policy-driver.ts": "245f4e10158a3c5739be1cf8298904cc55188f6d1ca4da987cdb013af00d9b04",
+    "scripts/test-model-preflight.py": "30a3d4cff0114d28e88c5030351d7e57b1b774178fd3a22f6caa719a2afc496f"
+  }
+}

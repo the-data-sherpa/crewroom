@@ -1,0 +1,101 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import {writeFileSync} from 'node:fs';
+import {join} from 'node:path';
+import {workflowFixture,until} from './workflow-support';
+
+// Production daemon, real supervised OS processes/Git and synthetic inference/Mail.
+// Live provider acceptance is retained separately; this fixture tests the protocol.
+test('MH6 stages pair, checkpoint, documentation and independent review through the daemon', {timeout:180000}, async t=>{
+ const f=await workflowFixture(t,'coding',0,false,{service:true,configure({root,roles}){
+  roles.push({...roles.find(r=>r.id==='tech-writer')!,id:'navigator',name:'Navigator'});
+  writeFileSync(join(root,'roles.json'),JSON.stringify(roles));
+ }});
+ await f.c.command('prepare',{target:f.run.id,input:{mode:'new'}});
+ await f.start();
+ const idle=()=>until(async()=>{const r=await f.snapshot();return !(await f.c.command('busy',{target:f.run.id}))&&r.assignments.filter((a:any)=>!a.retiredAt).every((a:any)=>r.attempts.find((p:any)=>p.id===a.currentAttemptId)?.state==='idle')?r:false;},45000);
+ let runtime=await idle();
+ const id=(name:string)=>runtime.assignments.find((a:any)=>a.name===name).currentAttemptId;
+ const status=()=>f.tool(id('Coordinator'),'coding/choreography',{});
+ const member=(name:string,roleId:string,responsibility:string,stage:number,writes=false)=>({name,roleId,responsibility,stage,writes,packages:['fixture'],rationale:'Exercise '+responsibility,input:'Fulfil '+responsibility+' responsibility'});
+ const schedule={uiRequired:false,diagnosisReason:null,assignments:[member('Writer','implementer','writer',0,true),member('Navigator','navigator','navigator',0),member('Docs','tech-writer','documentation',1,true),member('Review','reviewer','reviewer',2)]};
+ await f.tool(id('Coordinator'),'coding/choreography-propose',{revision:0,schedule},'schedule');
+ const team=async(names:string[],retire:string[]=[])=>{
+  const prior=id('Coordinator');
+  await f.tool(prior,'team-proposal',{specialists:names.map(name=>{const m=schedule.assignments.find(m=>m.name===name)!;return {name,roleId:m.roleId,input:m.input,criteria:[{index:0,obligation:'Verify accepted criterion',checkIds:[]}],dependsOn:[]};}),retire:retire.map(name=>({name,reason:'Package contribution reconciled'}))});
+  runtime=await until(async()=>{const r=await idle();return r.assignments.find((a:any)=>a.name==='Coordinator').currentAttemptId!==prior&&names.every(name=>r.assignments.some((a:any)=>a.name===name&&!a.retiredAt))?r:false;},45000);
+ };
+ await team(['Writer','Navigator']);
+ const action=async(name:string,kind:string,extra:any={})=>{const state=await status();return f.tool(id(name),'coding/package',{revision:state.choreography.revision,packageId:'fixture',kind,summary:kind+' evidence',artifacts:[],...extra});};
+ await action('Coordinator','start');
+ await assert.rejects(f.tool(id('Coordinator'),'coding/claim',{assignee:'Navigator',instruction:'Write'}),/writing responsibility/);
+ await f.tool(id('Coordinator'),'coding/claim',{assignee:'Writer',instruction:'Apply accepted behavior'},'claim-writer');
+ const file=await f.tool(id('Writer'),'coding/read',{path:'source.txt'});
+ await f.tool(id('Writer'),'coding/edit',{path:'source.txt',expectedHash:file.sha256,content:'after\n'},'edit');
+ await assert.rejects(f.tool(id('Writer'),'coding/complete',{summary:'Premature freeze'}),/not complete|report|navigator/);
+ const exchange=async(name:string,kind:string,to:string,extra:any={})=>{const state=await status();const result=await f.tool(id(name),'coding/pair-exchange',{revision:state.choreography.revision,packageId:'fixture',kind,to,artifact:'source.txt',body:'Inspect the before/after transition and reject unexpected source text.',proposedChange:'Verify exact source text including trailing newline.',...extra});await until(async()=>{const r=await f.snapshot();return r.messages.find((m:any)=>m.id===result.message.id)?.disposition==='received';});runtime=await idle();return result.exchange;};
+ // Lose the daemon while a durable exchange intent awaits external Mail.
+ const pendingArgs={revision:(await status()).choreography.revision,packageId:'fixture',kind:'approach',to:'Navigator',artifact:'source.txt',body:'Inspect the transition and trailing newline.',proposedChange:'Check exact source bytes.'};
+ f.holdMail();
+ const pending=f.tool(id('Writer'),'coding/pair-exchange',pendingArgs,'pending-exchange').catch(error=>error);
+ await until(async()=>(await f.snapshot()).messages.some((m:any)=>m.toolCallId==='pair:pending-exchange'));
+ await f.kill();f.releaseMail();await pending;await f.reopen();runtime=await idle();
+ await until(async()=>(await f.snapshot()).messages.filter((m:any)=>m.toolCallId==='pair:pending-exchange'&&m.disposition==='received').length===1);
+ assert.equal((await f.snapshot()).choreography.exchanges.filter((e:any)=>e.kind==='approach').length,1);
+
+ const challenge=await exchange('Navigator','challenge','Writer');
+ const response=await exchange('Writer','response','Navigator',{challengeId:challenge.id});
+ await exchange('Coordinator','resolution','Navigator',{challengeId:challenge.id,responseId:response.id});
+ const reported=await f.tool(id('Writer'),'coding/read',{path:'source.txt'});
+ const reportInput={revision:(await status()).choreography.revision,packageId:'fixture',kind:'report',summary:'Source contribution',artifacts:[{path:'source.txt',sha256:reported.sha256}]};
+ const reportReceipt=await f.tool(id('Writer'),'coding/package',reportInput,'report-replay');
+ await f.tool(id('Writer'),'coding/edit',{path:'source.txt',expectedHash:reported.sha256,content:'after revised\n'},'later-edit');
+ assert.deepEqual(await f.tool(id('Writer'),'coding/package',reportInput,'report-replay'),reportReceipt);
+ await assert.rejects(f.tool(id('Writer'),'coding/package',{...reportInput,summary:'different'},'report-replay'),/different/);
+ await action('Navigator','report');
+ const originalWriter=id('Writer');
+ await f.pause();assert.ok((await f.snapshot()).attempts.every((a:any)=>a.ownership==='stopped'));
+ await f.resume();runtime=await idle();assert.notEqual(id('Writer'),originalWriter);
+ assert.equal((await f.snapshot()).packageWriter.attemptId,id('Writer'));
+ await assert.rejects(f.tool(originalWriter,'coding/edit',{path:'source.txt',expectedHash:file.sha256,content:'stale'}),/not authorized|current|no longer/);
+ const oldWriter=id('Writer');
+ const completion=await f.tool(oldWriter,'coding/checkpoint',{summary:'Preserve implementation for documentation',successor:'Docs'},'checkpoint');
+ await until(async()=>{const r=await f.c.command('record',{target:f.run.id});return r.completions.find((c:any)=>c.id===completion.id)?.state==='completed';},45000);
+ runtime=await until(async()=>{const r=await idle();return r.assignments.find((a:any)=>a.name==='Writer').currentAttemptId!==oldWriter?r:false;},45000);
+ const record=await f.c.command('record',{target:f.run.id});assert.equal(record.candidates.length,0);assert.equal(record.completions[0].mode,'checkpoint');
+ await assert.rejects(f.tool(id('Coordinator'),'coding/claim',{assignee:'Writer',instruction:'Reacquire'}),/reserved/);
+ await f.kill();await f.reopen();runtime=await idle();assert.equal((await f.c.command('record',{target:f.run.id})).candidates.length,0);
+ await team(['Docs'],['Writer','Navigator']);
+ await f.tool(id('Coordinator'),'coding/claim',{assignee:'Docs',instruction:'Document the accepted behavior'},'claim-docs');
+ const doc=await f.tool(id('Docs'),'coding/read',{path:'README.md'}).catch(()=>({sha256:null}));
+ await f.tool(id('Docs'),'coding/edit',{path:'README.md',expectedHash:doc.sha256,content:'# Fixture\n\nThe source contains after followed by a newline.\n'},'docs');
+ const priorSource=await f.tool(id('Docs'),'coding/read',{path:'source.txt'});
+ await f.tool(id('Docs'),'coding/edit',{path:'source.txt',expectedHash:priorSource.sha256,content:'after revised\nDocumented inline.\n'},'inline-docs');
+ const inline=await f.tool(id('Docs'),'coding/read',{path:'source.txt'});
+ const saved=await f.tool(id('Docs'),'coding/read',{path:'README.md'});
+ await action('Docs','report',{artifacts:[{path:'README.md',sha256:saved.sha256},{path:'source.txt',sha256:inline.sha256}],documentation:{disposition:'changed',reason:'Describe the new behavior'}});
+ await action('Coordinator','complete');
+ const beforeFreeze=id('Coordinator');
+ const finish=await f.tool(id('Docs'),'coding/complete',{summary:'Code and documentation complete'},'freeze');
+ await until(async()=>{const r=await f.c.command('record',{target:f.run.id});return r.completions.find((c:any)=>c.id===finish.id)?.state==='completed';},45000);
+ runtime=await until(async()=>{const r=await idle();return r.assignments.find((a:any)=>a.name==='Coordinator').currentAttemptId!==beforeFreeze?r:false;},45000);
+ const frozen=await f.c.command('record',{target:f.run.id});assert.equal(frozen.candidates.length,1);const candidate=frozen.candidates[0];assert.equal(candidate.implementationAttempts.length,2);assert.ok(candidate.choreography);
+ await f.kill();await f.reopen();runtime=await idle();assert.deepEqual((await f.c.command('record',{target:f.run.id})).candidates,[candidate]);
+ await team(['Review'],['Docs']);
+ await f.tool(id('Coordinator'),'coding/review-assign',{assignee:'Review',candidateId:candidate.id,instruction:'Review exact code and documentation'},'independent');
+ assert.ok((await status()).choreography.packages.every((p:any)=>p.state==='complete'));
+ await f.tool(id('Review'),'coding/review',{candidateId:candidate.id,verdict:'changes_requested',summary:'Cover an additional retained behavior',findings:[{path:'source.txt',line:1,severity:'major',body:'Add the requested regression artifact'}],coverage:[]});
+ await team([],['Review']);
+ for(const m of schedule.assignments)m.name+='Again';
+ await f.tool(id('Coordinator'),'coding/choreography-propose',{revision:(await status()).choreography.revision,schedule,reopenPackages:['fixture']},'rework-schedule');
+ await team(['WriterAgain','NavigatorAgain']);
+ await f.tool(id('Coordinator'),'coding/claim',{assignee:'WriterAgain',instruction:'Address the independent review request'},'rework-claim');
+ await assert.rejects(f.tool(id('WriterAgain'),'coding/edit',{path:'regression.txt',expectedHash:null,content:'regression'}),/Reopen/);
+ await action('Coordinator','reopen');
+ await f.tool(id('WriterAgain'),'coding/edit',{path:'regression.txt',expectedHash:null,content:'regression\n'},'rework-edit');
+ assert.equal((await status()).choreography.packages[0].generation,2);
+ await assert.rejects(f.tool(id('WriterAgain'),'coding/complete',{summary:'Skip renewed obligations'}),/not complete|report|navigator/);
+ assert.equal((await f.c.command('evidence',{target:f.run.id})).ready,false);
+
+ t.diagnostic(JSON.stringify({candidate:candidate.id,head:candidate.revision.head,checkpoint:completion.id,implementationAttempts:candidate.implementationAttempts,liveInference:false,mail:'synthetic',root:f.root}));
+});

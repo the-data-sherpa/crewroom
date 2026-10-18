@@ -1,0 +1,64 @@
+{
+  "observedAt": "2026-10-12T05:54:07.955514+00:00",
+  "workItem": "MH1",
+  "baseline": "dc85a54a24e36b2dc57779bb2b9e46f12fcb26db",
+  "scope": "Non-inference discovery contract probe; no production execution adapter, UI integration, or live delivery claim.",
+  "sourceSha256": {
+    "scripts/discover_harness_models.py": "34f0c7390d82f8613d4595e0d49b4c46eaf52d901f1a88b06872f3012e6112fe",
+    "scripts/test_harness_discovery.py": "8d3256a273adbe9110a0f3da682b5b6b1635f19317f12ee2ab6767f1bb3221e1"
+  },
+  "tests": {
+    "command": "python3 -m unittest discover -s scripts -p 'test_harness_discovery.py' -v",
+    "passed": 9,
+    "failed": 0,
+    "covers": [
+      "Codex initialization and pagination without inference requests",
+      "Claude isolated initialization and alias identity",
+      "OMP metadata allowlist and provider identity",
+      "Invalid and duplicate catalogs",
+      "Repeated cursors and private error filtering",
+      "Bounded time/output and child reaping",
+      "Independent missing executable reporting",
+      "Malformed or incomplete JSON",
+      "Helper cleanup after leader exit on Linux"
+    ]
+  },
+  "installedDiscovery": {
+    "command": "python3 scripts/discover_harness_models.py",
+    "exitCode": 0,
+    "catalogSha256": "1ec847ad6ca91da1e9d853b75a694b2ee5dd1a4997de078e7784410be10f1a8d",
+    "harnesses": [
+      {
+        "harness": "codex",
+        "version": "0.162.0",
+        "status": "ok",
+        "scope": "client_catalog",
+        "entryCount": 7
+      },
+      {
+        "harness": "claude-code",
+        "version": "2.1.292",
+        "status": "ok",
+        "scope": "isolated_client_menu",
+        "entryCount": 5
+      },
+      {
+        "harness": "omp",
+        "version": "17.3.5",
+        "status": "ok",
+        "scope": "configured_auth_catalog",
+        "entryCount": 109
+      }
+    ]
+  },
+  "inferenceRequested": false,
+  "accountEntitlementVerified": false,
+  "productionAdaptersVerifiedByThisProbe": false,
+  "limits": [
+    "Claude menu is isolated and unauthenticated",
+    "OMP listing may update caches or resolve authentication",
+    "Local OMP version is older than the recorded production baseline",
+    "Process-group cleanup is not containment for arbitrary detached work",
+    "No Rust/TypeScript domain or UI change; application suites were not rerun"
+  ]
+}

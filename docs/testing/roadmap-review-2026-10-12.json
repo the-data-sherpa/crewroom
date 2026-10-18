@@ -1,0 +1,67 @@
+{
+  "checks": [
+    {
+      "label": "all",
+      "count": 8
+    },
+    {
+      "label": "MVP",
+      "count": 5
+    },
+    {
+      "label": "after MVP",
+      "count": 3
+    },
+    {
+      "label": "search",
+      "count": 1
+    }
+  ],
+  "viewports": [
+    1280,
+    390
+  ],
+  "themes": [
+    "dark",
+    "light"
+  ],
+  "overflow": {
+    "width": 390,
+    "scroll": 390,
+    "items": []
+  },
+  "scriptErrors": [],
+  "brokenInternal": [],
+  "links": 57,
+  "date": "2026-10-12",
+  "issues": [
+    "FOR-6",
+    "FOR-15"
+  ],
+  "scope": "Documentation, research and interactive roadmap only; no application runtime changes or new live-run claims.",
+  "sourceBase": "94cd80844432e611890613deef625cf7161ed7c3",
+  "browser": "Installed /usr/bin/chromium via Playwright; preferred chrome-devtools-axi could not launch because Google Chrome stable was absent.",
+  "additionalChecks": {
+    "responsiveDiagramVisibility": "pass",
+    "completionDetailsOpen": "pass",
+    "delegationChoiceQueuesLocallyWithMockedBridge": "pass",
+    "sourceHashesAndInventoryCounts": "pass",
+    "gitDiffCheck": "pass"
+  },
+  "visualInspection": [
+    "desktop dark",
+    "desktop light",
+    "390px narrow layout",
+    "delegation diagrams desktop and narrow"
+  ],
+  "limitations": [
+    "No new app test/build/end-to-end suite needed for documentation-only changes.",
+    "Orchestrator evidence is static primary-source inspection, not a live trial.",
+    "Local choice control tested with mocked Lavish bridge; no actual operator choice sent."
+  ],
+  "artifacts": {
+    ".lavish/crewroom-roadmap-2026-10-12.html": "122e0a075e2f46146e2cbeb654dafba343482d588cc6f6d0a5f328bf62f99a45",
+    ".lavish/crewroom-roadmap-2026-10-12.json": "14373533f5f14c36cf65be0d14d37e42bd5442b5cba1169c647181a4ac2ca99e",
+    "docs/research/orchestrator-delegation-assessment-2026-10-12.md": "bd9605f8b15e9743ec95fe4694ea867fa09154ae15d3f4a9da2eea81b8864fc7"
+  }
+}

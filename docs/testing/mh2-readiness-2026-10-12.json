@@ -1,0 +1,131 @@
+{
+  "issue": "FOR-7",
+  "date": "2026-10-12",
+  "sourceRevision": "686c26b852a614e2f5a68f1c899f3a9bd91a6137",
+  "scope": "Readiness evaluation only; no runtime implementation, inference or active configuration changes.",
+  "readiness": "Ready for bounded compatibility spike; production enablement gated on provider/tool confinement and durable recovery/replay.",
+  "modelAccessRoute": "Provider gateway recommended; no operator answer recorded. Existing-login requirement would need additional design.",
+  "checks": [
+    {
+      "command": "cargo test --locked -p crewroom-runtime --test host_protocol --test model_jobs --test rpc --test process_ownership",
+      "exitCode": 0,
+      "passed": 23,
+      "failed": 0,
+      "groups": {
+        "host_protocol": 11,
+        "model_jobs": 3,
+        "rpc": 7,
+        "process_ownership": 2
+      },
+      "evidenceClass": "Local unit/fixture tests with actual owned-process cases; no real OMP or Codex execution turns."
+    },
+    {
+      "command": "python3 -m unittest discover -s scripts -p 'test_harness_discovery.py' -v",
+      "exitCode": 0,
+      "passed": 9,
+      "failed": 0,
+      "evidenceClass": "Discovery fixture/process tests; no inference."
+    }
+  ],
+  "environment": {
+    "node": "22.23.3",
+    "requiredNode": ">=24.0.0",
+    "omp": "17.3.5",
+    "transportTarget": "OMP 18.4.12 protocol v2",
+    "dockerServer": "29.7.2",
+    "cargo": "1.98.1",
+    "platform": "Linux x86_64"
+  },
+  "codexProbe": {
+    "version": "0.162.0",
+    "executable": "/home/crewroom/.local/share/mise/installs/codex/0.162.0/bin/codex",
+    "inferenceTurns": 0,
+    "observations": [
+      {
+        "experimentalApi": false,
+        "initializeSucceeded": true,
+        "startError": {
+          "code": -32600,
+          "message": "thread/start.dynamicTools requires experimentalApi capability"
+        },
+        "notificationMethods": [
+          "remoteControl/status/changed"
+        ]
+      },
+      {
+        "experimentalApi": true,
+        "initializeSucceeded": true,
+        "startError": null,
+        "threadId": "01a131bd-0976-7b72-80df-f4a189b6b4cb",
+        "model": "gpt-6.1-sol",
+        "modelProvider": "crewroom_probe",
+        "approvalPolicy": "never",
+        "sandbox": {
+          "type": "readOnly",
+          "networkAccess": false
+        },
+        "ephemeral": false,
+        "pathPresent": true,
+        "sameProcessResumeSucceeded": false,
+        "sameProcessResumeError": {
+          "code": -32600,
+          "message": "no rollout found for thread id 01a131bd-0976-7b72-80df-f4a189b6b4cb"
+        },
+        "notificationMethods": [
+          "remoteControl/status/changed",
+          "thread/started"
+        ]
+      },
+      {
+        "restartResumeSucceeded": false,
+        "error": {
+          "code": -32600,
+          "message": "no rollout found for thread id 01a131bd-0976-7b72-80df-f4a189b6b4cb"
+        },
+        "notificationMethods": [
+          "remoteControl/status/changed"
+        ]
+      }
+    ],
+    "isolatedConfig": "model = \"gpt-6.1-sol\"\nmodel_provider = \"crewroom_probe\"\nweb_search = \"disabled\"\n[model_providers.crewroom_probe]\nname = \"Crewroom non-inference probe\"\nbase_url = \"http://127.0.0.1:9/v1\"\nenv_key = \"CREWROOM_PROBE_TOKEN\"\nwire_api = \"responses\"\nrequires_openai_auth = false\nsupports_websockets = false\n[features]\nshell_tool = false\nunified_exec = false\nshell_snapshot = false\nmulti_agent = false\napps = false\nplugins = false\nhooks = false\ncode_mode_host = false\nimage_generation = false\nbrowser_use = false\ncomputer_use = false\nview_image = false\n"
+  },
+  "codexBinarySha256": "50ed828f357c655a3c82054d346cab8434f24901f14ec19b8267571bdd008b38",
+  "schemaSha256": {
+    "v2/ThreadStartParams.json": "80a40a7fac15b4bf70efb7f893fb353acc0a0d30c68f54aee4f01923deca85de",
+    "v2/ThreadResumeParams.json": "c69d0d08d046e48b2f9e631761e1127c347fac2f8c2776df458559eb3aa4bd83",
+    "DynamicToolCallParams.json": "401bba20cfbd95762bef0467d840430c46be53369093ad9f26425ba757e34efc",
+    "DynamicToolCallResponse.json": "abb082cad67f11fcc98ba75f2eff75d7d1723af0c657655329b83ff160451a02"
+  },
+  "probeScriptSha256": "daa8e7b73aa894cb55559a1abf869e5ca5b6ce3cf1e8c507298c7710e0a93569",
+  "limitations": [
+    "Successful strict-config and thread/start do not prove available inference or complete tool confinement.",
+    "Immediate and fresh-process resume of an unprompted new thread failed with no rollout found; durable recovery after a turn remains unverified.",
+    "Cross-attempt idempotent tool result reconciliation remains design and execution work.",
+    "Current OMP real-runner fixtures use macOS-specific binary/addon paths and sandbox-exec; no fresh OMP runtime compatibility claim.",
+    "Full application suites not rerun for this evaluation; prior Linux browser evidence remains 29/31."
+  ],
+  "reviewSurface": {
+    "path": ".lavish/crewroom-mh2-readiness-2026-10-12.html",
+    "designSource": "Existing native Crewroom palette from crates/crewroom-desktop/src/workbench.rs",
+    "validation": {
+      "darkViewport": [
+        1280,
+        940
+      ],
+      "lightViewport": [
+        1280,
+        940
+      ],
+      "narrowViewport": [
+        390,
+        940
+      ],
+      "horizontalOverflow": false,
+      "pageErrors": 0,
+      "detailsInteraction": "passed",
+      "screenshotsVisuallyInspected": true
+    },
+    "browser": "Local Playwright Chromium; preferred chrome-devtools-axi could not find Google Chrome stable."
+  },
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

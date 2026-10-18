@@ -1,0 +1,86 @@
+{
+  "date": "2026-10-04",
+  "baseRevision": "b808127e76812a6b4682e33fd3fcbd38afc22b5c",
+  "candidate": "Working tree identified by the source hashes below.",
+  "scope": "Native agent role catalog labels, specialty summaries, and ticket-to-catalog navigation with retained drafts. Role storage and specialist execution contracts are unchanged.",
+  "sourceSha256": {
+    "crates/crewroom-desktop/src/workbench.rs": "5aa414c7aa6770a06603c50ff4a6230a04054c7f472d201fea158f33432ce993",
+    "crates/crewroom-desktop/src/workbench/settings.rs": "f06685c653253cadf38bf463e9cb45cc006e9b193c5ecf703b97599a030d3697",
+    "crates/crewroom-desktop/src/workbench/settings/tests.rs": "6c4879aaf7a28dbccecf800c8eb6839fe0d60779190217d5fcf024228989137c",
+    "crates/crewroom-desktop/src/workbench/planning.rs": "e3faa63f89a14f1d2d7982f4f90cb66aa731aacf497eb0a6e9835da7abd339b7",
+    "crates/crewroom-desktop/src/workbench/planning/tests.rs": "4f2cec3603c0d0aa027dd40c1aada5fddbf6a16fb5bcbe133a4454f017f66202",
+    "crates/crewroom-desktop/src/workbench/collaboration/insertion.rs": "4d603074e43d031629642657553d03586928107e2b86c9b920cbdcd2bbaaf9ed",
+    "crates/crewroom-desktop/src/workbench/collaboration/tests.rs": "b4a9814a0f87ae45df09e8fe725c76b63912b6f7d1780e605d234fe73edbead1",
+    "crates/crewroom-desktop/src/workbench/test_support.rs": "94837f603794b164ad999d0169b87ceedee444d75718c88ad282b5bbdcca8e89",
+    "docs/user-guide.md": "39c6b10b7216cf9c1e07fac7ca98877b48b85192e55435340be930c9bddc92c1"
+  },
+  "validation": [
+    {
+      "command": "ZIG=\"$PWD/.crewroom/toolchains/zig-aarch64-macos-0.16.0/zig\" python3 scripts/test_processes.py run -- cargo test --locked -p crewroom-desktop -j 6 -- --test-threads=1",
+      "runId": "d95b4b0a-c1a5-45ba-9ee3-e8c2673384ff",
+      "passed": 36,
+      "failed": 0,
+      "ignored": 9,
+      "seconds": 96.71,
+      "limits": "Existing ignored journeys require separate external process/provider fixtures; none was newly skipped."
+    },
+    {
+      "command": "npm run build",
+      "result": "passed",
+      "node": "26.10.0"
+    },
+    {
+      "command": "python3 scripts/test_processes.py run -- npm run test:e2e",
+      "runId": "9ac5c112-555a-4c87-842f-4a7bebb8c84c",
+      "passed": 31,
+      "failed": 0,
+      "node": "26.10.0",
+      "limits": "Retained browser compatibility suite; four previously documented Ghostty console diagnostics remain."
+    },
+    {
+      "command": "ZIG=\"$PWD/.crewroom/toolchains/zig-aarch64-macos-0.16.0/zig\" cargo clippy --locked -p crewroom-desktop --all-targets -j 6 -- -D warnings",
+      "result": "passed"
+    },
+    {
+      "command": "cargo fmt --all --check",
+      "result": "passed"
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed"
+    },
+    {
+      "command": "./scripts/run-native.sh --build-only",
+      "result": "passed",
+      "bundle": "/Users/crewroom/Projects/Git/crewroom/target/debug/native-package.GkLDZg/Crewroom.app",
+      "receipt": "/Users/crewroom/Projects/Git/crewroom/target/debug/native-package.GkLDZg/Crewroom.app.receipt.json"
+    },
+    {
+      "check": "New UI copy: snitch-ux strict copy lint",
+      "words": 108,
+      "violationsPer100Words": 0
+    }
+  ],
+  "initialFailure": {
+    "nativePassed": 33,
+    "nativeFailed": 3,
+    "nativeIgnored": 9,
+    "reason": "Two pointer tests scrolled the outer page instead of the nested catalog; a new layout assertion targeted a plain div that GPUI Kit does not register. Changed role selection tests to actual Tab/Enter navigation with visible-focus assertions and restricted bounds checks to registered controls. No production workaround or test skip was added."
+  },
+  "covered": [
+    "Role creation, persistence, stale-revision refusal and draft preservation",
+    "Keyboard selection of roles deep in the catalog",
+    "Configuration controls within 390 px",
+    "Ticket brief remains unsaved and cannot queue after catalog navigation",
+    "Unsent specialist role/input/dependencies survive catalog navigation and produce a pending proposal",
+    "Queued proposal replay and service restart retain proposal semantics"
+  ],
+  "cleanup": "Recorded native and browser test runs have no attributable surviving processes. Existing normal daemon and GUI were protected.",
+  "limits": [
+    "Headless native interaction/layout checks; no new macOS screenshot or OS accessibility claim.",
+    "Provider boundaries remain scripted; no live Jira, PR or model delivery was performed.",
+    "Built a new debug bundle without replacing the active GUI/service, user configuration or retained pilot.",
+    "No domain implementation changed; npm test was not rerun."
+  ],
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

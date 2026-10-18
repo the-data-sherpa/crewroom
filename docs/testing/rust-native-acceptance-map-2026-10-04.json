@@ -1,0 +1,3054 @@
+{
+  "schemaVersion": 1,
+  "kind": "native-acceptance-evidence-map",
+  "recordedAt": "2026-10-04",
+  "scope": "87 behavior cases, 12 named scenarios, 31 browser-equivalent journeys. Documentation-only audit of existing evidence at a frozen native checkpoint.",
+  "readOnlyMainCommit": "e03459580765ee39af89803304b9fb2758de6221",
+  "counts": {
+    "behaviorCases": 87,
+    "scenarios": 12,
+    "nativeJourneys": 31,
+    "behaviorPartial": 9,
+    "journeyPartial": 15,
+    "openGapGroups": 14
+  },
+  "definitions": {
+    "mapped-existing-evidence": "The listed assertions have cited historical native evidence. This is a mapping, not a fresh candidate pass or a blanket acceptance of every sentence in the original case.",
+    "partial": "An explicit assertion remains without matching native evidence in the inspected receipts. A gap is not automatically an implementation defect.",
+    "composed-partial": "Related assertions are covered across receipts, but the named scenario/profile has no complete native execution certificate."
+  },
+  "boundaries": [
+    "No new tests, provider calls, process launches, active-data changes or release acceptance performed during this audit.",
+    "Scripted providers exercise real native control flow, Git, Docker, OMP and Mail only where each receipt says so. No live-provider/model-quality claim.",
+    "Five positive GPUI journeys at the frozen checkpoint use explicitly stopped attempt records and real service/Git/loopback providers; not live model execution.",
+    "Historical source manifests remain authoritative for each execution. A newer aggregate Rust test count does not rerun old expensive fixtures. Final combined release revalidation is separate.",
+    "Retained browser/domain evidence is not native UI proof; documented failures and focused retries remain as recorded.",
+    "New main-branch work after the frozen checkpoint is intentionally excluded; root owns UI closure, terminal focus/accessibility integration and cutover."
+  ],
+  "inputs": {
+    "suite": {
+      "path": "docs/testing/suite.json",
+      "sha256": "fc48695536a1ddb3ace3ab7402fae44c2c8856091a29ce0b9f978f5bf4c5cce4"
+    },
+    "scenarios": {
+      "path": "docs/testing/scenarios.json",
+      "sha256": "f2d5cbc3cd2415dd571375dd77566403ca7465ec752c1768f6135df49618b036"
+    },
+    "browserInventory": {
+      "path": ".crewroom/test-results/n33b1-20261003/n6-browser-journey-map.json",
+      "sha256": "0d7a56d73e6cccc303229573def5c2aa68760bfd1df73074478cc4f916e18278",
+      "localOnly": true
+    }
+  },
+  "sources": {
+    "providers": {
+      "path": "docs/testing/rust-native-providers-2026-10-02.json",
+      "sha256": "38b7349556c64a9b49c1a178890616bd5a801233d3e392edba46a9fe9dd3e65b",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "4ad009c0ed6cba56cd69c19c7e5919bde724796f",
+      "sourceManifestSha256": "9924f03badbe1e0b51c6ee46655af33900ad323f800d1eff3758d815ad266175",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "input-boundaries": {
+      "path": "docs/testing/rust-native-input-boundaries-2026-10-02.json",
+      "sha256": "4447612655c42407673e53e54c9f18f3cb909bbbf8f2c379e853dceae8b2ec3f",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "1678f5854b3912f7eb0c73076b3a7b6acd95d49f",
+      "sourceManifestSha256": "c9f56b28438db065d3824acb0a6d9be7e43dcb159d84d48615163560a0af0975",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "jira-delivery": {
+      "path": "docs/testing/rust-native-jira-delivery-2026-10-03.json",
+      "sha256": "caefa3b27dc767cfc217d1872884cc9d091944440683df25ecc42acdcae22db9",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "a588da807e991f7172fa34540ab43520b59e30ba",
+      "sourceManifestSha256": "914dd41ee8beb62decd64a855ff10230cb12cd7fe991d403a3b71e46ac3cf846",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "daemon-scheduling": {
+      "path": "docs/testing/rust-native-daemon-scheduling-2026-10-03.json",
+      "sha256": "519e681515f3173745ca98bea4eb433baa3ad9eb1502e0654a1fa8cc712489f0",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "ba64555d81b1f5b7608017c24c16f7f406aa9569",
+      "sourceManifestSha256": "e2376655ed1e5bc3e072bf2f2b0b03ac8542396ebc74551459db700a2114e6d3",
+      "anchors": [
+        "coverage",
+        "actualRuntimeProof",
+        "checks"
+      ]
+    },
+    "journeys": {
+      "path": "docs/testing/rust-native-journeys-2026-10-04.json",
+      "sha256": "aa3f5eaa2cf573d3269dfbaac6515eb000c38909ca1f7dbcdf05aedd9b5fb075",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "11d85ff0af5c55772f1abac83e4a2560509bb350",
+      "sourceManifestSha256": "55c484e3d186f69048f9e92a0e67c8fc9c5937b6d16ae8700449ad63f7d62e1a",
+      "anchors": [
+        "journeys",
+        "checks"
+      ]
+    },
+    "workflow": {
+      "path": "docs/testing/rust-native-workflow-2026-10-02.json",
+      "sha256": "2f7203a106efc4fafdab274e69d0e7fb6f08e82812402b048354247f5ac7feee",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "e91d25894b3eae8890344fa87ef5682557f87b1d",
+      "sourceManifestSha256": "7a25a3ca73a462c96198dd73842f591af8f7836c8ae8c004ee48c5590de71af4",
+      "anchors": [
+        "workflowCases",
+        "checks"
+      ]
+    },
+    "outcomes": {
+      "path": "docs/testing/rust-native-outcomes-2026-10-02.json",
+      "sha256": "d09a90492cc30e4270a65409ed76e228b82197ba44d47ea459a15cb661313ac3",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "2220401f7af1b280fa77a70a53e618cf045eca1f",
+      "sourceManifestSha256": "1287b4175d6d842dc4275263d7a328dfdb089c08b3c68ebbfaf834417027983b",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "workflow-supervision": {
+      "path": "docs/testing/rust-native-workflow-supervision-2026-10-03.json",
+      "sha256": "89fdc920b005650ceef39b0d3977c321ede9a20e61ece1359e8dc46d22a98f65",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "0998816b47cca668cfd272dc2303172055614e71",
+      "sourceManifestSha256": "5e526bda82f800b9617037a339c577991460f6d25352fc55becc7548c14ff56c",
+      "anchors": [
+        "workflowCases",
+        "checks"
+      ]
+    },
+    "collaboration": {
+      "path": "docs/testing/rust-native-collaboration-2026-10-03.json",
+      "sha256": "ecc5abfee5a3235e140fbed802779fa02fd04b2bdb0aba2f675ecfcba746313b",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "b761a795151aaa0f08eb32ddc50651c4452f622a",
+      "sourceManifestSha256": "d9f020fab4d43fdeba68efc7400c0b7998c5897996ddeaa0a9fb325bceafb78e",
+      "anchors": [
+        "nativeChecks",
+        "nativeInteraction",
+        "checks"
+      ]
+    },
+    "repository-work": {
+      "path": "docs/testing/rust-native-repository-work-2026-10-02.json",
+      "sha256": "613bcf799b0214d5defb1cdfb7ddb3fef59d7f18a37abed8ea021fffdd168a28",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "9bb0e726666e76d56d4e36085598741af7c6905a",
+      "sourceManifestSha256": "c7cd8fd15ab0ecdb1e3f6955e914c867a34a261cc188852f1513a1707a0b183a",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "repository": {
+      "path": "docs/testing/rust-native-repository-2026-10-03.json",
+      "sha256": "1de0895eb72f4e64b92557bd0ba473986bf1e7d573f0987b346fb52a6ec006ca",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "ef127917910d73809b9e9df47dea26bd15577431",
+      "sourceManifestSha256": "64b4bf46e5503d2cae221fd66af549954c3939e2509a7068851b7f0d268bac2c",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "target-service": {
+      "path": "docs/testing/rust-native-target-service-2026-10-03.json",
+      "sha256": "bb6a83ef59e23018fd2f63781a493c5743d87e9ae3a75b5e6ec7e2e02d02b1f9",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "cda50bbb2d472a2ba69be4cf7971bb163782747e",
+      "sourceManifestSha256": "2ec6d798902c72f21ef9f6a06e09a4b1f067e232e86e757652912d74d7c9eb0e",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "planning": {
+      "path": "docs/testing/rust-native-planning-2026-10-03.json",
+      "sha256": "2589cce828e5c931fd3b0c3a9011b3dbc1c86244e0bf6dcb202192711a9190bc",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "d0d860f6811457a4ed381f2814253770ef4b99ce",
+      "sourceManifestSha256": "aa7a9b8f9faf304b18427b94401c7052bd18723dfcfda7665c2e4b32c8d86c86",
+      "anchors": [
+        "nativeChecks",
+        "nativeInteraction",
+        "journeyScope",
+        "checks"
+      ]
+    },
+    "evidence": {
+      "path": "docs/testing/rust-native-evidence-2026-10-03.json",
+      "sha256": "bf6198473b99dc05b7650ef05ea8a66c8099e94c792a53162fba7c81fe5c709f",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "908552e289fc5dc11784a7fdb206046d0a71f9c8",
+      "sourceManifestSha256": "a16325f9c9f1786655efacc660caa2e0c68baa3179f0309bf62a381ba05fe229",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "teams": {
+      "path": "docs/testing/rust-native-teams-2026-10-02.json",
+      "sha256": "6cf9da7e4388668524f7edd57e31c8b0d6bf492763931a3814bdcef793ea114a",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "43861838b61d280354ec4871845e453b4c2558ad",
+      "sourceManifestSha256": "ea20a86e9f4103f2b7dd68dee839a97608f970c745fe84ac8bd2458042d9825d",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "workflow-inputs": {
+      "path": "docs/testing/rust-native-workflow-inputs-2026-10-03.json",
+      "sha256": "aae499018b3597b67a74a5432e762e6ae6163b1cc5d75a29bcdae236cd5a0aee",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "ad017a363e76bffafe93186f0165464e4febd67b",
+      "sourceManifestSha256": "a33eaba827a953721941b88ba2392fbfbafe7c1e17fe7be0aaeae5f098f749b6",
+      "anchors": [
+        "checks"
+      ]
+    },
+    "learning": {
+      "path": "docs/testing/rust-native-learning-2026-10-02.json",
+      "sha256": "e5e83804f2a556f51c948ade59ea26fc98f24749b71419de6e99e06f88229aec",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "68075be8866805e9eb8058d57f880dbf8257faee",
+      "sourceManifestSha256": "81161fc508d7f43df07929c760261f515b402cd3c47f6234ec2893362f0c5486",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "configuration": {
+      "path": "docs/testing/rust-native-configuration-2026-10-03.json",
+      "sha256": "9f9543ca4ca543b2172860b64330b2bbb4609570bab0b8aa048db3bb105cb2ff",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "06f8f24870d9618d5241168b1394a7d762e14f4b",
+      "sourceManifestSha256": "8e5574b27c0dc373961e2eae36bc8019ad7002ef164294b8da4c907ab1c14a58",
+      "anchors": [
+        "nativeInteraction",
+        "journeyScope",
+        "checks"
+      ]
+    },
+    "attempts": {
+      "path": "docs/testing/rust-native-attempts-2026-10-02.json",
+      "sha256": "e0c2628383db1f6cd43d94c90ad1fd400ff6ef64b2283a7f38e678c6ba394476",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "c5ebbb2e616cd09c50e3fb4c130a3362e11da4b6",
+      "sourceManifestSha256": "52ecdddef9bf10e6446a8c396778f788fd35a25692936081671d74dda2002c18",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "omp-rpc": {
+      "path": "docs/testing/rust-native-omp-rpc-2026-10-02.json",
+      "sha256": "69e7d9f2c91958bac6b24eef609ff2b94b42c6192850d35b6bb4c228d1072445",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "ad6f6f40251baf8ae1ccec06fe090f363cc754f1",
+      "sourceManifestSha256": "ae0ecdf11f2450ca35f134f3e895f4f322707d0bb22b5c12bcb2181a1894e887",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "provider-gateway": {
+      "path": "docs/testing/rust-native-provider-gateway-2026-10-02.json",
+      "sha256": "997cff4b241b9ee466e874f119bf253f163bb75eac8d7cd7d5ff18ca008ef486",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "854be93924292c4ac81af10c863c14f5d1bca6df",
+      "sourceManifestSha256": "30adb5bd261f1606a9e2198b65f09de64e88f42e873d4f97f4a074bd33a671c6",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "host": {
+      "path": "docs/testing/rust-native-host-2026-10-03.json",
+      "sha256": "e42973db733e7b17932f44f56dfe29f9651a8855af25b88f8a0f96f6c798084e",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "09c7cc7cb59ab3740f424b162fe5f5309946007d",
+      "sourceManifestSha256": "441d79adff087911fe03932f6583bb6670d8f15679df954a390161b46ecbef57",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "messages": {
+      "path": "docs/testing/rust-native-messages-2026-10-02.json",
+      "sha256": "4b2336d13064df37f2fdfc2f967db5d707f3e864fdcbf2357f56d7fe2ea68ae3",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "d787acb503420a6c7174efeff4a2b454fb150c23",
+      "sourceManifestSha256": "309e83b8f1b2542f1b75ce31f482ffd86e1e392d3ec8c629e5edf816bad22769",
+      "anchors": [
+        "behaviorReferences",
+        "acceptance",
+        "checks"
+      ]
+    },
+    "mail": {
+      "path": "docs/testing/rust-native-mail-2026-10-03.json",
+      "sha256": "ac4872a762e3110ffca3767850334db78a95c857ef051379f327d63809129fe3",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "db8fe6a9410f44cabc01a2088daa8fec18a1b393",
+      "sourceManifestSha256": "fe7c6536ceb41a5ea5bac2185e6e2047dc0ada01ffb8fdc3aed9a7c8f50aace2",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "host-protocol": {
+      "path": "docs/testing/rust-native-host-protocol-2026-10-03.json",
+      "sha256": "6c8ad0f0925018a4b27ef56251688c817835c941b7f26ffdb123c85a3ecfc34b",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "5a3950437e7e0fc8910bbec20acfb7cf35f2d035",
+      "sourceManifestSha256": "24b9cfb3cb4544cd2bff327dbfb334504962abfeed20285acc37374a1a872677",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "terminal": {
+      "path": "docs/testing/rust-native-terminal-2026-10-04.json",
+      "sha256": "0e0a444d9279fca4a3a2a8bf6eb7c9843bb6e643a537573cf18343e915e15200",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "b761a795151aaa0f08eb32ddc50651c4452f622a",
+      "sourceManifestSha256": null,
+      "anchors": []
+    },
+    "supervisor-lifecycle": {
+      "path": "docs/testing/rust-native-supervisor-lifecycle-2026-10-03.json",
+      "sha256": "fc8a4fd50a18bf1b09d60b67855e3a80ce361bf702f551b3fdb8f46439a416ec",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "0e5ef758b2625d9f34c55cc8c383f0607233d29d",
+      "sourceManifestSha256": "b9ef3f2f82db5a0c932a55e4e1dc63c346a4a04459d226f0eb697da0a3297cc7",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "repository-shutdown": {
+      "path": "docs/testing/rust-native-repository-shutdown-2026-10-03.json",
+      "sha256": "2db0690b87956eb399c07535bde3667de73117d34ad6fdc0917c7161d7f429bd",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "d333c022ae3839f6daf185d26ffba2cd867c284a",
+      "sourceManifestSha256": "510eb5e794c835ed420091fa83bf887419924793d26adc4abeb9165f0b47f40f",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "containers": {
+      "path": "docs/testing/rust-native-containers-2026-10-03.json",
+      "sha256": "ca147c0c44697868b4f4d6f3cbf0de1ba552fdb2cde4774389c33bc93b9ac307",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "a2185fa5f09453d9d1ae547add51db51d8993b4a",
+      "sourceManifestSha256": "8d7e3d3ffdf34770ca230bf846ae5d49795f7678b3fae8612061c9c5f9eef835",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "retained-work": {
+      "path": "docs/testing/rust-native-retained-work-2026-10-03.json",
+      "sha256": "7f415c74c1339dd2c55b7fd02124a1e52037980eaa0ee298be725000ca506226",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "353e82db9eebe5065561617732cadeffb9c2355a",
+      "sourceManifestSha256": "8a834b9c90e4bc7aaebbb66cab74dbd68d3faa18b3f2db30a1f66b32cb7185c7",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "processes": {
+      "path": "docs/testing/rust-native-processes-2026-10-02.json",
+      "sha256": "7071c8953512d26084bba7cb6c3034b03a2b3c7395fec5b88c2ddf606c512b9c",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "4fc2c08f4875951f9a19419d46d5b0443bd31b79",
+      "sourceManifestSha256": "60154fc504e6b19fb28df5079924f7c4a1c649e90f6b24aaa72afe5ecadbcd7f",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "upgrades": {
+      "path": "docs/testing/rust-native-upgrades-2026-10-03.json",
+      "sha256": "ca7a12885efca087bba2c966dc3019dabb9ae2f7951163bebb125aab512b61cd",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": null,
+      "sourceManifestSha256": null,
+      "anchors": [
+        "checks"
+      ]
+    },
+    "scheduling": {
+      "path": "docs/testing/rust-native-scheduling-2026-10-02.json",
+      "sha256": "fad84de2c5e9e90ae61bcbc3629599a3c3bd3d960583ebc549ed9fb414710858",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "953dadcccca44695675d8c169e5be38324fa4a00",
+      "sourceManifestSha256": "98b0e58e2fe8019cd864109c221674bf9cd65fdafbea3d567554b2e5922933bd",
+      "anchors": [
+        "behaviorReferences",
+        "acceptance",
+        "checks"
+      ]
+    },
+    "publication-service": {
+      "path": "docs/testing/rust-native-publication-service-2026-10-03.json",
+      "sha256": "a43ecd278ad87dd94cb4db2bbe30428256f273489fce0b8843a300dc8f5c41cd",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "41dd02942a4c62bb8a1af96b292a0369607d2908",
+      "sourceManifestSha256": "cc4b1d259f35157465aea6ad0cc1aaaf93b8c6319e68311839135c234bf2451a",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "target-refresh": {
+      "path": "docs/testing/rust-native-target-refresh-2026-10-03.json",
+      "sha256": "a7cef46cf7219ed4bfc8b83310dc93935c4330e3d0ab1efd01e90b0f8f2044c6",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "035286052b7a688332f716ae9ed2cd30279ab96d",
+      "sourceManifestSha256": "486911a7e9606120016cac0d80116458d9e3ca955ad7bfa74e3c5a2d547bb160",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "conflict-continuation": {
+      "path": "docs/testing/rust-native-conflict-continuation-2026-10-03.json",
+      "sha256": "eda8744c1e1076194149f0a6762e84e2750a8d156d3b8beed8a1979238f3824c",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "22be6223da8dc0fd68c8445e20163a47d59eb2d1",
+      "sourceManifestSha256": "71bd8e0c3203b7763a007ede585c6199dfac21b3f12804dce63c17a20cc30c71",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "conflict-promotion": {
+      "path": "docs/testing/rust-native-conflict-promotion-2026-10-03.json",
+      "sha256": "20cab7bf2bad8d99920c3b45594209eba1970d8fa0f95faa0dec9e332ad8fe9e",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "92ec762efa81c3f59953c5d5daefc100bd12bd9d",
+      "sourceManifestSha256": "d3a3da8af010c092f07e092c6865ecb6ea30c12ec3d29d33bbf963cb9e024738",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "lifecycle": {
+      "path": "docs/testing/rust-native-lifecycle-2026-10-04.json",
+      "sha256": "840611df7840b0b0430ac2a0e26821735348464867802b4e2fe63faa78d91436",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "e3aac2d0ba5573d4607c31a83248d69c02a7ad27",
+      "sourceManifestSha256": "0d0e45bcfe9b443d1a54c4e8e3c1a4ac9aa2a9b84d421aa1a25811b465047f16",
+      "anchors": []
+    },
+    "publication-git": {
+      "path": "docs/testing/rust-native-publication-git-2026-10-03.json",
+      "sha256": "33e9e8b6ea275689c1edbb496690b68b8b51e678230a68b9849469903149a4f7",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "11a91218ab3b1949817b62e551870adbb53e7fa2",
+      "sourceManifestSha256": "e0bbd121e1d9fb52fff1dbf26b3668a40b670277d9d89777521b9d2f035c6cbc",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "provider-clients": {
+      "path": "docs/testing/rust-native-provider-clients-2026-10-03.json",
+      "sha256": "888823f5721417edad81ab27603978fd87d968ca1e58967d723664d664f439b7",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "1ceab4792510883a8841da8034ee154f664ace22",
+      "sourceManifestSha256": "68c7556db2294beb1d2d0d1695e8c0336e9964226ef9a3cd3c08143c4ef46d57",
+      "anchors": [
+        "behaviorReferences",
+        "checks"
+      ]
+    },
+    "terminal-accessibility": {
+      "path": "docs/testing/rust-native-terminal-accessibility-2026-10-04.json",
+      "sha256": "da6c0a466ec3226ff958bc13617279bbd34a95d90bae40d1161c92939792c776",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "83a8389debdc40ae44063fb49c14a0e234cbd44d",
+      "sourceManifestSha256": null,
+      "anchors": [
+        "load",
+        "acceptance"
+      ]
+    },
+    "upgrades-operations": {
+      "path": "docs/testing/rust-native-upgrades-operations-2026-10-04.json",
+      "sha256": "f2910c2b3a32c2f462a983abfb6988af0ffd7525497e1a20bb4edb16bf8a81bf",
+      "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221",
+      "baselineCommit": "431c19a1d6f84e959caaea36f5853fa941dbe9d1",
+      "sourceManifestSha256": "022f7b1d6718887a11391ec26c29687359b21f99d4f913074b300f692e72f4f9",
+      "anchors": [
+        "checks"
+      ]
+    }
+  },
+  "cases": [
+    {
+      "id": "INT-01",
+      "title": "Site-aware upsert",
+      "expected": "Two tasks remain distinct; only that site's imported fields change; local notes, criteria and history survive.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Site and issue IDs remain distinct",
+        "imported fields update independently of local refinements and history."
+      ],
+      "evidence": [
+        "providers",
+        "input-boundaries",
+        "jira-delivery"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "INT-02",
+      "title": "Board and queue order",
+      "expected": "Board follows imported rank; execution order follows local priority.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Saved-filter order is retained",
+        "local queue order has separate transactional control",
+        "Jira outage preserves last complete snapshot."
+      ],
+      "evidence": [
+        "providers",
+        "daemon-scheduling",
+        "journeys"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "INT-03",
+      "title": "Optional Explore and Grill",
+      "expected": "Direct Run is allowed; Explore/Grill persist notes without launching coding work.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Direct coding admission is supported",
+        "Explore and Grill run a coordinator and save proposals without coding work",
+        "native accept/discard controls persist decisions."
+      ],
+      "evidence": [
+        "workflow",
+        "outcomes",
+        "workflow-supervision",
+        "collaboration"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "INT-04",
+      "title": "Accepted brief versions",
+      "expected": "Queued and active snapshots retain their versions; changed scope requires an explicit decision before affected work continues.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Captured brief versions survive changes",
+        "active adoption requires a reason",
+        "stale proposal acceptance fails",
+        "obsolete insertion is rejected."
+      ],
+      "evidence": [
+        "workflow",
+        "collaboration"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "INT-05",
+      "title": "Conflicting Jira refresh",
+      "expected": "Affected work pauses for a decision; neither side silently overwrites the other.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Conflicting source requirements preserve accepted local scope and hold active work",
+        "repeated conflict observation does not repeatedly clean up or repair."
+      ],
+      "evidence": [
+        "jira-delivery",
+        "workflow-supervision"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "INT-06",
+      "title": "Explicit repository scope",
+      "expected": "One target is required per coding ticket; mappings never change silently; no cross-repository dispatch.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "One captured target governs admission and worktree preparation",
+        "retired target prevents queueing until explicit active replacement."
+      ],
+      "evidence": [
+        "repository-work",
+        "repository",
+        "target-service",
+        "planning"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "INT-07",
+      "title": "Research-only outcome",
+      "expected": "Produce the requested artifact and limitations; no fabricated commit, coding check or PR is required.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Pinned research checks real citations and artifacts",
+        "verified/rejected/superseded history survives reopen",
+        "completion requires stopped ownership and no coding records."
+      ],
+      "evidence": [
+        "evidence",
+        "workflow-supervision",
+        "journeys"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "INT-08",
+      "title": "No automatic backlog execution",
+      "expected": "Only the selected item starts; duplicate requests do not create duplicate active runs.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Durable queue admission is idempotent",
+        "only selected plans are queued",
+        "no agents appear when runner capability is unavailable."
+      ],
+      "evidence": [
+        "daemon-scheduling",
+        "workflow",
+        "planning"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "ROL-01",
+      "title": "Minimal versus complex team",
+      "expected": "Small work uses a small team; complex work admits justified specialists within scheduler limits; neither launches the whole catalog.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Selected teams require validated proposals and respect three-specialist ceiling",
+        "disabled or unjustified selections fail before admission."
+      ],
+      "evidence": [
+        "teams",
+        "workflow-inputs",
+        "workflow-supervision"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "ROL-02",
+      "title": "Custom role lifecycle",
+      "expected": "Validation is enforced; a valid inserted role gets a real assignment at a safe point; disabled roles cannot receive new work.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Role creation/edit/disable uses revisions",
+        "native edits and conflicts preserve drafts",
+        "insertion waits for a safe point and creates explicit replacement identities."
+      ],
+      "evidence": [
+        "learning",
+        "teams",
+        "workflow-supervision",
+        "configuration",
+        "collaboration"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "ROL-03",
+      "title": "Immutable definition snapshot",
+      "expected": "Existing assignment keeps its definition/model revision; only a new explicit assignment uses the update.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Role/model definitions are copied into immutable assignment snapshots",
+        "later role versions affect only explicitly new assignments."
+      ],
+      "evidence": [
+        "attempts",
+        "learning",
+        "workflow-inputs"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "ROL-04",
+      "title": "Project constraints",
+      "expected": "Each assignment includes its own project constraints; reusable defaults remain unchanged.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Each host profile receives captured project instructions and role constraints",
+        "project guidance approval does not rewrite reusable role defaults."
+      ],
+      "evidence": [
+        "workflow-inputs",
+        "repository",
+        "learning"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "ROL-05",
+      "title": "Reviewer independence",
+      "expected": "Self-review cannot satisfy the gate; a separate non-implementer assignment can, even with the same model.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Reviewer assignment/session must be independent of every implementing author",
+        "readiness requires current independent review."
+      ],
+      "evidence": [
+        "evidence",
+        "workflow-supervision"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "ROL-06",
+      "title": "Reporter versus writer",
+      "expected": "Reporter uses bounded Jira permissions; writer edits only its authorized repository scope and respects the single-writer lease.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Reporter authority gates controller-derived Jira writes",
+        "repository mutation needs an owned scope and single-writer lease."
+      ],
+      "evidence": [
+        "jira-delivery",
+        "repository",
+        "workflow-supervision"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "ROL-07",
+      "title": "Invalid selection proposal",
+      "expected": "Validate the proposal; reject invalid assignments before any process or privileged tool starts.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Unknown/disabled/duplicate/infrastructure selections and unavailable roles are refused before privileged launch",
+        "rejection preserves the existing team."
+      ],
+      "evidence": [
+        "teams",
+        "workflow-inputs",
+        "workflow-supervision"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "RTE-01",
+      "title": "Complete catalog binding matrix",
+      "expected": "All 950 bindings preserve provider, full model ID and role identity; dispatch eligibility is a separate capability/policy decision.",
+      "coverage": "partial",
+      "assertionsCovered": [
+        "Representative declared OpenAI/Anthropic/Gemini identities and slash-bearing selectors work with actual OMP",
+        "the receipt explicitly excludes the complete catalog matrix."
+      ],
+      "evidence": [
+        "omp-rpc"
+      ],
+      "gaps": [
+        "G01"
+      ]
+    },
+    {
+      "id": "RTE-02",
+      "title": "Heterogeneous and rotated teams",
+      "expected": "Every launch receives its pinned model; role selection is independent of assignment; no coordinator model leaks into specialists.",
+      "coverage": "partial",
+      "assertionsCovered": [
+        "Pinned per-assignment profiles and actual OpenAI/Anthropic OMP requests are checked",
+        "compatible fallback is a separate persisted attempt."
+      ],
+      "evidence": [
+        "omp-rpc",
+        "workflow-inputs",
+        "daemon-scheduling"
+      ],
+      "gaps": [
+        "G02"
+      ]
+    },
+    {
+      "id": "RTE-03",
+      "title": "Slash-bearing IDs and API dispatch",
+      "expected": "Split at the first slash only; use captured API family rather than guessing from provider name.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Full IDs are split only at first slash",
+        "captured API families drive all three protocol adapters",
+        "wire identity is verified."
+      ],
+      "evidence": [
+        "omp-rpc",
+        "provider-gateway"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "RTE-04",
+      "title": "Missing, stale and ambiguous selectors",
+      "expected": "Reject ambiguity; preserve the original snapshot; stale/missing catalog evidence is visible; no guessed replacement.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Missing, duplicated, ambiguous and incompatible catalog entries are rejected",
+        "immutable requested identity is retained."
+      ],
+      "evidence": [
+        "omp-rpc",
+        "workflow-inputs"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "RTE-05",
+      "title": "Default model resolution",
+      "expected": "Resolve and persist one explicit selector before launch; restart cannot silently change it.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Default resolution persists an explicit selector",
+        "restored sessions and reopened attempts preserve captured identity."
+      ],
+      "evidence": [
+        "omp-rpc",
+        "attempts",
+        "daemon-scheduling"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "RTE-06",
+      "title": "Effort validation",
+      "expected": "Resolve default explicitly; reject unsupported medium for low/high-only models; do not send reasoning settings to a no-reasoning model.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Allowed effort levels are validated",
+        "default/off handling is explicit",
+        "wrong wire effort is refused before provider effects."
+      ],
+      "evidence": [
+        "omp-rpc",
+        "provider-gateway"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "RTE-07",
+      "title": "Capabilities and context limits",
+      "expected": "No name-based capability inference; unknown stays unknown; preflight blocks or records an explicit safe adaptation before dispatch.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Unknown capabilities remain unknown",
+        "tools/input compatibility and context budgets are checked before dispatch",
+        "compression is bounded and accounted."
+      ],
+      "evidence": [
+        "omp-rpc",
+        "provider-gateway"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "RTE-08",
+      "title": "Runtime identity mismatch",
+      "expected": "Mark mismatch and stop affected work before side effects; never report the requested identity as observed.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Observed runner/wire model or effort mismatch stops accepted input",
+        "requested identity is not substituted for an observation."
+      ],
+      "evidence": [
+        "omp-rpc",
+        "provider-gateway",
+        "host"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "RTE-09",
+      "title": "Explicit fallback",
+      "expected": "Only a compatible policy-approved fallback is used; create a new recorded attempt; otherwise escalate; no silent model swap.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Actual configured fallback, no-fallback and nonretryable variants use real OMP/Mail",
+        "attempts preserve prior identity and explicit fallback lineage."
+      ],
+      "evidence": [
+        "daemon-scheduling",
+        "attempts"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "RTE-10",
+      "title": "Advisory router boundaries",
+      "expected": "Treat it as a proposal; hard constraints still hold; advisory failure leaves deterministic configured selection available.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Proposal validation preserves deterministic configured selection and hard role/model/purpose constraints."
+      ],
+      "evidence": [
+        "omp-rpc",
+        "teams",
+        "workflow-inputs"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "RTE-11",
+      "title": "Secondary OMP model paths",
+      "expected": "Inventory and pin or disable secondary model calls; no unrecorded hidden model/provider dispatch.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Private OMP configuration pins or disables secondary model paths",
+        "gateway rejects unapproved identity and records observed usage."
+      ],
+      "evidence": [
+        "omp-rpc",
+        "workflow-inputs",
+        "provider-gateway"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "RTE-12",
+      "title": "Provider error taxonomy",
+      "expected": "Classify errors, bound retries and backoff, preserve uncertainty; prompt completion alone cannot prove a useful result.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "401/403/429, timeouts, disconnects and malformed/empty responses are classified",
+        "actual OMP retry/fallback exhaustion reaches bounded attention."
+      ],
+      "evidence": [
+        "provider-gateway",
+        "omp-rpc",
+        "daemon-scheduling"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "MSG-01",
+      "title": "Four-hop external round trip",
+      "expected": "Four addressed messages and replies originate in the assigned processes; external receipts and recipient events agree.",
+      "coverage": "partial",
+      "assertionsCovered": [
+        "Durable addressed records and one actual OMP/Rust Mail peer handoff are proved",
+        "no four-hop native round-trip receipt is present."
+      ],
+      "evidence": [
+        "messages",
+        "mail",
+        "daemon-scheduling"
+      ],
+      "gaps": [
+        "G03"
+      ]
+    },
+    {
+      "id": "MSG-02",
+      "title": "Passive observer",
+      "expected": "Reading never consumes delivery; readers can reconnect and reconstruct history.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Passive event/pane consumers reconnect using independent cursors",
+        "repeated views do not consume Mail receipt/application or mutate terminal input."
+      ],
+      "evidence": [
+        "messages",
+        "mail",
+        "host-protocol",
+        "terminal",
+        "collaboration"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "MSG-03",
+      "title": "Duplicate delivery",
+      "expected": "Transport may repeat; domain handling and resulting effects occur once; duplicates remain auditable.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Stable send/receive identities deduplicate delivery through controller restart",
+        "durable acceptance precedes acknowledgement."
+      ],
+      "evidence": [
+        "mail",
+        "workflow-supervision"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "MSG-04",
+      "title": "Reordering and causality",
+      "expected": "Correlate by run/assignment/attempt and message IDs; do not advance an unrelated or replaced assignment.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Run/assignment/attempt correlation rejects stale results and wrong causal replies",
+        "replay cannot advance replaced ownership."
+      ],
+      "evidence": [
+        "messages",
+        "mail",
+        "host"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "MSG-05",
+      "title": "Lost send acknowledgement",
+      "expected": "Reconcile by stable identity before retry; one logical send survives; unknown delivery stays unknown.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Lost send acknowledgement is reconciled by stable identity",
+        "exact readback is required and unknown/expired outcomes do not trigger blind resend."
+      ],
+      "evidence": [
+        "mail",
+        "workflow-supervision"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "MSG-06",
+      "title": "Receive crash windows",
+      "expected": "Durable inbox/application records support recovery; no loss or repeated side effect at any window.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Five actual Mail receive interruption windows cover durable inbox, application and acknowledgement recovery without duplicate domain effects."
+      ],
+      "evidence": [
+        "mail"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "MSG-07",
+      "title": "Mailbox restart and expiration",
+      "expected": "Reconnect with bounded backoff; retention/idempotency limits are visible; expiry does not mean delivered or task complete.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Unavailable/restarted Mail holds admission, reconnects with bounds and retains pending work",
+        "expiry never becomes delivery proof."
+      ],
+      "evidence": [
+        "mail",
+        "daemon-scheduling"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "MSG-08",
+      "title": "Routing and isolation",
+      "expected": "Reject or quarantine unauthorized routing; never wake the wrong assignment.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Current immutable host authority and sender/run/attempt routing reject forged or cross-run actions before effects."
+      ],
+      "evidence": [
+        "mail",
+        "workflow-supervision"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "MSG-09",
+      "title": "Polling and payload boundaries",
+      "expected": "Respect bounded poll/backoff policy; preserve pending messages; reject invalid payloads; no busy loop.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Singleflight polling, round-robin bounds, 429/backoff and payload validation retain pending work without unbounded polls."
+      ],
+      "evidence": [
+        "mail",
+        "host-protocol"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "LIF-01",
+      "title": "Process independence",
+      "expected": "Distinct OS processes and sessions remain observable; surviving agents continue or wait according to dependency state.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Independent host/runner OS identities remain observable",
+        "assignment exits consume only that assignment repair budget while other identities remain owned."
+      ],
+      "evidence": [
+        "supervisor-lifecycle",
+        "workflow-supervision",
+        "daemon-scheduling"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "LIF-02",
+      "title": "Specialist replacement",
+      "expected": "Resume a usable session or create a new attempt with saved handoff; preserve work; reject stale prior ownership/results.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Actual OMP usable-session restoration and wrong/empty session fallback are tested",
+        "replacements preserve handoff and reject old owner/results."
+      ],
+      "evidence": [
+        "host",
+        "supervisor-lifecycle",
+        "daemon-scheduling"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "LIF-03",
+      "title": "Coordinator restart",
+      "expected": "Rebuild state from durable records; reconcile running assignments and pending messages before dispatch.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Durable message dispatch receipts and current host identities reconcile after controller death before a repeated effect."
+      ],
+      "evidence": [
+        "workflow-supervision",
+        "mail",
+        "daemon-scheduling"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "LIF-04",
+      "title": "Workbench restart",
+      "expected": "Identify owned surviving processes; reconcile leases and unknown actions; never infer process death from lost connection.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Stable-origin SIGKILL reattaches exact live hosts/OMP",
+        "changed origin and uncertain ownership stop or hold",
+        "no lost-connection death inference."
+      ],
+      "evidence": [
+        "supervisor-lifecycle",
+        "daemon-scheduling"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "LIF-05",
+      "title": "Pause with active child tool",
+      "expected": "Show pausing until agent and child activity stop; block new work; preserve artifact and checkpoint.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Pause/Close drain a real active Docker check and actual Git work",
+        "pausing keeps dispatch fenced until physical cleanup is established."
+      ],
+      "evidence": [
+        "workflow-supervision",
+        "repository-shutdown",
+        "containers"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "LIF-06",
+      "title": "Resume and cancellation",
+      "expected": "Resume uses durable history; cancel stops further dispatch and pending side effects while preserving files, evidence and PR identity.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Resume restores sessions/history",
+        "cancellation fences dispatch and preserves work/evidence",
+        "continuation links exactly one successor with retained branch and reopened history."
+      ],
+      "evidence": [
+        "daemon-scheduling",
+        "retained-work",
+        "journeys"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "LIF-07",
+      "title": "PID reuse and competing owners",
+      "expected": "Use durable identity plus lease/process-start evidence; never signal an unrelated PID; only one owner acts.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Checked identity/start/lease records reject competing owners and foreign PIDs",
+        "only verified owned process/container resources are signaled."
+      ],
+      "evidence": [
+        "processes",
+        "supervisor-lifecycle",
+        "containers"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "LIF-08",
+      "title": "Recovery bounds",
+      "expected": "Persist the counter across restart; third automatic cycle is blocked; uncertain ownership/effects escalate immediately.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Two automatic repairs are durable and third is held",
+        "runtime exits exhaust assignment budget",
+        "unknown effects/ownership hold immediately."
+      ],
+      "evidence": [
+        "attempts",
+        "workflow-supervision",
+        "daemon-scheduling"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "LIF-09",
+      "title": "Partial and corrupt state",
+      "expected": "No fabricated completed state or destructive reset; surface recoverable error; preserve last known durable evidence.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Corrupt journals and failed writes preserve last durable evidence",
+        "historical migrations roll back transactionally",
+        "unsafe legacy ownership remains recoverable hold."
+      ],
+      "evidence": [
+        "host-protocol",
+        "workflow-supervision",
+        "upgrades"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "QUE-01",
+      "title": "Concurrency ceilings",
+      "expected": "At most one coding ticket and three specialists execute; coordinator is counted separately; others remain queued.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "One coding slot and three specialists are separate from coordinator",
+        "competing launches remain queued and actual daemon admission is serialized."
+      ],
+      "evidence": [
+        "teams",
+        "scheduling",
+        "daemon-scheduling"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "QUE-02",
+      "title": "Single writer lease",
+      "expected": "Serialize writers; read/review only a stable published revision; rejected writer gets no mutation permission.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Single writer governs edits",
+        "checks/review bind stable committed candidate",
+        "rejected writer lacks mutation permission."
+      ],
+      "evidence": [
+        "repository",
+        "evidence",
+        "workflow-supervision"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "QUE-03",
+      "title": "Independent next ticket",
+      "expected": "Next independent ticket starts only at accepted readiness; PR creation or idle terminal alone cannot release the slot.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Current readiness releases independent work",
+        "confirmed regression re-holds it",
+        "PR creation and terminal quiet do not release slot."
+      ],
+      "evidence": [
+        "daemon-scheduling",
+        "publication-service"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "QUE-04",
+      "title": "Dependent ticket",
+      "expected": "Dependent work starts only after verified merge; neither close nor local branch presence substitutes for merge.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Provider-observed merged dependency also requires actual local Git ancestry",
+        "closed-unmerged or local branch presence does not admit it."
+      ],
+      "evidence": [
+        "daemon-scheduling",
+        "target-service"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "QUE-05",
+      "title": "Repeated controls and queue restart",
+      "expected": "Operations are transactional and idempotent; retain valid order without duplicate active runs.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Concurrent/replayed controls and restart preserve unique order",
+        "native reorder/remove/stale revision handling retains durable plans."
+      ],
+      "evidence": [
+        "scheduling",
+        "daemon-scheduling",
+        "planning"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "REP-01",
+      "title": "Isolated repository setup",
+      "expected": "Create a separate owned branch/worktree; leave original files, index, HEAD and untracked files unchanged.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Owned worktrees/branches isolate real Git work",
+        "original tracked/untracked/index/HEAD state remains unchanged through continuation."
+      ],
+      "evidence": [
+        "repository",
+        "retained-work",
+        "journeys"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "REP-02",
+      "title": "Continue existing work",
+      "expected": "Continue only explicitly selected, verified owned work; uncertainty requires operator decision.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Explicit continuation verifies checked owned branch/worktree and provider PR identity",
+        "uncertain/moved/foreign/closed state holds rather than adopts."
+      ],
+      "evidence": [
+        "retained-work",
+        "target-service",
+        "journeys"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "REP-03",
+      "title": "Interrupted edit or commit",
+      "expected": "Retain partial work; inspect repository state and commit identity before repeating; never create duplicate logical commits blindly.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Real interrupted edits/commits inspect captured hashes and Git markers",
+        "durable receipt replay does not create duplicate commits."
+      ],
+      "evidence": [
+        "repository",
+        "evidence",
+        "retained-work"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "REP-04",
+      "title": "Base branch drift",
+      "expected": "Invalidate affected evidence; refresh only owned work per project policy; revalidate new revision or escalate uncertain scope.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Actual target rebase invalidates prior evidence",
+        "isolated conflict work honors scope/instructions",
+        "reasoned superseding retry retains history/workspaces."
+      ],
+      "evidence": [
+        "target-refresh",
+        "conflict-continuation",
+        "conflict-promotion",
+        "journeys"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "REP-05",
+      "title": "Local output boundaries",
+      "expected": "Reject writes outside the owned scope; return a concrete blocked action.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Traversal/symlink/hardlink/special-file escapes are refused",
+        "scope and expected hash govern edits",
+        "Docker check root is constrained."
+      ],
+      "evidence": [
+        "repository",
+        "containers"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "REP-06",
+      "title": "Real local checks on scripted patches",
+      "expected": "Run actual repository checks; capture exit status/output and tested revision; do not substitute scripted success claims.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Real Docker commands yield passing/nonzero/timeout/interrupted output bound to source revision",
+        "scripted messages cannot substitute for results."
+      ],
+      "evidence": [
+        "evidence",
+        "workflow-supervision"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "EVD-01",
+      "title": "Complete coding evidence",
+      "expected": "Ready for review only when every required condition has current evidence.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Current candidate, criteria, required checks and independent review jointly gate readiness",
+        "all evidence binds head/base/requirements/policy."
+      ],
+      "evidence": [
+        "evidence",
+        "workflow-supervision",
+        "publication-service"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "EVD-02",
+      "title": "False completion signals",
+      "expected": "None substitutes for required check/review evidence; empty or missing results remain incomplete.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Quiet/zero-output/completed prompts are not coding readiness",
+        "absent local checks remain incomplete even when a PR and hosted success exist."
+      ],
+      "evidence": [
+        "evidence",
+        "host",
+        "journeys"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "EVD-03",
+      "title": "Failed, skipped and unavailable checks",
+      "expected": "Only an actual pass satisfies a required check; distinguish states in evidence/UI.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Real failed/interrupted checks and hosted skipped required step remain distinct",
+        "missing/incomplete and unavailable observations are not passes."
+      ],
+      "evidence": [
+        "evidence",
+        "journeys",
+        "lifecycle"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "EVD-04",
+      "title": "Revision mismatch",
+      "expected": "Invalidate affected coverage/check/review evidence; rework cannot inherit stale approval.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Head/base/criteria/instruction/check-policy changes invalidate affected evidence",
+        "stale prior review is visible and cannot be inherited."
+      ],
+      "evidence": [
+        "evidence",
+        "target-refresh",
+        "lifecycle"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "EVD-05",
+      "title": "Review findings and repair",
+      "expected": "Route bounded repair; require fresh relevant checks and independent review before readiness.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Blocking review and failed checks hold readiness",
+        "rework creates new candidate, requires fresh checks/review, and is bounded by repair limits."
+      ],
+      "evidence": [
+        "evidence",
+        "workflow-supervision",
+        "publication-service"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "EVD-06",
+      "title": "Forged or corrupt evidence",
+      "expected": "Reject mismatched provenance; agents cannot waive the gate through message content.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Artifact hashes, author provenance, stopped ownership and candidate identity reject forged/self-reviewed/stale evidence."
+      ],
+      "evidence": [
+        "evidence",
+        "repository"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "EVD-07",
+      "title": "Hosted check regression",
+      "expected": "Revoke readiness immediately; old success cannot restore it; do not auto-resume agents.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Current hosted regression latches readiness false",
+        "stale success cannot restore it",
+        "feedback observation does not automatically resume agents."
+      ],
+      "evidence": [
+        "publication-service",
+        "daemon-scheduling",
+        "journeys"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "EVD-08",
+      "title": "Honest research evidence",
+      "expected": "Block its outcome criteria without inventing coding evidence; verified artifacts complete only the research outcome.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Actual pinned citations and source hashes reject missing/bad research",
+        "corrected supersession completes only research after stop, with read-only history."
+      ],
+      "evidence": [
+        "evidence",
+        "workflow-supervision",
+        "journeys"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "DEL-01",
+      "title": "Allowed Jira updates",
+      "expected": "Queue status/comments/evidence links using reporter authority; description/criteria rewrites require explicit operator instruction.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Only bounded reporter/controller-derived status, comment and evidence updates are authorized",
+        "source requirements cannot be silently rewritten."
+      ],
+      "evidence": [
+        "jira-delivery",
+        "workflow-supervision"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "DEL-02",
+      "title": "Jira outage and recovery",
+      "expected": "Continue accepted work; persist pending updates visibly; reconcile/retry without duplicate comments or lost order.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Accepted work and last complete intake survive outage",
+        "pending ordered delivery persists and reconciles with idempotency identities."
+      ],
+      "evidence": [
+        "jira-delivery",
+        "providers",
+        "journeys"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "DEL-03",
+      "title": "Uncertain external writes",
+      "expected": "Reconcile existing objects; retry only when non-application is established; unknown remains attention-required, including inconclusive empty lookup.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Lost write acknowledgements/SIGKILL reconcile existing/absent/unknown using markers and identities",
+        "inconclusive empty lookup never permits blind retry."
+      ],
+      "evidence": [
+        "jira-delivery",
+        "publication-service"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "DEL-04",
+      "title": "PR content and identity",
+      "expected": "Correct target/head/title/body and evidence links; reuse same PR on rework; never create a second PR blindly.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Actual Git head/lease and scripted PR identity/content are checked",
+        "validated feedback/cancel successor republishes to same PR with fresh evidence."
+      ],
+      "evidence": [
+        "publication-service",
+        "publication-git"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "DEL-05",
+      "title": "Human review and merge",
+      "expected": "No automatic merge; feedback remains visible until explicit Resume; dependent release needs verified merge.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Feedback/merge/readiness are independent",
+        "manual Resume authorizes rework",
+        "only verified observed merge releases dependency",
+        "no merge tool exists."
+      ],
+      "evidence": [
+        "publication-service",
+        "daemon-scheduling",
+        "journeys"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "DEL-06",
+      "title": "Conflicting and delayed provider events",
+      "expected": "Apply events idempotently by resource revision; do not regress known state or erase local refinements.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Resource revisions reject old/duplicate observations through restart",
+        "partial provider reads retain prior confirmed data and local refinements."
+      ],
+      "evidence": [
+        "providers",
+        "jira-delivery",
+        "publication-service"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "DEL-07",
+      "title": "Provider permissions and partial failure",
+      "expected": "Preserve confirmed earlier outcomes; report exact blocked step; don't claim PR/Jira success or undo unrelated work.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Permission/transient/malformed responses retain confirmed prior steps and expose blocked/unknown step without false successful writes."
+      ],
+      "evidence": [
+        "provider-clients",
+        "jira-delivery",
+        "publication-service"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "UI-01",
+      "title": "Three separate status dimensions",
+      "expected": "Show Jira status, workflow and agent activity independently; planned assignments never look running.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Native views distinguish imported Jira state, queued/workflow state and observed attempts",
+        "unavailable/queued fixtures show no executing agents."
+      ],
+      "evidence": [
+        "planning",
+        "collaboration",
+        "lifecycle",
+        "journeys"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "UI-02",
+      "title": "Steering lifecycle",
+      "expected": "Show stored/received/applied separately; route operator steering through the coordinator; retain history on reload.",
+      "coverage": "partial",
+      "assertionsCovered": [
+        "Native paused composer stores pending steering by keyboard",
+        "real daemon routes steering through coordinator",
+        "replies/page replay and stored history survive reconnect."
+      ],
+      "evidence": [
+        "messages",
+        "daemon-scheduling",
+        "collaboration"
+      ],
+      "gaps": [
+        "G06"
+      ]
+    },
+    {
+      "id": "UI-03",
+      "title": "Observe specialists",
+      "expected": "Show actual observed events, disconnection/staleness and assignment/attempt identity; no invented output.",
+      "coverage": "partial",
+      "assertionsCovered": [
+        "Read-only Ghostty renders actual tmux observation",
+        "attempt/session identity and reconnect cursors are retained",
+        "multiple passive readers leave live processes intact."
+      ],
+      "evidence": [
+        "host",
+        "terminal",
+        "terminal-accessibility",
+        "collaboration"
+      ],
+      "gaps": [
+        "G07"
+      ]
+    },
+    {
+      "id": "UI-04",
+      "title": "Insert and pause from UI",
+      "expected": "Show queued insertion and pausing honestly until confirmed; retain actions and state after reload.",
+      "coverage": "partial",
+      "assertionsCovered": [
+        "Native pending insertion/replay/adoption/restart and unavailable runner are tested",
+        "actual headless insertion waits for safe point and Pause drains tools."
+      ],
+      "evidence": [
+        "collaboration",
+        "workflow-supervision",
+        "lifecycle"
+      ],
+      "gaps": [
+        "G08"
+      ]
+    },
+    {
+      "id": "UI-05",
+      "title": "Disconnected and failed integration states",
+      "expected": "Expose actionable unavailable/pending/unknown states; don't show success counters for simulated or unavailable integrations.",
+      "coverage": "partial",
+      "assertionsCovered": [
+        "Native connection errors preserve drafts/saved snapshots",
+        "unavailable runner/usage, missing checks and provider outage remain distinct from success."
+      ],
+      "evidence": [
+        "configuration",
+        "collaboration",
+        "lifecycle",
+        "journeys"
+      ],
+      "gaps": [
+        "G07"
+      ]
+    },
+    {
+      "id": "UI-06",
+      "title": "Basic complete operator flow",
+      "expected": "Controls remain usable, validation is clear, save failures retain edits, reload preserves durable data.",
+      "coverage": "partial",
+      "assertionsCovered": [
+        "Native forms, narrow configuration/queue layouts, keyboard submissions, validation/write-failure drafts, reopen and saved history are covered in bounded tests."
+      ],
+      "evidence": [
+        "configuration",
+        "planning",
+        "collaboration",
+        "lifecycle",
+        "journeys",
+        "terminal-accessibility"
+      ],
+      "gaps": [
+        "G05"
+      ]
+    },
+    {
+      "id": "SEC-01",
+      "title": "Loopback and origin enforcement",
+      "expected": "Reject untrusted mutations; allow valid same-origin operation through documented local client rules.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Loopback native operator bearer/origin and separate host bearer are enforced",
+        "valid authenticated native client requests succeed."
+      ],
+      "evidence": [
+        "daemon-scheduling"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "SEC-02",
+      "title": "Secrets and environment isolation",
+      "expected": "No credential in UI, model prompts, logs or exported evidence; child environment is allowlisted.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Private allowlisted host/provider configuration, redacted errors and bounded hashed records prevent synthetic credential exposure",
+        "native Jira snapshot omits fixture token."
+      ],
+      "evidence": [
+        "repository",
+        "host",
+        "provider-gateway",
+        "journeys"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "SEC-03",
+      "title": "Untrusted ticket or message instructions",
+      "expected": "Control plane grants no new authority; simulated malicious tool requests are denied regardless of text.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Tool authority checks current assignment/purpose/scope independent of message text",
+        "forged routing and path escape fail before effects."
+      ],
+      "evidence": [
+        "workflow-supervision",
+        "repository",
+        "mail"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "SEC-04",
+      "title": "Network containment",
+      "expected": "Test aborts on egress or uncontrolled listener; only disposable loopback services can be reached.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "OS fixture guard permits selected loopback endpoints and denies external/other-loopback/child egress",
+        "check containers have no network."
+      ],
+      "evidence": [
+        "omp-rpc",
+        "daemon-scheduling",
+        "containers"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "SEC-05",
+      "title": "Destructive cleanup boundaries",
+      "expected": "Cleanup touches only verified test-owned processes, ports and paths; no user config or repository changes.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Exact checked ownership controls process/path/container cleanup",
+        "unknown/foreign resources hold",
+        "disposable restore leaves operator checkout unchanged."
+      ],
+      "evidence": [
+        "processes",
+        "containers",
+        "repository-shutdown",
+        "upgrades-operations"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "SEC-06",
+      "title": "No infrastructure or merge tools",
+      "expected": "Actions are absent or denied by initial scope; cannot be smuggled through a reporter or specialist.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Initial tools are purpose/capability constrained",
+        "infrastructure/deploy/merge operations are absent or refused",
+        "reporter cannot obtain writer authority."
+      ],
+      "evidence": [
+        "workflow-inputs",
+        "workflow-supervision",
+        "jira-delivery"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "LIM-01",
+      "title": "Active-time budget",
+      "expected": "Only active execution consumes the configured initial 60-minute budget; expiration requests safe pause; restart never resets usage.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Injected clock accounts active intervals across wait/restart",
+        "exhaustion safely stops owned work without consuming repair allowance."
+      ],
+      "evidence": [
+        "attempts",
+        "scheduling",
+        "workflow-supervision"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "LIM-02",
+      "title": "Cost provenance",
+      "expected": "Label actual/estimate/unavailable correctly; no fabricated zero cost or hard monetary guarantee without reliable accounting.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Actual/estimated/partial/unavailable usage retains provenance through restart",
+        "missing tokens stay null, with no fabricated zero or monetary guarantee."
+      ],
+      "evidence": [
+        "provider-gateway",
+        "daemon-scheduling",
+        "lifecycle"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "LIM-03",
+      "title": "Bounded failures and backpressure",
+      "expected": "Bound attempts, queue growth and retry rate; apply backpressure and surface attention without dropping accepted work.",
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": [
+        "Polling/payload/stream backpressure and provider retry/fallback limits retain accepted durable backlog and terminate in attention."
+      ],
+      "evidence": [
+        "mail",
+        "provider-gateway",
+        "daemon-scheduling"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "LIM-04",
+      "title": "Repeatable schedules",
+      "expected": "Same seed reproduces failures; invariants hold across generated schedules; failing seed/event trace is retained.",
+      "coverage": "partial",
+      "assertionsCovered": [
+        "Deterministic differential/state and focused crash fixtures exist",
+        "no native saved randomized schedule with seed/event-trace replay is claimed."
+      ],
+      "evidence": [
+        "attempts",
+        "scheduling",
+        "messages"
+      ],
+      "gaps": [
+        "G04"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "E2E-01",
+      "title": "Small coding ticket",
+      "profile": "baseline",
+      "cases": [
+        "INT-03",
+        "RTE-02",
+        "REP-01",
+        "REP-06",
+        "EVD-01",
+        "DEL-04"
+      ],
+      "expected": "One owned worktree, one fake PR, matching head/base evidence, criteria covered, readiness true and no merge write.",
+      "coverage": "composed-partial",
+      "assertionsCovered": "Actual native candidate/check/review and scripted Jira/PR delivery exist across workflow and publication gates.",
+      "evidence": [
+        "workflow-supervision",
+        "daemon-scheduling",
+        "jira-delivery",
+        "publication-service"
+      ],
+      "gaps": [
+        "G02"
+      ],
+      "boundary": "Component receipts are composed here; this is not a claim that this named scenario/profile ran unchanged end to end."
+    },
+    {
+      "id": "E2E-02",
+      "title": "Complex feature with selected specialists",
+      "profile": "heterogeneous",
+      "cases": [
+        "ROL-01",
+        "ROL-04",
+        "ROL-06",
+        "QUE-01",
+        "QUE-02",
+        "EVD-01"
+      ],
+      "expected": "Up to three compatible specialists, one writer, all criteria linked to current artifacts; distinct configured models observed throughout.",
+      "coverage": "composed-partial",
+      "assertionsCovered": "Selected-team ceiling, writer serialization and current criterion/check/review evidence are proved; staged complex feature profile is not an executed named native scenario.",
+      "evidence": [
+        "teams",
+        "workflow-supervision",
+        "evidence"
+      ],
+      "gaps": [
+        "G02"
+      ],
+      "boundary": "Component receipts are composed here; this is not a claim that this named scenario/profile ran unchanged end to end."
+    },
+    {
+      "id": "E2E-03",
+      "title": "Failed checks and review cause bounded rework",
+      "profile": "rotated",
+      "cases": [
+        "ROL-05",
+        "REP-06",
+        "EVD-03",
+        "EVD-05",
+        "LIF-08"
+      ],
+      "expected": "Failure never reaches readiness; corrected current evidence can pass; exhausted recovery requires attention.",
+      "coverage": "composed-partial",
+      "assertionsCovered": "Real failed/passing checks, independent review rejection, fresh-head evidence and two-cycle exhaustion are covered across separate native fixtures.",
+      "evidence": [
+        "evidence",
+        "workflow-supervision",
+        "publication-service"
+      ],
+      "gaps": [
+        "G02"
+      ],
+      "boundary": "Component receipts are composed here; this is not a claim that this named scenario/profile ran unchanged end to end."
+    },
+    {
+      "id": "E2E-04",
+      "title": "Specialist and controller interruption",
+      "profile": "heterogeneous",
+      "cases": [
+        "MSG-03",
+        "MSG-05",
+        "MSG-06",
+        "LIF-01",
+        "LIF-02",
+        "LIF-03",
+        "LIF-04"
+      ],
+      "expected": "Other processes remain observable; existing edits and receipts survive; one logical effect per action; uncertain outcomes stop rather than repeat blindly.",
+      "coverage": "composed-partial",
+      "assertionsCovered": "Actual Mail receive/send crash windows, actual host/OMP reattachment and stale-reply rejection are covered separately; specified multi-specialist profile and four-hop traffic are incomplete.",
+      "evidence": [
+        "mail",
+        "host",
+        "supervisor-lifecycle",
+        "daemon-scheduling"
+      ],
+      "gaps": [
+        "G02",
+        "G03"
+      ],
+      "boundary": "Component receipts are composed here; this is not a claim that this named scenario/profile ran unchanged end to end."
+    },
+    {
+      "id": "E2E-05",
+      "title": "Operator steering, insertion and pause",
+      "profile": "heterogeneous",
+      "cases": [
+        "ROL-02",
+        "LIF-05",
+        "LIF-06",
+        "UI-02",
+        "UI-03",
+        "UI-04"
+      ],
+      "expected": "Stored/received/applied are distinct; pausing lasts until child work stops; old-scope evidence is stale; new assignment and all history survive reload.",
+      "coverage": "composed-partial",
+      "assertionsCovered": "Daemon steering/actual stop/insertion and native pending/replay/adoption persistence are proved in separate fixtures; native active-child intermediate-state display remains open.",
+      "evidence": [
+        "workflow-supervision",
+        "daemon-scheduling",
+        "collaboration"
+      ],
+      "gaps": [
+        "G02",
+        "G06",
+        "G08"
+      ],
+      "boundary": "Component receipts are composed here; this is not a claim that this named scenario/profile ran unchanged end to end."
+    },
+    {
+      "id": "E2E-06",
+      "title": "Uncertain Jira and PR publication",
+      "profile": "baseline",
+      "cases": [
+        "MSG-05",
+        "DEL-02",
+        "DEL-03",
+        "DEL-04",
+        "DEL-07"
+      ],
+      "expected": "Exactly one PR/comment per logical action; uncertainty stays visible and blocks blind retry; accepted code work is preserved.",
+      "coverage": "composed-partial",
+      "assertionsCovered": "Lost Jira/PR acknowledgements, controller SIGKILL and existing/absent/inconclusive readbacks preserve exact action identities; actual Git state is retained.",
+      "evidence": [
+        "jira-delivery",
+        "publication-service"
+      ],
+      "gaps": [
+        "G02"
+      ],
+      "boundary": "Component receipts are composed here; this is not a claim that this named scenario/profile ran unchanged end to end."
+    },
+    {
+      "id": "E2E-07",
+      "title": "Queue and merge dependencies",
+      "profile": "baseline",
+      "cases": [
+        "INT-02",
+        "INT-08",
+        "QUE-01",
+        "QUE-03",
+        "QUE-04",
+        "QUE-05",
+        "DEL-05"
+      ],
+      "expected": "No overlap of coding tickets; no automatic backlog work; dependency only proceeds after observed merge; no merge API request.",
+      "coverage": "composed-partial",
+      "assertionsCovered": "Local/Jira order separation, real daemon readiness release/re-hold and provider merge plus Git ancestry are proved; native transition display remains open.",
+      "evidence": [
+        "providers",
+        "daemon-scheduling",
+        "planning"
+      ],
+      "gaps": [
+        "G02",
+        "G11"
+      ],
+      "boundary": "Component receipts are composed here; this is not a claim that this named scenario/profile ran unchanged end to end."
+    },
+    {
+      "id": "E2E-08",
+      "title": "Routing failure, fallback and wrong model",
+      "profile": "rotated",
+      "cases": [
+        "RTE-04",
+        "RTE-06",
+        "RTE-08",
+        "RTE-09",
+        "RTE-11",
+        "RTE-12"
+      ],
+      "expected": "Every actual scripted dispatch matches a recorded identity; retries are bounded; wrong/hidden models cannot produce accepted effects; fallback lineage is explicit.",
+      "coverage": "composed-partial",
+      "assertionsCovered": "Selector/effort rejection, actual 429 fallback/no-fallback, model/secondary-path refusal and recorded lineage are covered; named rotated full-team run is missing.",
+      "evidence": [
+        "omp-rpc",
+        "provider-gateway",
+        "daemon-scheduling"
+      ],
+      "gaps": [
+        "G02"
+      ],
+      "boundary": "Component receipts are composed here; this is not a claim that this named scenario/profile ran unchanged end to end."
+    },
+    {
+      "id": "E2E-09",
+      "title": "Target drift and late CI",
+      "profile": "heterogeneous",
+      "cases": [
+        "REP-04",
+        "EVD-04",
+        "EVD-07",
+        "DEL-06"
+      ],
+      "expected": "Only current matching evidence restores readiness; new failure revokes it immediately; no unowned checkout changes.",
+      "coverage": "composed-partial",
+      "assertionsCovered": "Actual target refresh/conflict recovery and stale/current hosted observations invalidate readiness without changing original checkout; full named profile is missing.",
+      "evidence": [
+        "target-refresh",
+        "conflict-promotion",
+        "publication-service",
+        "journeys"
+      ],
+      "gaps": [
+        "G02"
+      ],
+      "boundary": "Component receipts are composed here; this is not a claim that this named scenario/profile ran unchanged end to end."
+    },
+    {
+      "id": "E2E-10",
+      "title": "Standalone research and documentation",
+      "profile": "rotated",
+      "cases": [
+        "INT-07",
+        "ROL-04",
+        "EVD-08",
+        "UI-05"
+      ],
+      "expected": "Outcome is a reviewable artifact with limitations and provenance; no code commit, model quality claim or fake coding gate.",
+      "coverage": "composed-partial",
+      "assertionsCovered": "Actual pinned artifacts/citations, rejection/correction, stopped completion and native reopened read-only research are proved without coding evidence.",
+      "evidence": [
+        "evidence",
+        "workflow-supervision",
+        "journeys"
+      ],
+      "gaps": [
+        "G02"
+      ],
+      "boundary": "Component receipts are composed here; this is not a claim that this named scenario/profile ran unchanged end to end."
+    },
+    {
+      "id": "E2E-11",
+      "title": "Untrusted content and authority boundary",
+      "profile": "baseline",
+      "cases": [
+        "MSG-08",
+        "REP-05",
+        "SEC-01",
+        "SEC-02",
+        "SEC-03",
+        "SEC-04",
+        "SEC-06"
+      ],
+      "expected": "No forbidden side effect or secret leak; rejected requests are attributable; valid same-origin in-scope work still functions. This tests enforcement, not model resistance to persuasion.",
+      "coverage": "composed-partial",
+      "assertionsCovered": "Actual authority, path, forged message, authenticated origin and OS egress boundaries reject scripted requests while authorized fixture work succeeds.",
+      "evidence": [
+        "repository",
+        "mail",
+        "workflow-supervision",
+        "daemon-scheduling"
+      ],
+      "gaps": [
+        "G02"
+      ],
+      "boundary": "Component receipts are composed here; this is not a claim that this named scenario/profile ran unchanged end to end."
+    },
+    {
+      "id": "E2E-12",
+      "title": "Budget, cancellation and later continuation",
+      "profile": "baseline",
+      "cases": [
+        "LIF-06",
+        "LIF-07",
+        "LIF-08",
+        "LIM-01",
+        "LIM-02",
+        "LIM-03",
+        "SEC-05"
+      ],
+      "expected": "Budget persists, cancellation prevents new effects, artifacts remain, accounting is honest and cleanup leaves unrelated resources untouched.",
+      "coverage": "composed-partial",
+      "assertionsCovered": "Injected active-time accounting, actual budget stop, cancellation/retained PR continuation and exact ownership cleanup are covered in separate native fixtures.",
+      "evidence": [
+        "attempts",
+        "workflow-supervision",
+        "retained-work",
+        "publication-service",
+        "containers"
+      ],
+      "gaps": [
+        "G02"
+      ],
+      "boundary": "Component receipts are composed here; this is not a claim that this named scenario/profile ran unchanged end to end."
+    }
+  ],
+  "nativeJourneys": [
+    {
+      "id": "NUI-01",
+      "browser": {
+        "file": "tests/e2e/cancel-continuation.spec.ts",
+        "line": 9,
+        "test": "'CAN-02/04/05: keyboard continuation keeps one successor, both history links and original evidence across restart at 390px'",
+        "sourceSha256": "ed54d91082d695e5470d75c6919c21c9f7d302b83ee094ff0f7c645a0e53f9c3"
+      },
+      "coverage": "partial",
+      "assertionsCovered": "One retained branch successor; original candidate/diff read-only; both history links and reopened selection.",
+      "evidence": [
+        "journeys"
+      ],
+      "nativeTest": {
+        "symbol": "native_journey_cancelled_continuation_preserves_branch_diff_lineage_and_reopen",
+        "path": "crates/crewroom-desktop/src/workbench/journey_tests.rs",
+        "line": 151,
+        "sha256": "2ca2ba938b1124d5cf78ccecb21f5d22a6da08d4b22a6a1c5277dd140e8c95a9",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": [
+        "G05"
+      ]
+    },
+    {
+      "id": "NUI-02",
+      "browser": {
+        "file": "tests/e2e/cancel-continuation.spec.ts",
+        "line": 48,
+        "test": "'CAN-01/03/05: cancel confirmation is keyboard accessible and unowned cancelled plans offer a new branch only'",
+        "sourceSha256": "ed54d91082d695e5470d75c6919c21c9f7d302b83ee094ff0f7c645a0e53f9c3"
+      },
+      "coverage": "partial",
+      "assertionsCovered": "Cancel dismiss/confirm and persisted cancelled state; Resume removed.",
+      "evidence": [
+        "lifecycle"
+      ],
+      "nativeTest": {
+        "symbol": "native_budget_repair_cancel_and_restart_keep_durable_state_distinct",
+        "path": "crates/crewroom-desktop/src/workbench/lifecycle_tests.rs",
+        "line": 97,
+        "sha256": "aa000bbf6df950f0eace4ff2ae6d31a751acc392fba1150a9fe950e76324ec92",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": [
+        "G13"
+      ]
+    },
+    {
+      "id": "NUI-03",
+      "browser": {
+        "file": "tests/e2e/check-environment.spec.ts",
+        "line": 8,
+        "test": "'correcting a paused check environment shows stale evidence and the recorded reason'",
+        "sourceSha256": "df35af2dd459f7e9debff1762a0dd231233fbf00ad9954d230e34dfea68f1e8f"
+      },
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": "Check environment reason/CAS and preserved historical check/review policy; no changing command/required flag.",
+      "evidence": [
+        "lifecycle"
+      ],
+      "nativeTest": {
+        "symbol": "native_evidence_hash_checks_history_selection_and_environment_cas",
+        "path": "crates/crewroom-desktop/src/workbench/lifecycle_tests.rs",
+        "line": 232,
+        "sha256": "aa000bbf6df950f0eace4ff2ae6d31a751acc392fba1150a9fe950e76324ec92",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": []
+    },
+    {
+      "id": "NUI-04",
+      "browser": {
+        "file": "tests/e2e/feedback.spec.ts",
+        "line": 22,
+        "test": "'observe PR feedback, select Resume and publish a validated revision to the same PR'",
+        "sourceSha256": "e862a65cddc1fb79c38ac17ed443278085cb6b78606ef82d373ce491aa977796"
+      },
+      "coverage": "partial",
+      "assertionsCovered": "Feedback/outage/recovery UI; backend same-PR rework is separately proved.",
+      "evidence": [
+        "journeys",
+        "publication-service"
+      ],
+      "nativeTest": {
+        "symbol": "native_journey_publication_hosted_checks_and_feedback_outage_remain_separate",
+        "path": "crates/crewroom-desktop/src/workbench/journey_tests.rs",
+        "line": 579,
+        "sha256": "2ca2ba938b1124d5cf78ccecb21f5d22a6da08d4b22a6a1c5277dd140e8c95a9",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": [
+        "G09"
+      ]
+    },
+    {
+      "id": "NUI-05",
+      "browser": {
+        "file": "tests/e2e/history.spec.ts",
+        "line": 8,
+        "test": "'HIS-04: history survives reload and Back; prior evidence is read-only and tabs work at 390 px'",
+        "sourceSha256": "06e973dfa772b2d463f9040274c9bda3338b8a6be35f1884df43fd2fb1480ddb"
+      },
+      "coverage": "partial",
+      "assertionsCovered": "Prior attempt selection/reopen/Back and read-only saved evidence.",
+      "evidence": [
+        "lifecycle"
+      ],
+      "nativeTest": {
+        "symbol": "native_history_reopens_prior_attempt_and_back_preserves_the_current_run",
+        "path": "crates/crewroom-desktop/src/workbench/lifecycle_tests.rs",
+        "line": 184,
+        "sha256": "aa000bbf6df950f0eace4ff2ae6d31a751acc392fba1150a9fe950e76324ec92",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": [
+        "G05"
+      ]
+    },
+    {
+      "id": "NUI-06",
+      "browser": {
+        "file": "tests/e2e/history.spec.ts",
+        "line": 78,
+        "test": "'HIS-05: an observation outage is labelled separately from recorded agent failures'",
+        "sourceSha256": "06e973dfa772b2d463f9040274c9bda3338b8a6be35f1884df43fd2fb1480ddb"
+      },
+      "coverage": "partial",
+      "assertionsCovered": "Recorded failure and live observation have separate projections; requested contrasting outage labels are not asserted.",
+      "evidence": [
+        "lifecycle",
+        "collaboration"
+      ],
+      "nativeTest": {
+        "symbol": "native_history_reopens_prior_attempt_and_back_preserves_the_current_run",
+        "path": "crates/crewroom-desktop/src/workbench/lifecycle_tests.rs",
+        "line": 184,
+        "sha256": "aa000bbf6df950f0eace4ff2ae6d31a751acc392fba1150a9fe950e76324ec92",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": [
+        "G07"
+      ]
+    },
+    {
+      "id": "NUI-07",
+      "browser": {
+        "file": "tests/e2e/history.spec.ts",
+        "line": 109,
+        "test": "'RTE-09: fallback history and agent tiles keep each attempt\\'s own model after reload'",
+        "sourceSha256": "06e973dfa772b2d463f9040274c9bda3338b8a6be35f1884df43fd2fb1480ddb"
+      },
+      "coverage": "partial",
+      "assertionsCovered": "History persists; real fallback lineage exists in daemon receipt; distinct native tile/history model labels not asserted.",
+      "evidence": [
+        "lifecycle",
+        "daemon-scheduling"
+      ],
+      "nativeTest": {
+        "symbol": "native_history_reopens_prior_attempt_and_back_preserves_the_current_run",
+        "path": "crates/crewroom-desktop/src/workbench/lifecycle_tests.rs",
+        "line": 184,
+        "sha256": "aa000bbf6df950f0eace4ff2ae6d31a751acc392fba1150a9fe950e76324ec92",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": [
+        "G07"
+      ]
+    },
+    {
+      "id": "NUI-08",
+      "browser": {
+        "file": "tests/e2e/insertion.spec.ts",
+        "line": 9,
+        "test": "'INS-01/02/05: queued insertion by keyboard, replay, coordinator notice, restart and narrow layout'",
+        "sourceSha256": "09ecdda3689f247f015b7ae33890b56b700743f4e3d3b6ae888f0b423e65f2b8"
+      },
+      "coverage": "partial",
+      "assertionsCovered": "Pending queued proposal, replay identity, coordinator notice and restart; no false running assignment.",
+      "evidence": [
+        "collaboration"
+      ],
+      "nativeTest": {
+        "symbol": "native_queued_specialist_replay_adoption_and_restart_preserve_proposal_semantics",
+        "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+        "line": 224,
+        "sha256": "d4bdc604f04a4a8cf1511dd7515852a639e941041e8691eb13f456c9944827e3",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": [
+        "G05"
+      ]
+    },
+    {
+      "id": "NUI-09",
+      "browser": {
+        "file": "tests/e2e/insertion.spec.ts",
+        "line": 49,
+        "test": "'INS-04/05: insertion refuses an unavailable runner without losing the explanation'",
+        "sourceSha256": "09ecdda3689f247f015b7ae33890b56b700743f4e3d3b6ae888f0b423e65f2b8"
+      },
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": "Actual native window disables unavailable runner controls with reason; explanation draft retained.",
+      "evidence": [
+        "collaboration"
+      ],
+      "nativeTest": {
+        "symbol": "native_queued_specialist_replay_adoption_and_restart_preserve_proposal_semantics",
+        "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+        "line": 224,
+        "sha256": "d4bdc604f04a4a8cf1511dd7515852a639e941041e8691eb13f456c9944827e3",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": []
+    },
+    {
+      "id": "NUI-10",
+      "browser": {
+        "file": "tests/e2e/insertion.spec.ts",
+        "line": 59,
+        "test": "'INS-02/04: after adoption rejects a proposal, an identical submission uses a new identity without reloading'",
+        "sourceSha256": "09ecdda3689f247f015b7ae33890b56b700743f4e3d3b6ae888f0b423e65f2b8"
+      },
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": "Adoption rejects old proposal; identical new submission gets a distinct identity without reload.",
+      "evidence": [
+        "collaboration"
+      ],
+      "nativeTest": {
+        "symbol": "native_queued_specialist_replay_adoption_and_restart_preserve_proposal_semantics",
+        "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+        "line": 224,
+        "sha256": "d4bdc604f04a4a8cf1511dd7515852a639e941041e8691eb13f456c9944827e3",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": []
+    },
+    {
+      "id": "NUI-11",
+      "browser": {
+        "file": "tests/e2e/jira.spec.ts",
+        "line": 8,
+        "test": "'Jira refresh shows saved-filter order, outages and retained work without queuing tickets'",
+        "sourceSha256": "10317866fb5752f06ebae36fbc9550bcb45dd690c1d62c86508d04e72d1382f8"
+      },
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": "Saved-filter order, saved brief, refreshed source status and outage retaining prior snapshot; no queue created.",
+      "evidence": [
+        "journeys"
+      ],
+      "nativeTest": {
+        "symbol": "native_journey_jira_refresh_outage_retains_operator_brief_and_never_queues",
+        "path": "crates/crewroom-desktop/src/workbench/journey_tests.rs",
+        "line": 356,
+        "sha256": "2ca2ba938b1124d5cf78ccecb21f5d22a6da08d4b22a6a1c5277dd140e8c95a9",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": []
+    },
+    {
+      "id": "NUI-12",
+      "browser": {
+        "file": "tests/e2e/learning.spec.ts",
+        "line": 13,
+        "test": "'the operator approves or rejects coordinator learning proposals; approval versions future guidance'",
+        "sourceSha256": "8d717afe1ed62e257f005c696e17e7c9b23ad14fa8666d4ba25f92a32751a5f4"
+      },
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": "Role/project approval versions future guidance; stale conflicts/rejection/write-failure retry retain reason and decision.",
+      "evidence": [
+        "collaboration"
+      ],
+      "nativeTest": {
+        "symbol": "native_learning_versions_roles_and_projects_without_changing_existing_decisions",
+        "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+        "line": 79,
+        "sha256": "d4bdc604f04a4a8cf1511dd7515852a639e941041e8691eb13f456c9944827e3",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": []
+    },
+    {
+      "id": "NUI-13",
+      "browser": {
+        "file": "tests/e2e/publication.spec.ts",
+        "line": 10,
+        "test": "'PR creation, hosted validation and a skipped required check remain separate in the workbench'",
+        "sourceSha256": "0ff2f406a2b72b485e5d8a06c0cec1ceb4ed733a998d717d373f02c1ca048d17"
+      },
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": "Confirmed PR and hosted success remain distinct from absent local checks; skipped required hosted step blocks readiness.",
+      "evidence": [
+        "journeys"
+      ],
+      "nativeTest": {
+        "symbol": "native_journey_publication_hosted_checks_and_feedback_outage_remain_separate",
+        "path": "crates/crewroom-desktop/src/workbench/journey_tests.rs",
+        "line": 579,
+        "sha256": "2ca2ba938b1124d5cf78ccecb21f5d22a6da08d4b22a6a1c5277dd140e8c95a9",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": []
+    },
+    {
+      "id": "NUI-14",
+      "browser": {
+        "file": "tests/e2e/refinement.spec.ts",
+        "line": 28,
+        "test": "'INT-03: direct queued coding starts automatically while Explore and Grill retain decisions independently'",
+        "sourceSha256": "99d94169507506db143ed4fff1aa85a2607ba3597fea6c0447e7840b9ae12cc6"
+      },
+      "coverage": "partial",
+      "assertionsCovered": "Refinement accept/discard/adopt is native; direct automatic execution proved headlessly.",
+      "evidence": [
+        "collaboration",
+        "daemon-scheduling"
+      ],
+      "nativeTest": {
+        "symbol": "native_refinement_edit_accept_stale_discard_and_explicit_adoption",
+        "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+        "line": 361,
+        "sha256": "d4bdc604f04a4a8cf1511dd7515852a639e941041e8691eb13f456c9944827e3",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": [
+        "G14"
+      ]
+    },
+    {
+      "id": "NUI-15",
+      "browser": {
+        "file": "tests/e2e/repositories.spec.ts",
+        "line": 12,
+        "test": "'REP-02: keyboard edit, refused and confirmed retirement, retained selection and 390px layout'",
+        "sourceSha256": "b4315b15d34bf76b9c722cdc8affffe63f79da292c29912a8b2510d98f286782"
+      },
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": "Keyboard edits, retirement refusal/dismiss/confirm, active replacement target and narrow configuration layout.",
+      "evidence": [
+        "configuration",
+        "planning"
+      ],
+      "nativeTest": {
+        "symbol": "native_repository_checks_conflicts_and_retirement_use_the_real_service",
+        "path": "crates/crewroom-desktop/src/workbench/settings/tests.rs",
+        "line": 188,
+        "sha256": "714778f34afd4f9936fe168887cb71083171fca5f367414a89edbd548dea72ba",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": []
+    },
+    {
+      "id": "NUI-16",
+      "browser": {
+        "file": "tests/e2e/repositories.spec.ts",
+        "line": 86,
+        "test": "'REP-02: retired historical run shows its original repository in run history and Results'",
+        "sourceSha256": "b4315b15d34bf76b9c722cdc8affffe63f79da292c29912a8b2510d98f286782"
+      },
+      "coverage": "partial",
+      "assertionsCovered": "Current definition retirement persists; captured historical Results/History display not asserted.",
+      "evidence": [
+        "configuration",
+        "lifecycle"
+      ],
+      "nativeTest": {
+        "symbol": "native_repository_checks_conflicts_and_retirement_use_the_real_service",
+        "path": "crates/crewroom-desktop/src/workbench/settings/tests.rs",
+        "line": 188,
+        "sha256": "714778f34afd4f9936fe168887cb71083171fca5f367414a89edbd548dea72ba",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": [
+        "G10"
+      ]
+    },
+    {
+      "id": "NUI-17",
+      "browser": {
+        "file": "tests/e2e/research.spec.ts",
+        "line": 27,
+        "test": "'INT-07/EVD-08: reloaded research results retain citations, limitations, coverage and rejected history without coding sections'",
+        "sourceSha256": "06b17d69e56f0e09e850e207b4d0f19bda6be2a22ac67b91291b80760f4ee4d2"
+      },
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": "Real source-pinned citation rejection/correction/supersession; limitations/coverage/artifact content and research-only reopen.",
+      "evidence": [
+        "journeys"
+      ],
+      "nativeTest": {
+        "symbol": "native_journey_research_keeps_verified_rejected_superseded_citations_and_readonly_artifacts",
+        "path": "crates/crewroom-desktop/src/workbench/journey_tests.rs",
+        "line": 440,
+        "sha256": "2ca2ba938b1124d5cf78ccecb21f5d22a6da08d4b22a6a1c5277dd140e8c95a9",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": []
+    },
+    {
+      "id": "NUI-18",
+      "browser": {
+        "file": "tests/e2e/steering.spec.ts",
+        "line": 10,
+        "test": "'STE-01/02/05: steering states, recorded times and replies stay distinct; paused composer works by keyboard at 390 px'",
+        "sourceSha256": "e794129b80907a20d15f450bda67cac64e03bf4be6837a650d2cca82f0ca207f"
+      },
+      "coverage": "partial",
+      "assertionsCovered": "Paused Cmd-Enter stores pending; coordinator replies/page replay survive daemon restart.",
+      "evidence": [
+        "collaboration"
+      ],
+      "nativeTest": {
+        "symbol": "native_conversation_pages_reconnect_and_keyboard_store_paused_steering",
+        "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+        "line": 473,
+        "sha256": "d4bdc604f04a4a8cf1511dd7515852a639e941041e8691eb13f456c9944827e3",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": [
+        "G06",
+        "G05"
+      ]
+    },
+    {
+      "id": "NUI-19",
+      "browser": {
+        "file": "tests/e2e/steering.spec.ts",
+        "line": 58,
+        "test": "'STE-04: closed and completed runs explain disabled steering; legacy transition times stay unknown'",
+        "sourceSha256": "e794129b80907a20d15f450bda67cac64e03bf4be6837a650d2cca82f0ca207f"
+      },
+      "coverage": "partial",
+      "assertionsCovered": "Closed-run save is refused and message count unchanged; all terminal/legacy time labels not asserted.",
+      "evidence": [
+        "collaboration"
+      ],
+      "nativeTest": {
+        "symbol": "native_conversation_pages_reconnect_and_keyboard_store_paused_steering",
+        "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+        "line": 473,
+        "sha256": "d4bdc604f04a4a8cf1511dd7515852a639e941041e8691eb13f456c9944827e3",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": [
+        "G06"
+      ]
+    },
+    {
+      "id": "NUI-20",
+      "browser": {
+        "file": "tests/e2e/target-conflict.spec.ts",
+        "line": 9,
+        "test": "'a paused target conflict shows the held branch, retained workspace and explicit continuation gate'",
+        "sourceSha256": "0475d6354a2fc664046dbf7b1856d07065ec67ac345c1a9343c0d314d3e80c13"
+      },
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": "Actual conflict, original candidate, retained isolated workspace and reasoned superseding retry remain visible.",
+      "evidence": [
+        "journeys"
+      ],
+      "nativeTest": {
+        "symbol": "native_journey_target_refresh_and_reasoned_conflict_retry_keep_revision_history",
+        "path": "crates/crewroom-desktop/src/workbench/journey_tests.rs",
+        "line": 251,
+        "sha256": "2ca2ba938b1124d5cf78ccecb21f5d22a6da08d4b22a6a1c5277dd140e8c95a9",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": []
+    },
+    {
+      "id": "NUI-21",
+      "browser": {
+        "file": "tests/e2e/target-conflict.spec.ts",
+        "line": 39,
+        "test": "'a target change to project instructions holds a conflict for the operator'",
+        "sourceSha256": "0475d6354a2fc664046dbf7b1856d07065ec67ac345c1a9343c0d314d3e80c13"
+      },
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": "Changed project instructions hold refresh until explicit reasoned continuation, preserving supersession.",
+      "evidence": [
+        "journeys"
+      ],
+      "nativeTest": {
+        "symbol": "native_journey_target_refresh_and_reasoned_conflict_retry_keep_revision_history",
+        "path": "crates/crewroom-desktop/src/workbench/journey_tests.rs",
+        "line": 251,
+        "sha256": "2ca2ba938b1124d5cf78ccecb21f5d22a6da08d4b22a6a1c5277dd140e8c95a9",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": []
+    },
+    {
+      "id": "NUI-22",
+      "browser": {
+        "file": "tests/e2e/wall.spec.ts",
+        "line": 15,
+        "test": "'the run view is a live, read-only agent wall with proposed specialists, live checks and explicit repair allowances'",
+        "sourceSha256": "424a42d2228b68290f45e3dfe84c11c24ddcf1085a1276f644910494db946bdb"
+      },
+      "coverage": "partial",
+      "assertionsCovered": "Read-only real tmux wall/load plus native repair allowance and pending proposed specialist are proved separately.",
+      "evidence": [
+        "terminal",
+        "terminal-accessibility",
+        "lifecycle",
+        "collaboration"
+      ],
+      "nativeTest": {
+        "symbol": "native_budget_repair_cancel_and_restart_keep_durable_state_distinct",
+        "path": "crates/crewroom-desktop/src/workbench/lifecycle_tests.rs",
+        "line": 97,
+        "sha256": "aa000bbf6df950f0eace4ff2ae6d31a751acc392fba1150a9fe950e76324ec92",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": [
+        "G08"
+      ]
+    },
+    {
+      "id": "NUI-23",
+      "browser": {
+        "file": "tests/e2e/workbench.spec.ts",
+        "line": 14,
+        "test": "'local ticket and brief persist while unavailable execution remains explicit'",
+        "sourceSha256": "6bc9da39e3a44b42a89356e495006c56f5260f76c1fd909ad0adaf31799ac122"
+      },
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": "Native local task/brief, save validation and unavailable runner retain durable state with no claimed execution.",
+      "evidence": [
+        "configuration",
+        "planning"
+      ],
+      "nativeTest": {
+        "symbol": "native_plan_blocks_unsaved_brief_and_retired_target_at_narrow_width",
+        "path": "crates/crewroom-desktop/src/workbench/planning/tests.rs",
+        "line": 228,
+        "sha256": "c5e91d1b0aa6e2f720ee04fc2af6d8199f138e3f2f3ff1a63cfe67d8f6ea14ad",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": []
+    },
+    {
+      "id": "NUI-24",
+      "browser": {
+        "file": "tests/e2e/workbench.spec.ts",
+        "line": 33,
+        "test": "'QUE-05: queue panel reorders two captured plans across reload and removes without starting agents'",
+        "sourceSha256": "6bc9da39e3a44b42a89356e495006c56f5260f76c1fd909ad0adaf31799ac122"
+      },
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": "Reorder/remove captured plans, stale-revision refusal and reopen without activity.",
+      "evidence": [
+        "planning"
+      ],
+      "nativeTest": {
+        "symbol": "native_launch_queue_and_dependencies_keep_intent_separate_from_execution",
+        "path": "crates/crewroom-desktop/src/workbench/planning/tests.rs",
+        "line": 54,
+        "sha256": "c5e91d1b0aa6e2f720ee04fc2af6d8199f138e3f2f3ff1a63cfe67d8f6ea14ad",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": []
+    },
+    {
+      "id": "NUI-25",
+      "browser": {
+        "file": "tests/e2e/workbench.spec.ts",
+        "line": 72,
+        "test": "'QUE-04: declare a dependency and retain its queue hold across reload'",
+        "sourceSha256": "6bc9da39e3a44b42a89356e495006c56f5260f76c1fd909ad0adaf31799ac122"
+      },
+      "coverage": "partial",
+      "assertionsCovered": "Native dependency edit/cycle/stale guard and durable queue hold; actual merge release is headless.",
+      "evidence": [
+        "planning"
+      ],
+      "nativeTest": {
+        "symbol": "native_launch_queue_and_dependencies_keep_intent_separate_from_execution",
+        "path": "crates/crewroom-desktop/src/workbench/planning/tests.rs",
+        "line": 54,
+        "sha256": "c5e91d1b0aa6e2f720ee04fc2af6d8199f138e3f2f3ff1a63cfe67d8f6ea14ad",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": [
+        "G11"
+      ]
+    },
+    {
+      "id": "NUI-26",
+      "browser": {
+        "file": "tests/e2e/workbench.spec.ts",
+        "line": 101,
+        "test": "'QUE-03: paused review release and waiting ticket hold are truthful in the workbench'",
+        "sourceSha256": "6bc9da39e3a44b42a89356e495006c56f5260f76c1fd909ad0adaf31799ac122"
+      },
+      "coverage": "partial",
+      "assertionsCovered": "Daemon release/re-hold is proved; native paused review-release and waiting hold variant is missing.",
+      "evidence": [
+        "planning",
+        "daemon-scheduling"
+      ],
+      "nativeTest": {
+        "symbol": "native_launch_queue_and_dependencies_keep_intent_separate_from_execution",
+        "path": "crates/crewroom-desktop/src/workbench/planning/tests.rs",
+        "line": 54,
+        "sha256": "c5e91d1b0aa6e2f720ee04fc2af6d8199f138e3f2f3ff1a63cfe67d8f6ea14ad",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": [
+        "G11"
+      ]
+    },
+    {
+      "id": "NUI-27",
+      "browser": {
+        "file": "tests/e2e/workbench.spec.ts",
+        "line": 139,
+        "test": "'INT-04: brief history and queued/active adoption decisions remain truthful after reload'",
+        "sourceSha256": "6bc9da39e3a44b42a89356e495006c56f5260f76c1fd909ad0adaf31799ac122"
+      },
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": "Captured versions, proposal history and explicit adoption with reason persist.",
+      "evidence": [
+        "collaboration"
+      ],
+      "nativeTest": {
+        "symbol": "native_refinement_edit_accept_stale_discard_and_explicit_adoption",
+        "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+        "line": 361,
+        "sha256": "d4bdc604f04a4a8cf1511dd7515852a639e941041e8691eb13f456c9944827e3",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": []
+    },
+    {
+      "id": "NUI-28",
+      "browser": {
+        "file": "tests/e2e/workbench.spec.ts",
+        "line": 192,
+        "test": "'M1 exit gate: import, refine, refresh, queue and steering survive a real server restart'",
+        "sourceSha256": "6bc9da39e3a44b42a89356e495006c56f5260f76c1fd909ad0adaf31799ac122"
+      },
+      "coverage": "partial",
+      "assertionsCovered": "Import/refine/refresh, queue and steering/restart individually proved, not one complete native M1 sequence.",
+      "evidence": [
+        "journeys",
+        "planning",
+        "collaboration"
+      ],
+      "nativeTest": {
+        "symbol": "native_journey_jira_refresh_outage_retains_operator_brief_and_never_queues",
+        "path": "crates/crewroom-desktop/src/workbench/journey_tests.rs",
+        "line": 356,
+        "sha256": "2ca2ba938b1124d5cf78ccecb21f5d22a6da08d4b22a6a1c5277dd140e8c95a9",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": [
+        "G12"
+      ]
+    },
+    {
+      "id": "NUI-29",
+      "browser": {
+        "file": "tests/e2e/workbench.spec.ts",
+        "line": 247,
+        "test": "'ROL-02: role editor persists revisions, protects drafts, resolves conflicts and fits 390px'",
+        "sourceSha256": "6bc9da39e3a44b42a89356e495006c56f5260f76c1fd909ad0adaf31799ac122"
+      },
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": "Native role versions, draft protection, validation/conflict, disable/reload and narrow configuration layout.",
+      "evidence": [
+        "configuration"
+      ],
+      "nativeTest": {
+        "symbol": "native_role_editor_persists_preserves_drafts_and_rejects_stale_revisions",
+        "path": "crates/crewroom-desktop/src/workbench/settings/tests.rs",
+        "line": 32,
+        "sha256": "714778f34afd4f9936fe168887cb71083171fca5f367414a89edbd548dea72ba",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": []
+    },
+    {
+      "id": "NUI-30",
+      "browser": {
+        "file": "tests/e2e/workbench.spec.ts",
+        "line": 316,
+        "test": "'observation view reconnects through event pages without losing coordinator replies or latest progress'",
+        "sourceSha256": "6bc9da39e3a44b42a89356e495006c56f5260f76c1fd909ad0adaf31799ac122"
+      },
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": "225 events cross pages/reconnect without duplicate replies; latest state generation remains selected.",
+      "evidence": [
+        "collaboration"
+      ],
+      "nativeTest": {
+        "symbol": "native_conversation_pages_reconnect_and_keyboard_store_paused_steering",
+        "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+        "line": 473,
+        "sha256": "d4bdc604f04a4a8cf1511dd7515852a639e941041e8691eb13f456c9944827e3",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": []
+    },
+    {
+      "id": "NUI-31",
+      "browser": {
+        "file": "tests/e2e/workbench.spec.ts",
+        "line": 345,
+        "test": "'REP-01: configure a checked repository, show target validation, and select its truthful publication state'",
+        "sourceSha256": "6bc9da39e3a44b42a89356e495006c56f5260f76c1fd909ad0adaf31799ac122"
+      },
+      "coverage": "mapped-existing-evidence",
+      "assertionsCovered": "Repository check policy persisted; target validation/selection and separate publication readiness shown.",
+      "evidence": [
+        "configuration",
+        "planning",
+        "journeys"
+      ],
+      "nativeTest": {
+        "symbol": "native_repository_checks_conflicts_and_retirement_use_the_real_service",
+        "path": "crates/crewroom-desktop/src/workbench/settings/tests.rs",
+        "line": 188,
+        "sha256": "714778f34afd4f9936fe168887cb71083171fca5f367414a89edbd548dea72ba",
+        "readAtCommit": "e03459580765ee39af89803304b9fb2758de6221"
+      },
+      "gaps": []
+    }
+  ],
+  "gaps": {
+    "G01": {
+      "assertion": "All 950 retained catalog role/model bindings compared through the native binding boundary.",
+      "needed": "Run the full pinned catalog through Rust and compare provider/full ID/role separately from dispatch eligibility.",
+      "cases": [
+        "RTE-01"
+      ]
+    },
+    "G02": {
+      "assertion": "Named baseline, heterogeneous and rotated role profiles executed with per-process observed identities.",
+      "needed": "Run the three accepted profiles against native daemon with scripted providers; bind each launch/observed request to its assignment.",
+      "cases": [
+        "RTE-02"
+      ]
+    },
+    "G03": {
+      "assertion": "Coordinator \u2192 specialist A \u2192 specialist B \u2192 A \u2192 coordinator external addressed round trip.",
+      "needed": "Execute all four addressed hops in distinct native-owned OMP processes through actual Mail; capture sender/recipient receipts and process identities.",
+      "cases": [
+        "MSG-01"
+      ]
+    },
+    "G04": {
+      "assertion": "Same saved randomized schedule seed replays controls, duplicates, crashes and replies with invariant/event trace.",
+      "needed": "Provide a native seeded schedule runner and replay receipt; deterministic fixed comparisons alone do not establish this assertion.",
+      "cases": [
+        "LIM-04"
+      ]
+    },
+    "G05": {
+      "assertion": "Native complete keyboard/narrow operator flows including the newest continuation, recovery and result controls.",
+      "needed": "Exercise equivalent 390px keyboard journeys and native focus/AX, OS VoiceOver and actual IME candidate/commit; do not substitute simulated composition or broad layout screenshots.",
+      "cases": [
+        "UI-06"
+      ]
+    },
+    "G06": {
+      "assertion": "Native steering distinguishes received/applied/rejected/unknown legacy times and terminal-run disabled explanations.",
+      "needed": "Assert rendered labels/times for each state and completed/closed variants after reload; current GPUI test proves pending storage, replies and closed refusal.",
+      "cases": [
+        "UI-02"
+      ]
+    },
+    "G07": {
+      "assertion": "Observation outage is distinct from a recorded agent failure; fallback attempts show their own model in history and tiles after reload.",
+      "needed": "Add native projection/render assertions with two different fallback models and disconnected observation while retaining recorded failure.",
+      "cases": [
+        "UI-03",
+        "UI-05"
+      ]
+    },
+    "G08": {
+      "assertion": "Native busy insertion and Pause show intermediate states until confirmed with real active child work.",
+      "needed": "Connect native actions to active process fixture and assert pending/pausing through stop and reopen; current actual stop/insertion evidence is headless.",
+      "cases": [
+        "UI-04"
+      ]
+    },
+    "G09": {
+      "assertion": "Native feedback Resume produces validated revision and republishes to same PR.",
+      "needed": "Finish parent-owned native UI/real-service Resume journey; current publication service proves backend same-PR rework and GPUI proves feedback observation only.",
+      "cases": []
+    },
+    "G10": {
+      "assertion": "Native retired historical repository appears as captured in both Results and History.",
+      "needed": "Render a run whose current repository definition is retired/changed and assert original captured repository in both native views.",
+      "cases": []
+    },
+    "G11": {
+      "assertion": "Native queue displays paused review-release vs waiting hold and drives merged dependency release.",
+      "needed": "Assert the native UI variants over actual daemon readiness/dependency transitions; existing native planning uses unavailable execution.",
+      "cases": []
+    },
+    "G12": {
+      "assertion": "Native M1 import/refine/refresh/queue/steering sequence survives one production daemon restart.",
+      "needed": "Compose the separately proved native actions in the accepted sequence and assert durable values/no duplicate launches after restart.",
+      "cases": []
+    },
+    "G13": {
+      "assertion": "Native unowned cancelled plan offers only the new-branch continuation and keyboard cancel confirmation.",
+      "needed": "Exercise the unowned cancellation variant and narrow keyboard confirmation; owned retained continuation alone does not prove it.",
+      "cases": []
+    },
+    "G14": {
+      "assertion": "Native Direct Run control admits execution automatically while Explore/Grill remain noncoding.",
+      "needed": "Bind native Run to a configured daemon and assert admission without a second start action; existing native planning fixture intentionally has no runner.",
+      "cases": []
+    }
+  },
+  "releaseGatesRemaining": [
+    "Integrated accessibility/focus and new controls plus OS VoiceOver/IME candidate proof.",
+    "Fresh checkout pinned release build/install; final signed binary sidecar identity, current notices including gpui-component and gpui-pre LICENSE-APACHE/CREWROOM.md/crewroom-patches.json.",
+    "Idle and four-agent native UI+daemon/host/OMP resource measurements with external Mail/Docker attribution.",
+    "Same-build whole-state restore already proved; execute distinct matching-old-build/pre-cutover-snapshot rollback and final root-owned default/retirement decision."
+  ]
+}

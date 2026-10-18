@@ -1,0 +1,12 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Saved filters</title>
+<h1>Saved filters</h1><p id="empty">No saved filters. Add a filter to export it.</p>
+<label for="filters">Filters JSON</label><textarea id="filters">[]</textarea><button id="export">Export filters</button>
+<p role="alert" id="error"></p><pre id="output" aria-label="Exported filters"></pre>
+<script type="module">
+import { exportFilters } from './filters.mjs';
+document.querySelector('#export').onclick = () => {
+  const output=document.querySelector('#output'), error=document.querySelector('#error'); output.textContent=''; error.textContent='';
+  try { const values=JSON.parse(document.querySelector('#filters').value); output.textContent=exportFilters(values); document.querySelector('#empty').hidden=values.length>0; }
+  catch { error.textContent='Enter filters with a name and query.'; }
+};
+</script></html>

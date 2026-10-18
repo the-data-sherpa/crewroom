@@ -1,0 +1,412 @@
+{
+  "date": "2026-09-27",
+  "scope": "Bounded real mailbox/OMP/tmux contracts with scripted loopback model APIs. Not full Crewroom workflow acceptance.",
+  "decision": "Rust Agent Mail is the preferred mailbox for the next integration slice. No fallback was required and no custom mailbox was built.",
+  "versions": {
+    "rustMail": {
+      "release": "v0.3.36",
+      "archiveSha256": "2b90585878dd3c8509c21b177450f9f975caebb27a2f6a8601efed0ffb016523",
+      "binarySha256": "554d6f0a06d73b2907940350228232f2b479f96630a73ff6b85e590a12b98075",
+      "url": "https://github.com/Dicklesworthstone/mcp_agent_mail_rust/releases/download/v0.3.36/mcp-agent-mail-aarch64-apple-darwin.tar.xz",
+      "scope": "Local experimental download; no global installation"
+    },
+    "tmux": "tmux 3.7c",
+    "omp": "omp/18.3.1"
+  },
+  "sourceState": "Uncommitted scaffold; source hashes identify the tested fixtures.",
+  "sourceSha256": {
+    "scripts/prepare-rust-mail-test.py": "4f63b13d2f77cfe7141f5404e48c7b21b768dee759758a86ff29b06661a62d48",
+    "scripts/mailbox_contract_fixture.py": "013c517dd0bc57cc6d0a89247b32beee82d5f470ec4427a7d76fd22887559aea",
+    "scripts/test-rust-mail-offline.py": "5193970396011e4c6a62cdca956a76645ae6fdd299d51df39fef6403a3443e95",
+    "scripts/omp_mailbox_pane_fixture.py": "762d21034379eaa16e0be3fd204b70e502cee03546d783694592895c2501ab25",
+    "scripts/test-rust-mail-omp-tmux.py": "c165ecb4c2725e2409428102760f810108ffb6ebaa9e0a6c6c5243432970da69",
+    "scripts/omp_offline_fixture.py": "a4668001b6e8271eadc6ca74cbd204c315f67f7f41de42ce8816589cb4563276",
+    "scripts/probe-omp-external-messages.py": "592b5b102fbf913f40d828e680ed1666a1b58f7d956c5f1a98449ca05185b487",
+    "docs/testing/fixtures/omp-model-catalog-2026-09-26.json": "beaaf07d178d6044f03dbb0b686c9acf44b20c56e79747ca2ea27a204103e055"
+  },
+  "ompBinarySha256": "67b807a99454a4d8e1cf982dce7b3343b2c2fc148f33e403dbfb3f1049b22570",
+  "summary": {
+    "distinctChecks": 14,
+    "passed": 14,
+    "failed": 0,
+    "mailboxChecks": 9,
+    "ompTmuxChecks": 5,
+    "scriptedProviderRequests": 18,
+    "oneMailboxCheckCharacterizesExpiredKeys": true
+  },
+  "mailboxContracts": [
+    {
+      "name": "Stored message, passive observer and explicit acknowledgement",
+      "status": "passed",
+      "evidence": {
+        "messageId": 1,
+        "passiveEvents": true,
+        "passiveInboxOptOut": true,
+        "ack": {
+          "message_id": 1,
+          "acknowledged": true,
+          "acknowledged_at": "2026-09-27T08:15:25.290033Z",
+          "read_at": "2026-09-27T08:15:25.290033Z"
+        }
+      },
+      "seconds": 0.188
+    },
+    {
+      "name": "Repeated send returns original identity and rejects changed payload",
+      "status": "passed",
+      "evidence": {
+        "messageId": 2,
+        "oneMessage": true,
+        "payloadConflictRejected": true
+      },
+      "seconds": 0.129
+    },
+    {
+      "name": "Concurrent sends with one key create one message and delivery event",
+      "status": "passed",
+      "evidence": {
+        "concurrentRequests": 4,
+        "messageIds": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "oneDeliveryEvent": true
+      },
+      "seconds": 0.198
+    },
+    {
+      "name": "Lost send response and abrupt restart preserve one message",
+      "status": "passed",
+      "evidence": {
+        "original": 4,
+        "repeated": 4,
+        "discardedMcpResponse": true,
+        "mailboxKilledWithSIGKILL": true,
+        "oneDeliveryEvent": true,
+        "pendingRetained": true
+      },
+      "seconds": 2.341
+    },
+    {
+      "name": "Acknowledgement survives restart and repeated acknowledgement",
+      "status": "passed",
+      "evidence": {
+        "messageId": 5,
+        "ackSurvivedRestartAndReplay": true
+      },
+      "seconds": 2.222
+    },
+    {
+      "name": "Observer resumes paginated event cursor after service restart",
+      "status": "passed",
+      "evidence": {
+        "messageIds": [
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "savedCursor": 7,
+        "observerResumedWithoutConsuming": true
+      },
+      "seconds": 2.699
+    },
+    {
+      "name": "Unknown recipient is rejected",
+      "status": "passed",
+      "evidence": {
+        "unknownRecipientRejected": true
+      },
+      "seconds": 0.01
+    },
+    {
+      "name": "Invalid service credential is rejected",
+      "status": "passed",
+      "evidence": {
+        "invalidBearerDenied": true,
+        "httpStatus": 401
+      },
+      "seconds": 0.002
+    },
+    {
+      "name": "Expired retry keys are explicitly characterized, not treated as unlimited dedupe",
+      "status": "passed",
+      "evidence": {
+        "configuredRetentionSeconds": 2,
+        "original": 1,
+        "repeated": 2,
+        "boundedRetryProtectionConfirmed": true,
+        "requiredPolicy": "Reconcile retained logical identity after retention; do not blindly resend."
+      },
+      "seconds": 5.318
+    }
+  ],
+  "ompTmuxContracts": [
+    {
+      "name": "Three tmux-hosted OMP processes use three assigned provider/model identities",
+      "status": "passed",
+      "evidence": {
+        "paneRows": "%0 88610 0\n%1 88729 0\n%2 88734 0\n",
+        "differentOmpPids": true,
+        "modelsObservedAtProvider": {
+          "Coordinator": "aperture-openai/openai.gpt-6-sol",
+          "SpecialistOne": "aperture-anthropic/anthropic.claude-sonnet-5",
+          "SpecialistTwo": "aperture-google/gemini-3.8-flash"
+        }
+      }
+    },
+    {
+      "name": "Four peer-message hops pass through Rust Mail outside OMP team bus",
+      "status": "passed",
+      "evidence": {
+        "hops": [
+          {
+            "from": "Coordinator",
+            "to": "SpecialistOne",
+            "messageId": 1,
+            "body": "TMUX_HOP_0_9ab622"
+          },
+          {
+            "from": "SpecialistOne",
+            "to": "SpecialistTwo",
+            "messageId": 2,
+            "body": "TMUX_HOP_1_591008"
+          },
+          {
+            "from": "SpecialistTwo",
+            "to": "SpecialistOne",
+            "messageId": 3,
+            "body": "TMUX_HOP_2_0c3413"
+          },
+          {
+            "from": "SpecialistOne",
+            "to": "Coordinator",
+            "messageId": 4,
+            "body": "TMUX_HOP_3_34331b"
+          }
+        ],
+        "allAcknowledged": true,
+        "passiveObserverSawAll": true,
+        "nativeTeamBusUnused": true
+      }
+    },
+    {
+      "name": "Terminal viewers reconnect without consuming messages or replacing agents",
+      "status": "passed",
+      "evidence": {
+        "controlClientsAttachedAndDetached": 2,
+        "panesWithRealEvents": [
+          "Coordinator",
+          "SpecialistOne",
+          "SpecialistTwo"
+        ],
+        "sameSessions": true
+      }
+    },
+    {
+      "name": "Stored mail does not execute a paused recipient before adapter dispatch",
+      "status": "passed",
+      "evidence": {
+        "messageId": 5,
+        "noProviderCallBeforeExplicitDispatch": true,
+        "resumedOnce": true,
+        "scope": "Test adapter holds dispatch; production pause controller is unimplemented."
+      }
+    },
+    {
+      "name": "First-turn OMP crash recovers saved mail into a separate replacement process",
+      "status": "passed",
+      "evidence": {
+        "messageId": 6,
+        "ompInputOnDiskBeforeKill": false,
+        "mailRetainedInput": true,
+        "oldSession": "01a0e1f3-d5bf-734a-8aca-92caeb18591d",
+        "replacementSession": "01a0e1f3-d8d9-70c6-af2c-bdcd99e5c506",
+        "inputOccurrencesInReplacement": 1,
+        "scope": "Explicit fixture replacement after killed process; no unknown external effect."
+      }
+    }
+  ],
+  "processes": [
+    {
+      "name": "Coordinator",
+      "pane": "%0",
+      "hostPid": 88610,
+      "ompPid": 88612,
+      "sessionId": "01a0e1f3-c7cf-721c-941f-e4a42311802c",
+      "modelSelector": "aperture-openai/openai.gpt-6-sol"
+    },
+    {
+      "name": "SpecialistOne",
+      "pane": "%1",
+      "hostPid": 88729,
+      "ompPid": 88731,
+      "sessionId": "01a0e1f3-ca16-7492-a795-28897be29e71",
+      "modelSelector": "aperture-anthropic/anthropic.claude-sonnet-5"
+    },
+    {
+      "name": "SpecialistTwo",
+      "pane": "%2",
+      "hostPid": 88734,
+      "ompPid": 88739,
+      "sessionId": "01a0e1f3-cc4a-77b5-ad8d-bc889a5addec",
+      "modelSelector": "aperture-google/gemini-3.8-flash"
+    },
+    {
+      "name": "SpecialistTwo",
+      "pane": "%3",
+      "hostPid": 88763,
+      "ompPid": 88765,
+      "sessionId": "01a0e1f3-d5bf-734a-8aca-92caeb18591d",
+      "modelSelector": "aperture-google/gemini-3.8-flash"
+    },
+    {
+      "name": "SpecialistTwo",
+      "pane": "%4",
+      "hostPid": 88771,
+      "ompPid": 88775,
+      "sessionId": "01a0e1f3-d8d9-70c6-af2c-bdcd99e5c506",
+      "modelSelector": "aperture-google/gemini-3.8-flash"
+    }
+  ],
+  "modelRequests": [
+    {
+      "agent": "Coordinator",
+      "provider": "aperture-openai",
+      "model": "openai.gpt-6-sol"
+    },
+    {
+      "agent": "SpecialistOne",
+      "provider": "aperture-anthropic",
+      "model": "anthropic.claude-sonnet-5"
+    },
+    {
+      "agent": "SpecialistTwo",
+      "provider": "aperture-google",
+      "model": "gemini-3.8-flash"
+    },
+    {
+      "agent": "Coordinator",
+      "provider": "aperture-openai",
+      "model": "openai.gpt-6-sol"
+    },
+    {
+      "agent": "Coordinator",
+      "provider": "aperture-openai",
+      "model": "openai.gpt-6-sol"
+    },
+    {
+      "agent": "SpecialistOne",
+      "provider": "aperture-anthropic",
+      "model": "anthropic.claude-sonnet-5"
+    },
+    {
+      "agent": "SpecialistOne",
+      "provider": "aperture-anthropic",
+      "model": "anthropic.claude-sonnet-5"
+    },
+    {
+      "agent": "SpecialistOne",
+      "provider": "aperture-anthropic",
+      "model": "anthropic.claude-sonnet-5"
+    },
+    {
+      "agent": "SpecialistTwo",
+      "provider": "aperture-google",
+      "model": "gemini-3.8-flash"
+    },
+    {
+      "agent": "SpecialistTwo",
+      "provider": "aperture-google",
+      "model": "gemini-3.8-flash"
+    },
+    {
+      "agent": "SpecialistTwo",
+      "provider": "aperture-google",
+      "model": "gemini-3.8-flash"
+    },
+    {
+      "agent": "SpecialistOne",
+      "provider": "aperture-anthropic",
+      "model": "anthropic.claude-sonnet-5"
+    },
+    {
+      "agent": "SpecialistOne",
+      "provider": "aperture-anthropic",
+      "model": "anthropic.claude-sonnet-5"
+    },
+    {
+      "agent": "SpecialistOne",
+      "provider": "aperture-anthropic",
+      "model": "anthropic.claude-sonnet-5"
+    },
+    {
+      "agent": "Coordinator",
+      "provider": "aperture-openai",
+      "model": "openai.gpt-6-sol"
+    },
+    {
+      "agent": "SpecialistTwo",
+      "provider": "aperture-google",
+      "model": "gemini-3.8-flash"
+    },
+    {
+      "agent": "SpecialistTwo",
+      "provider": "aperture-google",
+      "model": "gemini-3.8-flash"
+    },
+    {
+      "agent": "SpecialistTwo",
+      "provider": "aperture-google",
+      "model": "gemini-3.8-flash"
+    }
+  ],
+  "guards": {
+    "mailbox": {
+      "fixture_port_allowed": true,
+      "external_denied": true,
+      "other_loopback_denied": true,
+      "child_egress_denied": true
+    },
+    "omp": {
+      "fixture_port_allowed": true,
+      "external_denied": true,
+      "other_loopback_denied": true,
+      "child_egress_denied": true
+    }
+  },
+  "cleanup": {
+    "mailboxProcessesExited": true,
+    "combinedProcessesExited": true,
+    "ompCopiesRemoved": true,
+    "remainingPids": []
+  },
+  "limits": [
+    "Mailbox retry-key retention is finite; test used 24 hours and separately characterized expiry with a two-second setting.",
+    "OMP replacement and held dispatch were performed by the test adapter; Crewroom persistent workflow services remain unimplemented.",
+    "Child-tool interruption, surviving-writer reconciliation and supervisor crash recovery remain unproven.",
+    "No live model, Jira, Bitbucket, Conductor, or infrastructure operation was performed.",
+    "Scripted model identities establish routing mechanics, not remote availability or model quality.",
+    "No browser application acceptance was run. Terminal displays render RPC activity, not the native OMP TUI.",
+    "The mailbox bearer credential stayed in the test controller; observer non-consumption does not establish read-only mailbox credential permissions."
+  ],
+  "rawEvidence": {
+    "mailbox": ".crewroom/test-results/rust-mail-contract-1",
+    "ompTmux": ".crewroom/test-results/rust-mail-omp-tmux-verified"
+  },
+  "earlierAttempts": [
+    {
+      "path": ".crewroom/test-results/rust-mail-discovery-2",
+      "classification": "Test-client keyword collision during register_agent; fixed before acceptance runs; not a mailbox failure."
+    },
+    {
+      "path": ".crewroom/test-results/rust-mail-omp-tmux-1",
+      "classification": "All five passed; final run repeated after strengthening resume-call-count assertion."
+    }
+  ]
+}

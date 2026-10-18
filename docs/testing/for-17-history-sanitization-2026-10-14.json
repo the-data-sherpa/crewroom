@@ -1,0 +1,110 @@
+{
+  "issue": "FOR-17",
+  "date": "2026-10-14",
+  "sourceRevision": "de246552f51568633c40be28f9f681ca23cba010",
+  "sourceTree": "aa7ae1b18f9cbfcc338be794f1bbcac37cf88312",
+  "sourceBinding": "Prepared source and rewritten source have identical tracked trees. Fresh checks cover the changed implementation and fixtures; original historical receipts remain bound to private pre-rewrite revisions.",
+  "rewrite": {
+    "commitsRewritten": 236,
+    "privateBackupsVerified": true,
+    "allLocalRefsRewritten": true,
+    "remoteMainForcePushedWithExplicitLease": true,
+    "otherRemoteBranchesAndTags": 0,
+    "privateGitMetadataArchiveVerified": true,
+    "freshRemoteClonePhysicalBlobs": 4753,
+    "freshRemoteCloneUnreviewedBlobs": 0,
+    "localObjectCleanup": {
+      "physicalBlobs": 4756,
+      "unreviewedBlobs": 0,
+      "reflogsExpiredAfterPrivateBackup": true,
+      "originalMainObjectPresent": false
+    }
+  },
+  "checks": {
+    "domain": {
+      "passed": 332
+    },
+    "browser": {
+      "passed": 31
+    },
+    "desktop": {
+      "passed": 66,
+      "ignored": 15
+    },
+    "rustLibraries": {
+      "passed": 56,
+      "ignored": 1
+    },
+    "webBuild": "passed; existing large-chunk warning",
+    "runtimeRepositoryFixtureCompile": "passed",
+    "rustFormat": "passed",
+    "changedPythonFixturesCompile": 4,
+    "localDocumentationLinks": {
+      "checked": 993,
+      "missingFiles": 0,
+      "newBrokenAnchors": 0
+    },
+    "candidateFsck": "passed",
+    "independentReviews": "standards and privacy/spec passed after corrections"
+  },
+  "scan": {
+    "scanner": "Gitleaks 8.30.1",
+    "configuration": "Default rules, no project config/ignore or environment override, redaction 100%, allow comments ignored, archive depth 2",
+    "uniqueBlobs": 4756,
+    "blobBytes": 129610605,
+    "knownPrivateMatches": 0,
+    "findings": 400,
+    "triage": {
+      "recordedSourceSHA256": 396,
+      "publicSigningKeyFingerprint": 1,
+      "ordinaryVendorSyntax": 3
+    },
+    "metadataFindings": 0,
+    "knownSensitiveOriginalBlobsReachable": 0,
+    "reviewedHistoricalPrivateEntries": 348,
+    "binaryScope": "42 vendored assets and one previously visually reviewed synthetic fixture screenshot; gzip corpus decoded for content checks",
+    "finalDocumentationDeltaFindings": 0
+  },
+  "hosted": {
+    "remoteMain": "de246552f51568633c40be28f9f681ca23cba010",
+    "remoteRefs": {
+      "HEAD": "de246552f51568633c40be28f9f681ca23cba010",
+      "refs/heads/main": "de246552f51568633c40be28f9f681ca23cba010",
+      "refs/pull/1/head": "c9e6e7bea295865d90883d94435441b93b5e70f4"
+    },
+    "oldMainCommitProbe": {
+      "status": 200,
+      "commandExit": 0
+    },
+    "oldPrivateBlobProbe": {
+      "status": 200,
+      "commandExit": 0
+    },
+    "private": true
+  },
+  "publicationGate": "held: GitHub retained pull-request reference and old objects require removal",
+  "privateArtifactsSha256": {
+    "original-all.bundle": "19578cd2c0dc66a0fc07a115f5e990047bba2d5eaf1e35269520b1a658b4e11c",
+    "prepared-all.bundle": "c2a1b0bb9d4621abae7f94c505cb819c4fb50d6b758ef57d32ce915dcff60a63",
+    "candidate-audit.json": "9df4c12f04cadaf3abb7e5b514dcc66f527e30a889ccf1963075983a3752a6aa",
+    "candidate-gitleaks.json": "aaf5eff99771fa89e78659ddd5592d9d53eaccf70af7723914547ba47c749b07",
+    "candidate-triage.json": "6d52cff09a638f2ca8a9ce98201801f0d9dd9013b872bbbb1431d16456e616d3",
+    "candidate-metadata-gitleaks.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "npm-test.log": "c1f66af74f23acddc0958e95cdf9fe40aad3ff6a9cefd0707ea5d172a97ea048",
+    "npm-build.log": "67dc023179e209ce17f44e2fb3f2b4cefc2f66be2652458c8671434d51fd1665",
+    "rust-tests.log": "9a03d1d03a7e1ed4b312601546a9fee41c0de33f787354cbe4a6dea649c85396",
+    "rust-example-check.log": "9c3ee15e1b5d55c185f1fe949bbb1eac78f86981f5c59a3cf0d51a3e79a09834",
+    "desktop-tests-final.log": "eea64b77701f181e6c2fd4df4aa6135558a99fef745a7b10a786d7b0a318d5e5",
+    "e2e.log": "0a5413df4e810ea3eb9dda573358e48637eebac487cc62e767d8cece32f8a1d9",
+    "hosted-verification.json": "c4f974df27fb953b383535d11e440369035499e888914a6c89a5e74edb45cb16",
+    "git-metadata-before-prune.tar.gz": "16f7ed93a5a0a7dd1179c6b841e11e0689b37ee8b7e0b2480cab81aa17ef7894"
+  },
+  "limits": [
+    "No new live provider/model delivery, installation or cross-platform certification.",
+    "Desktop external-fixture cases remain ignored; fresh desktop checks are headless control tests, not OS-input certification.",
+    "Initial desktop invocations used invalid target selectors; corrected --bin crewroom executed the recorded suite.",
+    "The original publication receipt incorrectly inferred zero total PRs from open counts and omitted the hidden pull ref. A full all-state query found one closed merged PR whose head was already included in the original scanned history.",
+    "Scanner and targeted manual review do not prove absence of every unidentified private detail.",
+    "Original historical evidence replay requires the private archive; commit identities changed."
+  ]
+}

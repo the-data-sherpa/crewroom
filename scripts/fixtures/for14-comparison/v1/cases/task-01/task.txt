@@ -1,0 +1,1 @@
+Update the delivery label helper. A delivery due today should say “Today”, one day away should say “Tomorrow”, and later deliveries should say “In N days”. Reject negative, fractional and nonnumeric day counts. Preserve the existing exported function. Hand off the change and its validation.

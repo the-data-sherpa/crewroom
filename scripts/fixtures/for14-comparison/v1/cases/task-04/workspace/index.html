@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>People</title>
+<style>*{box-sizing:border-box}body{margin:0;background:#f4f7f6;color:#172e2a;font:16px system-ui}main{max-width:700px;min-width:600px;margin:40px auto;padding:24px}input{width:100%;padding:12px;border:1px solid #78938d;border-radius:8px;font:inherit}ul{padding:0;list-style:none}li{padding:16px;background:white;border-bottom:1px solid #dce5e2}#empty{padding:16px}</style></head>
+<body><main><h1>People</h1><label for="search">Search people</label><input id="search" type="search"><ul id="people"><li>Ada Lovelace</li><li>Grace Hopper</li><li>Katherine Johnson</li></ul><p id="empty" hidden>No people match</p></main>
+<script src="people.cjs"></script><script>
+const search = document.querySelector('#search');
+const rows = [...document.querySelectorAll('#people li')];
+function update() {
+  const matches = filterPeople(rows.map(row => row.textContent), search.value);
+  rows.forEach(row => row.hidden = !matches.includes(row.textContent));
+  document.querySelector('#empty').hidden = matches.length !== 0;
+}
+search.addEventListener('change', update);
+</script></body></html>

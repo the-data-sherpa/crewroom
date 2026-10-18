@@ -1,0 +1,97 @@
+{
+  "workItem": "M4.3",
+  "status": "complete_with_recorded_boundaries",
+  "date": "2026-09-28",
+  "validation": {
+    "domain": {
+      "passed": 72,
+      "failed": 0,
+      "log": ".crewroom/test-results/m4-publication-domain-final.log"
+    },
+    "build": {
+      "passed": true,
+      "log": ".crewroom/test-results/m4-publication-build-final.log"
+    },
+    "browser": {
+      "passed": 5,
+      "failed": 0,
+      "log": ".crewroom/test-results/m4-publication-browser-final.log"
+    },
+    "reporterRuntime": {
+      "passed": true,
+      "guard": {
+        "fixture_port_allowed": true,
+        "external_denied": true,
+        "other_loopback_denied": true,
+        "child_egress_denied": true
+      },
+      "providerRequests": 7,
+      "providerErrors": [],
+      "unexpectedSurvivingProcesses": [],
+      "runtime": {
+        "passed": true,
+        "independentProcesses": 2,
+        "mailReceipts": 2,
+        "commentPosts": 1,
+        "restartReconciled": true,
+        "changedRequirementsStoppedProcesses": 2,
+        "staleResumeBlocked": true,
+        "browserReceipts": [
+          "pending",
+          "confirmed"
+        ]
+      }
+    }
+  },
+  "behaviors": [
+    "Durable push and PR intents precede external writes; restart adopts a matching PR after a lost create response without resending an inconclusive request.",
+    "Repository UUID preflight precedes Git writes. Explicit remote/ref leases reject competing branches and protected targets. Source/base drift blocks PR creation and readiness.",
+    "Only the active coordinator may publish a clean, changed, independently reviewed current candidate. PR content includes accepted criteria and actual local evidence identities.",
+    "Required status keys, PR identity, head, base, latest matching pipeline and required step results all constrain readiness. Optional SKIPPED remains distinct; required SKIPPED blocks.",
+    "A delivery reporter can queue the verified PR link and candidate evidence in Jira. Pausing during credential lookup prevents the later provider write.",
+    "Server-owned Git commands retain process ownership and have time/output bounds. Credentials remain server-side. There is no merge operation."
+  ],
+  "regressionsFound": [
+    "A failing fixture proved source drift after confirmed push could still create a PR. The current guard passes the same test.",
+    "The browser test originally asserted while asynchronous reconciliation was still pending. It now waits for the actual mutation response before checking presentation."
+  ],
+  "boundaries": [
+    "Provider mutation tests use loopback HTTP fixtures and a local bare Git remote. No live Jira/Bitbucket mutation or Conductor source change occurred.",
+    "The PR browser/service fixture uses explicitly labeled controller evidence fixtures. Full real OMP/Git/container delivery integration remains M4.4.",
+    "The bkt CLI can read live Bitbucket, but direct server Keychain access timed out during the read-only probe. Production OAuth access is not yet verified; M5 must resolve it.",
+    "The current publication is immutable per run. Operator-selected review continuation and updated publication revisions remain M6.3.",
+    "Unknown writes and permission rejections stay visible for explicit recovery; no blind retries or automatic merge are offered."
+  ],
+  "transportDecision": {
+    "selection": "Fixed-origin direct Bitbucket REST client, with no automatic mutation retries.",
+    "reason": "Source inspection of bkt 0.26.6 found network/5xx retries without an HTTP-method restriction, which cannot satisfy the lost-create-response contract. bkt is used only for read-only OAuth refresh.",
+    "source": "https://github.com/avivsinai/bitbucket-cli/blob/v0.26.6/pkg/httpx/client.go"
+  },
+  "sourceSha256": {
+    "server/app.ts": "0063ba1aa4f24ffadd9b19909a3c9a90f8f8d8dcf39778043a766b827374ac75",
+    "server/index.ts": "abde2cd3002767a8fa52491d2b1f48a654708116eb64dc5eb39c71b64dc234ac",
+    "server/jira-client.ts": "149872371b2e8a3613a36ebab98b0c31f419de9f688d176d552b8b8601086352",
+    "server/jira-delivery.ts": "9f0e1abb7ec3859536521438c022d29ef851915224929186f162157a8808b08f",
+    "server/results.ts": "5d3d6848a625f9e7b33b8b1b93a3e6112f89c2c92bca81252b9580cbeae7fef2",
+    "server/runtime/host.ts": "65447480262f7c4e654fd3e59d59032a4531b14d01c244b744cadd297ba2742d",
+    "server/runtime/jira-tools.ts": "5cb1dce5664bb9f4cf91f86bbbb2f473d87a0bf2a1f06166b19b4feebb88dcd2",
+    "server/runtime/supervisor.ts": "572ff169cb937766e6f2b013f9b9837eeabe2b4f79230a618f9b75a1d037fd63",
+    "server/workbench.ts": "ac0acc0704c41a695a92ad8af0e2a591d2297f55873da622cb89d90f651f8d69",
+    "shared/jira.ts": "3728b78c42a8de4f63ad237dac5bdc36d1dafae8e2631c013fb4bbc38c25096b",
+    "src/main.tsx": "e8b08a9480b04571b9f25a781889a331eb4b4d52e2023ee49e9f5d22294b64ce",
+    "src/results.tsx": "7fb2ee589a978f902d1ff086ecf85c917f907f31033bd1d46fb70cd75667f6c5",
+    "tests/jira-delivery.test.ts": "15c258b35478872a58fa9c01148298e8659ee4999ac6c98b6ba0c5013ec41352",
+    "server/bitbucket-client.ts": "9b1171578cf8d6861c89d4ee44d9a17d079c0b6e6e011bc9dd0533eeb7bbd20e",
+    "server/publication-connection.ts": "d55d1d3844a67e007fc8c91c826fe84f6c8b6e157e8b857fa0d0f2b7ae0d0485",
+    "server/publication-git.ts": "43bd4c7214395b51f0b1abf47c209a0cb29beb25f0496dadaa475d9b4069ef33",
+    "server/publication.ts": "73dc0acbb544bb284e834f2da3bdee9956e9e857e53d8e8bc0ddf2e9509fdd5f",
+    "server/runtime/publication-tools.ts": "a58a02946656632a7c7b174d01a7baed27c6b9644e4af532cb9f9d65ba95ecbf",
+    "shared/publication.ts": "c92af8af439d5977a8e68acf7c2a859d20094bf33385179e7f52939146e80fe3",
+    "src/publication.tsx": "3fe988840831cab0b2e1e0413ad4a5bb716cb2c4693beb7287ece0aea0ddc821",
+    "tests/bitbucket.test.ts": "cfec7ca5a1df218f4d226e8466bbf7a75032ebd5c7cb9cb4255d95023b033cd6",
+    "tests/e2e/publication.spec.ts": "6c68083dc46c5b6d5282a38b52d56caf4353935a92a967484708f21468b2ce1b",
+    "tests/fixtures/publication.ts": "c3d4495e0a3865c0156aab464249dd73a70b82b620741216d986add183fae36b",
+    "tests/publication-git.test.ts": "86e7cec7f6c98a856e596b12b6eef6524b30998aab291b46f923f150eb3e6ff1",
+    "tests/publication.test.ts": "0116f554bb6145039ef9865775efadd23f031d521bdedee9db9a2f40b6c4a2e5"
+  }
+}

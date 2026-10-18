@@ -1,0 +1,1392 @@
+{
+  "status": "passed",
+  "publicMethods": 154,
+  "directlyExercised": 151,
+  "lifetimeCovered": 1,
+  "laterBoundaries": 2,
+  "dispatches": 1992,
+  "rows": [
+    {
+      "method": "constructor",
+      "status": "partial",
+      "native": "Store::open",
+      "scope": "Fresh/schema-26 opens exercised by every native oracle process; historical schema upgrades remain N7.1."
+    },
+    {
+      "method": "close",
+      "status": "covered",
+      "native": "Store owns rusqlite::Connection; Drop closes it",
+      "scope": "Each native operation exits and the next reopens the same disposable database."
+    },
+    {
+      "method": "learningProposals",
+      "status": "covered",
+      "native": "learning_proposals",
+      "path": "crates/crewroom-core/src/learning.rs",
+      "line": 54,
+      "passed": 1,
+      "refused": 0
+    },
+    {
+      "method": "getLearningProposal",
+      "status": "covered",
+      "native": "get_learning_proposal",
+      "path": "crates/crewroom-core/src/learning.rs",
+      "line": 57,
+      "passed": 1,
+      "refused": 0
+    },
+    {
+      "method": "proposeLearning",
+      "status": "covered",
+      "native": "propose_learning",
+      "path": "crates/crewroom-core/src/learning.rs",
+      "line": 69,
+      "passed": 2,
+      "refused": 1
+    },
+    {
+      "method": "decideLearning",
+      "status": "covered",
+      "native": "decide_learning",
+      "path": "crates/crewroom-core/src/learning.rs",
+      "line": 107,
+      "passed": 4,
+      "refused": 0
+    },
+    {
+      "method": "completeLearningApproval",
+      "status": "covered",
+      "native": "complete_learning_approval",
+      "path": "crates/crewroom-core/src/learning.rs",
+      "line": 147,
+      "passed": 1,
+      "refused": 0
+    },
+    {
+      "method": "deliveryNotices",
+      "status": "covered",
+      "native": "delivery_notices",
+      "path": "crates/crewroom-core/src/messages.rs",
+      "line": 79,
+      "passed": 2,
+      "refused": 0
+    },
+    {
+      "method": "noticeDelivery",
+      "status": "covered",
+      "native": "notice_delivery",
+      "path": "crates/crewroom-core/src/messages.rs",
+      "line": 235,
+      "passed": 10,
+      "refused": 0
+    },
+    {
+      "method": "dispatchDeliveryNotice",
+      "status": "covered",
+      "native": "dispatch_delivery_notice",
+      "path": "crates/crewroom-core/src/messages.rs",
+      "line": 239,
+      "passed": 3,
+      "refused": 5
+    },
+    {
+      "method": "publications",
+      "status": "covered",
+      "native": "publications",
+      "path": "crates/crewroom-core/src/provider_records.rs",
+      "line": 29,
+      "passed": 1,
+      "refused": 0
+    },
+    {
+      "method": "publication",
+      "status": "covered",
+      "native": "publication",
+      "path": "crates/crewroom-core/src/provider_records.rs",
+      "line": 32,
+      "passed": 3,
+      "refused": 0
+    },
+    {
+      "method": "savePublication",
+      "status": "covered",
+      "native": "save_publication",
+      "path": "crates/crewroom-core/src/provider_records.rs",
+      "line": 35,
+      "passed": 11,
+      "refused": 0
+    },
+    {
+      "method": "savePublicationFeedback",
+      "status": "covered",
+      "native": "save_publication_feedback",
+      "path": "crates/crewroom-core/src/provider_records.rs",
+      "line": 47,
+      "passed": 15,
+      "refused": 3
+    },
+    {
+      "method": "jiraUpdates",
+      "status": "covered",
+      "native": "jira_updates",
+      "path": "crates/crewroom-core/src/provider_records.rs",
+      "line": 81,
+      "passed": 3,
+      "refused": 0
+    },
+    {
+      "method": "saveJiraUpdate",
+      "status": "covered",
+      "native": "save_jira_update",
+      "path": "crates/crewroom-core/src/provider_records.rs",
+      "line": 88,
+      "passed": 7,
+      "refused": 0
+    },
+    {
+      "method": "getRun",
+      "status": "covered",
+      "native": "get_run",
+      "path": "crates/crewroom-core/src/store.rs",
+      "line": 214,
+      "passed": 1,
+      "refused": 0
+    },
+    {
+      "method": "codingRecord",
+      "status": "covered",
+      "native": "coding_record",
+      "path": "crates/crewroom-core/src/provider_records.rs",
+      "line": 14,
+      "passed": 2,
+      "refused": 1
+    },
+    {
+      "method": "updateCodingRecord",
+      "status": "covered",
+      "native": "update_coding_record",
+      "path": "crates/crewroom-core/src/provider_records.rs",
+      "line": 18,
+      "passed": 2,
+      "refused": 2
+    },
+    {
+      "method": "repositoryWork",
+      "status": "covered",
+      "native": "repository_work",
+      "path": "crates/crewroom-core/src/continuations.rs",
+      "line": 59,
+      "passed": 2,
+      "refused": 1
+    },
+    {
+      "method": "reserveRepositoryWork",
+      "status": "covered",
+      "native": "reserve_repository_work",
+      "path": "crates/crewroom-core/src/repository_work.rs",
+      "line": 26,
+      "passed": 3,
+      "refused": 10
+    },
+    {
+      "method": "confirmRepositoryWork",
+      "status": "covered",
+      "native": "confirm_repository_work",
+      "path": "crates/crewroom-core/src/repository_work.rs",
+      "line": 37,
+      "passed": 4,
+      "refused": 1
+    },
+    {
+      "method": "claimRepositoryWriter",
+      "status": "covered",
+      "native": "claim_repository_writer",
+      "path": "crates/crewroom-core/src/repository_work.rs",
+      "line": 61,
+      "passed": 9,
+      "refused": 24
+    },
+    {
+      "method": "releaseRepositoryWriter",
+      "status": "covered",
+      "native": "release_repository_writer",
+      "path": "crates/crewroom-core/src/repository_work.rs",
+      "line": 111,
+      "passed": 8,
+      "refused": 3
+    },
+    {
+      "method": "checkpointRepository",
+      "status": "covered",
+      "native": "checkpoint_repository",
+      "path": "crates/crewroom-core/src/repository_work.rs",
+      "line": 133,
+      "passed": 1,
+      "refused": 1
+    },
+    {
+      "method": "preflightTargetRefresh",
+      "status": "covered",
+      "native": "preflight_target_refresh",
+      "path": "crates/crewroom-core/src/target_recovery.rs",
+      "line": 29,
+      "passed": 2,
+      "refused": 14
+    },
+    {
+      "method": "beginTargetRefresh",
+      "status": "covered",
+      "native": "begin_target_refresh",
+      "path": "crates/crewroom-core/src/target_recovery.rs",
+      "line": 101,
+      "passed": 5,
+      "refused": 3
+    },
+    {
+      "method": "recordTargetRefreshWorkspace",
+      "status": "covered",
+      "native": "record_target_refresh_workspace",
+      "path": "crates/crewroom-core/src/target_recovery.rs",
+      "line": 113,
+      "passed": 2,
+      "refused": 8
+    },
+    {
+      "method": "beginTargetConflictContinuation",
+      "status": "covered",
+      "native": "begin_target_conflict_continuation",
+      "path": "crates/crewroom-core/src/target_recovery.rs",
+      "line": 185,
+      "passed": 1,
+      "refused": 7
+    },
+    {
+      "method": "finishTargetConflictContinuation",
+      "status": "covered",
+      "native": "finish_target_conflict_continuation",
+      "path": "crates/crewroom-core/src/target_recovery.rs",
+      "line": 233,
+      "passed": 1,
+      "refused": 3
+    },
+    {
+      "method": "beginTargetPromotion",
+      "status": "covered",
+      "native": "begin_target_promotion",
+      "path": "crates/crewroom-core/src/target_recovery.rs",
+      "line": 248,
+      "passed": 2,
+      "refused": 8
+    },
+    {
+      "method": "rejectUnpromotedConflict",
+      "status": "covered",
+      "native": "reject_unpromoted_conflict",
+      "path": "crates/crewroom-core/src/target_recovery.rs",
+      "line": 319,
+      "passed": 1,
+      "refused": 17
+    },
+    {
+      "method": "interruptUnpromotedConflict",
+      "status": "covered",
+      "native": "interrupt_unpromoted_conflict",
+      "path": "crates/crewroom-core/src/target_recovery.rs",
+      "line": 328,
+      "passed": 1,
+      "refused": 0
+    },
+    {
+      "method": "recordTargetRebaseRecovery",
+      "status": "covered",
+      "native": "record_target_rebase_recovery",
+      "path": "crates/crewroom-core/src/target_recovery.rs",
+      "line": 365,
+      "passed": 7,
+      "refused": 3
+    },
+    {
+      "method": "finishTargetRefresh",
+      "status": "covered",
+      "native": "finish_target_refresh",
+      "path": "crates/crewroom-core/src/target_recovery.rs",
+      "line": 394,
+      "passed": 9,
+      "refused": 6
+    },
+    {
+      "method": "runtime",
+      "status": "covered",
+      "native": "runtime",
+      "path": "crates/crewroom-core/src/store.rs",
+      "line": 514,
+      "passed": 1,
+      "refused": 0
+    },
+    {
+      "method": "admitAssignment",
+      "status": "covered",
+      "native": "admit_assignment",
+      "path": "crates/crewroom-core/src/attempts.rs",
+      "line": 63,
+      "passed": 22,
+      "refused": 21
+    },
+    {
+      "method": "admitInitialTeam",
+      "status": "covered",
+      "native": "admit_initial_team",
+      "path": "crates/crewroom-core/src/attempts.rs",
+      "line": 131,
+      "passed": 6,
+      "refused": 7
+    },
+    {
+      "method": "teamProposals",
+      "status": "covered",
+      "native": "team_proposals",
+      "path": "crates/crewroom-core/src/teams.rs",
+      "line": 92,
+      "passed": 1,
+      "refused": 0
+    },
+    {
+      "method": "insertionReplay",
+      "status": "covered",
+      "native": "insertion_replay",
+      "path": "crates/crewroom-core/src/teams.rs",
+      "line": 106,
+      "passed": 1,
+      "refused": 0
+    },
+    {
+      "method": "validateInsertionTeam",
+      "status": "covered",
+      "native": "validate_insertion_team",
+      "path": "crates/crewroom-core/src/briefs.rs",
+      "line": 144,
+      "passed": 1,
+      "refused": 4
+    },
+    {
+      "method": "proposeOperatorSpecialist",
+      "status": "covered",
+      "native": "propose_operator_specialist",
+      "path": "crates/crewroom-core/src/teams.rs",
+      "line": 120,
+      "passed": 19,
+      "refused": 29
+    },
+    {
+      "method": "insertionBlockers",
+      "status": "covered",
+      "native": "insertion_blockers",
+      "path": "crates/crewroom-core/src/teams.rs",
+      "line": 155,
+      "passed": 4,
+      "refused": 0
+    },
+    {
+      "method": "proposeTeam",
+      "status": "covered",
+      "native": "propose_team",
+      "path": "crates/crewroom-core/src/teams.rs",
+      "line": 184,
+      "passed": 4,
+      "refused": 16
+    },
+    {
+      "method": "rejectUnavailableTeamProposal",
+      "status": "covered",
+      "native": "reject_unavailable_team_proposal",
+      "path": "crates/crewroom-core/src/teams.rs",
+      "line": 228,
+      "passed": 9,
+      "refused": 0
+    },
+    {
+      "method": "applyTeamProposal",
+      "status": "covered",
+      "native": "apply_team_proposal",
+      "path": "crates/crewroom-core/src/teams.rs",
+      "line": 302,
+      "passed": 6,
+      "refused": 7
+    },
+    {
+      "method": "beginCodingTransition",
+      "status": "covered",
+      "native": "begin_coding_transition",
+      "path": "crates/crewroom-core/src/teams.rs",
+      "line": 359,
+      "passed": 2,
+      "refused": 1
+    },
+    {
+      "method": "finishCodingTransition",
+      "status": "covered",
+      "native": "finish_coding_transition",
+      "path": "crates/crewroom-core/src/teams.rs",
+      "line": 381,
+      "passed": 2,
+      "refused": 0
+    },
+    {
+      "method": "beginTeamTransition",
+      "status": "covered",
+      "native": "begin_team_transition",
+      "path": "crates/crewroom-core/src/teams.rs",
+      "line": 334,
+      "passed": 2,
+      "refused": 2
+    },
+    {
+      "method": "finishTeamTransition",
+      "status": "covered",
+      "native": "finish_team_transition",
+      "path": "crates/crewroom-core/src/teams.rs",
+      "line": 351,
+      "passed": 2,
+      "refused": 0
+    },
+    {
+      "method": "prepareMessage",
+      "status": "covered",
+      "native": "prepare_message",
+      "path": "crates/crewroom-core/src/messages.rs",
+      "line": 124,
+      "passed": 23,
+      "refused": 38
+    },
+    {
+      "method": "bindMailbox",
+      "status": "covered",
+      "native": "bind_mailbox",
+      "path": "crates/crewroom-core/src/messages.rs",
+      "line": 151,
+      "passed": 2,
+      "refused": 3
+    },
+    {
+      "method": "getPeerMessage",
+      "status": "covered",
+      "native": "get_peer_message",
+      "path": "crates/crewroom-core/src/messages.rs",
+      "line": 164,
+      "passed": 1,
+      "refused": 0
+    },
+    {
+      "method": "recordMessageStored",
+      "status": "covered",
+      "native": "record_message_stored",
+      "path": "crates/crewroom-core/src/messages.rs",
+      "line": 168,
+      "passed": 5,
+      "refused": 2
+    },
+    {
+      "method": "acceptMessage",
+      "status": "covered",
+      "native": "accept_message",
+      "path": "crates/crewroom-core/src/messages.rs",
+      "line": 191,
+      "passed": 3,
+      "refused": 2
+    },
+    {
+      "method": "markMessageUncertain",
+      "status": "covered",
+      "native": "mark_message_uncertain",
+      "path": "crates/crewroom-core/src/messages.rs",
+      "line": 204,
+      "passed": 2,
+      "refused": 0
+    },
+    {
+      "method": "restoreUndispatchedInput",
+      "status": "covered",
+      "native": "restore_undispatched_input",
+      "path": "crates/crewroom-core/src/messages.rs",
+      "line": 281,
+      "passed": 6,
+      "refused": 2
+    },
+    {
+      "method": "observerCursor",
+      "status": "covered",
+      "native": "observer_cursor",
+      "path": "crates/crewroom-core/src/observations.rs",
+      "line": 174,
+      "passed": 1,
+      "refused": 0
+    },
+    {
+      "method": "getAttempt",
+      "status": "covered",
+      "native": "get_attempt",
+      "path": "crates/crewroom-core/src/attempts.rs",
+      "line": 27,
+      "passed": 1,
+      "refused": 0
+    },
+    {
+      "method": "claimAttempt",
+      "status": "covered",
+      "native": "claim_attempt",
+      "path": "crates/crewroom-core/src/attempts.rs",
+      "line": 185,
+      "passed": 17,
+      "refused": 2
+    },
+    {
+      "method": "executingRuns",
+      "status": "covered",
+      "native": "executing_runs",
+      "path": "crates/crewroom-core/src/attempts.rs",
+      "line": 172,
+      "passed": 1,
+      "refused": 0
+    },
+    {
+      "method": "unstoppedCodingRun",
+      "status": "covered",
+      "native": "unstopped_coding_run",
+      "path": "crates/crewroom-core/src/attempts.rs",
+      "line": 181,
+      "passed": 2,
+      "refused": 0
+    },
+    {
+      "method": "replaceAttempt",
+      "status": "covered",
+      "native": "replace_attempt",
+      "path": "crates/crewroom-core/src/attempts.rs",
+      "line": 269,
+      "passed": 9,
+      "refused": 11
+    },
+    {
+      "method": "grantRepairCycle",
+      "status": "covered",
+      "native": "grant_repair_cycle",
+      "path": "crates/crewroom-core/src/attempts.rs",
+      "line": 306,
+      "passed": 3,
+      "refused": 21
+    },
+    {
+      "method": "recordAttemptIdentity",
+      "status": "covered",
+      "native": "record_attempt_identity",
+      "path": "crates/crewroom-core/src/attempts.rs",
+      "line": 196,
+      "passed": 12,
+      "refused": 1
+    },
+    {
+      "method": "recordDispatch",
+      "status": "covered",
+      "native": "record_dispatch",
+      "path": "crates/crewroom-core/src/messages.rs",
+      "line": 211,
+      "passed": 6,
+      "refused": 3
+    },
+    {
+      "method": "codingQueue",
+      "status": "covered",
+      "native": "coding_queue",
+      "path": "crates/crewroom-core/src/scheduling.rs",
+      "line": 88,
+      "passed": 2,
+      "refused": 0
+    },
+    {
+      "method": "codingSlot",
+      "status": "covered",
+      "native": "coding_slot",
+      "path": "crates/crewroom-core/src/scheduling.rs",
+      "line": 18,
+      "passed": 1,
+      "refused": 0
+    },
+    {
+      "method": "eligibilityHold",
+      "status": "covered",
+      "native": "eligibility_hold",
+      "path": "crates/crewroom-core/src/scheduling.rs",
+      "line": 133,
+      "passed": 4,
+      "refused": 0
+    },
+    {
+      "method": "dependencyMerges",
+      "status": "covered",
+      "native": "dependency_merges",
+      "path": "crates/crewroom-core/src/scheduling.rs",
+      "line": 207,
+      "passed": 2,
+      "refused": 0
+    },
+    {
+      "method": "saveDependencyBaseHold",
+      "status": "covered",
+      "native": "save_dependency_base_hold",
+      "path": "crates/crewroom-core/src/scheduling.rs",
+      "line": 215,
+      "passed": 4,
+      "refused": 0
+    },
+    {
+      "method": "setLaunchHold",
+      "status": "covered",
+      "native": "set_launch_hold",
+      "path": "crates/crewroom-core/src/scheduling.rs",
+      "line": 234,
+      "passed": 5,
+      "refused": 0
+    },
+    {
+      "method": "claimNextCodingSlot",
+      "status": "covered",
+      "native": "claim_next_coding_slot",
+      "path": "crates/crewroom-core/src/scheduling.rs",
+      "line": 277,
+      "passed": 5,
+      "refused": 0
+    },
+    {
+      "method": "assertCodingSlotAvailable",
+      "status": "covered",
+      "native": "assert_coding_slot_available",
+      "path": "crates/crewroom-core/src/scheduling.rs",
+      "line": 259,
+      "passed": 1,
+      "refused": 2
+    },
+    {
+      "method": "claimCodingSlot",
+      "status": "covered",
+      "native": "claim_coding_slot",
+      "path": "crates/crewroom-core/src/scheduling.rs",
+      "line": 292,
+      "passed": 4,
+      "refused": 1
+    },
+    {
+      "method": "releaseCodingSlot",
+      "status": "covered",
+      "native": "release_coding_slot",
+      "path": "crates/crewroom-core/src/scheduling.rs",
+      "line": 327,
+      "passed": 3,
+      "refused": 1
+    },
+    {
+      "method": "deferUnadmittedLaunch",
+      "status": "covered",
+      "native": "defer_unadmitted_launch",
+      "path": "crates/crewroom-core/src/scheduling.rs",
+      "line": 392,
+      "passed": 2,
+      "refused": 1
+    },
+    {
+      "method": "deferDependencyLaunch",
+      "status": "covered",
+      "native": "defer_unadmitted_launch",
+      "path": "crates/crewroom-core/src/scheduling.rs",
+      "line": 392,
+      "passed": 1,
+      "refused": 1,
+      "scope": "Same transaction with dependency=true"
+    },
+    {
+      "method": "canReplayInitialLaunch",
+      "status": "covered",
+      "native": "can_replay_initial_launch",
+      "path": "crates/crewroom-core/src/scheduling.rs",
+      "line": 446,
+      "passed": 6,
+      "refused": 0
+    },
+    {
+      "method": "normalizeLaunchExecution",
+      "status": "covered",
+      "native": "normalize_launch_execution",
+      "path": "crates/crewroom-core/src/scheduling.rs",
+      "line": 473,
+      "passed": 3,
+      "refused": 0
+    },
+    {
+      "method": "restartScheduledLaunch",
+      "status": "covered",
+      "native": "restart_scheduled_launch",
+      "path": "crates/crewroom-core/src/scheduling.rs",
+      "line": 498,
+      "passed": 1,
+      "refused": 1
+    },
+    {
+      "method": "reclaimCodingSlot",
+      "status": "covered",
+      "native": "reclaim_coding_slot",
+      "path": "crates/crewroom-core/src/scheduling.rs",
+      "line": 514,
+      "passed": 2,
+      "refused": 1
+    },
+    {
+      "method": "queueFeedbackResume",
+      "status": "covered",
+      "native": "queue_feedback_resume",
+      "path": "crates/crewroom-core/src/feedback_resume.rs",
+      "line": 28,
+      "passed": 10,
+      "refused": 6
+    },
+    {
+      "method": "holdQueuedFeedbackResume",
+      "status": "covered",
+      "native": "hold_queued_feedback_resume",
+      "path": "crates/crewroom-core/src/feedback_resume.rs",
+      "line": 69,
+      "passed": 2,
+      "refused": 0
+    },
+    {
+      "method": "queueReviewResume",
+      "status": "covered",
+      "native": "queue_review_resume",
+      "path": "crates/crewroom-core/src/feedback_resume.rs",
+      "line": 113,
+      "passed": 2,
+      "refused": 0
+    },
+    {
+      "method": "setResumeRequestState",
+      "status": "covered",
+      "native": "set_resume_request_state",
+      "path": "crates/crewroom-core/src/feedback_resume.rs",
+      "line": 137,
+      "passed": 3,
+      "refused": 0
+    },
+    {
+      "method": "clearResumeRequest",
+      "status": "covered",
+      "native": "clear_resume_request",
+      "path": "crates/crewroom-core/src/feedback_resume.rs",
+      "line": 160,
+      "passed": 4,
+      "refused": 0
+    },
+    {
+      "method": "markFeedbackHandoff",
+      "status": "covered",
+      "native": "mark_feedback_handoff",
+      "path": "crates/crewroom-core/src/feedback_resume.rs",
+      "line": 182,
+      "passed": 2,
+      "refused": 0
+    },
+    {
+      "method": "finishFeedbackContinuation",
+      "status": "covered",
+      "native": "finish_feedback_continuation",
+      "path": "crates/crewroom-core/src/feedback_resume.rs",
+      "line": 203,
+      "passed": 5,
+      "refused": 2
+    },
+    {
+      "method": "continuationReplay",
+      "status": "covered",
+      "native": "continuation_replay",
+      "path": "crates/crewroom-core/src/continuations.rs",
+      "line": 70,
+      "passed": 1,
+      "refused": 0
+    },
+    {
+      "method": "continuationPublication",
+      "status": "covered",
+      "native": "continuation_publication",
+      "path": "crates/crewroom-core/src/continuations.rs",
+      "line": 83,
+      "passed": 3,
+      "refused": 5
+    },
+    {
+      "method": "publicationSuperseded",
+      "status": "covered",
+      "native": "publication_superseded",
+      "path": "crates/crewroom-core/src/continuations.rs",
+      "line": 122,
+      "passed": 4,
+      "refused": 1
+    },
+    {
+      "method": "cancelledSource",
+      "status": "covered",
+      "native": "cancelled_source",
+      "path": "crates/crewroom-core/src/continuations.rs",
+      "line": 147,
+      "passed": 7,
+      "refused": 27
+    },
+    {
+      "method": "continuationView",
+      "status": "covered",
+      "native": "continuation_view",
+      "path": "crates/crewroom-core/src/continuations.rs",
+      "line": 240,
+      "passed": 11,
+      "refused": 0
+    },
+    {
+      "method": "queueCancelledContinuation",
+      "status": "covered",
+      "native": "queue_cancelled_continuation",
+      "path": "crates/crewroom-core/src/continuations.rs",
+      "line": 263,
+      "passed": 6,
+      "refused": 11
+    },
+    {
+      "method": "transferCancelledWork",
+      "status": "covered",
+      "native": "transfer_cancelled_work",
+      "path": "crates/crewroom-core/src/continuations.rs",
+      "line": 291,
+      "passed": 4,
+      "refused": 5
+    },
+    {
+      "method": "configuredCheckIds",
+      "status": "covered",
+      "native": "configured_check_ids",
+      "path": "crates/crewroom-core/src/briefs.rs",
+      "line": 124,
+      "passed": 5,
+      "refused": 1
+    },
+    {
+      "method": "setQueueLaunch",
+      "status": "covered",
+      "native": "set_queue_launch",
+      "path": "crates/crewroom-core/src/launch.rs",
+      "line": 150,
+      "passed": 28,
+      "refused": 38
+    },
+    {
+      "method": "reorderQueue",
+      "status": "covered",
+      "native": "reorder_queue",
+      "path": "crates/crewroom-core/src/store.rs",
+      "line": 421,
+      "passed": 2,
+      "refused": 19
+    },
+    {
+      "method": "cancelQueued",
+      "status": "covered",
+      "native": "cancel_queued",
+      "path": "crates/crewroom-core/src/store.rs",
+      "line": 475,
+      "passed": 1,
+      "refused": 0
+    },
+    {
+      "method": "setDesiredState",
+      "status": "covered",
+      "native": "set_desired_state",
+      "path": "crates/crewroom-core/src/scheduling.rs",
+      "line": 549,
+      "passed": 13,
+      "refused": 1
+    },
+    {
+      "method": "prepareContinuation",
+      "status": "covered",
+      "native": "prepare_continuation",
+      "path": "crates/crewroom-core/src/scheduling.rs",
+      "line": 563,
+      "passed": 4,
+      "refused": 1
+    },
+    {
+      "method": "accountTime",
+      "status": "covered",
+      "native": "account_time",
+      "path": "crates/crewroom-core/src/active_time.rs",
+      "line": 83,
+      "passed": 35,
+      "refused": 0
+    },
+    {
+      "method": "requireAttention",
+      "status": "covered",
+      "native": "require_attention",
+      "path": "crates/crewroom-core/src/scheduling.rs",
+      "line": 582,
+      "passed": 1,
+      "refused": 0
+    },
+    {
+      "method": "startExecution",
+      "status": "covered",
+      "native": "start_execution",
+      "path": "crates/crewroom-core/src/scheduling.rs",
+      "line": 592,
+      "passed": 5,
+      "refused": 0
+    },
+    {
+      "method": "setActiveLimit",
+      "status": "covered",
+      "native": "set_active_limit",
+      "path": "crates/crewroom-core/src/scheduling.rs",
+      "line": 595,
+      "passed": 1,
+      "refused": 1
+    },
+    {
+      "method": "beginPause",
+      "status": "covered",
+      "native": "begin_pause",
+      "path": "crates/crewroom-core/src/attempts.rs",
+      "line": 354,
+      "passed": 8,
+      "refused": 0
+    },
+    {
+      "method": "recordOwnership",
+      "status": "covered",
+      "native": "record_ownership",
+      "path": "crates/crewroom-core/src/attempts.rs",
+      "line": 232,
+      "passed": 31,
+      "refused": 0
+    },
+    {
+      "method": "finishPause",
+      "status": "covered",
+      "native": "finish_pause",
+      "path": "crates/crewroom-core/src/attempts.rs",
+      "line": 364,
+      "passed": 15,
+      "refused": 0
+    },
+    {
+      "method": "agentEvents",
+      "status": "covered",
+      "native": "agent_events",
+      "path": "crates/crewroom-core/src/observations.rs",
+      "line": 55,
+      "passed": 1,
+      "refused": 0
+    },
+    {
+      "method": "agentEventsOfType",
+      "status": "covered",
+      "native": "agent_events_of_type",
+      "path": "crates/crewroom-core/src/observations.rs",
+      "line": 71,
+      "passed": 7,
+      "refused": 0
+    },
+    {
+      "method": "attemptForPane",
+      "status": "covered",
+      "native": "attempt_for_pane",
+      "path": "crates/crewroom-core/src/observations.rs",
+      "line": 110,
+      "passed": 3,
+      "refused": 0
+    },
+    {
+      "method": "commandEvents",
+      "status": "covered",
+      "native": "command_events",
+      "path": "crates/crewroom-core/src/observations.rs",
+      "line": 92,
+      "passed": 1,
+      "refused": 0
+    },
+    {
+      "method": "agentEventPage",
+      "status": "covered",
+      "native": "agent_event_page",
+      "path": "crates/crewroom-core/src/observations.rs",
+      "line": 113,
+      "passed": 2,
+      "refused": 0
+    },
+    {
+      "method": "hasAgentEvent",
+      "status": "covered",
+      "native": "has_agent_event",
+      "path": "crates/crewroom-core/src/observations.rs",
+      "line": 107,
+      "passed": 1,
+      "refused": 0
+    },
+    {
+      "method": "recordAgentEvent",
+      "status": "covered",
+      "native": "record_agent_event",
+      "path": "crates/crewroom-core/src/observations.rs",
+      "line": 134,
+      "passed": 23,
+      "refused": 0
+    },
+    {
+      "method": "recordObserverPage",
+      "status": "covered",
+      "native": "record_observer_page",
+      "path": "crates/crewroom-core/src/observations.rs",
+      "line": 185,
+      "passed": 2,
+      "refused": 2
+    },
+    {
+      "method": "onChange",
+      "status": "pending",
+      "native": "AppState watch channel covers HTTP/WS only",
+      "scope": "Controller event wiring remains N3.3; execution stays unavailable."
+    },
+    {
+      "method": "setDependencies",
+      "status": "covered",
+      "native": "set_dependencies",
+      "path": "crates/crewroom-core/src/dependencies.rs",
+      "line": 80,
+      "passed": 5,
+      "refused": 33
+    },
+    {
+      "method": "getTask",
+      "status": "covered",
+      "native": "get_task",
+      "path": "crates/crewroom-core/src/store.rs",
+      "line": 201,
+      "passed": 2,
+      "refused": 0
+    },
+    {
+      "method": "requirementRevisions",
+      "status": "covered",
+      "native": "requirement_revisions",
+      "path": "crates/crewroom-core/src/store.rs",
+      "line": 291,
+      "passed": 1,
+      "refused": 0
+    },
+    {
+      "method": "snapshot",
+      "status": "covered",
+      "native": "snapshot",
+      "path": "crates/crewroom-core/src/store.rs",
+      "line": 534,
+      "passed": 6,
+      "refused": 0
+    },
+    {
+      "method": "assignRepository",
+      "status": "covered",
+      "native": "assign_repository",
+      "path": "crates/crewroom-core/src/store.rs",
+      "line": 301,
+      "passed": 1,
+      "refused": 9
+    },
+    {
+      "method": "addNote",
+      "status": "covered",
+      "native": "add_note",
+      "path": "crates/crewroom-core/src/store.rs",
+      "line": 320,
+      "passed": 8,
+      "refused": 18
+    },
+    {
+      "method": "refinementProposals",
+      "status": "covered",
+      "native": "refinement_proposals",
+      "path": "crates/crewroom-core/src/outcomes.rs",
+      "line": 119,
+      "passed": 3,
+      "refused": 0
+    },
+    {
+      "method": "proposeRefinement",
+      "status": "covered",
+      "native": "propose_refinement",
+      "path": "crates/crewroom-core/src/outcomes.rs",
+      "line": 126,
+      "passed": 33,
+      "refused": 48
+    },
+    {
+      "method": "decideRefinement",
+      "status": "covered",
+      "native": "decide_refinement",
+      "path": "crates/crewroom-core/src/outcomes.rs",
+      "line": 151,
+      "passed": 11,
+      "refused": 26
+    },
+    {
+      "method": "researchArtifacts",
+      "status": "covered",
+      "native": "research_artifacts",
+      "path": "crates/crewroom-core/src/outcomes.rs",
+      "line": 204,
+      "passed": 2,
+      "refused": 1
+    },
+    {
+      "method": "saveResearchArtifact",
+      "status": "covered",
+      "native": "save_research_artifact",
+      "path": "crates/crewroom-core/src/outcomes.rs",
+      "line": 209,
+      "passed": 6,
+      "refused": 7
+    },
+    {
+      "method": "requestResearchCompletion",
+      "status": "covered",
+      "native": "request_research_completion",
+      "path": "crates/crewroom-core/src/outcomes.rs",
+      "line": 223,
+      "passed": 4,
+      "refused": 2
+    },
+    {
+      "method": "completeResearch",
+      "status": "covered",
+      "native": "complete_research",
+      "path": "crates/crewroom-core/src/outcomes.rs",
+      "line": 256,
+      "passed": 4,
+      "refused": 8
+    },
+    {
+      "method": "closeRefinement",
+      "status": "covered",
+      "native": "close_refinement",
+      "path": "crates/crewroom-core/src/workflow.rs",
+      "line": 162,
+      "passed": 2,
+      "refused": 0
+    },
+    {
+      "method": "steer",
+      "status": "covered",
+      "native": "steer",
+      "path": "crates/crewroom-core/src/messages.rs",
+      "line": 112,
+      "passed": 30,
+      "refused": 25
+    },
+    {
+      "method": "steering",
+      "status": "covered",
+      "native": "steering",
+      "path": "crates/crewroom-core/src/messages.rs",
+      "line": 76,
+      "passed": 1,
+      "refused": 0
+    },
+    {
+      "method": "dispatchSteering",
+      "status": "covered",
+      "native": "dispatch_steering",
+      "path": "crates/crewroom-core/src/messages.rs",
+      "line": 335,
+      "passed": 5,
+      "refused": 5
+    },
+    {
+      "method": "receiveSteering",
+      "status": "covered",
+      "native": "receive_steering",
+      "path": "crates/crewroom-core/src/messages.rs",
+      "line": 371,
+      "passed": 6,
+      "refused": 0
+    },
+    {
+      "method": "applySteering",
+      "status": "covered",
+      "native": "apply_steering",
+      "path": "crates/crewroom-core/src/messages.rs",
+      "line": 388,
+      "passed": 3,
+      "refused": 4
+    },
+    {
+      "method": "repositoryUpdateReplay",
+      "status": "covered",
+      "native": "repository_update_replay",
+      "path": "crates/crewroom-core/src/repositories.rs",
+      "line": 333,
+      "passed": 15,
+      "refused": 21
+    },
+    {
+      "method": "updateRepository",
+      "status": "covered",
+      "native": "update_repository",
+      "path": "crates/crewroom-core/src/repositories.rs",
+      "line": 341,
+      "passed": 4,
+      "refused": 14
+    },
+    {
+      "method": "retireRepository",
+      "status": "covered",
+      "native": "retire_repository",
+      "path": "crates/crewroom-core/src/repositories.rs",
+      "line": 453,
+      "passed": 4,
+      "refused": 2
+    },
+    {
+      "method": "repositoryReplay",
+      "status": "covered",
+      "native": "repository_replay",
+      "path": "crates/crewroom-core/src/repositories.rs",
+      "line": 372,
+      "passed": 1,
+      "refused": 2
+    },
+    {
+      "method": "isOwnedRepositoryWorktree",
+      "status": "covered",
+      "native": "is_owned_repository_worktree",
+      "path": "crates/crewroom-core/src/repositories.rs",
+      "line": 300,
+      "passed": 3,
+      "refused": 0
+    },
+    {
+      "method": "saveRepository",
+      "status": "covered",
+      "native": "save_repository",
+      "path": "crates/crewroom-core/src/repositories.rs",
+      "line": 412,
+      "passed": 1,
+      "refused": 1
+    },
+    {
+      "method": "createTask",
+      "status": "covered",
+      "native": "create_task",
+      "path": "crates/crewroom-core/src/store.rs",
+      "line": 271,
+      "passed": 21,
+      "refused": 20
+    },
+    {
+      "method": "queueRefinement",
+      "status": "covered",
+      "native": "queue_refinement",
+      "path": "crates/crewroom-core/src/workflow.rs",
+      "line": 129,
+      "passed": 8,
+      "refused": 14
+    },
+    {
+      "method": "queueResearch",
+      "status": "covered",
+      "native": "queue_research",
+      "path": "crates/crewroom-core/src/research.rs",
+      "line": 144,
+      "passed": 5,
+      "refused": 15
+    },
+    {
+      "method": "queue",
+      "status": "covered",
+      "native": "queue_with_roles",
+      "path": "crates/crewroom-core/src/store.rs",
+      "line": 339,
+      "passed": 26,
+      "refused": 47
+    },
+    {
+      "method": "importJira",
+      "status": "covered",
+      "native": "import_jira",
+      "path": "crates/crewroom-core/src/jira.rs",
+      "line": 132,
+      "passed": 32,
+      "refused": 32
+    },
+    {
+      "method": "jiraState",
+      "status": "covered",
+      "native": "jira_state",
+      "path": "crates/crewroom-core/src/jira.rs",
+      "line": 220,
+      "passed": 3,
+      "refused": 0
+    },
+    {
+      "method": "commitJiraSync",
+      "status": "covered",
+      "native": "commit_jira_sync",
+      "path": "crates/crewroom-core/src/jira.rs",
+      "line": 223,
+      "passed": 8,
+      "refused": 14
+    },
+    {
+      "method": "failJiraSync",
+      "status": "covered",
+      "native": "fail_jira_sync",
+      "path": "crates/crewroom-core/src/jira.rs",
+      "line": 246,
+      "passed": 4,
+      "refused": 0
+    },
+    {
+      "method": "acceptRequirements",
+      "status": "covered",
+      "native": "accept_requirements",
+      "path": "crates/crewroom-core/src/outcomes.rs",
+      "line": 48,
+      "passed": 5,
+      "refused": 4
+    },
+    {
+      "method": "refine",
+      "status": "covered",
+      "native": "refine",
+      "path": "crates/crewroom-core/src/store.rs",
+      "line": 288,
+      "passed": 30,
+      "refused": 49
+    },
+    {
+      "method": "adoptRequirements",
+      "status": "covered",
+      "native": "adopt_requirements",
+      "path": "crates/crewroom-core/src/requirements.rs",
+      "line": 28,
+      "passed": 8,
+      "refused": 13
+    }
+  ],
+  "claims": "Schema-26 durable methods and their bounded refusal/replay sequences only. Trace counts identify successful native example dispatches and do not imply complete branch coverage or actual external effects.",
+  "sourceManifestSha256": "690e2fc6c7029a3bd45d8b81dc2f94a2103806a25e2b5703d64da5ec1645d80e",
+  "baselineCommit": "69089dcfbf7488748f251180e158e5ce8a9776da",
+  "traceSha256": "3dac8e332c52c121f50f73a6e5b4e4426950f9b37974b7052f67088c46b6bf8e"
+}

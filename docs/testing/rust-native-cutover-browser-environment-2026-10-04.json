@@ -1,0 +1,251 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-04T07:39:06.310240+00:00",
+  "scope": "Disposable retained-browser validation of proposed native startup aliases, not active default cutover or packaged native GUI acceptance.",
+  "baseRevision": "46a8d14d873c15a6f6797f4d0e0627e2236b7749",
+  "fixtureSourceRevision": "46a8d14d873c15a6f6797f4d0e0627e2236b7749",
+  "proposedPackage": {
+    "path": "/private/tmp/cr-cutover-validation/package.json",
+    "sha256": "b1740385fe9c637f6cbb95bb6ceb1d9767b2eac103d204161df0dac4b2209205",
+    "bytes": 1113
+  },
+  "sourceBinding": {
+    "inputCount": 175,
+    "manifestSha256": "6cb521ad17ee01e3c39b5db5002143d0efb17aa785b35543befeeff6151044c1",
+    "manifestEncoding": "UTF-8 JSON sorted keys, separators comma/colon, no trailing newline",
+    "completeRecordedInputs": {
+      "path": "/private/tmp/cr-cutover-validation-results/browser-clean-environment/report.json",
+      "sha256": "ec4b6a892b499e925601ee859b505184d1f8c1a46eb621e2079e9fc890c343f5",
+      "bytes": 38947
+    },
+    "unchangedBeforeAfterAndAtReceipt": true,
+    "preexistingPackageAliasEditOnly": true,
+    "trackedWorktreeChanges": [
+      "package.json"
+    ]
+  },
+  "originalAttempt": {
+    "report": {
+      "path": "/private/tmp/cr-cutover-validation-results/report.json",
+      "sha256": "88966998f0da15396e1238c17d740a9a1c848aacd3430ff3eddee19c67528ffa",
+      "bytes": 36017
+    },
+    "domain": {
+      "passed": 332,
+      "failed": 0,
+      "name": "domain",
+      "args": [
+        "npm",
+        "test"
+      ],
+      "exitCode": 0,
+      "seconds": 548.1892152079963,
+      "logSha256": "4ba7c4259733a7fddddaf6d1cc9f27d9a5cf605e7f67eaa080f898d2ad007d8c"
+    },
+    "build": {
+      "name": "build",
+      "args": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exitCode": 0,
+      "seconds": 1.1260051249992102,
+      "logSha256": "35edb8770ec026f2250b55ad8b7e1d3bb097b611a9d361f97e453acea354381e"
+    },
+    "browser": {
+      "passed": 29,
+      "failed": 2,
+      "name": "browser",
+      "args": [
+        "npm",
+        "run",
+        "test:e2e"
+      ],
+      "exitCode": 1,
+      "seconds": 71.30390762502793,
+      "logSha256": "b309779f434503de9655d9f6e32630cf3b31dba9a895eddf34192f6164240f5a"
+    },
+    "browserLog": {
+      "path": "/private/tmp/cr-cutover-validation-results/browser.log",
+      "sha256": "b309779f434503de9655d9f6e32630cf3b31dba9a895eddf34192f6164240f5a",
+      "bytes": 15971
+    },
+    "cause": "Both refinement and research fixture Mail logs report sandbox-exec execvp ENOENT for the unprovisioned clone-local mcp-agent-mail executable; both fixture reports recorded zero provider requests.",
+    "mailFailureLogs": [
+      {
+        "path": "/private/var/folders/px/ff3hb6b94x1560pwkcnvqrw80000gp/T/crb-4733f815/mail/server-0.log",
+        "sha256": "3445132b06758fd2ce69834526ad295dae749b17bb27613c9238ee38e8592b9c",
+        "bytes": 157
+      },
+      {
+        "path": "/private/var/folders/px/ff3hb6b94x1560pwkcnvqrw80000gp/T/cr-research-browser-1780180f/mail/server-0.log",
+        "sha256": "3445132b06758fd2ce69834526ad295dae749b17bb27613c9238ee38e8592b9c",
+        "bytes": 157
+      }
+    ],
+    "preservedUnchanged": true
+  },
+  "environmentCorrection": {
+    "mail": {
+      "source": {
+        "path": "/Users/crewroom/.codex/worktrees/native-upgrades/crewroom/.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail",
+        "sha256": "554d6f0a06d73b2907940350228232f2b479f96630a73ff6b85e590a12b98075",
+        "bytes": 102000304
+      },
+      "destination": {
+        "path": "/private/tmp/cr-cutover-validation/.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail",
+        "sha256": "554d6f0a06d73b2907940350228232f2b479f96630a73ff6b85e590a12b98075",
+        "bytes": 102000304
+      },
+      "validationReference": {
+        "path": "/private/tmp/cr-n7-final-rework/report.json",
+        "sha256": "d7e83244e406acd2bccafb30d3b27d28b751fe86d7a76afa30e805632f61141a",
+        "bytes": 43857
+      },
+      "change": "Copied only verified fixture executable; synthetic configuration remains fixture-generated."
+    },
+    "dependencies": {
+      "priorSymlinkTarget": "/Users/crewroom/Projects/Git/crewroom/node_modules",
+      "action": "Unlink only clone node_modules symlink; fresh npm ci in clone. Main target remains untouched.",
+      "freshLockReceipt": {
+        "path": "/private/tmp/cr-cutover-validation/node_modules/.package-lock.json",
+        "sha256": "0b60e073610bc19c971c3473e975816da7bd6ec9fae3eccd8975e551fd8417c4",
+        "bytes": 57080
+      },
+      "version": {
+        "ghostty-web": "0.4.0",
+        "vite": "8.3.1",
+        "@playwright/test": "1.63.0"
+      }
+    },
+    "noSourceEdits": true,
+    "noCredentialsCopied": true,
+    "mainDependenciesUntouched": true
+  },
+  "rerun": {
+    "passed": true,
+    "browserPassed": 31,
+    "browserFailed": 0,
+    "commands": [
+      {
+        "name": "npm-ci",
+        "args": [
+          "npm",
+          "ci",
+          "--no-audit",
+          "--no-fund"
+        ],
+        "exitCode": 0,
+        "seconds": 2.3024432079982944,
+        "log": {
+          "path": "/private/tmp/cr-cutover-validation-results/browser-clean-environment/npm-ci.log",
+          "sha256": "77c18f5c26888b4ee120519df09efa079f6ba755b26e89d2d28cb5f0dc96aed7",
+          "bytes": 26
+        }
+      },
+      {
+        "name": "build",
+        "args": [
+          "npm",
+          "run",
+          "build"
+        ],
+        "exitCode": 0,
+        "seconds": 2.4502086670254357,
+        "log": {
+          "path": "/private/tmp/cr-cutover-validation-results/browser-clean-environment/build.log",
+          "sha256": "63b0c5fa6e2df8a2a44e58f20ffd26f6579ade463c78f50298f910b55f07fe95",
+          "bytes": 933
+        }
+      },
+      {
+        "name": "browser",
+        "args": [
+          "npm",
+          "run",
+          "test:e2e",
+          "--",
+          "--output",
+          "/private/tmp/cr-cutover-validation-results/browser-clean-environment/playwright-artifacts"
+        ],
+        "exitCode": 0,
+        "seconds": 104.22349862498231,
+        "log": {
+          "path": "/private/tmp/cr-cutover-validation-results/browser-clean-environment/browser.log",
+          "sha256": "be51bf15baa43e693e3e826b9a6aa2b9b28222ac73f3d531adf33f2a1083a49f",
+          "bytes": 9149
+        }
+      }
+    ],
+    "finishedAt": "2026-10-04T07:32:22.577305+00:00",
+    "playwright": {
+      "path": "/private/tmp/cr-cutover-validation-results/browser-clean-environment/playwright-artifacts/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903",
+      "bytes": 45
+    }
+  },
+  "preexistingLegacyDiagnostic": {
+    "message": "RangeError: offset is out of bounds",
+    "stack": "ghostty-web K.write / IA.writeInternal / IA.write -> src/terminal.tsx:39 -> live.subscribe / live.ts ws.onmessage",
+    "priorAcceptedLog": {
+      "path": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/n61c2b-20261004/browser.log",
+      "sha256": "8bbf3b51795cc996b1cc8d36fb8bc7b272f6f7557c1ce0fd23454622bbc4fdb4",
+      "bytes": 9049
+    },
+    "priorCount": 4,
+    "freshPrivateDependenciesCount": 4,
+    "feedbackJourneyPassedInBoth": true,
+    "conclusion": "Predates this validation and persists with fresh clone-local npm dependencies; not fixed, not attributed to native migration, and separate from browser assertion outcomes."
+  },
+  "cleanup": {
+    "receipt": {
+      "path": "/private/tmp/cr-cutover-validation-results/browser-clean-environment/cleanup-verification.json",
+      "sha256": "3d42b28909817d835ed4e0b0f0b0ef8ed5b9efae32f89d4e37f9c1e0b22830b1",
+      "bytes": 934
+    },
+    "checkedAt": "2026-10-04T07:39:06.307990+00:00",
+    "driverExitCode": 0,
+    "processCommandTerms": [
+      "cr-cutover-validation",
+      "crb-2675d090",
+      "cr-research-browser-953e23a5",
+      "playwright test",
+      "node_modules/.bin/vite"
+    ],
+    "matchingProcessCount": 0,
+    "fixtureReports": [
+      {
+        "path": "/private/var/folders/px/ff3hb6b94x1560pwkcnvqrw80000gp/T/crb-2675d090/report.json",
+        "sha256": "5f3f752a93e8645722695631516f816a54fa622d5b3d2925f5788867471bb617",
+        "bytes": 284,
+        "passed": true,
+        "providerRequests": 5,
+        "unexpectedSurvivingProcesses": []
+      },
+      {
+        "path": "/private/var/folders/px/ff3hb6b94x1560pwkcnvqrw80000gp/T/cr-research-browser-953e23a5/report.json",
+        "sha256": "e0415f864038b9762d651acc80ae74aefd52ad253261be6ae6abd642a4f3a863",
+        "bytes": 285,
+        "passed": true,
+        "providerRequests": 15,
+        "unexpectedSurvivingProcesses": []
+      }
+    ]
+  },
+  "documentationDraft": {
+    "readme": {
+      "path": "/Users/crewroom/.codex/worktrees/native-upgrades/crewroom/.crewroom/test-results/native-default-docs/README.md",
+      "sha256": "a9ffef392a553dc62cbdcbdba373a792c93eced48fbd179b85c63542e1dfb504",
+      "bytes": 7257
+    },
+    "change": "Adds OMP, tmux, running Docker and fixture-image prerequisites; prepares checksum-pinned Mail 0.3.36 via python3 scripts/prepare-rust-mail-test.py before full browser suite. Draft only, not applied to main."
+  },
+  "limits": [
+    "Retained fixtures use scripted local provider responses, not live model/provider delivery.",
+    "Original 29/31 failed run remains immutable; clean environment and full31 rerun are separate results.",
+    "No additional domain rerun; original332 pass is retained with exact unchanged recorded inputs.",
+    "Does not establish final native GUI, resource, OS accessibility/input-method, or default cutover acceptance."
+  ],
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

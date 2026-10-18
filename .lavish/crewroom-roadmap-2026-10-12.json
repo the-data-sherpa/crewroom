@@ -1,0 +1,522 @@
+{
+  "date": "2026-10-12",
+  "sourceBase": "94cd80844432e611890613deef625cf7161ed7c3",
+  "reviewIssue": "FOR-6",
+  "projectId": "d8e8dc0c-c48a-4f3d-83c6-ccb5b1a2c17e",
+  "mvpBoundary": "Operator-confirmed: multi-harness factory through MH6 with OMP, Codex and Claude Code, model selection, plan-aware intake and programming pairs. S9 remains approved follow-up.",
+  "tasks": [
+    {
+      "id": "MH2",
+      "title": "Runtime interface and Codex adapter",
+      "kind": "core",
+      "status": "Approved \u00b7 not implemented",
+      "summary": "Extract the OMP-specific protocol seam without replacing Crewroom supervision. Implement Codex app-server initialization, assignment/session identity, tools, event streaming and stop/resume.",
+      "acceptance": "Real disposable runner cases: correct model, addressed tool roundtrip, independent processes, busy interruption, confirmed stopped ownership, session recovery, no duplicate tool delivery after restart. Existing OMP contracts still pass.",
+      "source": "docs/multi-harness-plan.md#ordered-work-and-acceptance",
+      "details": [
+        "Extract the OMP protocol boundary while retaining the existing workflow authority and supervisor.",
+        "Implement Codex sessions, assignment identity, host tools, normalized event streaming and stop/resume.",
+        "Preserve old OMP sessions and prove busy interruption, stopped ownership and restart replay."
+      ],
+      "dependsOn": "MH1 (complete)",
+      "linear": {
+        "id": "FOR-7",
+        "url": "https://linear.app/forgeinnovations/issue/FOR-7/mh2-runtime-interface-and-codex-adapter",
+        "status": "Backlog"
+      }
+    },
+    {
+      "id": "MH3",
+      "title": "Claude Code adapter",
+      "kind": "core",
+      "status": "Approved \u00b7 not implemented",
+      "summary": "Implement a separately supervised Claude Code process through its supported streaming/control integration; use Crewroom's tools and external mail.",
+      "acceptance": "Same cases as MH2. Validate permission/tool gating on every relevant call, distinguish interruption from completion, and retain model alias versus observed identity. Initialization alone does not pass this item.",
+      "source": "docs/multi-harness-plan.md#ordered-work-and-acceptance",
+      "details": [
+        "Add a separately supervised Claude Code process and streaming/control adapter.",
+        "Gate permissions and tools on relevant calls; retain alias versus observed model identity.",
+        "Repeat the real-runner interruption, messaging, recovery and duplicate-delivery tests."
+      ],
+      "dependsOn": "MH2",
+      "linear": {
+        "id": "FOR-8",
+        "url": "https://linear.app/forgeinnovations/issue/FOR-8/mh3-claude-code-adapter",
+        "status": "Backlog"
+      }
+    },
+    {
+      "id": "MH4",
+      "title": "Native model catalog and assignment",
+      "kind": "core",
+      "status": "Approved \u00b7 not implemented",
+      "summary": "Add explicit discovery refresh, stale/error states, model/job selection, route resolution and frozen assignment details to the Rust service and native UI.",
+      "acceptance": "A specialist can select and run an eligible model through each verified adapter. Duplicate labels, unavailable routes, unsupported efforts, missing tools, restart, legacy assignment history and credential-free UI are exercised.",
+      "source": "docs/multi-harness-plan.md#ordered-work-and-acceptance",
+      "details": [
+        "Add explicit catalog refresh plus stale, unavailable and error states in the service and native UI.",
+        "Resolve equivalent model offerings deterministically; keep material capability/access differences visible.",
+        "Freeze selected route/model/effort per assignment and preserve existing assignment history."
+      ],
+      "dependsOn": "MH3",
+      "linear": {
+        "id": "FOR-9",
+        "url": "https://linear.app/forgeinnovations/issue/FOR-9/mh4-native-model-catalog-and-assignment",
+        "status": "Backlog"
+      }
+    },
+    {
+      "id": "MH5",
+      "title": "Intake and accepted implementation plans",
+      "kind": "core",
+      "status": "Approved \u00b7 not implemented",
+      "summary": "Separate queued ideas from execution-ready jobs; automatically enter grilling when a current plan is absent; permit controlled repository inspection during scoping.",
+      "acceptance": "A planned job skips redundant questions. An unplanned job asks for missing decisions, saves the accepted plan, and advances under existing queue authority. Changed requirements invalidate the affected plan; operator wait survives restart without consuming execution budget.",
+      "source": "docs/multi-harness-plan.md#ordered-work-and-acceptance",
+      "details": [
+        "Distinguish queued ideas from execution-ready jobs using a current accepted implementation plan.",
+        "Record named work packages, dependencies, expected outputs and acceptance criteria in the accepted plan (FOR-16).",
+        "Scope an unplanned job through Grill with controlled repository inspection; reuse a current plan without redundant questions.",
+        "Invalidate affected plans after requirements change; retain operator waits across restart without execution-budget charge."
+      ],
+      "dependsOn": "MH4",
+      "linear": {
+        "id": "FOR-10",
+        "url": "https://linear.app/forgeinnovations/issue/FOR-10/mh5-intake-and-accepted-implementation-plans",
+        "status": "Backlog"
+      }
+    },
+    {
+      "id": "MH6",
+      "title": "Pair and specialist choreography",
+      "kind": "core",
+      "status": "Approved \u00b7 not implemented",
+      "summary": "Define writer/navigator responsibilities, structured exchanges, optional UI/diagnosis specialists, documentation obligations, and independent final review.",
+      "acceptance": "A real backend job and UI job assemble different teams. A navigator meaningfully challenges the implementation. Documentation and all changes precede final evidence; a third-party reviewer is independent. Interrupted work resumes without duplicate writers.",
+      "source": "docs/multi-harness-plan.md#ordered-work-and-acceptance",
+      "details": [
+        "Use the existing run coordinator for named assignments with frozen role/model/route briefs and visible ownership, reports, artifacts and blockers (FOR-16).",
+        "Define one writing agent and an active navigator, with structured exchanges and a separate final reviewer.",
+        "Stage UI, diagnosis and documentation roles within the current three-specialist limit.",
+        "Implement explicit ownership transfer if another contributor must edit; finish documentation before freezing the candidate.",
+        "Prove a real backend job and a UI job, meaningful navigator challenge and restart without duplicate writers."
+      ],
+      "dependsOn": "MH5",
+      "linear": {
+        "id": "FOR-11",
+        "url": "https://linear.app/forgeinnovations/issue/FOR-11/mh6-pair-and-specialist-choreography",
+        "status": "Backlog"
+      }
+    },
+    {
+      "id": "S9.1",
+      "title": "Feature-to-verification map",
+      "kind": "learning",
+      "status": "Approved \u00b7 not implemented",
+      "summary": "a repository-local index under `docs/testing/feature-map/` connecting an operator's feature name to prerequisites, navigation and actions, observable outcomes, the existing harness command and retained evidence. Each recipe identifies the supported surface/platform, instance/build identity, isolated setup, readiness check and cleanup. Use versioned helpers around existing controls where needed; do not create another acceptance catalog or require agents to invent a new script per run.",
+      "acceptance": "- A specialist starting from the documented feature name can exercise steering across reconnect without undocumented setup coaching; actual user actions, stored/received/applied states and the durable record agree.\n- All three recipes execute against isolated Crewroom-owned state and identify the exact application/source revision and platform. A native user journey includes native interaction evidence; a service test or legacy browser run alone cannot satisfy it.\n- Unavailable runner, provider or platform prerequisites produce an explicit unavailable/incomplete result. Scripted-provider evidence is labelled separately from live delivery; no skipped action becomes a pass.\n- A changed entry point or stale recipe is detected and corrected through a demonstrated re-run. Cleanup stops only resources created for verification and preserves evidence.",
+      "source": "docs/workbench-redesign.md#s9--verification-and-evaluated-learning",
+      "details": [
+        "Provide three native verification recipes: steering across reconnect, pause/resume, and readiness invalidation after a revision change.",
+        "Bind prerequisites, navigation, commands, revision, platform, outcomes and cleanup to existing case IDs.",
+        "Have a specialist execute each recipe without undocumented coaching; detect and re-exercise a stale recipe."
+      ],
+      "dependsOn": "MH6",
+      "linear": {
+        "id": "FOR-12",
+        "url": "https://linear.app/forgeinnovations/issue/FOR-12/s91-feature-to-verification-map",
+        "status": "Backlog"
+      }
+    },
+    {
+      "id": "S9.2",
+      "title": "Corrections become enforceable checks",
+      "kind": "learning",
+      "status": "Approved \u00b7 not implemented",
+      "summary": "an evidence-linked correction record that groups recurring mistakes from retained steering, review and repair history, then identifies the strongest practical remedy: domain/API design, types, static analysis, behavioral tests or guidance requiring judgment. A recurring class cites at least two observed occurrences. Record why the selected layer fits and whether an existing check already covers it.",
+      "acceptance": "- Trace one recurring mistake from its recorded occurrences through a justified remedy to proof that the check rejects a real historical bad case and accepts legitimate behavior. Reuse existing enforcement if it already works; do not invent a new defect or duplicate a check to complete the slice.\n- A source reference that is missing, or an isolated one-off correction, cannot be presented as an evidenced recurring class. A finding requiring judgment remains a proposal rather than an asserted mechanical guarantee.\n- The mutation trial records its module/source revision, tool configuration, exercised mutations, outcomes and runtime. Any assertion improvement is verified against both the original behavior and the relevant mutation. A trial that finds no useful gap may complete with that bounded result.\n- Proposal review preserves S7's operator decision, provenance and immutable admitted assignments. Structural work follows the existing operator queue and never bypasses the human merge gate.",
+      "source": "docs/workbench-redesign.md#s9--verification-and-evaluated-learning",
+      "details": [
+        "Trace one recurring mistake to at least two real occurrences and a justified enforcement layer.",
+        "Prove an existing or improved check rejects the historical bad case and accepts legitimate behavior.",
+        "Run a bounded mutation trial on one small deterministic module; record equivalent survivors and runtime cost."
+      ],
+      "dependsOn": "S9.1",
+      "linear": {
+        "id": "FOR-13",
+        "url": "https://linear.app/forgeinnovations/issue/FOR-13/s92-corrections-become-enforceable-checks",
+        "status": "Backlog"
+      }
+    },
+    {
+      "id": "S9.3",
+      "title": "Compare instruction revisions before adoption",
+      "kind": "learning",
+      "status": "Approved \u00b7 not implemented",
+      "summary": "an operator-started comparison for one proposed role, principle or playbook revision against its current revision. Reuse the relevant editor/proposal surface for starting a bounded evaluation and opening its result; add no separate fleet or automatic promotion workflow. Begin with one real proposed revision while using the same comparison contract for all three instruction kinds.",
+      "acceptance": "- Old and proposed instructions execute the same cases with the recorded settings and repetitions. Results retain each attempt and a baseline comparison; a single successful run does not establish improvement.\n- Deterministic fixtures prove that false completion, stale evidence and wrong-surface verification are detected. A separate bounded run through real supervised agents and a live model supplies behavioral evidence; scripted replies alone cannot complete that live acceptance case.\n- Pause, interruption, restart and unavailable-provider cases preserve completed results and mark unfinished attempts accurately. Resumption uses the existing supervision/ownership contract without duplicating writers or external effects. Any new runner tools pass a real-runner contract check.\n- The operator can inspect results and adopt or reject through the existing decision path. Evaluation completion never adopts a revision, changes a current assignment, satisfies coding readiness or becomes a mandatory gate for every ordinary configuration edit.",
+      "source": "docs/workbench-redesign.md#s9--verification-and-evaluated-learning",
+      "details": [
+        "Compare current and proposed role, principle or playbook instructions under identical recorded settings.",
+        "Use at least four cases and two attempts per case per variant: a minimum of 16 attempts for one comparison.",
+        "Keep worker prompts free of the scoring rubric; retain evidence, interventions, repairs, time and available usage.",
+        "Include a bounded live-agent comparison, recovery and truthful unfinished results; adoption remains an operator decision."
+      ],
+      "dependsOn": "S9.2",
+      "linear": {
+        "id": "FOR-14",
+        "url": "https://linear.app/forgeinnovations/issue/FOR-14/s93-compare-instruction-revisions-before-adoption",
+        "status": "Backlog"
+      }
+    }
+  ],
+  "baseline": [
+    {
+      "id": "M1.1",
+      "title": "Preserve and organize the baseline",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M1.2",
+      "title": "Implement transactional storage",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M1.3",
+      "title": "Make the application runnable",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M1.4",
+      "title": "Establish application checks",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M2.1",
+      "title": "Validate assignments before launch",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M2.2",
+      "title": "Integrate hosts and messages",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M2.3",
+      "title": "Prove safe interruption early",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M2.4",
+      "title": "Implement continuity and limits",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M2.5",
+      "title": "Expose supervision",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M3.1",
+      "title": "Coordinate assignments",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M3.2",
+      "title": "Own repository work",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M3.3",
+      "title": "Execute and verify",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M3.4",
+      "title": "Present the result",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M4.1",
+      "title": "Onboard read-only",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M4.2",
+      "title": "Import and synchronize Jira",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M4.3",
+      "title": "Publish and observe PRs",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M4.4",
+      "title": "Finish the synthetic delivery path",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M5.1",
+      "title": "Select the pilot",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M5.2",
+      "title": "Execute through the workbench",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M5.3",
+      "title": "Deliver and inspect",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M6.1",
+      "title": "Conversational refinement and non-coding work",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M6.2",
+      "title": "Queue and repository configuration",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M6.3",
+      "title": "Drift and review continuation",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M6.4",
+      "title": "Complete operator flows",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M7.1",
+      "title": "Reconcile acceptance coverage",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M7.2",
+      "title": "Complete operational readiness",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M7.3",
+      "title": "Verify installation and repeat use",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M7.4",
+      "title": "Record the release",
+      "status": "Accepted",
+      "source": "docs/release-0.1.0.md"
+    },
+    {
+      "id": "M8 S1",
+      "title": "Session shell and sidebar (UI only)",
+      "status": "Accepted within recorded platform scope",
+      "source": "docs/workbench-redesign.md"
+    },
+    {
+      "id": "M8 S2",
+      "title": "Embedded agent grid",
+      "status": "Accepted within recorded platform scope",
+      "source": "docs/workbench-redesign.md"
+    },
+    {
+      "id": "M8 S3",
+      "title": "Needs you inbox (read projection + existing actions)",
+      "status": "Accepted within recorded platform scope",
+      "source": "docs/workbench-redesign.md"
+    },
+    {
+      "id": "M8 S4",
+      "title": "Role catalog and editor sheet (existing schema)",
+      "status": "Accepted within recorded platform scope",
+      "source": "docs/workbench-redesign.md"
+    },
+    {
+      "id": "M8 S5",
+      "title": "Model jobs and budget (schema change)",
+      "status": "Accepted within recorded platform scope",
+      "source": "docs/workbench-redesign.md"
+    },
+    {
+      "id": "M8 S6",
+      "title": "Principles (schema change)",
+      "status": "Accepted within recorded platform scope",
+      "source": "docs/workbench-redesign.md"
+    },
+    {
+      "id": "M8 S7",
+      "title": "Role revisions and the learning loop",
+      "status": "Accepted within recorded platform scope",
+      "source": "docs/workbench-redesign.md"
+    },
+    {
+      "id": "M8 S8",
+      "title": "Playbooks (runner contract)",
+      "status": "Accepted within recorded platform scope",
+      "source": "docs/workbench-redesign.md"
+    }
+  ],
+  "platform": [
+    {
+      "id": "L1",
+      "title": "Linux / Wayland terminal interaction",
+      "status": "Approved unverified follow-up",
+      "work": "Exercise the actual native terminal, read-only controls, selection/copy, steering and close/reconnect on the Linux surface. Headless desktop checks alone do not close this gap.",
+      "source": "docs/status.md#continuation-order"
+    },
+    {
+      "id": "L2",
+      "title": "Linux live-provider delivery",
+      "status": "Unverified support gap",
+      "work": "Establish native Linux evidence with real supervised agents and configured providers. The historical macOS Jira-to-Bitbucket pilot and scripted suites do not establish this. Fold it into the final multi-harness proof if Linux is the target.",
+      "source": "docs/testing/linux-native-2026-10-04.json"
+    },
+    {
+      "id": "L3",
+      "title": "Two macOS-only browser runner fixtures",
+      "status": "Documented test portability gap",
+      "work": "Port the refinement/research runner fixture setup if a green Linux compatibility suite is required. Latest consolidation was 29/31; both failures copy /Users/crewroom/.bun/bin/omp.",
+      "source": "docs/testing/repository-consolidation-2026-10-12.json"
+    },
+    {
+      "id": "L4",
+      "title": "Optimized Linux release acceptance",
+      "status": "Unverified release boundary",
+      "work": "Validate the release build and supported install/reuse/recovery path on the Linux target. Existing Linux evidence covers source/debug support; this is not yet a Linux release claim.",
+      "source": "docs/testing/linux-native-2026-10-04.json"
+    }
+  ],
+  "optional": [
+    [
+      "O1",
+      "VoiceOver compatibility",
+      "Explicitly deprioritized; optional and unverified.",
+      "docs/release-native.md"
+    ],
+    [
+      "O2",
+      "Japanese OS input-method composition",
+      "Additional compatibility work; optional and unverified.",
+      "docs/release-native.md"
+    ],
+    [
+      "O3",
+      "Broader platform support",
+      "X11 and Linux ARM64 are not validated; X11-only launch is currently refused.",
+      "docs/linux.md"
+    ],
+    [
+      "O4",
+      "Portable provider-account onboarding",
+      "Documented future enhancement beyond manual supported configuration.",
+      "docs/release-0.1.0.md#outstanding-enhancements"
+    ],
+    [
+      "O5",
+      "Relocatable backup / export",
+      "Current restoration uses original absolute paths; portable relocation remains future work.",
+      "docs/release-0.1.0.md#outstanding-enhancements"
+    ],
+    [
+      "O6",
+      "Selective history archival",
+      "Retention/archival enhancement; automatic pruning is outside the release.",
+      "docs/release-0.1.0.md#outstanding-enhancements"
+    ],
+    [
+      "O7",
+      "Reliable monetary-budget enforcement",
+      "Execution limits and token records do not establish an enforceable dollar ceiling.",
+      "docs/release-0.1.0.md#outstanding-enhancements"
+    ],
+    [
+      "O8",
+      "Terminal, bundle and sustained resource optimization",
+      "Documented enhancement; short resource samples do not establish long-term leak freedom.",
+      "docs/release-native.md#resource-observations-and-retained-failures"
+    ],
+    [
+      "O9",
+      "Notarized / broadly distributed installers",
+      "Existing macOS package is local and ad-hoc signed; Linux is a directory/source-build path.",
+      "docs/release-native.md#supported-scope"
+    ]
+  ],
+  "sourceSha256": {
+    "docs/status.md": "b8ee8f4dfe8e150d1632c968278d45a29b7b089824d65dd3d732468311397819",
+    "docs/product.md": "6b88fafc069f963761aedca8b76cc267b6d73135388d9c8261153d7c4c30cd06",
+    "docs/mvp-plan.md": "286d43837ad7ce518f611b01b131b1524a7c5aabd712bb557e6bc8062646d69e",
+    "docs/multi-harness-plan.md": "5519391eaccf0fa34aaf09e641eff20913270384e872a76cdecc64c80a57d4ec",
+    "docs/workbench-redesign.md": "5371bf05c7ce62e4b8979f1973bb98f42a72034281ec0d33f8b67a0adeffc0ef",
+    "docs/release-0.1.0.md": "6404111ff88a01a143b90de98f4425d0f3a876bf9b616aa0d88e2502d97baaae",
+    "docs/release-native.md": "3cea36a767c10787ff55387dd026e549b45149d2d8b71d602e8b428cc3ab5ef6",
+    "docs/linux.md": "a5df94abe379007393e00fa1c87e8228b66fdb73d72201a804d14398ab1c0e9a",
+    "docs/native-migration-tasks.md": "aa7c8bb871749ec8d0113856c3c61d91e8b8fb109bc8c4be1738832cd513e404",
+    "docs/m7-release-checkpoint.md": "f16158be717aea74c0ee8744bd30bb69b32f67a13da3f03a8221083f2a44182a",
+    "docs/research/crewroom-specialist-workflow-assessment-2026-10-12.md": "ae5130d0922ad7ac673e1c5a7ed0c93d817f97ae2b277ec9d53f5efecb7bbba9",
+    "docs/research/harness-engineering-and-crewroom.md": "b81f0e1c8d1a016d5d129ea9309510efbf84d4e600286cbfd69de1d046bf0069",
+    "docs/testing/repository-consolidation-2026-10-12.json": "764db462ac1f2b378b04181d46ca78ff1b3dd9649e6f4b9bb13b06f633ed20ca",
+    "docs/research/orchestrator-delegation-assessment-2026-10-12.md": "90eb6baba45a343d40d6bd7aa076ec0c00eb7299914b33b93edb9557d29fb84f"
+  },
+  "sourceRefByPath": {
+    "docs/status.md": "main",
+    "docs/mvp-plan.md": "main",
+    "docs/multi-harness-plan.md": "main",
+    "docs/native-migration-tasks.md": "main",
+    "docs/m7-release-checkpoint.md": "main",
+    "docs/research/orchestrator-delegation-assessment-2026-10-12.md": "main",
+    "docs/product.md": "main"
+  },
+  "provenance": "sourceBase is the repository revision before this review. Updated source links follow main; sourceSha256 identifies the exact reviewed documents. FOR-16 subsequently records accepted delegation decisions and refreshes the affected source hashes.",
+  "delegation": {
+    "issue": "FOR-15",
+    "research": "docs/research/orchestrator-delegation-assessment-2026-10-12.md",
+    "status": "Accepted direction; MH5/MH6 implementation remains Backlog",
+    "sourceCommit": "95dd4d712d5b6026cc00d59fd0dd63aea5c4e66e",
+    "decisionIssue": "FOR-16",
+    "decisionDate": "2026-10-12",
+    "acceptedDecisions": [
+      "Named assignments within the existing per-run coordinator",
+      "One executing coding ticket at a time",
+      "Explicit operator Resume for PR-feedback work"
+    ],
+    "possibleLaterExpansions": [
+      "Persistent project lead",
+      "Parallel coding tickets",
+      "Automatic PR feedback admission"
+    ],
+    "direction": "Named work packages and observable delegation within the existing run coordinator in MH5/MH6"
+  }
+}

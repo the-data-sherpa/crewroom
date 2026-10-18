@@ -1,0 +1,89 @@
+{
+  "recordedAt": "2026-10-04T07:28:34.746168+00:00",
+  "candidateRevision": "8f3e325870e40209f42c43ef0009e953f45398f5",
+  "purpose": "Resolve stale captured pixels from failed finalGUI attempt before modifying production rendering.",
+  "scope": "Original signed package plus two separately named instrumented diagnostic copies; disposable intake service, zero runs/agents, no OS setting changes.",
+  "result": "Visibility/occlusion test condition resolved; no production rendering change required.",
+  "originalReproduction": {
+    "recordedAt": "2026-10-04T07:13:27.305539+00:00",
+    "candidateRevision": "8f3e325870e40209f42c43ef0009e953f45398f5",
+    "package": "/private/tmp/cr-n7-1004a/Crewroom.app",
+    "packageGuiSha256": "141498a07d2cabd8717eb05dab7b7cd64cf36f5d902e8b92c755c1d3d1297e49",
+    "guiPid": 11089,
+    "daemonPid": 11059,
+    "runtimeConfigured": false,
+    "runs": 0,
+    "steps": [
+      {
+        "action": "Root launches documented original launcher with disposable seeded intake service",
+        "observed": "First frame shows empty workspace/Reconnecting, AX window/title only despite seeded task."
+      },
+      {
+        "action": "Click visible New ticket then press Tab",
+        "observed": "AX shows Connected, original seeded ticket and New local ticket form; pixels remain initial empty frame."
+      },
+      {
+        "action": "Create second distinctive local task via authenticated fixture API",
+        "observed": "HTTP200; after next keyboard event AX includes Redraw async second ticket, pixels remain unchanged."
+      },
+      {
+        "action": "Cmd-H, reselect still-running app, click titlebar to activate",
+        "observed": "Pixels remain initial frame. Actual hidden-state transition was not independently verified; this is only an attempted hide/reselect/activation check."
+      },
+      {
+        "action": "Resize1280x912 to1002x842",
+        "observed": "Pixels immediately show Connected, both tasks and current New local ticket form."
+      },
+      {
+        "action": "Click Title and type Repaint after resize",
+        "observed": "Focused AX text field value changes; pixels still display What needs to change? placeholder."
+      },
+      {
+        "action": "Cmd-A Backspace, verify AX field empty, Cmd-Q with no subsequent CUA app observation",
+        "observed": "GUI11089 exits; no package GUI remains; daemon remains healthy with two tasks and zero runs."
+      }
+    ],
+    "conclusion": "The original captured stale pixels were later explained by full window occlusion. They do not establish an ordinary visible foreground redraw defect.",
+    "evidence": {
+      "/private/tmp/cr-redraw-intake1/launch.json": "3b511b8475ffa61b4fd23aad98f0e1e1447cc2ac4dddc8f90a1f880d7e6a4e96",
+      "/private/tmp/cr-redraw-intake1/workspace-before.json": "e3175a63ac8c0db081950da7a5c8629a14bbff30eb9e3e1699a7c7311fc0cebb",
+      "/private/tmp/cr-redraw-intake1/second-task.json": "0e0de35d18a19d86170754323e35c2a03645bb111f684dff37b2bd9cbdf6f01b",
+      "/private/tmp/cr-redraw-intake1/gui-repro-after.json": "6397acff5a6f84eec0a604220cc68e30547803b04c9fc41609ecadf7d2ab165f"
+    },
+    "settingsChanged": false,
+    "cleanup": "Root owns intake daemon cleanup; GUI closed normally."
+  },
+  "diagnostics": {
+    "v1Pid": 12317,
+    "v2Pid": 27789,
+    "v2GuiSha256": "43a6f7896fe1d84c24a064358cc49ab7f794a6663d44a5127f8abfb6c5438229",
+    "fullyCovered": "Native isVisible=true, isKey=true, appActive=true, appHidden=false; raw occlusion8192, cached visibility false, and no frame source. The SDK Visible bit (1<<1) was absent. An ordered, key, active window did not prove visible onscreen pixels.",
+    "windowServerObservationByParent": "The diagnostic window at (1080,262), size1012x852, was wholly covered by an above layer0 Chrome window at (367,74), size2523x1299. Other user apps were left untouched.",
+    "exposure": "A documented CUA resize to2100x702 extended the right edge beyond the covering window. Raw occlusion became8194; source=true, CVDisplayLink ticks and normal draw began. Subsequent ordinary typing appeared in both AX and pixels without another resize.",
+    "asynchronousUpdate": "The authenticated fixture API created Visible async confirmation. Its sidebar row appeared in AX and pixels without a resize.",
+    "narrowPrerequisite": "The native green button secondary action zoom the window expanded to the screen visible frame. A bottom-right drag then resized it to390x702. The parent verified origin(0,30), leaving367px uncovered. Typed Visible narrow 390 appeared in AX and pixels without another resize.",
+    "inconclusiveActions": "AX Raise and attempted Cmd-H/reselection did not establish physical foreground visibility. The titlebar drag did not move the actual origin; this failed geometry attempt was retained and not repeated.",
+    "cleanup": "Unsaved drafts were cleared and verified empty in AX, then normal Cmd-Q closed each diagnostic GUI. No CUA observation followed Quit. PIDs12317 and27789 were verified gone; the parent subsequently stopped the intake service."
+  },
+  "rerunPrerequisites": [
+    "Use the original unchanged signed package.",
+    "Use native Zoom then resize to1240 or390 at origin(0,30), preserving an uncovered strip. Apply this to every new wall and reopened workbench window.",
+    "Verify ordinary pixel updates before the healthy resource baseline.",
+    "Do not use CUA getApp/getAXState after Quit. Use process inventory and select only after a confirmed reopen.",
+    "Start load within90s of ready. Finish within120s of load completion, with a parent150s fallback before the180s hard deadline."
+  ],
+  "remaining": "Final original packaged visible GUI/load/footprint acceptance, plus permission-dependent actual VoiceOver and OS IME checks.",
+  "evidence": {
+    "/private/tmp/cr-redraw-intake1/launch.json": "3b511b8475ffa61b4fd23aad98f0e1e1447cc2ac4dddc8f90a1f880d7e6a4e96",
+    "/private/tmp/cr-redraw-intake1/workspace-before.json": "e3175a63ac8c0db081950da7a5c8629a14bbff30eb9e3e1699a7c7311fc0cebb",
+    "/private/tmp/cr-redraw-intake1/second-task.json": "0e0de35d18a19d86170754323e35c2a03645bb111f684dff37b2bd9cbdf6f01b",
+    "/private/tmp/cr-redraw-intake1/gui-repro-after.json": "6397acff5a6f84eec0a604220cc68e30547803b04c9fc41609ecadf7d2ab165f",
+    "/private/tmp/cr-redraw-intake1/diagnostic-launch.json": "8e8abd3db0550e1e6f7fc8a78c3f0eb52ba1ec706f3426e85d6b3e410c74132a",
+    "/private/tmp/cr-redraw-intake1/diagnostic-v2-launch.json": "a5bfbdb0e809cc9a79f82c77c74fd02f5c8ec1e7d8dfa1d51254f0541918de8f",
+    "/private/tmp/cr-redraw-intake1/diagnostic-v1-app.stderr.log": "158e4bcc0ce67419104e97079dfcaba32e16e19e878b95e3f33c57e3ef6cf5de",
+    "/private/tmp/cr-redraw-intake1/diagnostic-v2-app.stderr.log": "f7ca7ed15d59c747188628ec09caf2da78ee5ab1ff8d41119a5f0be15d613db9",
+    "/private/tmp/cr-redraw-intake1/visible-third-task.json": "98b76ddebc3c96ae3561a4b7052e555cfa56e8663cf09f55fb6b3f2699b4e5b9",
+    "/private/tmp/cr-redraw-intake1/cleanup.json": "13a33b24c380f74a35bbdbcbd0a2f9b01d82ff7e7b81bc58e959bc9b3cdc70b2"
+  },
+  "selfEvaluation": "Read-only diagnostics prevented an unnecessary production patch. The corrected test condition is specific and repeatable. Initial confidence in a defect was too strong before AppKit occlusion and WindowServer geometry were compared."
+}

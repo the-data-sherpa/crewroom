@@ -1,0 +1,155 @@
+{
+  "recordedAt": "2026-10-02T17:01:23.115435+00:00",
+  "scope": "N1 native intake and Rust service foundation only",
+  "baselineCommit": "e91d25894b3eae8890344fa87ef5682557f87b1d",
+  "branch": "codex/rust-gpui",
+  "workingTree": true,
+  "sourceManifestSha256": "714c5c92c3ec55c1fbc06281cc09483c251482da5ff18dd11ec24c516ca20baa",
+  "sourceManifestAlgorithm": "SHA256 of sorted relative path + NUL + file SHA256 + newline",
+  "sourceSha256": {
+    "Cargo.lock": "6382777f0671d3a7699b9be94c9b13ad2d19d1f805a1de959e9bef5752bf1520",
+    "Cargo.toml": "8e386d915ec17894c41f67f42de88e6ec136e93b5fbbcc037d5bacc2c76597b0",
+    "crates/crewroom-core/Cargo.toml": "f6c2d85a72fbb63245870696dabadd49a5220dfacae7443beadeaf04f8f98dfe",
+    "crates/crewroom-core/src/authority.rs": "cea5d17dc0659d1b78891c70b13024204f0d0b21c3b440056e2a6fe7ffae99f9",
+    "crates/crewroom-core/src/default-roles.json": "95dd06eaaad48ee79cb0a2f439c61893df00caaf1c1d1f06622f2bfcd43ee680",
+    "crates/crewroom-core/src/jira.rs": "98b30dcc574bf0913a6403a3200d7ab512fa2978aade20c3db53bd96edd9ce8d",
+    "crates/crewroom-core/src/lib.rs": "1d1b7be87da66c34a1723922804cb981de56d997b153f04b36009fc69084e04b",
+    "crates/crewroom-core/src/lifecycle.rs": "75c0c28ec61391192714b56bbf56b121856f866e2958ae0fdeae3de5c9809bee",
+    "crates/crewroom-core/src/repositories.rs": "ac177ad0ea191403cf3ee8ef88f0349b2a355b1b9475a3bd916b6081935d84f6",
+    "crates/crewroom-core/src/roles.rs": "2b5a67990a0f3b18b2b3a610f8561d6807bc830e50242b0a21bb9bac688a38f1",
+    "crates/crewroom-core/src/schema.sql": "3c62ce4b96dfe279a0b34c5f1532f5a864e3a13bc7f0ce463082c4b712f1a9f9",
+    "crates/crewroom-core/src/store.rs": "64eaea155b89bcbb53d893d06c3e56a1b65f4d61fcbdcfbbbd58d2b7d0f5a618",
+    "crates/crewroom-core/tests/lifecycle-corpus.json.gz": "da30ee997f23eb8e55ae42245546d1d10a285e1387c40382066da36fabc89c7b",
+    "crates/crewroom-core/tests/lifecycle.rs": "8111c7765c1141be5acc748207a3222d5a32a1896903f2ef62bead1d1c735f68",
+    "crates/crewroom-core/tests/store.rs": "8d74b1235cd0614285833f617cc94f057881a382a159d3ba17dd93b73ae21f19",
+    "crates/crewroom-desktop/Cargo.toml": "0b440c7ce5aed75890585eabfa118d4f8e09ab826ac28edf119516d26faea470",
+    "crates/crewroom-desktop/src/client.rs": "4f451a28f0446136de6f8dc83318f50ed56fef726ed171cba080e556ad7a2af2",
+    "crates/crewroom-desktop/src/main.rs": "ce74c24a0da02b6af1767ca335194b54d5e54b8cc369b55605aa0b7aaef5e792",
+    "crates/crewroom-desktop/src/workbench.rs": "91f1d315567e3940d3e96e5e17821ba460674758b89cc3c7d99ee79042a47fd5",
+    "crates/crewroom-service/Cargo.toml": "97ce7ef3f48e6ba59fc62e7ea9967cb6aeac698db598b0026cd61dabf1489bc1",
+    "crates/crewroom-service/src/lib.rs": "f63336215c273a8a25e0943ce51b80c5e28f5c1ce1c49d22196ce63d743071e1",
+    "crates/crewroom-service/src/main.rs": "8aec68a25a91a4f364cf26d67cfc998fc453425892b47f2b38b135f1e5a11481",
+    "crates/crewroom-service/tests/daemon.rs": "d9bcde8e28ddf26c3d4e7742526b2776ee542be2f24871a65f88e517895592e4",
+    "crates/crewroom-service/tests/http.rs": "97ecd018a2cefa442b3f0819c52a3c4b3cc0e1e9373221fa4cb883752657ada5",
+    "scripts/run-native.sh": "e9cfdbc019a6e9b01b9f6c51a8289a3e5c4df3a7157dd18fab9708cac51c2479",
+    "scripts/rust/export-roles.ts": "3c228c8390db93b3596992c7dcc940b1b68cb87708f2629cf545bcfafde4412b",
+    "scripts/rust/export-schema.ts": "be77013a3dda00c306ea0ea3d11e49d673230dc39ec899103e7979c3ad9ff775",
+    "scripts/rust/lifecycle-corpus.ts": "2b72ed988f29a95cffea213024ca6cc6eacd9600856ce7d7ce0bf4f6f7e60466",
+    "scripts/rust/verify-compatibility.ts": "258462d7e7c4fb76587d0a5209476f2820bbf456b1b36b67818e084b5ee3d711",
+    "server/check-policy.ts": "f00878ab4122f0abddf6a9164c5cd63fa8ac32b80c98d6f9c36bd8238fa31a0e",
+    "server/repository-configuration.ts": "db725ca9a402f5c5d6ae011170bd4e0c4fcdd47bab43249f05ed83331234bf75",
+    "server/roles.ts": "0095596aa24a1fcd33067ef79195abe0225503d51f3a83733e31cf9613fe582d",
+    "server/run-lifecycle.ts": "a838d614db28cebfa51ecafae529c23dee0f1b191686bcbe805016912f59c291",
+    "server/workbench.ts": "42758cd84ce350916af44d6bfe052bdd1da0bb87b038bf64639eabcc9e7a769d",
+    "tests/fixtures/repository.ts": "41cd8da36d83ad148370a1ca92f37351de60c9da03e15285d6c884c9319af567"
+  },
+  "checks": [
+    {
+      "command": "cargo test --workspace --locked -j 6",
+      "status": "passed",
+      "tests": 12,
+      "lifecycleComparisons": 4536,
+      "localLog": ".crewroom/rust-workspace-tests.log",
+      "logSha256": "bd307609fe59f50b7e4ed627d8bc423f79e015118c8be557ead6f6f481ec11e1"
+    },
+    {
+      "command": "cargo clippy --workspace --all-targets --locked -j 6 -- -D warnings",
+      "status": "passed",
+      "localLog": ".crewroom/rust-clippy.log",
+      "logSha256": "c4d3733a02da06df824523f8be8af7a3d08010fe4e60fbbe091ae0d648980fe6"
+    },
+    {
+      "command": "./scripts/run-native.sh --build-only",
+      "status": "passed",
+      "adHocSigning": "verified",
+      "localLog": ".crewroom/rust-final-build.log",
+      "logSha256": "46259a66a9ba115c97a0cd65389b670ce2be5cf7b0c21f00f98fd22cb428f8dc"
+    },
+    {
+      "command": "cargo fmt --all -- --check",
+      "status": "passed",
+      "localLog": ".crewroom/rust-format.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "PATH=/opt/homebrew/opt/node/bin:$PATH node_modules/.bin/tsx scripts/rust/verify-compatibility.ts",
+      "status": "passed",
+      "cases": 16,
+      "localLog": ".crewroom/rust-compatibility.log",
+      "logSha256": "bed0ae9dc733411a4fb89653c2afe4f2f3a54c32665c357e7695f479859b0e7d"
+    },
+    {
+      "command": "GIT_EDITOR=true PATH=/opt/homebrew/opt/node/bin:$PATH npm test",
+      "status": "passed",
+      "tests": 332,
+      "localLog": ".crewroom/rust-migration-domain.log",
+      "logSha256": "14b16326593072793d33d970eb6f76272c01b96fecfb97c30fd17554a76eeb02"
+    },
+    {
+      "command": "PATH=/opt/homebrew/opt/node/bin:$PATH npm run build",
+      "status": "passed",
+      "localLog": ".crewroom/rust-migration-web-build.log",
+      "logSha256": "6c62e4c8bee94ad326791bdc1336eb0ee703a5b69ab5cffafaa4165782837407"
+    },
+    {
+      "command": "GIT_EDITOR=true PATH=/opt/homebrew/opt/node/bin:$PATH npm run test:e2e",
+      "status": "partial",
+      "passed": 30,
+      "failed": 1,
+      "failure": "tests/e2e/feedback.spec.ts:22, 30000ms timeout",
+      "localLog": ".crewroom/rust-migration-browser.log",
+      "logSha256": "0a3e37dcb005672fc0f8caed6ac5f74bb86e918929a18a8c2a04b76a6b6614fd"
+    },
+    {
+      "command": "GIT_EDITOR=true PATH=/opt/homebrew/opt/node/bin:$PATH node_modules/.bin/playwright test tests/e2e/feedback.spec.ts",
+      "status": "passed",
+      "tests": 1,
+      "unchangedFocusedRerun": true,
+      "localLog": ".crewroom/rust-migration-feedback-rerun.log",
+      "logSha256": "4c2f4f03fb23ad74521c3d7c3bcf9a230f9a24b93d40e83d8a78c27ed47eb5a7"
+    }
+  ],
+  "manualNativeChecks": [
+    "Create a local ticket, paste Unicode, save accepted brief",
+    "Navigate Roles and back with unsaved text retained",
+    "Close native GUI while authenticated daemon remains available",
+    "Stop and restart owned daemon, rotate token, reconnect open native viewer",
+    "Reopen app with saved Unicode brief and criteria intact",
+    "Command-Q displays Keep editing and Discard drafts and close",
+    "Keep editing retains draft; discard closes only GUI"
+  ],
+  "repairedFailures": [
+    "SQLite NOFOLLOW with macOS parent symlinks",
+    "WebSocket observer held authority across daemon shutdown",
+    "nohup daemon terminated with launcher process group; replaced with pre-runtime daemonization",
+    "Close dialog missing footer actions and global keyboard route; replaced with alert dialog and view action",
+    "Queue/repository receipt shape ordering for cross-runtime replay"
+  ],
+  "fixtureCorrections": [
+    "Use actual /tasks/:id/runs and /queue/:id/remove routes",
+    "Use canonical temporary paths for replay after repository removal"
+  ],
+  "retainedDiagnostics": [
+    "Full browser suite feedback timeout passed on unchanged focused rerun; no single 31/31 invocation claimed",
+    "ghostty-web RangeError: offset is out of bounds at src/terminal.tsx:39 in browser logs",
+    "Dependency block 0.1.6 future-incompatibility notice"
+  ],
+  "providerDelivery": "No live Jira, Bitbucket or model delivery for this native acceptance",
+  "fullMigrationComplete": false,
+  "remaining": [
+    "N2 complete durable workflow/domain parity",
+    "N3 process supervision, model policy, contained commands and external Mail",
+    "N4 repository ownership and revision-specific evidence",
+    "N5 Jira/Bitbucket delivery and recovery",
+    "N6 complete native controls, evidence and terminal views",
+    "N7 cutover, restore, packaging and release verification"
+  ],
+  "notCertified": [
+    "Executing legacy-run recovery",
+    "Full IME/VoiceOver behavior",
+    "Native terminal output under load",
+    "Native equivalents for all 31 browser journeys",
+    "Distribution signing/notarization",
+    "Production footprint or cross-platform support"
+  ]
+}

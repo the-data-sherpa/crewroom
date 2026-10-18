@@ -1,0 +1,46 @@
+{
+  "source": "/Users/crewroom/.local/share/omp-retired/20260925T180705Z/terraform-pilot-source/pilot",
+  "scope": "Real disposable Git/SQLite/subprocesses; synthetic OMP and provider replies",
+  "python": "3.14.7",
+  "files": {
+    "vendor/queue_ledger.py": "c267071eab6eed32db1efcd55badfdabca33c9d37cb3d5e20a65eb4e60129a6a",
+    "tests/test_queue_ledger.py": "f1e272ac2dd0fcbffb5940e258492df41f06cb72e66398fa7c224c20baf05d5d",
+    "live/src/omp_team.py": "fc7cffd292d5f5e50e0772db8df1cca6454743e2318bf072af8d1e4664321708",
+    "live/src/local_smoke.py": "fbd339589374de0285550422dd8bdc8e466209f7e9199fa41d0c63780749a992",
+    "live/src/github_adapter.py": "77cb93bcc33d6a60bf628bd710c9df3c27f3f5ea632c65a26b516dc773bea176",
+    "live/src/bitbucket_adapter.py": "bbafe30f980b69e344311099197e4eba5f658f3af69ec9c1d9cc67bb17b0a3ed",
+    "live/src/onboarding.py": "94f7b802a9398d45dbe31de6439d5ec45be1bf900ea6711b541311e560cba0ec",
+    "live/tests/test_omp_team.py": "f2df6a479f37ab771ba8869c662c43b3457c10ca7821d1fdcc148fece0a4744c",
+    "live/tests/test_local_smoke.py": "d16783391f39e389a0b6afaa1b1ffe0d96df3a208a5e4477efbcd898ccfede39"
+  },
+  "suites": [
+    {
+      "cases": [
+        "test_inherited_lock_survives_controller_death",
+        "test_restart_uncertain_and_stale_completion",
+        "test_failed_check_blocks_publication_and_repair_invalidates_gates",
+        "test_source_drift_base_drift_and_evidence_corruption_block",
+        "test_review_provenance_and_verification_receipt",
+        "test_uncertain_publication_duplicate_intent_and_reconciliation",
+        "test_priority_dependencies_require_merge_not_ready"
+      ],
+      "exit_code": 0,
+      "output": "test_inherited_lock_survives_controller_death (test_queue_ledger.QueueLedgerTests.test_inherited_lock_survives_controller_death) ... ok\ntest_restart_uncertain_and_stale_completion (test_queue_ledger.QueueLedgerTests.test_restart_uncertain_and_stale_completion) ... ok\ntest_failed_check_blocks_publication_and_repair_invalidates_gates (test_queue_ledger.QueueLedgerTests.test_failed_check_blocks_publication_and_repair_invalidates_gates) ... ok\ntest_source_drift_base_drift_and_evidence_corruption_block (test_queue_ledger.QueueLedgerTests.test_source_drift_base_drift_and_evidence_corruption_block) ... ok\ntest_review_provenance_and_verification_receipt (test_queue_ledger.QueueLedgerTests.test_review_provenance_and_verification_receipt) ... ok\ntest_uncertain_publication_duplicate_intent_and_reconciliation (test_queue_ledger.QueueLedgerTests.test_uncertain_publication_duplicate_intent_and_reconciliation) ... ok\ntest_priority_dependencies_require_merge_not_ready (test_queue_ledger.QueueLedgerTests.test_priority_dependencies_require_merge_not_ready) ... ok\n\n----------------------------------------------------------------------\nRan 7 tests in 10.138s\n\nOK\n"
+    },
+    {
+      "cases": [
+        "test_failed_local_check_blocks_push_and_one_repair",
+        "test_lost_create_is_uncertain_and_never_blindly_repeated",
+        "test_lost_create_with_zero_readback_stays_uncertain",
+        "test_native_unknown_stops_batch_then_reopens_before_independent_work",
+        "test_add_and_status_while_native_child_holds_execution_lock",
+        "test_completed_impact_claim_resumes_without_duplicate_model_call"
+      ],
+      "exit_code": 0,
+      "output": "[a] run: native gates and local checks\n[w0b33d77a96-a] native impact\n[w0b33d77a96-a] native implementation\n[w0b33d77a96-a] native documentation\n[w0b33d77a96-a] native review\n[w0b33d77a96-a] local check unit\n[a] known failed gate; repair is bounded to one cycle\n[a] repair: native gates and local checks\n[w0b33d77a96-a] native impact\n[w0b33d77a96-a] native implementation\n[w0b33d77a96-a] native documentation\n[w0b33d77a96-a] native review\n[w0b33d77a96-a] local check unit\n[a] known failed gate; repair is bounded to one cycle\n[a] run: native gates and local checks\n[w2998168eb4-a] native impact\n[w2998168eb4-a] native implementation\n[w2998168eb4-a] native documentation\n[w2998168eb4-a] native review\n[w2998168eb4-a] local check unit\n[a] run: native gates and local checks\n[w8b5d1545b5-a] native impact\n[w8b5d1545b5-a] native implementation\n[w8b5d1545b5-a] native documentation\n[w8b5d1545b5-a] native review\n[w8b5d1545b5-a] local check unit\n[a] run: native gates and local checks\n[wa2a0f92537-a] native impact\n[wa2a0f92537-a] native implementation\n[b] run: native gates and local checks\n[wa2a0f92537-b] native impact\n[wa2a0f92537-b] native implementation\n[wa2a0f92537-b] native documentation\n[wa2a0f92537-b] native review\n[wa2a0f92537-b] local check unit\n[b] published https://github.com/example/fixture/pull/1\n[a] run: native gates and local checks\n[wb8a213f28e-a] native impact\n[wb8a213f28e-a] native implementation\n[wb8a213f28e-a] native documentation\n[wb8a213f28e-a] native review\n[wb8a213f28e-a] local check unit\n[a] published https://github.com/example/fixture/pull/1\n[b] run: native gates and local checks\n[wb8a213f28e-b] native impact\n[wb8a213f28e-b] native implementation\n[wb8a213f28e-b] native documentation\n[wb8a213f28e-b] native review\n[wb8a213f28e-b] local check unit\n[b] published https://github.com/example/fixture/pull/2\n[a] run: native gates and local checks\n[wb11070af3f-a] native impact\n[a] run: native gates and local checks\n[wb11070af3f-a] native implementation\n[wb11070af3f-a] native documentation\n[wb11070af3f-a] native review\n[wb11070af3f-a] local check unit\n[a] published https://github.com/example/fixture/pull/1\ntest_failed_local_check_blocks_push_and_one_repair (test_omp_team.QueueTests.test_failed_local_check_blocks_push_and_one_repair) ... ok\ntest_lost_create_is_uncertain_and_never_blindly_repeated (test_omp_team.QueueTests.test_lost_create_is_uncertain_and_never_blindly_repeated) ... ok\ntest_lost_create_with_zero_readback_stays_uncertain (test_omp_team.QueueTests.test_lost_create_with_zero_readback_stays_uncertain) ... ok\ntest_native_unknown_stops_batch_then_reopens_before_independent_work (test_omp_team.QueueTests.test_native_unknown_stops_batch_then_reopens_before_independent_work) ... ok\ntest_add_and_status_while_native_child_holds_execution_lock (test_omp_team.QueueTests.test_add_and_status_while_native_child_holds_execution_lock) ... ok\ntest_completed_impact_claim_resumes_without_duplicate_model_call (test_omp_team.QueueTests.test_completed_impact_claim_resumes_without_duplicate_model_call) ... ok\n\n----------------------------------------------------------------------\nRan 6 tests in 34.362s\n\nOK\n"
+    }
+  ],
+  "passed": true,
+  "recorded_date": "2026-09-25",
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

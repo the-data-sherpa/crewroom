@@ -1,0 +1,1229 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-26",
+  "overall": "failed-and-incomplete",
+  "scope": "Actual independent OMP processes; scripted local model responses; no live model/Jira/Bitbucket/Conductor calls.",
+  "rawArtifactRoot": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/offline-all-20260926-verified",
+  "runnerBinarySha256": "67b807a99454a4d8e1cf982dce7b3343b2c2fc148f33e403dbfb3f1049b22570",
+  "sourceHashes": {
+    "scripts/run-offline-suite.py": "301103e9a14318b2b8b0e5c64faeee0f4e3be2fc2bc9afcb2b17e44732316d7b",
+    "scripts/test-mailbox-offline.py": "0c18cbf32f7b61b4fee26d8bb32f3680a603e70bf06b59a46596c7e2b498cbae",
+    "scripts/test-omp-offline-faults.py": "bc84f5a179cf447ec2bd6d221393ddc8c7183eb70bf2978f942e525154b42d66",
+    "scripts/test-omp-offline.py": "5d5d4d838cb455f87ff0041295cac538f25ed056046fe7f54c9fbfdbdad1eb85",
+    "scripts/omp_offline_fixture.py": "a4668001b6e8271eadc6ca74cbd204c315f67f7f41de42ce8816589cb4563276"
+  },
+  "summary": {
+    "scaffoldPassed": 14,
+    "retainedMechanismPassed": 13,
+    "ompIdentityBindingsPassed": 950,
+    "scriptedProfileTurnsPassed": 57,
+    "additionalContractsPassed": 11,
+    "additionalContractsFailed": 5,
+    "typecheck": "passed",
+    "applicationBuild": "failed-missing-src/main.tsx",
+    "fullProductCasesPassed": 0,
+    "partialContractCases": 30,
+    "blockedBehaviorCases": 57,
+    "blockedEndToEndScenarios": 12
+  },
+  "guard": {
+    "fixture_port_allowed": true,
+    "external_denied": true,
+    "other_loopback_denied": true,
+    "child_egress_denied": true
+  },
+  "cleanup": {
+    "allOwnedProcessesExited": true,
+    "ownedProcessGroupsStillPresent": [],
+    "disposableRuntimesRemoved": true,
+    "logsAndSyntheticStateRetained": true
+  },
+  "contracts": [
+    {
+      "source": "omp",
+      "name": "Unknown model rejected without changing selection",
+      "status": "passed",
+      "evidence": {
+        "error": "set_model: Model not found: nonexistent-fixture/not-a-model",
+        "previousModelPreserved": true
+      }
+    },
+    {
+      "source": "omp",
+      "name": "Separate processes and abrupt session continuation",
+      "status": "passed",
+      "evidence": {
+        "oldPid": 34740,
+        "replacementPid": 34741,
+        "sameSession": true,
+        "peerProcessesSurvived": true,
+        "limitation": "Runner session continuation only; Crewroom ownership/replacement policy is unimplemented."
+      }
+    },
+    {
+      "source": "omp",
+      "name": "Abort pending model stream and run another turn",
+      "status": "passed",
+      "evidence": {
+        "promptOutcome": {
+          "type": "prompt_result",
+          "id": "c151190a622b4c1cbe4c8b333bd1b6be",
+          "agentInvoked": true,
+          "status": "aborted",
+          "sessionSettled": true
+        },
+        "resumed": true,
+        "limitation": "Does not prove interruption of shell/tool descendants."
+      }
+    },
+    {
+      "source": "mailbox",
+      "name": "Stored delivery, same-process dedupe and passive observation",
+      "status": "passed",
+      "evidence": {
+        "messageId": "229508423131906048",
+        "sameIdempotentSend": true,
+        "passiveObserver": true,
+        "acknowledged": true
+      }
+    },
+    {
+      "source": "mailbox",
+      "name": "Pending delivery survives abrupt mailbox restart",
+      "status": "passed",
+      "evidence": {
+        "deliveryId": "del_229508423249346561",
+        "pendingSurvivedRestart": true
+      }
+    },
+    {
+      "source": "mailbox",
+      "name": "Lost send reply remains idempotent across mailbox restart",
+      "status": "failed",
+      "error": "Same idempotency key created a second message after service restart"
+    },
+    {
+      "source": "mailbox",
+      "name": "Observer token cannot send a message",
+      "status": "passed",
+      "evidence": {
+        "writeDenied": true
+      }
+    },
+    {
+      "source": "mailbox",
+      "name": "First unfinished turn retains RPC-visible input after kill",
+      "status": "failed",
+      "error": "First unfinished turn: RPC-visible input was not recovered with the same session identity"
+    },
+    {
+      "source": "mailbox",
+      "name": "Four external hops with specialist crash before acknowledgement",
+      "status": "passed",
+      "evidence": {
+        "hops": [
+          {
+            "sender": "Coordinator",
+            "recipient": "SpecialistOne",
+            "messageId": "229508451443937280",
+            "deliveryId": "del_229508451443937281"
+          },
+          {
+            "sender": "SpecialistOne",
+            "recipient": "SpecialistTwo",
+            "messageId": "229508451733344256",
+            "deliveryId": "del_229508451733344257"
+          },
+          {
+            "sender": "SpecialistTwo",
+            "recipient": "SpecialistOne",
+            "messageId": "229508454082154496",
+            "deliveryId": "del_229508454082154497"
+          },
+          {
+            "sender": "SpecialistOne",
+            "recipient": "Coordinator",
+            "messageId": "229508456414187520",
+            "deliveryId": "del_229508456414187521"
+          }
+        ],
+        "specialistKilledAfterDurableReceipt": true,
+        "recipientInputOccurrences": 1,
+        "coordinatorProcessRestartedBeforeFinalReply": true,
+        "noPendingDeliveries": true,
+        "observerSawAllMessages": true,
+        "limitation": "Reconciliation is performed by this test adapter. Crewroom durable inbox/ownership remains unimplemented."
+      }
+    },
+    {
+      "source": "faults",
+      "name": "HTTP 401 exposes error with bounded requests",
+      "status": "passed",
+      "evidence": {
+        "promptStatus": "error",
+        "assistantErrors": 1,
+        "requests": 1,
+        "gateMustInspectErrorEvidence": true
+      }
+    },
+    {
+      "source": "faults",
+      "name": "HTTP 403 exposes error with bounded requests",
+      "status": "passed",
+      "evidence": {
+        "promptStatus": "error",
+        "assistantErrors": 1,
+        "requests": 1,
+        "gateMustInspectErrorEvidence": true
+      }
+    },
+    {
+      "source": "faults",
+      "name": "One 429 retries the same pinned model then succeeds",
+      "status": "passed",
+      "evidence": {
+        "requests": 2,
+        "sameModel": true,
+        "recoveredTextObserved": true
+      }
+    },
+    {
+      "source": "faults",
+      "name": "Malformed/empty stream exposes failure after bounded retries",
+      "status": "passed",
+      "evidence": {
+        "promptStatus": "error",
+        "requests": 4,
+        "failureEvents": 1,
+        "assistantErrors": 1,
+        "noQualityGateFromPromptStatus": true
+      }
+    },
+    {
+      "source": "faults",
+      "name": "Unsupported effort is rejected: glm",
+      "status": "failed",
+      "error": "Unsupported effort accepted; runner reported high"
+    },
+    {
+      "source": "faults",
+      "name": "Unsupported effort is rejected: gemini",
+      "status": "failed",
+      "error": "Unsupported effort accepted; runner reported low"
+    },
+    {
+      "source": "faults",
+      "name": "Unsupported effort is rejected: no-reasoning",
+      "status": "failed",
+      "error": "Unsupported effort accepted; runner reported None"
+    }
+  ],
+  "firstTurnObservation": {
+    "rpcInputObserved": true,
+    "inputOnDiskBeforeKill": false,
+    "oldSessionId": "01a0dcac-5527-7769-89fa-e0af3a8cc7a9",
+    "newSessionId": "01a0dcac-5713-70b5-b85f-23c002bf25bb",
+    "inputRecovered": false
+  },
+  "restartIdempotencyObservation": {
+    "original": "229508425216425984",
+    "repeated": "229508427167305728"
+  },
+  "effortObservations": [
+    {
+      "selector": "aperture-openai/zai-org/GLM-5.2",
+      "requested": "medium",
+      "observed": "high",
+      "error": null,
+      "strictlyRejected": false
+    },
+    {
+      "selector": "aperture-google/gemini-3.1-pro-preview",
+      "requested": "medium",
+      "observed": "low",
+      "error": null,
+      "strictlyRejected": false
+    },
+    {
+      "selector": "aperture-bedrock-compat/us.anthropic.claude-haiku-4-5-20251001-v1:0",
+      "requested": "high",
+      "observed": null,
+      "error": null,
+      "strictlyRejected": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "scaffold",
+      "exitCode": 0,
+      "log": "scaffold.log",
+      "status": "passed"
+    },
+    {
+      "name": "build",
+      "exitCode": 1,
+      "log": "build.log",
+      "status": "failed"
+    },
+    {
+      "name": "reuse",
+      "exitCode": 0,
+      "log": "reuse.log",
+      "status": "passed"
+    },
+    {
+      "name": "omp",
+      "exitCode": 0,
+      "log": "omp.log",
+      "status": "passed"
+    },
+    {
+      "name": "mailbox",
+      "exitCode": 1,
+      "log": "mailbox.log",
+      "status": "failed"
+    },
+    {
+      "name": "faults",
+      "exitCode": 1,
+      "log": "faults.log",
+      "status": "failed"
+    }
+  ],
+  "cases": [
+    {
+      "id": "INT-01",
+      "title": "Site-aware upsert",
+      "status": "blocked-unimplemented",
+      "reason": "Ticket/workflow persistence and import/refinement operations are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "INT-02",
+      "title": "Board and queue order",
+      "status": "blocked-unimplemented",
+      "reason": "Ticket/workflow persistence and import/refinement operations are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "INT-03",
+      "title": "Optional Explore and Grill",
+      "status": "blocked-unimplemented",
+      "reason": "Ticket/workflow persistence and import/refinement operations are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "INT-04",
+      "title": "Accepted brief versions",
+      "status": "blocked-unimplemented",
+      "reason": "Ticket/workflow persistence and import/refinement operations are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "INT-05",
+      "title": "Conflicting Jira refresh",
+      "status": "blocked-unimplemented",
+      "reason": "Ticket/workflow persistence and import/refinement operations are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "INT-06",
+      "title": "Explicit repository scope",
+      "status": "blocked-unimplemented",
+      "reason": "Ticket/workflow persistence and import/refinement operations are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "INT-07",
+      "title": "Research-only outcome",
+      "status": "blocked-unimplemented",
+      "reason": "Ticket/workflow persistence and import/refinement operations are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "INT-08",
+      "title": "No automatic backlog execution",
+      "status": "blocked-unimplemented",
+      "reason": "Ticket/workflow persistence and import/refinement operations are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "ROL-01",
+      "title": "Minimal versus complex team",
+      "status": "blocked-unimplemented",
+      "reason": "Custom role creation, assignment snapshots, selection and insertion services are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "ROL-02",
+      "title": "Custom role lifecycle",
+      "status": "blocked-unimplemented",
+      "reason": "Custom role creation, assignment snapshots, selection and insertion services are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "ROL-03",
+      "title": "Immutable definition snapshot",
+      "status": "blocked-unimplemented",
+      "reason": "Custom role creation, assignment snapshots, selection and insertion services are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "ROL-04",
+      "title": "Project constraints",
+      "status": "blocked-unimplemented",
+      "reason": "Custom role creation, assignment snapshots, selection and insertion services are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "ROL-05",
+      "title": "Reviewer independence",
+      "status": "blocked-unimplemented",
+      "reason": "Custom role creation, assignment snapshots, selection and insertion services are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "ROL-06",
+      "title": "Reporter versus writer",
+      "status": "blocked-unimplemented",
+      "reason": "Custom role creation, assignment snapshots, selection and insertion services are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "ROL-07",
+      "title": "Invalid selection proposal",
+      "status": "blocked-unimplemented",
+      "reason": "Custom role creation, assignment snapshots, selection and insertion services are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "RTE-01",
+      "title": "Complete catalog binding matrix",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom assignment/preflight/fallback services are not implemented; OMP contracts are tested separately.",
+      "evidence": [
+        "omp/report.json#bindings"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "RTE-02",
+      "title": "Heterogeneous and rotated teams",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom assignment/preflight/fallback services are not implemented; OMP contracts are tested separately.",
+      "evidence": [
+        "omp/report.json#profileTurns"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "RTE-03",
+      "title": "Slash-bearing IDs and API dispatch",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom assignment/preflight/fallback services are not implemented; OMP contracts are tested separately.",
+      "evidence": [
+        "omp/report.json#bindings",
+        "omp/report.json#profileTurns"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "RTE-04",
+      "title": "Missing, stale and ambiguous selectors",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom assignment/preflight/fallback services are not implemented; OMP contracts are tested separately.",
+      "evidence": [
+        "omp/report.json#contracts"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "RTE-05",
+      "title": "Default model resolution",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom assignment/preflight/fallback services are not implemented; OMP contracts are tested separately.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "RTE-06",
+      "title": "Effort validation",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom assignment/preflight/fallback services are not implemented; OMP contracts are tested separately.",
+      "evidence": [
+        "faults/report.json#effortObservations"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "RTE-07",
+      "title": "Capabilities and context limits",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom assignment/preflight/fallback services are not implemented; OMP contracts are tested separately.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "RTE-08",
+      "title": "Runtime identity mismatch",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom assignment/preflight/fallback services are not implemented; OMP contracts are tested separately.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "RTE-09",
+      "title": "Explicit fallback",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom assignment/preflight/fallback services are not implemented; OMP contracts are tested separately.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "RTE-10",
+      "title": "Advisory router boundaries",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom assignment/preflight/fallback services are not implemented; OMP contracts are tested separately.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "RTE-11",
+      "title": "Secondary OMP model paths",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom assignment/preflight/fallback services are not implemented; OMP contracts are tested separately.",
+      "evidence": [
+        "omp/report.json#providerRequestCount"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "RTE-12",
+      "title": "Provider error taxonomy",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom assignment/preflight/fallback services are not implemented; OMP contracts are tested separately.",
+      "evidence": [
+        "faults/report.json#contracts"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "MSG-01",
+      "title": "Four-hop external round trip",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom durable inbox/outbox, attempt fencing and message reconciliation adapter are not implemented.",
+      "evidence": [
+        "mailbox/report.json#contracts"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "MSG-02",
+      "title": "Passive observer",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom durable inbox/outbox, attempt fencing and message reconciliation adapter are not implemented.",
+      "evidence": [
+        "mailbox/report.json#contracts"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "MSG-03",
+      "title": "Duplicate delivery",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom durable inbox/outbox, attempt fencing and message reconciliation adapter are not implemented.",
+      "evidence": [
+        "mailbox/report.json#contracts"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "MSG-04",
+      "title": "Reordering and causality",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom durable inbox/outbox, attempt fencing and message reconciliation adapter are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "MSG-05",
+      "title": "Lost send acknowledgement",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom durable inbox/outbox, attempt fencing and message reconciliation adapter are not implemented.",
+      "evidence": [
+        "mailbox/report.json#restartIdempotencyObservation"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "MSG-06",
+      "title": "Receive crash windows",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom durable inbox/outbox, attempt fencing and message reconciliation adapter are not implemented.",
+      "evidence": [
+        "mailbox/report.json#firstTurnObservation",
+        "mailbox/report.json#contracts"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "MSG-07",
+      "title": "Mailbox restart and expiration",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom durable inbox/outbox, attempt fencing and message reconciliation adapter are not implemented.",
+      "evidence": [
+        "mailbox/report.json#contracts"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "MSG-08",
+      "title": "Routing and isolation",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom durable inbox/outbox, attempt fencing and message reconciliation adapter are not implemented.",
+      "evidence": [
+        "mailbox/report.json#contracts"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "MSG-09",
+      "title": "Polling and payload boundaries",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom durable inbox/outbox, attempt fencing and message reconciliation adapter are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "LIF-01",
+      "title": "Process independence",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom ownership, recovery budgets and process-tree lifecycle controller are not implemented.",
+      "evidence": [
+        "omp/report.json#contracts"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "LIF-02",
+      "title": "Specialist replacement",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom ownership, recovery budgets and process-tree lifecycle controller are not implemented.",
+      "evidence": [
+        "omp/report.json#contracts",
+        "mailbox/report.json#contracts"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "LIF-03",
+      "title": "Coordinator restart",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom ownership, recovery budgets and process-tree lifecycle controller are not implemented.",
+      "evidence": [
+        "mailbox/report.json#contracts"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "LIF-04",
+      "title": "Workbench restart",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom ownership, recovery budgets and process-tree lifecycle controller are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "LIF-05",
+      "title": "Pause with active child tool",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom ownership, recovery budgets and process-tree lifecycle controller are not implemented.",
+      "evidence": [
+        "omp/report.json#contracts"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "LIF-06",
+      "title": "Resume and cancellation",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom ownership, recovery budgets and process-tree lifecycle controller are not implemented.",
+      "evidence": [
+        "omp/report.json#contracts"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "LIF-07",
+      "title": "PID reuse and competing owners",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom ownership, recovery budgets and process-tree lifecycle controller are not implemented.",
+      "evidence": [
+        "reuse.json"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "LIF-08",
+      "title": "Recovery bounds",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom ownership, recovery budgets and process-tree lifecycle controller are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "LIF-09",
+      "title": "Partial and corrupt state",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom ownership, recovery budgets and process-tree lifecycle controller are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "QUE-01",
+      "title": "Concurrency ceilings",
+      "status": "blocked-unimplemented",
+      "reason": "Persistent scheduler, writer leases and merge-dependency gates are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "QUE-02",
+      "title": "Single writer lease",
+      "status": "blocked-unimplemented",
+      "reason": "Persistent scheduler, writer leases and merge-dependency gates are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "QUE-03",
+      "title": "Independent next ticket",
+      "status": "blocked-unimplemented",
+      "reason": "Persistent scheduler, writer leases and merge-dependency gates are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "QUE-04",
+      "title": "Dependent ticket",
+      "status": "partial-contract-evidence",
+      "reason": "Persistent scheduler, writer leases and merge-dependency gates are not implemented.",
+      "evidence": [
+        "reuse.json"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "QUE-05",
+      "title": "Repeated controls and queue restart",
+      "status": "blocked-unimplemented",
+      "reason": "Persistent scheduler, writer leases and merge-dependency gates are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "REP-01",
+      "title": "Isolated repository setup",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom repository/worktree service is not implemented; retained mechanisms are tested separately.",
+      "evidence": [
+        "reuse.json"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "REP-02",
+      "title": "Continue existing work",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom repository/worktree service is not implemented; retained mechanisms are tested separately.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "REP-03",
+      "title": "Interrupted edit or commit",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom repository/worktree service is not implemented; retained mechanisms are tested separately.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "REP-04",
+      "title": "Base branch drift",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom repository/worktree service is not implemented; retained mechanisms are tested separately.",
+      "evidence": [
+        "reuse.json"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "REP-05",
+      "title": "Local output boundaries",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom repository/worktree service is not implemented; retained mechanisms are tested separately.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "REP-06",
+      "title": "Real local checks on scripted patches",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom repository/worktree service is not implemented; retained mechanisms are tested separately.",
+      "evidence": [
+        "reuse.json"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "EVD-01",
+      "title": "Complete coding evidence",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom revision-specific evidence and readiness services are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "EVD-02",
+      "title": "False completion signals",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom revision-specific evidence and readiness services are not implemented.",
+      "evidence": [
+        "faults/report.json#contracts",
+        "reuse.json"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "EVD-03",
+      "title": "Failed, skipped and unavailable checks",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom revision-specific evidence and readiness services are not implemented.",
+      "evidence": [
+        "reuse.json"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "EVD-04",
+      "title": "Revision mismatch",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom revision-specific evidence and readiness services are not implemented.",
+      "evidence": [
+        "reuse.json"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "EVD-05",
+      "title": "Review findings and repair",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom revision-specific evidence and readiness services are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "EVD-06",
+      "title": "Forged or corrupt evidence",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom revision-specific evidence and readiness services are not implemented.",
+      "evidence": [
+        "reuse.json"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "EVD-07",
+      "title": "Hosted check regression",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom revision-specific evidence and readiness services are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "EVD-08",
+      "title": "Honest research evidence",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom revision-specific evidence and readiness services are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "DEL-01",
+      "title": "Allowed Jira updates",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom Jira/Bitbucket adapters, action ledger and delivery workflow are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "DEL-02",
+      "title": "Jira outage and recovery",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom Jira/Bitbucket adapters, action ledger and delivery workflow are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "DEL-03",
+      "title": "Uncertain external writes",
+      "status": "partial-contract-evidence",
+      "reason": "Crewroom Jira/Bitbucket adapters, action ledger and delivery workflow are not implemented.",
+      "evidence": [
+        "reuse.json"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "DEL-04",
+      "title": "PR content and identity",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom Jira/Bitbucket adapters, action ledger and delivery workflow are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "DEL-05",
+      "title": "Human review and merge",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom Jira/Bitbucket adapters, action ledger and delivery workflow are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "DEL-06",
+      "title": "Conflicting and delayed provider events",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom Jira/Bitbucket adapters, action ledger and delivery workflow are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "DEL-07",
+      "title": "Provider permissions and partial failure",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom Jira/Bitbucket adapters, action ledger and delivery workflow are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "UI-01",
+      "title": "Three separate status dimensions",
+      "status": "blocked-unimplemented",
+      "reason": "Application server/index.ts and src/main.tsx are absent; no runnable browser workbench.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "UI-02",
+      "title": "Steering lifecycle",
+      "status": "blocked-unimplemented",
+      "reason": "Application server/index.ts and src/main.tsx are absent; no runnable browser workbench.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "UI-03",
+      "title": "Observe specialists",
+      "status": "blocked-unimplemented",
+      "reason": "Application server/index.ts and src/main.tsx are absent; no runnable browser workbench.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "UI-04",
+      "title": "Insert and pause from UI",
+      "status": "blocked-unimplemented",
+      "reason": "Application server/index.ts and src/main.tsx are absent; no runnable browser workbench.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "UI-05",
+      "title": "Disconnected and failed integration states",
+      "status": "blocked-unimplemented",
+      "reason": "Application server/index.ts and src/main.tsx are absent; no runnable browser workbench.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "UI-06",
+      "title": "Basic complete operator flow",
+      "status": "blocked-unimplemented",
+      "reason": "Application server/index.ts and src/main.tsx are absent; no runnable browser workbench.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "SEC-01",
+      "title": "Loopback and origin enforcement",
+      "status": "blocked-unimplemented",
+      "reason": "Application origin/tool-authority/secrets policies are not implemented; test-process containment is tested separately.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "SEC-02",
+      "title": "Secrets and environment isolation",
+      "status": "blocked-unimplemented",
+      "reason": "Application origin/tool-authority/secrets policies are not implemented; test-process containment is tested separately.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "SEC-03",
+      "title": "Untrusted ticket or message instructions",
+      "status": "blocked-unimplemented",
+      "reason": "Application origin/tool-authority/secrets policies are not implemented; test-process containment is tested separately.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "SEC-04",
+      "title": "Network containment",
+      "status": "partial-contract-evidence",
+      "reason": "Application origin/tool-authority/secrets policies are not implemented; test-process containment is tested separately.",
+      "evidence": [
+        "omp/report.json#guard"
+      ],
+      "fullCasePassed": false
+    },
+    {
+      "id": "SEC-05",
+      "title": "Destructive cleanup boundaries",
+      "status": "blocked-unimplemented",
+      "reason": "Application origin/tool-authority/secrets policies are not implemented; test-process containment is tested separately.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "SEC-06",
+      "title": "No infrastructure or merge tools",
+      "status": "blocked-unimplemented",
+      "reason": "Application origin/tool-authority/secrets policies are not implemented; test-process containment is tested separately.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "LIM-01",
+      "title": "Active-time budget",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom active-time, cost-accounting and backpressure services are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "LIM-02",
+      "title": "Cost provenance",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom active-time, cost-accounting and backpressure services are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "LIM-03",
+      "title": "Bounded failures and backpressure",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom active-time, cost-accounting and backpressure services are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    },
+    {
+      "id": "LIM-04",
+      "title": "Repeatable schedules",
+      "status": "blocked-unimplemented",
+      "reason": "Crewroom active-time, cost-accounting and backpressure services are not implemented.",
+      "evidence": [],
+      "fullCasePassed": false
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "E2E-01",
+      "title": "Small coding ticket",
+      "status": "blocked-unimplemented",
+      "reason": "No end-to-end Crewroom workflow/server/UI/provider adapter exists. Lower-level experiments do not substitute for this job.",
+      "relatedCases": [
+        "INT-03",
+        "RTE-02",
+        "REP-01",
+        "REP-06",
+        "EVD-01",
+        "DEL-04"
+      ]
+    },
+    {
+      "id": "E2E-02",
+      "title": "Complex feature with selected specialists",
+      "status": "blocked-unimplemented",
+      "reason": "No end-to-end Crewroom workflow/server/UI/provider adapter exists. Lower-level experiments do not substitute for this job.",
+      "relatedCases": [
+        "ROL-01",
+        "ROL-04",
+        "ROL-06",
+        "QUE-01",
+        "QUE-02",
+        "EVD-01"
+      ]
+    },
+    {
+      "id": "E2E-03",
+      "title": "Failed checks and review cause bounded rework",
+      "status": "blocked-unimplemented",
+      "reason": "No end-to-end Crewroom workflow/server/UI/provider adapter exists. Lower-level experiments do not substitute for this job.",
+      "relatedCases": [
+        "ROL-05",
+        "REP-06",
+        "EVD-03",
+        "EVD-05",
+        "LIF-08"
+      ]
+    },
+    {
+      "id": "E2E-04",
+      "title": "Specialist and controller interruption",
+      "status": "blocked-unimplemented",
+      "reason": "No end-to-end Crewroom workflow/server/UI/provider adapter exists. Lower-level experiments do not substitute for this job.",
+      "relatedCases": [
+        "MSG-03",
+        "MSG-05",
+        "MSG-06",
+        "LIF-01",
+        "LIF-02",
+        "LIF-03",
+        "LIF-04"
+      ]
+    },
+    {
+      "id": "E2E-05",
+      "title": "Operator steering, insertion and pause",
+      "status": "blocked-unimplemented",
+      "reason": "No end-to-end Crewroom workflow/server/UI/provider adapter exists. Lower-level experiments do not substitute for this job.",
+      "relatedCases": [
+        "ROL-02",
+        "LIF-05",
+        "LIF-06",
+        "UI-02",
+        "UI-03",
+        "UI-04"
+      ]
+    },
+    {
+      "id": "E2E-06",
+      "title": "Uncertain Jira and PR publication",
+      "status": "blocked-unimplemented",
+      "reason": "No end-to-end Crewroom workflow/server/UI/provider adapter exists. Lower-level experiments do not substitute for this job.",
+      "relatedCases": [
+        "MSG-05",
+        "DEL-02",
+        "DEL-03",
+        "DEL-04",
+        "DEL-07"
+      ]
+    },
+    {
+      "id": "E2E-07",
+      "title": "Queue and merge dependencies",
+      "status": "blocked-unimplemented",
+      "reason": "No end-to-end Crewroom workflow/server/UI/provider adapter exists. Lower-level experiments do not substitute for this job.",
+      "relatedCases": [
+        "INT-02",
+        "INT-08",
+        "QUE-01",
+        "QUE-03",
+        "QUE-04",
+        "QUE-05",
+        "DEL-05"
+      ]
+    },
+    {
+      "id": "E2E-08",
+      "title": "Routing failure, fallback and wrong model",
+      "status": "blocked-unimplemented",
+      "reason": "No end-to-end Crewroom workflow/server/UI/provider adapter exists. Lower-level experiments do not substitute for this job.",
+      "relatedCases": [
+        "RTE-04",
+        "RTE-06",
+        "RTE-08",
+        "RTE-09",
+        "RTE-11",
+        "RTE-12"
+      ]
+    },
+    {
+      "id": "E2E-09",
+      "title": "Target drift and late CI",
+      "status": "blocked-unimplemented",
+      "reason": "No end-to-end Crewroom workflow/server/UI/provider adapter exists. Lower-level experiments do not substitute for this job.",
+      "relatedCases": [
+        "REP-04",
+        "EVD-04",
+        "EVD-07",
+        "DEL-06"
+      ]
+    },
+    {
+      "id": "E2E-10",
+      "title": "Standalone research and documentation",
+      "status": "blocked-unimplemented",
+      "reason": "No end-to-end Crewroom workflow/server/UI/provider adapter exists. Lower-level experiments do not substitute for this job.",
+      "relatedCases": [
+        "INT-07",
+        "ROL-04",
+        "EVD-08",
+        "UI-05"
+      ]
+    },
+    {
+      "id": "E2E-11",
+      "title": "Untrusted content and authority boundary",
+      "status": "blocked-unimplemented",
+      "reason": "No end-to-end Crewroom workflow/server/UI/provider adapter exists. Lower-level experiments do not substitute for this job.",
+      "relatedCases": [
+        "MSG-08",
+        "REP-05",
+        "SEC-01",
+        "SEC-02",
+        "SEC-03",
+        "SEC-04",
+        "SEC-06"
+      ]
+    },
+    {
+      "id": "E2E-12",
+      "title": "Budget, cancellation and later continuation",
+      "status": "blocked-unimplemented",
+      "reason": "No end-to-end Crewroom workflow/server/UI/provider adapter exists. Lower-level experiments do not substitute for this job.",
+      "relatedCases": [
+        "LIF-06",
+        "LIF-07",
+        "LIF-08",
+        "LIM-01",
+        "LIM-02",
+        "LIM-03",
+        "SEC-05"
+      ]
+    }
+  ],
+  "browser": {
+    "status": "blocked-unimplemented",
+    "reason": "Application server/index.ts and src/main.tsx are absent; no runnable browser workbench.",
+    "notRun": "npm run test:e2e"
+  },
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

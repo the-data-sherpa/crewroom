@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "guard": {
+    "fixture_port_allowed": true,
+    "external_denied": true,
+    "other_loopback_denied": true,
+    "child_egress_denied": true
+  },
+  "providerRequests": 1,
+  "providerErrors": [],
+  "unexpectedSurvivingProcesses": [],
+  "date": "2026-09-27",
+  "initialFailedRequests": 2,
+  "expectedEffort": "low",
+  "blockedEffort": "medium",
+  "exchangeRegression": ".crewroom/test-results/m2-runtime-gateway-2/report.json",
+  "interruptionRegression": ".crewroom/test-results/m2-contained-gateway-regression/report.json",
+  "sourceSha256": {
+    "server/runtime/provider-gateway.ts": "eca50c3588c69e7692d4707a5935479e32888211d2e7808018e4c660db4434d6",
+    "server/runtime/host.ts": "d4871a5ab4127a1765e40b8c2d884574e3f5826daaa1bdff11a303fc9d0b4ef8",
+    "server/runtime/supervisor.ts": "e4e6f1b46f172765ca32eaf810360e5fc07b88ab3b2ae09e3d9c76671f32ab3c",
+    "scripts/test-application-model-guard.py": "b7264c4919e300fa0ff2d84feae88793fe27d65bb237d1eaf4f863118284c634",
+    "scripts/model-guard-driver.ts": "ca144cceda4f1ea81b211711bd549df051eb35024a6c32dc8d416ac1350a4006"
+  }
+}

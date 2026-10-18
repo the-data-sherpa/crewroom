@@ -1,0 +1,163 @@
+{
+  "iteration": "Final packaged GUI observation, failed attempt 1",
+  "recordedAt": "2026-10-04T07:04:51.518690+00:00",
+  "passed": false,
+  "candidateRevision": "8f3e325870e40209f42c43ef0009e953f45398f5",
+  "package": {
+    "path": "/private/tmp/cr-n7-1004a/Crewroom.app",
+    "sidecarSha256": "5f9b92bf3bda35bd549c1dc8902cd4e62bba48a347f12c9eb62f8051eedf835b",
+    "binariesBeforeAndAfter": {
+      "Contents/MacOS/crewroom": "141498a07d2cabd8717eb05dab7b7cd64cf36f5d902e8b92c755c1d3d1297e49",
+      "Contents/MacOS/crewroomd": "0b66c90c1ccef2ac2e53e4d7aab5ce083cc4d4fba59405fe4b6b7a91df79e97d",
+      "Contents/MacOS/crewroom-launcher": "eef0c15e3936fad9ac7f1a64550f9c45b6e89f8737a7f56763d32a6c1fa8142c",
+      "Contents/MacOS/crewroom-process": "90d335fc8ef295497ad4db8e4b4c76098681f6dffd6281af563a5d02c560988f",
+      "Contents/MacOS/crewroom-host": "318d41097d3c8d44dad8dda3ac54c5dfb52c909d02f3f954e12ca11a6ebc6ff3"
+    },
+    "unchanged": true
+  },
+  "nativeGui": {
+    "initialPid": 6288,
+    "launch": "Original documented bundled crewroom-launcher invoked by root; no wrapper and no Terminal UI. CUA selected the running original bundle.",
+    "failure": "Pixels stayed at the initial disconnected/empty workspace after background connection and button actions. AX eventually reflected the connected workspace and selected running task after Tab. Wall AX then reflected four observed attempts and connected terminals, while visible pixels retained its initial empty wall. A resize from 1240 to 894 px repainted the four current idle tiles and blank terminal surfaces.",
+    "reproduction": [
+      "Launch original package with fixture connection descriptor.",
+      "Observe initial empty/reconnecting frame; authenticated read-only /api/workspace independently returned HTTP200 with one task.",
+      "Click New ticket; visible frame remains unchanged.",
+      "Press Tab; AX reports Connected and New local ticket but screenshot remains old workspace frame.",
+      "Click fixture task, then Tab; AX reports running task, independent statuses, brief, and wall button.",
+      "Open wall, Tab, Space to connect, Tab; AX advances while pixels remain initial empty wall.",
+      "Resize wall; pixels update to four current idle attempt/model/PID tiles."
+    ],
+    "partialChecks": {
+      "fourOwnedReadonlyTmuxClients": true,
+      "viewerClientFlags": "attached,focused,ignore-size,read-only,UTF-8",
+      "ownedPaneGeometry": "Four crewroom panes remained 160x40; history sizes455,459,452,448",
+      "cmdQClosedInitialGui": true,
+      "afterUiQuitSameElevenFixtureProcessIdentities": true,
+      "sameEightHostOmpProcessesAfterUiQuit": true
+    },
+    "notAccepted": [
+      "Healthy async redraw",
+      "Readable live terminal output on final package",
+      "Final-package narrow reflow",
+      "Final-package copy/selection/input refusal",
+      "Final-package dialog and hidden-input focus journey",
+      "GUI reopen/reconnect acceptance",
+      "Healthy final wall resource baseline",
+      "Actual VoiceOver and OS IME (permission remained unanswered; settings unchanged)"
+    ]
+  },
+  "load": {
+    "passed": true,
+    "milliseconds": 60558.507792000004,
+    "rounds": 18,
+    "completedInputs": 72,
+    "output": {
+      "Coordinator": {
+        "replies": 18,
+        "lines": 432,
+        "utf8Bytes": 48438,
+        "unicodeCharacters": 41526
+      },
+      "Specialist1": {
+        "replies": 18,
+        "lines": 432,
+        "utf8Bytes": 48438,
+        "unicodeCharacters": 41526
+      },
+      "Specialist2": {
+        "replies": 18,
+        "lines": 432,
+        "utf8Bytes": 48438,
+        "unicodeCharacters": 41526
+      },
+      "Specialist3": {
+        "replies": 18,
+        "lines": 432,
+        "utf8Bytes": 48438,
+        "unicodeCharacters": 41526
+      }
+    },
+    "providerRequests": 82,
+    "providerErrors": [],
+    "scope": "Actual native daemon, four actual OMPs and real Mail; loopback scripted provider replies, no live model delivery or real cost evidence."
+  },
+  "controllerFailure": {
+    "finishDeadline": "2026-10-04T07:02:41.838Z",
+    "timeoutRecorded": "2026-10-04T07:02:41.850Z",
+    "finishTriggerWritten": "2026-10-04T07:02:50.920245Z",
+    "reason": "Terminal subagent waited for reopen/PID-ownership clarification too long and missed the180second completion latch by about9seconds. This controller error is separate from the preceding packaged GUI redraw defect.",
+    "driverExitCode": 1,
+    "driverPassed": false,
+    "normalPostObservationReattachmentExecuted": false
+  },
+  "cleanup": {
+    "allOwnedProcessesExited": true,
+    "ownedRecords": [
+      {
+        "path": "/private/tmp/cr-n7-observe1/cr-wf-P0ZRcj/runtime/f14f2c36-418d-442f-ae49-77b09d985072/host-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-observe1/cr-wf-P0ZRcj/runtime/f14f2c36-418d-442f-ae49-77b09d985072/omp-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-observe1/cr-wf-P0ZRcj/runtime/ff1f91f6-442a-4b8f-bd36-d4a5acc1c59c/host-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-observe1/cr-wf-P0ZRcj/runtime/ff1f91f6-442a-4b8f-bd36-d4a5acc1c59c/omp-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-observe1/cr-wf-P0ZRcj/runtime/10f714c8-d0e0-4e15-8099-b729e062a97c/host-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-observe1/cr-wf-P0ZRcj/runtime/10f714c8-d0e0-4e15-8099-b729e062a97c/omp-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-observe1/cr-wf-P0ZRcj/runtime/0cda03d6-b3e9-43b6-97c1-31413640c2fe/host-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-observe1/cr-wf-P0ZRcj/runtime/0cda03d6-b3e9-43b6-97c1-31413640c2fe/omp-process",
+        "state": "stopped"
+      }
+    ],
+    "gui9254and9391": "Two exact-package GUI processes appeared after initial GUI quit; not launched by terminal subagent. Parent must identify/close its diagnostic GUIs; no ownership assumptions or direct signals made."
+  },
+  "resources": {
+    "status": "Diagnostic measurements from failed GUI attempt; not accepted healthy idle/load/postload wall baseline.",
+    "sampler": "Candidate scripts/measure-native-footprint.py unchanged,15s each; read-only wrapper supplied explicit metadata PIDs plus exact GUI and observed descendants.",
+    "idleAndActive": "GUI was visibly stale and four observer clients were not yet present.",
+    "postload": "Contains GUI plus4login and4tmux observer clients after forced resize; screenshots still did not prove live terminal rendering.",
+    "scope": "Explicit PIDs only. RSS double-counts shared pages. Mail separately labelled. No Docker commands in this workload and no Docker/VM overhead attributed."
+  },
+  "receipts": {
+    "/private/tmp/cr-n7-observe1/observation-ready.json": "21ae491f7749f8e7c23a98b72fb84cb4c73fc471af099758ece06d363b1def16",
+    "/private/tmp/cr-n7-observe1/load-started.json": "28f65a842c6a43b8496c5c2f11141851cda03ac3e55a089b18309b417fcd56e5",
+    "/private/tmp/cr-n7-observe1/load-complete.json": "160145f1d51f17d3b7468c257a3da946405376edaeae5fc74180edcf9138332e",
+    "/private/tmp/cr-n7-observe1/observation-error.json": "60636456072114f3edec9102617afe3d83e07436d82b726223b2504b61b8ce87",
+    "/private/tmp/cr-n7-observe1/report.json": "6063373f01f5741f7492c98d5aa6cf648de6a45938670538618e3f4969ff2a8e",
+    "/private/tmp/cr-n7-observe1/idle.json": "b5324d52c735afbeb361f713f284c340ed3ede77f5b2aec30aa2e07dd375e4d4",
+    "/private/tmp/cr-n7-observe1/idle.inventory.json": "ca7907587783a2f688ba58fa10f099d9add7a697aa3859cba735e31800f87fee",
+    "/private/tmp/cr-n7-observe1/active.json": "e39fb024ade09e5de950e3633c657e7b349c3cb8f2319c3bb35d810b4fc20cc0",
+    "/private/tmp/cr-n7-observe1/active.inventory.json": "ca7907587783a2f688ba58fa10f099d9add7a697aa3859cba735e31800f87fee",
+    "/private/tmp/cr-n7-observe1/postload.json": "5d721a50987a22f2e22b0880be5dd5b01c641c733a19d89eb1a87b1aa98d14cb",
+    "/private/tmp/cr-n7-observe1/postload.inventory.json": "6fb13189436cd3bf57639a490bd1907b859db5af2434446b693d2894e69af330",
+    "/private/tmp/cr-n7-observe1/gui-close-identities.json": "c19305aa1cbc64af985197a77435bb8e4f047693835cd7970d5236c80f61349a",
+    "/private/tmp/cr-n7-observe1/clients.txt": "38d98df02e02e43073228f2805cf0846017667802deb3de65898bc1206407151",
+    "/private/tmp/cr-n7-observe1/panes.txt": "58b54076c611a9037651a73f2f1b38532c65bccfbdad116cb0bb94227b7fe46c",
+    "/private/tmp/cr-n7-observe1/gui-stalled.sample.txt": "1f825814c411bb58661391a5e6e8d4ef5971049df40e42ff0804674ea3a9bfdf"
+  },
+  "selfEvaluation": "The first attempt retained truthful raw observations but initially overclassified stale captured pixels as a package defect. Follow-up diagnostics established full window occlusion and restored normal redraw without a production patch. Latch management was incorrect; the rerun must verify window visibility and finish within120seconds after load completion, with a150second supervisor fallback.",
+  "subsequentResolution": {
+    "receipt": "docs/testing/rust-native-redraw-investigation-2026-10-04.json",
+    "classification": "The stale captured pixels were reproduced with a fully occluded window. Exposing a strip restored normal CVDisplayLink ticks, ordinary typing, and asynchronous task updates without a production change. The first observation attempt remains failed because its completion latch timed out; its resource samples do not provide accepted visible-wall measurements.",
+    "cleanup": "Both subsequently present original-package GUI instances9254/9391 were closed normally. All11 initial fixture PIDs and original package GUIs absent in gui-cleanup.json.",
+    "likelyImplicitRelaunch": "PID9254 had no arguments and appeared after CUA getAXState followed Quit; PID9391 had the root launcher descriptor. Avoid CUA app observation after Quit and confirm exit through read-only process inventory."
+  }
+}

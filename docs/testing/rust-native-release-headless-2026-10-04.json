@@ -1,0 +1,435 @@
+{
+  "kind": "N7 final candidate headless package, installation and recovery",
+  "recordedAt": "2026-10-04",
+  "candidate": "8f3e325870e40209f42c43ef0009e953f45398f5",
+  "recordedFromMain": "5635e216f8ff1cd75b8a743c16ff85eab55b5a98",
+  "passed": true,
+  "scope": "Fresh checkout on the provisioned Apple Silicon macOS host, not a fresh OS. Actual native daemon/host/helper, OMP, Mail, Git and Docker; scripted model/provider replies. GUI, OS accessibility and footprint remain separate gates.",
+  "bundle": {
+    "path": "/private/tmp/cr-n7-1004a/Crewroom.app",
+    "sidecarSha256": "5f9b92bf3bda35bd549c1dc8902cd4e62bba48a347f12c9eb62f8051eedf835b",
+    "sourceInputsCount": 2082,
+    "sourceInputsSha256": "394c40cc9141d7f170874f217cd746498a773e03cb8393f9502c8218d019bdcb",
+    "launcherSha256": "eef0c15e3936fad9ac7f1a64550f9c45b6e89f8737a7f56763d32a6c1fa8142c",
+    "sourceRevision": "8f3e325870e40209f42c43ef0009e953f45398f5",
+    "packagerSha256": "2346856a696f98349a0d0325e93618a2c920cae04086d07769b4ae23733fb87a",
+    "workingTreeDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+    "platform": "ProductName:\t\tmacOS\nProductVersion:\t\t26.6.2\nBuildVersion:\t\t25G83",
+    "binaries": {
+      "crewroom": {
+        "inputSha256": "106a05c6487c4be31dc9cc3b144bca2c4a8935710c964a2a25498dd43cba5752",
+        "dependencies": [
+          "/usr/lib/libc++.1.dylib",
+          "/usr/lib/libobjc.A.dylib",
+          "/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit",
+          "/System/Library/Frameworks/Carbon.framework/Versions/A/Carbon",
+          "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation",
+          "/System/Library/Frameworks/CoreGraphics.framework/Versions/A/CoreGraphics",
+          "/System/Library/Frameworks/CoreText.framework/Versions/A/CoreText",
+          "/System/Library/Frameworks/CoreVideo.framework/Versions/A/CoreVideo",
+          "/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation",
+          "/System/Library/Frameworks/IOSurface.framework/Versions/A/IOSurface",
+          "/System/Library/Frameworks/Metal.framework/Versions/A/Metal",
+          "/System/Library/Frameworks/QuartzCore.framework/Versions/A/QuartzCore",
+          "/System/Library/Frameworks/CoreServices.framework/Versions/A/CoreServices",
+          "/System/Library/Frameworks/ApplicationServices.framework/Versions/A/ApplicationServices",
+          "/System/Library/Frameworks/Security.framework/Versions/A/Security",
+          "/usr/lib/libSystem.B.dylib",
+          "/System/Library/Frameworks/UserNotifications.framework/Versions/A/UserNotifications",
+          "/System/Library/Frameworks/CoreLocation.framework/Versions/A/CoreLocation",
+          "/System/Library/Frameworks/CoreData.framework/Versions/A/CoreData",
+          "/System/Library/Frameworks/CoreImage.framework/Versions/A/CoreImage",
+          "/System/Library/Frameworks/CloudKit.framework/Versions/A/CloudKit",
+          "/System/Library/Frameworks/OpenGL.framework/Versions/A/OpenGL",
+          "/usr/lib/libiconv.2.dylib",
+          "/System/Library/Frameworks/ColorSync.framework/Versions/A/ColorSync"
+        ],
+        "preBundleSignatureSha256": "9ce444f670d429d3e1165fe7ff64ecb6b96af9db0d9ec13ac1c4757a364f7478",
+        "preBundleSignatureBytes": 43349680,
+        "packagedSha256": "141498a07d2cabd8717eb05dab7b7cd64cf36f5d902e8b92c755c1d3d1297e49",
+        "bytes": 43349680
+      },
+      "crewroomd": {
+        "inputSha256": "454c6fdaa3f985c915428664c01d9fae60473c5c0bdb99f6123b232250716c51",
+        "dependencies": [
+          "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation",
+          "/usr/lib/libiconv.2.dylib",
+          "/usr/lib/libSystem.B.dylib"
+        ],
+        "preBundleSignatureSha256": "0b66c90c1ccef2ac2e53e4d7aab5ce083cc4d4fba59405fe4b6b7a91df79e97d",
+        "preBundleSignatureBytes": 21811856,
+        "packagedSha256": "0b66c90c1ccef2ac2e53e4d7aab5ce083cc4d4fba59405fe4b6b7a91df79e97d",
+        "bytes": 21811856
+      },
+      "crewroom-process": {
+        "inputSha256": "0812f332c9da3fb8a54a0431ebb13d7585bf36bb4c6644de44e2507207d5f75c",
+        "dependencies": [
+          "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation",
+          "/usr/lib/libiconv.2.dylib",
+          "/usr/lib/libSystem.B.dylib"
+        ],
+        "preBundleSignatureSha256": "90d335fc8ef295497ad4db8e4b4c76098681f6dffd6281af563a5d02c560988f",
+        "preBundleSignatureBytes": 1710928,
+        "packagedSha256": "90d335fc8ef295497ad4db8e4b4c76098681f6dffd6281af563a5d02c560988f",
+        "bytes": 1710928
+      },
+      "crewroom-host": {
+        "inputSha256": "8404c086f40d2ec2097504154a6fb4ac0b454691e237bd1094a4957ab982a3be",
+        "dependencies": [
+          "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation",
+          "/usr/lib/libiconv.2.dylib",
+          "/usr/lib/libSystem.B.dylib"
+        ],
+        "preBundleSignatureSha256": "318d41097d3c8d44dad8dda3ac54c5dfb52c909d02f3f954e12ca11a6ebc6ff3",
+        "preBundleSignatureBytes": 8040096,
+        "packagedSha256": "318d41097d3c8d44dad8dda3ac54c5dfb52c909d02f3f954e12ca11a6ebc6ff3",
+        "bytes": 8040096
+      }
+    },
+    "signing": "Local ad-hoc signatures; no distribution notarization claim.",
+    "scope": "Final signed package hashes; full GUI/runtime acceptance requires exercising this bundle.",
+    "bundleSignatureVerified": true,
+    "internalProvenanceSha256": "f038b2e782bb9e1a6be9f8af97c0b08d288a5ade0dfd0f9d7d3c59a28fa52b52"
+  },
+  "headlessProof": {
+    "profiles": {
+      "baseline": {
+        "reportSha256": "0523aef885b7bfb1618da6919e1ae35861b04d6d04eae3f3e957f8b0a7292dc5",
+        "providerRequests": 10,
+        "externalMailHops": 4,
+        "ownedProcessesStopped": 8
+      },
+      "heterogeneous": {
+        "reportSha256": "6c457fa669b39e501a0d4a0d050ddb07f435f79a6b79d4ac3ff60303735d6e4b",
+        "providerRequests": 10,
+        "externalMailHops": 4,
+        "ownedProcessesStopped": 8
+      },
+      "rotated": {
+        "reportSha256": "70dbf01cfbde55cfc8630ad6ed70c684ac2a94aa167ee9f71d9110827f3392a7",
+        "providerRequests": 10,
+        "externalMailHops": 4,
+        "ownedProcessesStopped": 8
+      }
+    },
+    "revision": "8f3e325870e40209f42c43ef0009e953f45398f5",
+    "headlessReleaseGatesPassed": true,
+    "bundleReceiptSha256": "5f9b92bf3bda35bd549c1dc8902cd4e62bba48a347f12c9eb62f8051eedf835b",
+    "logs": {
+      "bootstrap.log": "0a5434dc583a7305346913365c4f9d3ad315dc1e54270d05265c325ffc9d981b",
+      "checkout.log": "ea39dc6b43e1fae094f2cbd3b1551e29e0598648a4863895e2f676430007f4c8",
+      "clone.log": "967037aa582fafeff0e0cb15f87b604da015e45c1714ff98121dbf5a9c7b3821",
+      "dependency-install.log": "1da0940e3d83c60f63d9722f4633115ba6aa4cc9654a583b454bb54aa550c2f7",
+      "launcher.log": "f68e9c90801386cac22358159626abc9b581caa52f3cd4854ebed5d574ab37b6",
+      "package.log": "17b17f871b6b88ac35565f29b5b493cf23a74ab87874c67d2cab9cbdfff65edf",
+      "profile-baseline.log": "0c875e080b959182ff54a9cafed6b91e44053d390c51b389aae5f01d55e4853d",
+      "profile-heterogeneous.log": "6d17252d69f5970e12c15b470bda1c31c0309812550d0b6258f4d32d19843573",
+      "profile-rotated.log": "fdf7a2ca424b3b7106cf3527e136e8449067bba39f1cf434a8ca2e1e929bb808",
+      "release-build.log": "630e2b47f4c2349d8b98bdf8102367ef3e214839eae4b1fc80d2dec1e82c41bb",
+      "release-http-exact-binary.log": "4d0e2226ded77c26033e9c508c60c064709ae37c0a7c974efffa26c38ffad6e0",
+      "release-http-focused.log": "0c2a9313123848b5c7aa4a5eb6e3011dce817ec257acc4ce607066a6a40ed57b",
+      "release-tests-unchanged-rerun.log": "29ebbcfe3cab246a6468b88f22594d798e7e099435fc67c965593949d7003e8e",
+      "release-tests.log": "6fba4ed636c963181b0b1e8dacd610811b7377cbcbbdf4e9f2fc61dfe6d49906",
+      "restore.log": "edc28757503d1bf056a28eb60d703e954671149063c0dd679c89929b1f3bc386",
+      "retained-build.log": "27ce4ca0ea625f576e9ac894729c4a86f0c2f0ddee9116ec5b6400754bcff4ec"
+    },
+    "pending": [
+      "Native GUI/terminal/accessibility on this bundle",
+      "Production runtime footprint",
+      "Coverage reconciliation and failed-service gates",
+      "Old-build/pre-cutover whole-state rollback inventory",
+      "Default cutover and release note"
+    ]
+  },
+  "releaseTests": {
+    "candidate": "8f3e325870e40209f42c43ef0009e953f45398f5",
+    "productionChanged": false,
+    "initial": {
+      "passed": 179,
+      "failed": 1,
+      "test": "learning_decisions_and_startup_reconciliation_keep_one_catalog_revision",
+      "location": "crates/crewroom-service/tests/http.rs:371",
+      "error": "Another controller owns this workbench."
+    },
+    "focusedExactOriginalBinary": {
+      "path": "target/release/deps/http-0bfd356acc096b51",
+      "passed": 1,
+      "failed": 0,
+      "seconds": 0.27
+    },
+    "focusedCargoCommand": {
+      "command": "cargo test --release --locked -p crewroom-service --test http learning_decisions_and_startup_reconciliation_keep_one_catalog_revision -- --exact --nocapture",
+      "passed": 1,
+      "failed": 0,
+      "note": "Cargo rebuilt a narrower feature graph; this is separate from exact-original-binary proof."
+    },
+    "inspection": "Intake-only Service close fences requests, awaits timer and HTTP server, and takes shared AuthorityState. AppState clones share that Option, and no confirmed retained authority was identified. Fork/CLOEXEC lock inheritance was considered as an unproven hypothesis only. No root cause established, retries or production repair added.",
+    "next": "Continue remaining exact candidate package/install/restore/profile gates; preserve initial179/180 and focused1/1 separately.",
+    "logs": {
+      "release-tests.log": "6fba4ed636c963181b0b1e8dacd610811b7377cbcbbdf4e9f2fc61dfe6d49906",
+      "release-http-exact-binary.log": "4d0e2226ded77c26033e9c508c60c064709ae37c0a7c974efffa26c38ffad6e0",
+      "release-http-focused.log": "0c2a9313123848b5c7aa4a5eb6e3011dce817ec257acc4ce607066a6a40ed57b"
+    },
+    "fullUnchangedRerun": {
+      "passed": 180,
+      "failed": 0,
+      "logSha256": "29ebbcfe3cab246a6468b88f22594d798e7e099435fc67c965593949d7003e8e"
+    }
+  },
+  "launcher": {
+    "reportSha256": "16df8a965187502db99c383a73a8a0046c7ea83b165a95f2e40611eef9656d9d",
+    "passed": true,
+    "error": null,
+    "sourceBundle": "/private/tmp/cr-n7-1004a/Crewroom.app",
+    "launcherSha256": "eef0c15e3936fad9ac7f1a64550f9c45b6e89f8737a7f56763d32a6c1fa8142c",
+    "sourceRevision": "8f3e325870e40209f42c43ef0009e953f45398f5",
+    "sourceExecutableSha256": {
+      "crewroom": "141498a07d2cabd8717eb05dab7b7cd64cf36f5d902e8b92c755c1d3d1297e49",
+      "crewroomd": "0b66c90c1ccef2ac2e53e4d7aab5ce083cc4d4fba59405fe4b6b7a91df79e97d",
+      "crewroom-host": "318d41097d3c8d44dad8dda3ac54c5dfb52c909d02f3f954e12ca11a6ebc6ff3",
+      "crewroom-process": "90d335fc8ef295497ad4db8e4b4c76098681f6dffd6281af563a5d02c560988f"
+    },
+    "launches": [
+      {
+        "elapsedSeconds": 0.46906191698508337,
+        "code": 2,
+        "stdout": "",
+        "stderr": "Crewroom launcher: Data and role paths must be explicit absolute paths.\n"
+      },
+      {
+        "elapsedSeconds": 0.04353033297229558,
+        "code": 2,
+        "stdout": "",
+        "stderr": "Crewroom launcher: Private directories must have no group or other permissions.\n"
+      },
+      {
+        "elapsedSeconds": 0.4784605840104632,
+        "code": 0,
+        "stdout": "Started the bundled service. Closing this launcher or the app leaves it running.\nRust workflow service connected at http://127.0.0.1:60493 (PID 93208).\n",
+        "stderr": ""
+      },
+      {
+        "elapsedSeconds": 0.1802872499683872,
+        "code": 0,
+        "stdout": "Reusing the authenticated service. Its existing role, port and runtime configuration remain in effect.\nRust workflow service connected at http://127.0.0.1:60493 (PID 93208).\n",
+        "stderr": ""
+      },
+      {
+        "elapsedSeconds": 0.506406458967831,
+        "code": 0,
+        "stdout": "Started the bundled service. Closing this launcher or the app leaves it running.\nRust workflow service connected at http://127.0.0.1:60493 (PID 93266).\n",
+        "stderr": ""
+      }
+    ],
+    "ownedDaemonCount": 2,
+    "survivingOwnedDaemons": [],
+    "scope": "Headless launcher: no GUI/Finder or configured execution claim; minimal system PATH, absolute private paths with spaces, authenticated reopen, same-service reuse and stopped restart preserve a task."
+  },
+  "wholeState": {
+    "reportSha256": "4b832b6f7590d9b977d0b995f16c0bb36e1b2a22f900449c5485df9c17b0dbf6",
+    "passed": true,
+    "harnessBaseRevision": "8f3e325870e40209f42c43ef0009e953f45398f5",
+    "applicationCommit": "8f3e325870e40209f42c43ef0009e953f45398f5",
+    "packagedBuildReceiptSha256": "f038b2e782bb9e1a6be9f8af97c0b08d288a5ade0dfd0f9d7d3c59a28fa52b52",
+    "tmuxServerStopped": true,
+    "productionNativeDaemon": true,
+    "binaryDirectory": "/private/tmp/cr-n7-1004a/Crewroom.app/Contents/MacOS",
+    "binarySha256": {
+      "crewroomd": "0b66c90c1ccef2ac2e53e4d7aab5ce083cc4d4fba59405fe4b6b7a91df79e97d",
+      "crewroom-host": "318d41097d3c8d44dad8dda3ac54c5dfb52c909d02f3f954e12ca11a6ebc6ff3",
+      "crewroom-process": "90d335fc8ef295497ad4db8e4b4c76098681f6dffd6281af563a5d02c560988f"
+    },
+    "ownedProcessStates": [
+      {
+        "path": "/private/tmp/cr-n7-1004a/ops/installation/hosts/bfe398aa-5143-4423-938d-58a310364305/host-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-1004a/ops/installation/hosts/bfe398aa-5143-4423-938d-58a310364305/omp-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-1004a/ops/installation/hosts/b1783e59-dc98-41a7-bdc0-0d98bbbff123/host-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-1004a/ops/installation/hosts/b1783e59-dc98-41a7-bdc0-0d98bbbff123/omp-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-1004a/ops/installation/hosts/5c63264c-dd59-463d-88a9-0318d6e731f8/host-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-1004a/ops/installation/hosts/5c63264c-dd59-463d-88a9-0318d6e731f8/omp-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-1004a/ops/installation/hosts/422d0c94-45b7-4701-8150-d5a13270b69f/host-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-1004a/ops/installation/hosts/422d0c94-45b7-4701-8150-d5a13270b69f/omp-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-1004a/ops/installation/hosts/57aec337-7f7f-4898-bd25-e54518f79a8a/host-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-1004a/ops/installation/hosts/57aec337-7f7f-4898-bd25-e54518f79a8a/omp-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-1004a/ops/installation/hosts/ef18226f-fd3e-4531-8e23-4992fec1c3c1/host-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-1004a/ops/installation/hosts/ef18226f-fd3e-4531-8e23-4992fec1c3c1/omp-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-1004a/ops/installation/hosts/6d72e7a5-fd86-4336-b6e9-f358ff916fa4/host-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-1004a/ops/installation/hosts/6d72e7a5-fd86-4336-b6e9-f358ff916fa4/omp-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-1004a/ops/installation/hosts/c3ffbc55-1926-484a-8a60-a4a23d38404a/host-process",
+        "state": "stopped"
+      },
+      {
+        "path": "/private/tmp/cr-n7-1004a/ops/installation/hosts/c3ffbc55-1926-484a-8a60-a4a23d38404a/omp-process",
+        "state": "stopped"
+      }
+    ],
+    "error": null,
+    "providerRequests": 26,
+    "providerErrors": [],
+    "unexpectedSurvivingProcesses": [],
+    "backupEntries": 693,
+    "mailRestarts": 2,
+    "retainedCommandReceipts": 1,
+    "observedModelIdentities": true,
+    "runtime": {
+      "passed": true,
+      "productionNativeDaemon": true,
+      "freshConfiguration": true,
+      "cliLaunches": 2,
+      "runId": "3206ba6e-0c23-4d28-9dd4-149db7b8dd5d",
+      "subsequentRun": "618c61ec-b705-4c00-ae86-c2d0d6531f05",
+      "firstLocalEvidenceReady": true,
+      "subsequentResearchCompleted": true,
+      "restored": {
+        "requirements": true,
+        "steering": true,
+        "messages": 3,
+        "sessions": 4,
+        "artifacts": [
+          "b2e10a12-2da8-486d-b04f-47bbc0f60839",
+          "cadd6d4c-a0b0-4b12-845e-3db576bc0e4c"
+        ],
+        "candidate": {
+          "base": "edd416ebf3133e11a3c821a6fca9c06564ced955",
+          "head": "1fd090814f28cc94db1ced7de576ea6561028c29",
+          "tree": "694c09b7bef7fbe4645bb4ddfaa6291a8d7b4d70",
+          "worktreeHash": "5cf7ab440480f110794721cca5f660252f7fa15d410022e9a60788554567e01d",
+          "dirty": false,
+          "requirementsHash": "2d232235b32fbfc7ec8ae27881169ea2c9793c644b32cbf2fcb892ddb46e8d9d",
+          "instructionsHash": "0f0a7c9ccc371dfa4418d70204f7311391947bfddf5dcb731411fbcc168f7a6d"
+        },
+        "ownedWorktree": "/private/tmp/cr-n7-1004a/ops/installation/data/worktrees/3206ba6e-0c23-4d28-9dd4-149db7b8dd5d",
+        "roleHash": "7cfba51e813423eee257c9d40f4b025bb7289613ba3e8406a360e333a16f4191",
+        "runtimeHash": "3c44a004b5a4908750973a2161ace02798182fb065284796ac690825efea5cf1"
+      },
+      "providerBoundary": "Scripted model responses; no Jira or Bitbucket delivery configured."
+    },
+    "scope": "Fresh configuration and whole-state same-path recovery with real CLI/OMP/Mail/Git/checks; scripted models; no live Jira or Bitbucket delivery."
+  },
+  "profiles": {
+    "baseline": {
+      "summary": {
+        "reportSha256": "0523aef885b7bfb1618da6919e1ae35861b04d6d04eae3f3e957f8b0a7292dc5",
+        "providerRequests": 10,
+        "externalMailHops": 4,
+        "ownedProcessesStopped": 8
+      },
+      "reportSha256": "0523aef885b7bfb1618da6919e1ae35861b04d6d04eae3f3e957f8b0a7292dc5",
+      "profileProofSha256": "f0085ed788236610b750456bf405434e51c525ac33e8e0c7d23be33841ee9050",
+      "sameEightProcessReattachmentAfterDaemonSigkill": true,
+      "pausedAllStopped": true,
+      "runner": {
+        "version": "omp/18.4.12",
+        "sha256": "1a81bd323ba6d67374adf5645fe52e194671416e15c69ef17ac18e32b42c55ff"
+      },
+      "mail": {
+        "binary": "/Users/crewroom/.codex/worktrees/native-upgrades/crewroom/.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail",
+        "sha256": "554d6f0a06d73b2907940350228232f2b479f96630a73ff6b85e590a12b98075",
+        "release": "v0.3.36"
+      }
+    },
+    "heterogeneous": {
+      "summary": {
+        "reportSha256": "6c457fa669b39e501a0d4a0d050ddb07f435f79a6b79d4ac3ff60303735d6e4b",
+        "providerRequests": 10,
+        "externalMailHops": 4,
+        "ownedProcessesStopped": 8
+      },
+      "reportSha256": "6c457fa669b39e501a0d4a0d050ddb07f435f79a6b79d4ac3ff60303735d6e4b",
+      "profileProofSha256": "6fa72e8ee916028daaf71f7de5fe117e3ef931f0d2374021b39211ab3f4c38c2",
+      "sameEightProcessReattachmentAfterDaemonSigkill": true,
+      "pausedAllStopped": true,
+      "runner": {
+        "version": "omp/18.4.12",
+        "sha256": "1a81bd323ba6d67374adf5645fe52e194671416e15c69ef17ac18e32b42c55ff"
+      },
+      "mail": {
+        "binary": "/Users/crewroom/.codex/worktrees/native-upgrades/crewroom/.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail",
+        "sha256": "554d6f0a06d73b2907940350228232f2b479f96630a73ff6b85e590a12b98075",
+        "release": "v0.3.36"
+      }
+    },
+    "rotated": {
+      "summary": {
+        "reportSha256": "70dbf01cfbde55cfc8630ad6ed70c684ac2a94aa167ee9f71d9110827f3392a7",
+        "providerRequests": 10,
+        "externalMailHops": 4,
+        "ownedProcessesStopped": 8
+      },
+      "reportSha256": "70dbf01cfbde55cfc8630ad6ed70c684ac2a94aa167ee9f71d9110827f3392a7",
+      "profileProofSha256": "1a6cd5728009c610d439957119201ad2251ff802234ddbd054c9964a06f55aca",
+      "sameEightProcessReattachmentAfterDaemonSigkill": true,
+      "pausedAllStopped": true,
+      "runner": {
+        "version": "omp/18.4.12",
+        "sha256": "1a81bd323ba6d67374adf5645fe52e194671416e15c69ef17ac18e32b42c55ff"
+      },
+      "mail": {
+        "binary": "/Users/crewroom/.codex/worktrees/native-upgrades/crewroom/.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail",
+        "sha256": "554d6f0a06d73b2907940350228232f2b479f96630a73ff6b85e590a12b98075",
+        "release": "v0.3.36"
+      }
+    }
+  },
+  "runnerResume": {
+    "originalScript": "scripts/validate-native-release.sh",
+    "sha256": "2afc04acd0220b4dec0c96cbeb9bdba3fb30f9adb3b9c231d57e77727dc7b156",
+    "privateResumeScriptSha256": "2d76eac1a37e78822289091fb2d78c10d12683366eb479eec4ca00a961a950cf",
+    "reason": "Original runner stopped on first release-test failure. After unchanged focused and full180/180 success, resumed exactly its post-test package/install/restore/profile/receipt commands, without rebuilding or deleting failed logs."
+  },
+  "remaining": [
+    "Final package-bound original complex/target-drift and rework sequences",
+    "Actual packaged native GUI/terminal under sustained output and measured resources",
+    "VoiceOver and actual Japanese IME after pending settings authorization",
+    "Final acceptance reconciliation, native-default cutover and fresh retained suites"
+  ],
+  "rollback": {
+    "receipt": "docs/testing/rust-native-rollback-2026-10-04.json",
+    "sha256": "7c5010bd28d93606a2f065d46b41c08a28dbb7e104deef2d20e3631151478fdc",
+    "boundary": "Separately validated matching legacy build and stopped pre-cutover snapshot for unadmitted legacy plans. Same-build native runtime restore above is complementary, not a downgrade claim."
+  },
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

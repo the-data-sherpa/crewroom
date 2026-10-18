@@ -1,0 +1,166 @@
+{
+  "date": "2026-09-27",
+  "milestone": "M2.4",
+  "passed": true,
+  "domainTests": 35,
+  "build": "passed",
+  "browserTests": 2,
+  "runtime": {
+    "omp": "18.3.1",
+    "tmux": "3.7c",
+    "rustMail": "0.3.36",
+    "atcEnabled": false
+  },
+  "cases": [
+    {
+      "case": "session",
+      "passed": true,
+      "evidence": ".crewroom/test-results/m2-continuity-final/session/report.json",
+      "providerRequests": 2,
+      "unexpectedProviderRequests": [],
+      "survivingProcesses": []
+    },
+    {
+      "case": "first-turn",
+      "passed": true,
+      "evidence": ".crewroom/test-results/m2-continuity-final/first-turn/report.json",
+      "providerRequests": 2,
+      "unexpectedProviderRequests": [],
+      "survivingProcesses": []
+    },
+    {
+      "case": "cycles",
+      "passed": true,
+      "evidence": ".crewroom/test-results/m2-continuity-final/cycles/report.json",
+      "providerRequests": 3,
+      "unexpectedProviderRequests": [],
+      "survivingProcesses": []
+    },
+    {
+      "case": "steering",
+      "passed": true,
+      "evidence": ".crewroom/test-results/m2-continuity-final/steering/report.json",
+      "providerRequests": 3,
+      "unexpectedProviderRequests": [],
+      "survivingProcesses": []
+    },
+    {
+      "case": "receipt",
+      "passed": true,
+      "evidence": ".crewroom/test-results/m2final/receipt/report.json",
+      "providerRequests": 2,
+      "unexpectedProviderRequests": [],
+      "survivingProcesses": []
+    },
+    {
+      "case": "specialist",
+      "passed": true,
+      "evidence": ".crewroom/test-results/m2final/specialist/report.json",
+      "providerRequests": 11,
+      "unexpectedProviderRequests": [],
+      "survivingProcesses": []
+    },
+    {
+      "case": "policy",
+      "passed": true,
+      "evidence": ".crewroom/test-results/m2final/policy/report.json",
+      "providerRequests": 1,
+      "unexpectedProviderRequests": [],
+      "survivingProcesses": []
+    },
+    {
+      "case": "budget",
+      "passed": true,
+      "evidence": ".crewroom/test-results/m2final/budget/report.json",
+      "providerRequests": 1,
+      "unexpectedProviderRequests": [],
+      "survivingProcesses": [],
+      "removedContainers": 1
+    },
+    {
+      "case": "container",
+      "passed": true,
+      "evidence": ".crewroom/test-results/m2final/container/report.json",
+      "providerRequests": 2,
+      "unexpectedProviderRequests": [],
+      "survivingProcesses": [],
+      "removedContainers": 1
+    },
+    {
+      "case": "exchange",
+      "passed": true,
+      "evidence": ".crewroom/test-results/m2final/exchange/report.json",
+      "providerRequests": 9,
+      "unexpectedProviderRequests": [],
+      "survivingProcesses": []
+    },
+    {
+      "case": "mail reconciliation after sender exit",
+      "passed": true,
+      "evidence": ".crewroom/test-results/m2final/mail/result.txt",
+      "providerRequests": 0
+    }
+  ],
+  "failedCharacterizations": [
+    {
+      "path": ".crewroom/test-results/m2-continuity-diagnostic",
+      "reason": "OMP refused restoration across attempt working directories."
+    },
+    {
+      "path": ".crewroom/test-results/m2-auto-red",
+      "reason": "No automatic first-turn replacement."
+    },
+    {
+      "path": ".crewroom/test-results/m2-steering-red",
+      "reason": "Busy steering remained pending."
+    },
+    {
+      "path": ".crewroom/test-results/m2-specialist-red",
+      "reason": "Interrupted specialist received no continuation input."
+    },
+    {
+      "path": ".crewroom/test-results/m2-continuity-final/receipt-restart",
+      "reason": "tmux socket exceeded macOS path length. Added preflight rejection; corrected fixture path."
+    }
+  ],
+  "scope": "Real production services, SQLite, OMP/tmux/Rust Mail and disposable Docker commands; guarded scripted model providers. No live model/Jira/Bitbucket requests. Browser supervision controls and coding delivery remain later work.",
+  "sourceSha256": {
+    "server/jira.ts": "5ec48a00c2a23a939483304c032fba40d87925ff7f3bddbbe708ed0c50c5cc29",
+    "server/app.ts": "208500906f8ed4fced082b87217d111da3a88e2ca9f1cadd9182fc988eb0e544",
+    "server/seed.ts": "6563abc9e2722dcc9320d6a370352386854c083c1dd7d654945add9594c67384",
+    "server/workbench.ts": "ea85b78ea4f6a35fa5098e9e8d979e3ea21e697767be6b9365bf0fa49d978570",
+    "server/roles.ts": "dbf1c864822e117acdefab4c238943dfe536deee97e47c1031cdcf3627f997d4",
+    "server/index.ts": "19ddd96fefe4fffb2a13a49e8a51fbe8c05f71c9e6f7e3e49302dce3d831bef0",
+    "server/runtime/messaging.ts": "45bd9472228366b38d90db0bf288bbee963fadf0e75600b17ed6e20bf14363df",
+    "server/runtime/provider-gateway.ts": "eca50c3588c69e7692d4707a5935479e32888211d2e7808018e4c660db4434d6",
+    "server/runtime/inputs.ts": "7578b3b12c99325a7dfdb717f30a80895daa593c6b3277e58e09fec44ba59a14",
+    "server/runtime/rpc.ts": "160da3cf73e7724b10d0c66c04e99c144e3b00b5074a8470575551a146092c41",
+    "server/runtime/processes.ts": "a688db15c0f78441af9191481685d7bd6102b509a45d5899f94e7e87c6580c53",
+    "server/runtime/types.ts": "12b7d6eef9eb4975a08961ac09e3dd47a5577fe1e97291b5cc65f047054c33ce",
+    "server/runtime/model-policy.ts": "5c4357be49555633a9fbe4fb3d5c482f8952cf137bd5f0147d0c639b82570f61",
+    "server/runtime/supervisor.ts": "fc1b59e4a4f2781b26dac78b63b4e920627783fdb0806ffb1390f53f7f4dcf81",
+    "server/runtime/host.ts": "8735511f7baff9edac70598ee16cb29f60a76708f3be9d114fc78614a2fb9081",
+    "server/runtime/container-command.ts": "843fe8dd2f4ff274f30dce4fe49d3276f31826391a03ce5af1d45ccd926aec8a",
+    "shared/types.ts": "bb2597abf60fef27180036c604e65e961d8f9d19eff90ab71c55052cf834a087",
+    "src/main.tsx": "dd775b2d533e970c63fd8ef894fe10976f21236b9ad98aee40e9c81a63a18d05",
+    "tests/processes.test.ts": "e01fe5c7146fc60d1fa823986e80c6d91f854e5fb486669d7065e68e57b35939",
+    "tests/store.test.ts": "6b6f973f865b92a2e5b66c3389fadd33fd5fc33ec402e54f743f45774b7fcaf8",
+    "tests/model-policy.test.ts": "4148be6c60a7a68a604d873d225b069c305ff0747b682ba1158160c3d5ae1770",
+    "tests/jira.test.ts": "dc066ac79054f4cdaedbe4f8047fec77902a680761f4ba6c6346c8a9994f2fcf",
+    "tests/http.test.ts": "fdba217d377ea19878df37ae2da3ab3403089780d16d2f18f1ded18d54135eb0",
+    "tests/seed.test.ts": "7fa1251d144f3049ff587ee416520aaff5b16802e25034f886c643ffa42cd907",
+    "tests/roles.test.ts": "11ec2d971c0cc45ba62b4416a307c894d3b0ac3700529d0e7968d856fd84faf6",
+    "tests/runtime.test.ts": "7f61d9b996a2501c2c4cefddf9a3b52adbdd422d314d47cd7818b7b5c6d8f204",
+    "scripts/test-application-continuity.py": "0700cb69c1d69cf142d8e69f365d1ed71ed5cd196c4319f7c5000286db6aa753",
+    "scripts/continuity-driver.ts": "b97e99cf59d7ce8fc348cd8b7d206b2abf7dc7e5ac2c6de8a95d678b531ff97f",
+    "scripts/receipt-restart-driver.ts": "196ccb0323374a5dba1d3f0590ede9170d95aede15541f6a050b54236c48241c",
+    "scripts/test-application-runtime.py": "4a0875aedef13be5e3061c4fec615b57829aadbf7a0a8009e43864fa1b9c5607",
+    "scripts/runtime-driver.ts": "2964c48b6174f324a712c778602e1aabb066df1b648ae6ad73b9dd12b7f1ba7f",
+    "scripts/test-application-interruption.py": "d6a3dcb529e52baf490a0b5f9e177b82d0bc75878dc3061add258c1a150901e6",
+    "scripts/interruption-driver.ts": "45de230c5dc5babb822f38e488bfb56e966569b2ea9fc95cf1c46d6b12bfbcbd",
+    "scripts/test-application-model-guard.py": "b7264c4919e300fa0ff2d84feae88793fe27d65bb237d1eaf4f863118284c634",
+    "scripts/model-guard-driver.ts": "24625265b9995b77c3b21ee4902df5f53dec680f98cdbf775f51eb8370f95d72",
+    "scripts/test-application-mail.py": "73ab9b3456c57fe993183d2f4c689ce54eed5847f4c0974cf480d5808617e81b",
+    "scripts/messaging-driver.ts": "4708ffdfc3552504d22c78a55668c15341ef585a2aefd1c1b6ac64db11b9bccb"
+  }
+}

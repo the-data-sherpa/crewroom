@@ -1,0 +1,2795 @@
+{
+  "schemaVersion": 1,
+  "issue": "FOR-9",
+  "recordedAt": "2026-10-13T11:10:56.261116+00:00",
+  "implementationRevision": "f3c47066487ba4de73753c6eb89888fdf6243c02",
+  "implementationTree": "15a4792f82483a80436a1c0e49d531762fd3be27",
+  "baseRevision": "5492f48f642f063811a531e6df113d97a1bc50f3",
+  "reviewedDiffSha256": "c0e0f4cdf713684e782df3648879d0bd78c64333c7070828b28bbbea27654088",
+  "sourceFiles": {
+    "Cargo.lock": "f46ccc4862856d7cfab215a88d35b688160897839d5f6b873608da813c3344ae",
+    "Cargo.toml": "3000bda76be6d4f9cef9c451769bda6afb455630f5b7fa4b4bf88ecb72f13ef8",
+    "crates/crewroom-core/src/launch.rs": "027e046087225dd3d046d2e6d315d0b5e1571b10fdc26f03ada3f950a7be938e",
+    "crates/crewroom-core/src/model_jobs.rs": "247f9f528a564839f9829cf2e532c14e0d3261c797c1120e4f130d8dd709b22d",
+    "crates/crewroom-core/src/roles.rs": "b5b2d6e0dc0154b3b80ca502e9b936178acbfbcdfa73ca4a21a3c646e99efdb0",
+    "crates/crewroom-core/src/teams.rs": "fae97b33dff8e61320de704223af39eb20dd943ee501f8d83dfa90e84463a5c9",
+    "crates/crewroom-core/tests/teams.rs": "a1fd88e2cb43499295cbe50814d4b446cfe8cf929ae9dd34c1bb8f851486ce14",
+    "crates/crewroom-desktop/src/workbench.rs": "f6e27f4ade0b4b83db84aeecf3c1f8eb977cc3d4648d12bfe256d3227e906f23",
+    "crates/crewroom-desktop/src/workbench/agents.rs": "6828731f49ea2f44e506b5520dc601032af1d29893892fbc184c176fa9607e9d",
+    "crates/crewroom-desktop/src/workbench/collaboration/insertion.rs": "a6a81025fc36fafebc547f099d0c957df47c1fecde3bac151043b7c0b8d1294e",
+    "crates/crewroom-desktop/src/workbench/history.rs": "3c069db225ac7d895c5454734febee27846d64c5ada184566c280756b665f7f8",
+    "crates/crewroom-desktop/src/workbench/journey_tests.rs": "bdf5ce44491af7b95f62f19116aad20fe1d07c34113feb2a160818ea868f33f9",
+    "crates/crewroom-desktop/src/workbench/model_details.rs": "ae257fca27462b31cf0b43888cff2141c59fa0846a5ac6bb6bd8b45dd3fb032d",
+    "crates/crewroom-desktop/src/workbench/planning.rs": "2bc49c3edcfdcaa218bec510bf4681411312278f561813c09e437eac6ea235a9",
+    "crates/crewroom-desktop/src/workbench/settings.rs": "4f4415e87efd3dbcbe1200dc73599eb0a10fb386759105f089845bad6785617b",
+    "crates/crewroom-desktop/src/workbench/settings/model_picker.rs": "0602bebffd44f960835bc7bf59eafae49f794808bf0ca0a3fb800fccd60602c0",
+    "crates/crewroom-desktop/src/workbench/settings/model_picker/live_tests.rs": "6ca15fdb3d312ded6490a1f94f77dbc0938ce140cb089fd4c006bd9bf983afd3",
+    "crates/crewroom-desktop/src/workbench/settings/model_picker/tests.rs": "c811d9396d6562d462d03737cd6c517481185220fe574866cb94466934f4119d",
+    "crates/crewroom-desktop/src/workbench/settings/models.rs": "1fa2dee566ef6f270ada97603ef578ede9f1ba63d230fb4c84b1fd17ed676c7f",
+    "crates/crewroom-desktop/src/workbench/settings/roles.rs": "29cfc33cafb764e9dee17ad10af5cccdc6a563e81af4cb58959c28bdffc9e314",
+    "crates/crewroom-runtime/examples/model-discovery.rs": "2b0b34c5a058d1b0537234a1ccddbe07f64fc95d289536bb702feece6efb4ba9",
+    "crates/crewroom-runtime/src/lib.rs": "1654ae0aef691f7b79af5f814ca2ea797b7a77299858f2d6ae6b989b4c319a87",
+    "crates/crewroom-runtime/src/model_catalog.rs": "50688bddf5b0578a9f78e86ed305427860447333e1336214969ebcbcac5e948c",
+    "crates/crewroom-runtime/src/model_catalog/discovery.rs": "f07b92d630bcaade908b0ee4870d59af210cb823e7ce11dcb84e333bae66ff0c",
+    "crates/crewroom-runtime/src/model_catalog/policy.rs": "79a3dbc330dcd0cc3f2f8e1bcc04bdf8f4f3cd70407bd97022e983a11f37c155",
+    "crates/crewroom-runtime/src/model_catalog/store.rs": "b9d09cfaf75765c99ec09257bba9b3ab79776b9de1d8480531b944f812afedb6",
+    "crates/crewroom-runtime/src/model_policy.rs": "e9e4a6a48ef9d2bdd361f6c66fac9cc42e9067ad5a7f65ecb79c1a6c1049d04c",
+    "crates/crewroom-runtime/src/runner/auth.rs": "43fb483660e41bb5f174d0ca7ad1ba70228d5ce10bb26e62dfe35a362407491e",
+    "crates/crewroom-runtime/src/runner/mod.rs": "4b1b6c7172202a483e84c25abdf7fb89cb0a85455f42a512392a390a48591e43",
+    "crates/crewroom-runtime/src/supervisor/workflow/catalog.rs": "d85429f1b952fc4f2301b0bc82d2cb4bd00769fdfe4a02759bfe1b9d56e91612",
+    "crates/crewroom-runtime/src/supervisor/workflow/catalog_tests.rs": "b23687f753fdced4e74eac0b7e8ff310cb5d936e018581ed9da362859c9ab4b9",
+    "crates/crewroom-runtime/src/supervisor/workflow/configuration.rs": "a3037c27f63667e2c3f70b07977bd6669e437c56036508df31f6fca69ada49c6",
+    "crates/crewroom-runtime/src/supervisor/workflow/mod.rs": "1b291b6e3207bcadbc49fe5bb5438ed47d0d3cb5d26039e5b9ca029de9588f4c",
+    "crates/crewroom-runtime/src/supervisor/workflow/preparation.rs": "815180f2077dccac2b8b8cbe3e90ea31eb76148339edd3c6b2b8c16b15c77051",
+    "crates/crewroom-runtime/src/supervisor/workflow/recovery.rs": "2a5567bd34176f3104c839320ce6d080359556d8a97305e2686e89e75544585b",
+    "crates/crewroom-runtime/src/supervisor/workflow/start.rs": "cb7370e4eee0d0788962f0794eafb5f4ac7fea257c721bad8c16c598c81dc2df",
+    "crates/crewroom-runtime/src/supervisor/workflow/stop.rs": "80bd00cf6640da6e87e49db13136911bb7c47285d67cc44ac1ea87b8df099ab1",
+    "crates/crewroom-runtime/src/supervisor/workflow/tools.rs": "e7826439d2af99469a84e06a470c43b9c446f40b54fa066aaf5083845243772a",
+    "crates/crewroom-runtime/src/supervisor/workflow/transitions.rs": "b3058ddf2cbabc86f92e7d28fa0e4271c15c31a420630407484a0b8c40df8ee2",
+    "crates/crewroom-runtime/tests/catalog_policy.rs": "67c3f81b65c4458291c4b62747d4c594d4ccc8e55ea43a2d06c0a2a4cee1117a",
+    "crates/crewroom-runtime/tests/model_catalog.rs": "799cf5c4a2817e425e8ce432917dcad544de717ba10efb1a43f4f69a7470ced0",
+    "crates/crewroom-runtime/tests/model_discovery.rs": "a56fbfc80a673dc22950662cbb378df28ee0dcb6091eee6d0d41381c3d9fa296",
+    "crates/crewroom-service/src/lib.rs": "9a27fe144f003cd9a99976de23359e0118209cb3932b55a0496e3904df3e25f8",
+    "crates/crewroom-service/src/views/history.rs": "7f013854db2cb387665693ef9abc1a88320c78a099f59475588d15bf05f533ac",
+    "crates/crewroom-service/tests/model_catalog.rs": "8ee0ff863df0915bed13e068224cb6011dbac1d0ac81bf3866e7118169eec154",
+    "docs/architecture.md": "489c1578f4f27cc040fc0030267059005e78d3766832d6e197c4e6c801783a78",
+    "docs/multi-harness-plan.md": "28e85b9a80d79e0da29549a8fc9a8613c26ff321e28aad15f9e7848ff5e75423",
+    "docs/operations.md": "8fd9d6a6abb2d0029643a9032e872e1c2d299ff234883e30724c9f21353a57e9",
+    "docs/status.md": "a0d1430b90176266ccf4eb7abe9ca83580a4e85d7c28dee6d0caf603067be2bb",
+    "docs/testing/mh4-model-contract.md": "7b166572c3760d33144bbcadf4a71a280d9d0d9b17c129248d82db2dd2e9105b",
+    "docs/testing/mvp-progress.md": "15ecfa1ddaf70f9409517c2ce54dc57fd4839479d1a87fab72441e8fa4e27595",
+    "package-lock.json": "247158e6a19bb432bacb696a1951f2e8e17dc2e71047cb22762f1dc3faf1a9df",
+    "package.json": "4ea3d3c8e80f0653551556d54932e61c310f7fbc23a9e1f501c12e4a87fecb9f",
+    "scripts/mailbox_contract_fixture.py": "013c517dd0bc57cc6d0a89247b32beee82d5f470ec4427a7d76fd22887559aea",
+    "scripts/native_workflow_fixture.py": "d20a3177ac3ffa40b01cea6ad99db13e634f704bee363cd2337bb44e923e8754",
+    "scripts/rust/daemon-client.ts": "ad155368a37186999e2bcfa6e16e27a9a56f74a3d4e538ffb73ebb46868fe1c6",
+    "scripts/rust/verify-native-workflow.ts": "047c3ae284fe0c059d4b746fca2dacdab6824763360a618929f79ec2add001c9",
+    "scripts/rust/workflow-support.ts": "6d7eda379db35b3fc3414cbb13595d557c7dd159409dd1b99d842f926b2ffd71",
+    "scripts/test_processes.py": "b71e9a4b5655ce1c5193c7bbfe2c518d654733405e981a48fbc4c663a34a3fd5",
+    "scripts/verify_catalog_restart.py": "9675ccc05ccb2ecf623e558927a387bb7364b489239f1929d94071a0ab2ab3a2",
+    "scripts/verify_catalog_workflow.py": "64e36ed2accf14381103939e82bc174b712c7da2b8a5fa0800f3263651b12003",
+    "snitchfindings/crewroom/UX_REVIEW.md": "b69621f8acdc95327c29b8f50e490fe44b500d9d5a2fe89757b4fd1f7456909c"
+  },
+  "validationProvenance": [
+    "Full Rust release gate covers final implementation. Domain/browser were rerun; their files are unchanged by final Rust persistence repairs.",
+    "Desktop full rerun and live Claude rerun cover 3c51dcc. The final delta f3c4706 adds shared bounded interrupted-snapshot persistence and corrects one policy test; focused boundary/retry tests, full Rust, production-daemon crash/restart, rebuilt binaries and live Codex/OMP reruns cover that delta. No single invocation spanning all fixtures is claimed.",
+    "Actual OMP synthetic-provider checks and additional native journeys predate review repairs. Their changed workflow dependencies are covered by the final Rust suite and live adapter reruns; sourceChangesSinceCheck enumerates differences.",
+    "Per-check manifests are retained with local logs. The implementation tree pins all source and dependencies; sourceFiles adds explicit hashes for changed files and acceptance entrypoints. Subsequent documentation/receipt commits contain no implementation changes.",
+    "Ignored fixtures are listed individually. Six native Git/provider/history fixtures were separately executed, and native_catalog_external_live_selection ran explicitly through each live wrapper. Three unrelated pre-existing external control/intake/feedback fixtures and the visual seed utility were not run; no ignored case is counted as passed.",
+    "One ignored Rust subprocess entry point is exercised by its parent-death test. Rendered history uses seeded records; only the live adapter receipts establish inference and delivery."
+  ],
+  "checks": [
+    {
+      "name": "npm-test-final",
+      "command": [
+        "npm",
+        "test"
+      ],
+      "startedAt": "2026-10-13T10:58:07.622643+00:00",
+      "finishedAt": "2026-10-13T11:00:58.778957+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/npm-test-final.log",
+        "sha256": "eca4bad2c9232b89cae00eea5f3f031251284ad8246bf37e69acf0b82b5da1b5"
+      },
+      "testedSourceManifestSha256": "39571006abb25eae692cad0ad3f07d8104acd56a27509cde9fbc2bcc60589510",
+      "sourceChangesSinceCheck": [
+        "crates/crewroom-runtime/src/model_catalog/store.rs",
+        "crates/crewroom-runtime/tests/catalog_policy.rs"
+      ],
+      "ignoredTests": [],
+      "results": {
+        "passed": 332,
+        "failed": 0
+      }
+    },
+    {
+      "name": "browser-build-final",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "startedAt": "2026-10-13T10:58:07.623869+00:00",
+      "finishedAt": "2026-10-13T10:58:11.455672+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/browser-build-final.log",
+        "sha256": "0d2f6ed1726c2c61ef66377fd95f0fa690fa0b5c9e57ef1bfeaacd7bbdb67f6f"
+      },
+      "testedSourceManifestSha256": "39571006abb25eae692cad0ad3f07d8104acd56a27509cde9fbc2bcc60589510",
+      "sourceChangesSinceCheck": [
+        "crates/crewroom-runtime/src/model_catalog/store.rs",
+        "crates/crewroom-runtime/tests/catalog_policy.rs"
+      ],
+      "ignoredTests": []
+    },
+    {
+      "name": "browser-final",
+      "command": [
+        "npm",
+        "run",
+        "test:e2e"
+      ],
+      "startedAt": "2026-10-13T10:58:07.608554+00:00",
+      "finishedAt": "2026-10-13T11:00:56.510400+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/browser-final.log",
+        "sha256": "d1adf34d826519b790958cbd900f681212aa73905a8fb6c9db1781f40780fd95"
+      },
+      "testedSourceManifestSha256": "39571006abb25eae692cad0ad3f07d8104acd56a27509cde9fbc2bcc60589510",
+      "sourceChangesSinceCheck": [
+        "crates/crewroom-runtime/src/model_catalog/store.rs",
+        "crates/crewroom-runtime/tests/catalog_policy.rs"
+      ],
+      "ignoredTests": [],
+      "results": {
+        "passed": 31,
+        "failed": 0
+      }
+    },
+    {
+      "name": "rust-release",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-core",
+        "-p",
+        "crewroom-runtime",
+        "-p",
+        "crewroom-service",
+        "-j",
+        "6",
+        "--",
+        "--test-threads=1"
+      ],
+      "startedAt": "2026-10-13T11:00:17.939794+00:00",
+      "finishedAt": "2026-10-13T11:02:01.617856+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/rust-release.log",
+        "sha256": "9c980cb6cecead185d13b91f5b66fcd59089952bf3021f95c1e9b15533145409"
+      },
+      "testedSourceManifestSha256": "1fe2b89e3cc63ff2100689e8832506f1b71444ee935ebeacc8f0697ed9f2a772",
+      "sourceChangesSinceCheck": [],
+      "results": {
+        "passed": 217,
+        "failed": 0,
+        "ignored": 1
+      },
+      "ignoredTests": [
+        "runner::auth::tests::refresh_parent_worker"
+      ]
+    },
+    {
+      "name": "desktop-final",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-desktop",
+        "-j",
+        "6",
+        "--",
+        "--test-threads=1"
+      ],
+      "startedAt": "2026-10-13T10:56:08.265062+00:00",
+      "finishedAt": "2026-10-13T11:05:06.823188+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/desktop-final.log",
+        "sha256": "701ce9c19d943e6538a00a51abd135e0e8670e7338831d44f602daf194275a8c"
+      },
+      "testedSourceManifestSha256": "a87e0946190a3abf4bd950215642dfa866fbf8ced020cfc85bf1d58c0c026daa",
+      "sourceChangesSinceCheck": [
+        "crates/crewroom-runtime/src/model_catalog/store.rs",
+        "crates/crewroom-runtime/tests/catalog_policy.rs",
+        "docs/testing/mh4-model-contract.md"
+      ],
+      "results": {
+        "passed": 49,
+        "failed": 0,
+        "ignored": 11
+      },
+      "ignoredTests": [
+        "workbench::acceptance_tests::native_acceptance_retired_repository_keeps_captured_settings_in_results_and_history",
+        "workbench::demo_seed::seed_visual_review",
+        "workbench::journey_tests::external::native_external_feedback_resume",
+        "workbench::journey_tests::intake::native_external_intake_restart",
+        "workbench::journey_tests::native_journey_cancelled_continuation_preserves_branch_diff_lineage_and_reopen",
+        "workbench::journey_tests::native_journey_jira_refresh_outage_retains_operator_brief_and_never_queues",
+        "workbench::journey_tests::native_journey_publication_hosted_checks_and_feedback_outage_remain_separate",
+        "workbench::journey_tests::native_journey_research_keeps_verified_rejected_superseded_citations_and_readonly_artifacts",
+        "workbench::journey_tests::native_journey_target_refresh_and_reasoned_conflict_retry_keep_revision_history",
+        "workbench::journey_tests::operator::native_external_operator_control",
+        "workbench::settings::model_picker::live_tests::native_catalog_external_live_selection"
+      ]
+    },
+    {
+      "name": "workspace-release-build",
+      "command": [
+        "cargo",
+        "build",
+        "--locked",
+        "--workspace",
+        "-j",
+        "6"
+      ],
+      "startedAt": "2026-10-13T11:03:56.487435+00:00",
+      "finishedAt": "2026-10-13T11:03:58.682611+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/workspace-release-build.log",
+        "sha256": "7fb43f29937045fb59f22b919c703921348e7fe82b5e8cbe2d0d94a58563664c"
+      },
+      "testedSourceManifestSha256": "1fe2b89e3cc63ff2100689e8832506f1b71444ee935ebeacc8f0697ed9f2a772",
+      "sourceChangesSinceCheck": [],
+      "ignoredTests": []
+    },
+    {
+      "name": "runtime-release-build",
+      "command": [
+        "cargo",
+        "build",
+        "--locked",
+        "-p",
+        "crewroom-runtime",
+        "-p",
+        "crewroom-service",
+        "--bins",
+        "--examples",
+        "-j",
+        "6"
+      ],
+      "startedAt": "2026-10-13T11:00:19.115556+00:00",
+      "finishedAt": "2026-10-13T11:00:26.428017+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/runtime-release-build.log",
+        "sha256": "61322cb08d598a8799a5933d5f13c0a1ddc2d6490ec9262409506a3e3e25cd2d"
+      },
+      "testedSourceManifestSha256": "1fe2b89e3cc63ff2100689e8832506f1b71444ee935ebeacc8f0697ed9f2a772",
+      "sourceChangesSinceCheck": [],
+      "ignoredTests": []
+    },
+    {
+      "name": "format-release",
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--check"
+      ],
+      "startedAt": "2026-10-13T11:00:19.103738+00:00",
+      "finishedAt": "2026-10-13T11:00:21.903955+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/format-release.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "testedSourceManifestSha256": "1fe2b89e3cc63ff2100689e8832506f1b71444ee935ebeacc8f0697ed9f2a772",
+      "sourceChangesSinceCheck": [],
+      "ignoredTests": []
+    },
+    {
+      "name": "clippy-release",
+      "command": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "-p",
+        "crewroom-core",
+        "-p",
+        "crewroom-runtime",
+        "-p",
+        "crewroom-service",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "startedAt": "2026-10-13T11:00:19.111155+00:00",
+      "finishedAt": "2026-10-13T11:00:31.713656+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/clippy-release.log",
+        "sha256": "c05fcd8270761f27df5e75ff33a5c742776f04aaafd5784f7de04f1fa2657031"
+      },
+      "testedSourceManifestSha256": "1fe2b89e3cc63ff2100689e8832506f1b71444ee935ebeacc8f0697ed9f2a772",
+      "sourceChangesSinceCheck": [],
+      "ignoredTests": []
+    },
+    {
+      "name": "retained-discovery",
+      "command": [
+        "python3",
+        "scripts/test_harness_discovery.py"
+      ],
+      "startedAt": "2026-10-13T10:37:57.173165+00:00",
+      "finishedAt": "2026-10-13T10:37:58.084383+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/retained-discovery.log",
+        "sha256": "2733c2c79c9d8a753b045cbd40f29c572228ae057240ba1a754a52e70a786ce8"
+      },
+      "testedSourceManifestSha256": "c585e304602a6762693224aa6a6fdee57b5a9a21b83113f7b5681dd717438d8b",
+      "sourceChangesSinceCheck": [
+        "crates/crewroom-core/src/teams.rs",
+        "crates/crewroom-desktop/src/workbench/journey_tests.rs",
+        "crates/crewroom-runtime/src/model_catalog.rs",
+        "crates/crewroom-runtime/src/model_catalog/policy.rs",
+        "crates/crewroom-runtime/src/model_catalog/store.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/catalog.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/catalog_tests.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/transitions.rs",
+        "crates/crewroom-runtime/tests/catalog_policy.rs",
+        "crates/crewroom-runtime/tests/model_catalog.rs",
+        "docs/status.md",
+        "docs/testing/mh4-model-contract.md",
+        "docs/testing/mvp-progress.md"
+      ],
+      "ignoredTests": []
+    },
+    {
+      "name": "cleanup-tool",
+      "command": [
+        "npm",
+        "run",
+        "test:cleanup-tool"
+      ],
+      "startedAt": "2026-10-13T10:36:05.995481+00:00",
+      "finishedAt": "2026-10-13T10:36:11.903749+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/cleanup-tool.log",
+        "sha256": "4627a038299e2ebc07e7286faf79a4d211aba4ca6b01a15ce1bdf100988345e7"
+      },
+      "testedSourceManifestSha256": "f2e6d0464cd96a61063dbf8255d0e5692b8352bac3246810370d6ac277fed169",
+      "sourceChangesSinceCheck": [
+        "crates/crewroom-core/src/teams.rs",
+        "crates/crewroom-runtime/src/model_catalog.rs",
+        "crates/crewroom-runtime/src/model_catalog/policy.rs",
+        "crates/crewroom-runtime/src/model_catalog/store.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/catalog.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/catalog_tests.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/transitions.rs",
+        "crates/crewroom-runtime/tests/catalog_policy.rs",
+        "crates/crewroom-runtime/tests/model_catalog.rs",
+        "docs/status.md",
+        "docs/testing/mh4-model-contract.md",
+        "docs/testing/mvp-progress.md"
+      ],
+      "ignoredTests": []
+    },
+    {
+      "name": "python-compile-release",
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "scripts/verify_catalog_restart.py",
+        "scripts/verify_catalog_workflow.py",
+        "scripts/native_workflow_fixture.py",
+        "scripts/verify_claude_workflow.py",
+        "scripts/verify_codex_workflow.py"
+      ],
+      "startedAt": "2026-10-13T11:06:35.878820+00:00",
+      "finishedAt": "2026-10-13T11:06:35.916205+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/python-compile-release.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "testedSourceManifestSha256": "34c8f7e686e80df6321865ecf64021f66c24b85641930b052ad9d585dbd37eaa",
+      "sourceChangesSinceCheck": [
+        "docs/multi-harness-plan.md",
+        "docs/status.md",
+        "docs/testing/mh4-model-contract.md",
+        "docs/testing/mvp-progress.md"
+      ],
+      "ignoredTests": []
+    },
+    {
+      "name": "whitespace-release",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "startedAt": "2026-10-13T11:06:35.835148+00:00",
+      "finishedAt": "2026-10-13T11:06:35.841207+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/whitespace-release.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "testedSourceManifestSha256": "34c8f7e686e80df6321865ecf64021f66c24b85641930b052ad9d585dbd37eaa",
+      "sourceChangesSinceCheck": [
+        "docs/multi-harness-plan.md",
+        "docs/status.md",
+        "docs/testing/mh4-model-contract.md",
+        "docs/testing/mvp-progress.md"
+      ],
+      "ignoredTests": []
+    },
+    {
+      "name": "omp-rpc",
+      "command": [
+        "python3",
+        "scripts/rust/verify-omp-rpc.py",
+        "--output",
+        "/tmp/cr-mh4-omp-rpc"
+      ],
+      "startedAt": "2026-10-13T10:33:25.136389+00:00",
+      "finishedAt": "2026-10-13T10:33:43.995520+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/omp-rpc.log",
+        "sha256": "99de01511695f6930c3c5f8e34fc789e9c9cdf4b64b9cc76c00eb185be30c775"
+      },
+      "testedSourceManifestSha256": "62ebfa5d145690fba3d800a619957bf25e74343b876b96f8683bc29508027f2a",
+      "sourceChangesSinceCheck": [
+        "crates/crewroom-core/src/teams.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/transitions.rs",
+        "docs/status.md",
+        "docs/testing/mvp-progress.md",
+        "crates/crewroom-runtime/src/model_catalog.rs",
+        "crates/crewroom-runtime/src/model_catalog/policy.rs",
+        "crates/crewroom-runtime/src/model_catalog/store.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/catalog.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/catalog_tests.rs",
+        "crates/crewroom-runtime/tests/catalog_policy.rs",
+        "crates/crewroom-runtime/tests/model_catalog.rs",
+        "docs/testing/mh4-model-contract.md"
+      ],
+      "ignoredTests": []
+    },
+    {
+      "name": "omp-host",
+      "command": [
+        "python3",
+        "scripts/rust/verify-omp-host.py",
+        "--output",
+        "/tmp/cr-mh4-omp-host"
+      ],
+      "startedAt": "2026-10-13T10:34:01.600473+00:00",
+      "finishedAt": "2026-10-13T10:34:47.364540+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/omp-host.log",
+        "sha256": "58a4db07c6170717c40b5e099d4896abdf9a6f4a912cf1188e5b8f71c01553a9"
+      },
+      "testedSourceManifestSha256": "62ebfa5d145690fba3d800a619957bf25e74343b876b96f8683bc29508027f2a",
+      "sourceChangesSinceCheck": [
+        "crates/crewroom-core/src/teams.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/transitions.rs",
+        "docs/status.md",
+        "docs/testing/mvp-progress.md",
+        "crates/crewroom-runtime/src/model_catalog.rs",
+        "crates/crewroom-runtime/src/model_catalog/policy.rs",
+        "crates/crewroom-runtime/src/model_catalog/store.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/catalog.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/catalog_tests.rs",
+        "crates/crewroom-runtime/tests/catalog_policy.rs",
+        "crates/crewroom-runtime/tests/model_catalog.rs",
+        "docs/testing/mh4-model-contract.md"
+      ],
+      "ignoredTests": []
+    },
+    {
+      "name": "omp-supervisor",
+      "command": [
+        "python3",
+        "scripts/rust/verify-omp-supervisor.py",
+        "--output",
+        "/tmp/cr-mh4-omp-supervisor"
+      ],
+      "startedAt": "2026-10-13T10:34:42.355095+00:00",
+      "finishedAt": "2026-10-13T10:34:52.795759+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/omp-supervisor.log",
+        "sha256": "70d4bb96bcdeb16c3a48acffc0003008fb11fe341573be5ba57e2a8095be97ad"
+      },
+      "testedSourceManifestSha256": "d7b421d920fec0f7d7becb5e87167fa85e1e2857987037407ab2cc33490243b4",
+      "sourceChangesSinceCheck": [
+        "crates/crewroom-core/src/teams.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/transitions.rs",
+        "docs/status.md",
+        "docs/testing/mvp-progress.md",
+        "crates/crewroom-runtime/src/model_catalog.rs",
+        "crates/crewroom-runtime/src/model_catalog/policy.rs",
+        "crates/crewroom-runtime/src/model_catalog/store.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/catalog.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/catalog_tests.rs",
+        "crates/crewroom-runtime/tests/catalog_policy.rs",
+        "crates/crewroom-runtime/tests/model_catalog.rs",
+        "docs/testing/mh4-model-contract.md"
+      ],
+      "ignoredTests": []
+    },
+    {
+      "name": "omp-gateway",
+      "command": [
+        "python3",
+        "scripts/rust/verify-omp-gateway.py",
+        "--output",
+        "/tmp/cr-mh4-omp-gateway"
+      ],
+      "startedAt": "2026-10-13T10:36:04.816105+00:00",
+      "finishedAt": "2026-10-13T10:36:13.349172+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/omp-gateway.log",
+        "sha256": "0bc27d5db73912b3fbe5425272f9e38c63367c8a0a9434a96b8241f4bff3b875"
+      },
+      "testedSourceManifestSha256": "f2e6d0464cd96a61063dbf8255d0e5692b8352bac3246810370d6ac277fed169",
+      "sourceChangesSinceCheck": [
+        "crates/crewroom-core/src/teams.rs",
+        "crates/crewroom-runtime/src/model_catalog.rs",
+        "crates/crewroom-runtime/src/model_catalog/policy.rs",
+        "crates/crewroom-runtime/src/model_catalog/store.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/catalog.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/catalog_tests.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/transitions.rs",
+        "crates/crewroom-runtime/tests/catalog_policy.rs",
+        "crates/crewroom-runtime/tests/model_catalog.rs",
+        "docs/status.md",
+        "docs/testing/mh4-model-contract.md",
+        "docs/testing/mvp-progress.md"
+      ],
+      "ignoredTests": []
+    },
+    {
+      "name": "native-journeys-final",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-desktop",
+        "-j6",
+        "native_journey",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ],
+      "startedAt": "2026-10-13T10:37:32.192627+00:00",
+      "finishedAt": "2026-10-13T10:38:30.075521+00:00",
+      "exitCode": 101,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/native-journeys-final.log",
+        "sha256": "bd4c7455a882ffe7e629d9a6733d938469a75176e28190cffc8dd1ae05fa2d98"
+      },
+      "testedSourceManifestSha256": "c585e304602a6762693224aa6a6fdee57b5a9a21b83113f7b5681dd717438d8b",
+      "sourceChangesSinceCheck": [
+        "crates/crewroom-core/src/teams.rs",
+        "crates/crewroom-desktop/src/workbench/journey_tests.rs",
+        "crates/crewroom-runtime/src/model_catalog.rs",
+        "crates/crewroom-runtime/src/model_catalog/policy.rs",
+        "crates/crewroom-runtime/src/model_catalog/store.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/catalog.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/catalog_tests.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/transitions.rs",
+        "crates/crewroom-runtime/tests/catalog_policy.rs",
+        "crates/crewroom-runtime/tests/model_catalog.rs",
+        "docs/status.md",
+        "docs/testing/mh4-model-contract.md",
+        "docs/testing/mvp-progress.md"
+      ],
+      "results": {
+        "passed": 4,
+        "failed": 1,
+        "ignored": 0
+      },
+      "ignoredTests": []
+    },
+    {
+      "name": "native-continuation-final",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-desktop",
+        "-j6",
+        "native_journey_cancelled_continuation_preserves_branch_diff_lineage_and_reopen",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ],
+      "startedAt": "2026-10-13T10:39:05.927651+00:00",
+      "finishedAt": "2026-10-13T10:39:29.648555+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/native-continuation-final.log",
+        "sha256": "48a1368739b9ccb352c7cef78c4fa4a165e5265dd275d0b59ddc1492e8c459e6"
+      },
+      "testedSourceManifestSha256": "b17222c7337ab36e00af8fce6dac86b2df519770351e39b3c27f49eb19102453",
+      "sourceChangesSinceCheck": [
+        "crates/crewroom-core/src/teams.rs",
+        "crates/crewroom-runtime/src/model_catalog.rs",
+        "crates/crewroom-runtime/src/model_catalog/policy.rs",
+        "crates/crewroom-runtime/src/model_catalog/store.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/catalog.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/catalog_tests.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/transitions.rs",
+        "crates/crewroom-runtime/tests/catalog_policy.rs",
+        "crates/crewroom-runtime/tests/model_catalog.rs",
+        "docs/status.md",
+        "docs/testing/mh4-model-contract.md",
+        "docs/testing/mvp-progress.md"
+      ],
+      "results": {
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0
+      },
+      "ignoredTests": []
+    },
+    {
+      "name": "native-history-external",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-desktop",
+        "-j6",
+        "native_acceptance_retired_repository_keeps_captured_settings_in_results_and_history",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ],
+      "startedAt": "2026-10-13T10:37:33.356244+00:00",
+      "finishedAt": "2026-10-13T10:37:47.575312+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/native-history-external.log",
+        "sha256": "8d905c7eb20304ad1361986691275ed01ad274d28a8cee8e2c00d7803b1c978f"
+      },
+      "testedSourceManifestSha256": "c585e304602a6762693224aa6a6fdee57b5a9a21b83113f7b5681dd717438d8b",
+      "sourceChangesSinceCheck": [
+        "crates/crewroom-core/src/teams.rs",
+        "crates/crewroom-desktop/src/workbench/journey_tests.rs",
+        "crates/crewroom-runtime/src/model_catalog.rs",
+        "crates/crewroom-runtime/src/model_catalog/policy.rs",
+        "crates/crewroom-runtime/src/model_catalog/store.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/catalog.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/catalog_tests.rs",
+        "crates/crewroom-runtime/src/supervisor/workflow/transitions.rs",
+        "crates/crewroom-runtime/tests/catalog_policy.rs",
+        "crates/crewroom-runtime/tests/model_catalog.rs",
+        "docs/status.md",
+        "docs/testing/mh4-model-contract.md",
+        "docs/testing/mvp-progress.md"
+      ],
+      "results": {
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0
+      },
+      "ignoredTests": []
+    },
+    {
+      "name": "snapshot-final-2",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-runtime",
+        "model_catalog::store::tests",
+        "--",
+        "--test-threads=1"
+      ],
+      "startedAt": "2026-10-13T10:59:47.825344+00:00",
+      "finishedAt": "2026-10-13T10:59:56.520910+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/snapshot-final-2.log",
+        "sha256": "b1ef06281712e769f36ecff898dbff2811336d8c7f4bd909d604ccd6dc3a74c0"
+      },
+      "testedSourceManifestSha256": "1fe2b89e3cc63ff2100689e8832506f1b71444ee935ebeacc8f0697ed9f2a772",
+      "sourceChangesSinceCheck": [],
+      "results": {
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0
+      },
+      "ignoredTests": []
+    },
+    {
+      "name": "policy-admission-final",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-runtime",
+        "--test",
+        "catalog_policy"
+      ],
+      "startedAt": "2026-10-13T10:59:19.475858+00:00",
+      "finishedAt": "2026-10-13T10:59:19.709886+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/policy-admission-final.log",
+        "sha256": "1eda4ff1ec944c6a83470843332df593c45dc3e5a2a29c07b6f890a6608d70d9"
+      },
+      "testedSourceManifestSha256": "f36ec181fa675daea7bd744f536ece867767e81bbff734ba137502d8008ca6fb",
+      "sourceChangesSinceCheck": [
+        "crates/crewroom-runtime/src/model_catalog/store.rs"
+      ],
+      "results": {
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0
+      },
+      "ignoredTests": []
+    },
+    {
+      "name": "catalog-crash-restart-release",
+      "command": [
+        "python3",
+        "scripts/verify_catalog_restart.py",
+        "--output",
+        "/tmp/cr-mh4-catalog-restart-release"
+      ],
+      "startedAt": "2026-10-13T11:01:08.179390+00:00",
+      "finishedAt": "2026-10-13T11:01:08.734027+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/catalog-crash-restart-release.log",
+        "sha256": "f50358981f21ed3853654cf5da240b2d79199eb662c757203c66dd201b452254"
+      },
+      "testedSourceManifestSha256": "1fe2b89e3cc63ff2100689e8832506f1b71444ee935ebeacc8f0697ed9f2a772",
+      "sourceChangesSinceCheck": [],
+      "ignoredTests": []
+    },
+    {
+      "name": "live-codex-release",
+      "command": [
+        "python3",
+        "scripts/verify_catalog_workflow.py",
+        "--configuration",
+        "/tmp/cr-mh4-access-s2_gi09f/codex.json",
+        "--output",
+        "/tmp/cr-mh4-codex-live-06",
+        "--mail",
+        "/home/crewroom/Projects/crewroom/.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail"
+      ],
+      "startedAt": "2026-10-13T11:01:07.002788+00:00",
+      "finishedAt": "2026-10-13T11:05:00.634374+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/live-codex-release.log",
+        "sha256": "2f3e2c847e10a19446a48c68685a0fa275c89649c21a95afe2d372d565029959"
+      },
+      "testedSourceManifestSha256": "1fe2b89e3cc63ff2100689e8832506f1b71444ee935ebeacc8f0697ed9f2a772",
+      "sourceChangesSinceCheck": [],
+      "ignoredTests": []
+    },
+    {
+      "name": "live-claude-final",
+      "command": [
+        "python3",
+        "scripts/verify_catalog_workflow.py",
+        "--configuration",
+        "/tmp/cr-mh4-access-s2_gi09f/claude.json",
+        "--output",
+        "/tmp/cr-mh4-claude-live-02",
+        "--mail",
+        "/home/crewroom/Projects/crewroom/.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail"
+      ],
+      "startedAt": "2026-10-13T10:56:21.821230+00:00",
+      "finishedAt": "2026-10-13T11:00:17.839120+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/live-claude-final.log",
+        "sha256": "1a7761b215bf427fd2bfc76caa0715f4bd80e144da6fb377e001926c3b3ab092"
+      },
+      "testedSourceManifestSha256": "a87e0946190a3abf4bd950215642dfa866fbf8ced020cfc85bf1d58c0c026daa",
+      "sourceChangesSinceCheck": [
+        "crates/crewroom-runtime/src/model_catalog/store.rs",
+        "crates/crewroom-runtime/tests/catalog_policy.rs",
+        "docs/testing/mh4-model-contract.md"
+      ],
+      "ignoredTests": []
+    },
+    {
+      "name": "live-omp-verified",
+      "command": [
+        "python3",
+        "scripts/verify_catalog_workflow.py",
+        "--configuration",
+        "/tmp/cr-mh4-access-s2_gi09f/omp.json",
+        "--output",
+        "/tmp/cr-mh4-omp-live-04",
+        "--mail",
+        "/home/crewroom/Projects/crewroom/.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail"
+      ],
+      "startedAt": "2026-10-13T11:07:35.742785+00:00",
+      "finishedAt": "2026-10-13T11:09:49.425473+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/live-omp-verified.log",
+        "sha256": "1673dda9c9c3c411f75912b43398c7ecdf4767f37b485d567339392e5df3eb14"
+      },
+      "testedSourceManifestSha256": "34c8f7e686e80df6321865ecf64021f66c24b85641930b052ad9d585dbd37eaa",
+      "sourceChangesSinceCheck": [
+        "docs/multi-harness-plan.md",
+        "docs/status.md",
+        "docs/testing/mh4-model-contract.md",
+        "docs/testing/mvp-progress.md"
+      ],
+      "ignoredTests": []
+    }
+  ],
+  "liveAdapters": [
+    {
+      "adapter": "codex",
+      "receipt": {
+        "path": "/tmp/cr-mh4-codex-live-06/workflow-result.json",
+        "sha256": "d9bab64a6efbf94556204b4d21df15f44cbe71d98b23b07fdfb58ff568f96d8b"
+      },
+      "scope": "LIVE codex, native catalog picker and production Rust daemon, real external Rust Mail",
+      "passed": true,
+      "checks": [
+        "native keyboard model picker, refresh, low effort, persisted Code job and coordinator/specialist selections",
+        "refresh and saved budget changes leave both executing assignments byte-for-byte equal",
+        "model-based route, native login, exact separately owned host/runner pairs",
+        "real addressed host tool through workflow authorization and external Rust Mail to independent recipient",
+        "controller SIGKILL and exact live-process reattachment without another Mail effect",
+        "pause verifies stopped ownership; resume uses new processes, same durable threads and original Mail effect",
+        "specialist submits addressed artifact; coordinator completion is durable after controller restart; no duplicate external Mail effect"
+      ],
+      "selection": "offering:codex:codex:gpt-6-astra",
+      "catalogRevisionAtSelection": 4,
+      "roles": {
+        "coordinator": {
+          "requested": {
+            "model": "offering:codex:codex:gpt-6-astra",
+            "effort": "low"
+          },
+          "resolved": {
+            "adapter": "codex",
+            "provider": "codex",
+            "id": "gpt-6-astra",
+            "api": "codex-app-server",
+            "selector": "codex/gpt-6-astra",
+            "effort": "low",
+            "resolvedModel": null,
+            "efforts": [
+              "low"
+            ],
+            "inputs": [
+              "text"
+            ],
+            "tools": true
+          },
+          "selection": {
+            "schemaVersion": 1,
+            "intendedModel": "offering:codex:codex:gpt-6-astra",
+            "modelSource": "role_override",
+            "effortSource": "role_override",
+            "requestedEffort": "low",
+            "offering": {
+              "key": "offering:codex:codex:gpt-6-astra",
+              "harness": "codex",
+              "provider": "codex",
+              "selector": "gpt-6-astra",
+              "displayName": "GPT-6-Astra",
+              "api": "codex-app-server",
+              "observedModel": null,
+              "capabilities": {
+                "efforts": [
+                  "low"
+                ],
+                "inputs": [
+                  "text"
+                ],
+                "tools": true
+              },
+              "access": "configured",
+              "executionProfile": "codex-0.162.0-dynamic-tools-v1",
+              "inference": null
+            },
+            "advertisedCapabilities": {
+              "efforts": [
+                "low",
+                "medium",
+                "high",
+                "xhigh",
+                "max",
+                "ultra"
+              ],
+              "inputs": [
+                "text",
+                "image"
+              ],
+              "tools": null
+            },
+            "identity": {
+              "binary": "/home/crewroom/.local/share/mise/installs/codex/0.162.0/bin/codex",
+              "canonicalBinary": "/home/crewroom/.local/share/mise/installs/codex/0.162.0/bin/codex",
+              "binarySha256": "50ed828f357c655a3c82054d346cab8434f24901f14ec19b8267571bdd008b38",
+              "binaryStamp": "/home/crewroom/.local/share/mise/installs/codex/0.162.0/bin/codex:57:18930511:294410952:1791479572:0",
+              "version": "codex-cli 0.162.0",
+              "profile": "codex-codex-cli 0.162.0-metadata-v1"
+            },
+            "configurationRevision": "6f3164d97bbfd894506380b7dea2b6f07df8050eb8c79e51b6cfcf4e6a916040",
+            "catalogRevision": 4,
+            "policyRevision": "ac0ecb718f80335a886d953988ffb71592b5b1c4fa32f835e220533a8090e043",
+            "roleRevision": "ae4913ab2bb8efde635260d0563dd40dd3dd3a2b3bad2aee74e9b6ec5458771c",
+            "reason": "Exact offering selected.",
+            "previewRevision": "348a64daeabf9b485a9f086e0f348e03eba11b3a5ca70a0e14bf257bfcc110cd"
+          },
+          "job": "judgment",
+          "budget": "small",
+          "warning": null,
+          "settingsRevision": 1
+        },
+        "tech-writer": {
+          "requested": {
+            "model": "offering:codex:codex:gpt-6-astra",
+            "effort": "low"
+          },
+          "resolved": {
+            "adapter": "codex",
+            "provider": "codex",
+            "id": "gpt-6-astra",
+            "api": "codex-app-server",
+            "selector": "codex/gpt-6-astra",
+            "effort": "low",
+            "resolvedModel": null,
+            "efforts": [
+              "low"
+            ],
+            "inputs": [
+              "text"
+            ],
+            "tools": true
+          },
+          "selection": {
+            "schemaVersion": 1,
+            "intendedModel": "offering:codex:codex:gpt-6-astra",
+            "modelSource": "role_override",
+            "effortSource": "role_override",
+            "requestedEffort": "low",
+            "offering": {
+              "key": "offering:codex:codex:gpt-6-astra",
+              "harness": "codex",
+              "provider": "codex",
+              "selector": "gpt-6-astra",
+              "displayName": "GPT-6-Astra",
+              "api": "codex-app-server",
+              "observedModel": null,
+              "capabilities": {
+                "efforts": [
+                  "low"
+                ],
+                "inputs": [
+                  "text"
+                ],
+                "tools": true
+              },
+              "access": "configured",
+              "executionProfile": "codex-0.162.0-dynamic-tools-v1",
+              "inference": null
+            },
+            "advertisedCapabilities": {
+              "efforts": [
+                "low",
+                "medium",
+                "high",
+                "xhigh",
+                "max",
+                "ultra"
+              ],
+              "inputs": [
+                "text",
+                "image"
+              ],
+              "tools": null
+            },
+            "identity": {
+              "binary": "/home/crewroom/.local/share/mise/installs/codex/0.162.0/bin/codex",
+              "canonicalBinary": "/home/crewroom/.local/share/mise/installs/codex/0.162.0/bin/codex",
+              "binarySha256": "50ed828f357c655a3c82054d346cab8434f24901f14ec19b8267571bdd008b38",
+              "binaryStamp": "/home/crewroom/.local/share/mise/installs/codex/0.162.0/bin/codex:57:18930511:294410952:1791479572:0",
+              "version": "codex-cli 0.162.0",
+              "profile": "codex-codex-cli 0.162.0-metadata-v1"
+            },
+            "configurationRevision": "6f3164d97bbfd894506380b7dea2b6f07df8050eb8c79e51b6cfcf4e6a916040",
+            "catalogRevision": 4,
+            "policyRevision": "ac0ecb718f80335a886d953988ffb71592b5b1c4fa32f835e220533a8090e043",
+            "roleRevision": "781007b8dc6b223186ad4a3e63485b3ae9e521c344fceb932cc3ece3c646f865",
+            "reason": "Exact offering selected.",
+            "previewRevision": "02560d94cbdfbc25360747f556316c96075008374ab6e1bbf3cae7894f7b2648"
+          },
+          "job": "judgment",
+          "budget": "small",
+          "warning": null,
+          "settingsRevision": 1
+        }
+      },
+      "initialProcesses": [
+        {
+          "id": "c61f08ba-2f86-4339-9b79-38680c3f5107",
+          "hostPid": 2094957,
+          "runnerPid": 2095109,
+          "sessionId": "01a134ee-cc9b-7d10-8bd5-48950e2bf06a",
+          "runnerProfile": "a79f5343ba8e029d00d3dd8a14642edbf372d48bee3b3acd4dc9d4dd4b8d574f",
+          "model": {
+            "requested": {
+              "model": "offering:codex:codex:gpt-6-astra",
+              "effort": "low"
+            },
+            "resolved": {
+              "adapter": "codex",
+              "provider": "codex",
+              "id": "gpt-6-astra",
+              "api": "codex-app-server",
+              "selector": "codex/gpt-6-astra",
+              "effort": "low",
+              "resolvedModel": null,
+              "efforts": [
+                "low"
+              ],
+              "inputs": [
+                "text"
+              ],
+              "tools": true
+            },
+            "selection": {
+              "schemaVersion": 1,
+              "intendedModel": "offering:codex:codex:gpt-6-astra",
+              "modelSource": "role_override",
+              "effortSource": "role_override",
+              "requestedEffort": "low",
+              "offering": {
+                "key": "offering:codex:codex:gpt-6-astra",
+                "harness": "codex",
+                "provider": "codex",
+                "selector": "gpt-6-astra",
+                "displayName": "GPT-6-Astra",
+                "api": "codex-app-server",
+                "observedModel": null,
+                "capabilities": {
+                  "efforts": [
+                    "low"
+                  ],
+                  "inputs": [
+                    "text"
+                  ],
+                  "tools": true
+                },
+                "access": "configured",
+                "executionProfile": "codex-0.162.0-dynamic-tools-v1",
+                "inference": null
+              },
+              "advertisedCapabilities": {
+                "efforts": [
+                  "low",
+                  "medium",
+                  "high",
+                  "xhigh",
+                  "max",
+                  "ultra"
+                ],
+                "inputs": [
+                  "text",
+                  "image"
+                ],
+                "tools": null
+              },
+              "identity": {
+                "binary": "/home/crewroom/.local/share/mise/installs/codex/0.162.0/bin/codex",
+                "canonicalBinary": "/home/crewroom/.local/share/mise/installs/codex/0.162.0/bin/codex",
+                "binarySha256": "50ed828f357c655a3c82054d346cab8434f24901f14ec19b8267571bdd008b38",
+                "binaryStamp": "/home/crewroom/.local/share/mise/installs/codex/0.162.0/bin/codex:57:18930511:294410952:1791479572:0",
+                "version": "codex-cli 0.162.0",
+                "profile": "codex-codex-cli 0.162.0-metadata-v1"
+              },
+              "configurationRevision": "6f3164d97bbfd894506380b7dea2b6f07df8050eb8c79e51b6cfcf4e6a916040",
+              "catalogRevision": 4,
+              "policyRevision": "ac0ecb718f80335a886d953988ffb71592b5b1c4fa32f835e220533a8090e043",
+              "roleRevision": "ae4913ab2bb8efde635260d0563dd40dd3dd3a2b3bad2aee74e9b6ec5458771c",
+              "reason": "Exact offering selected.",
+              "previewRevision": "348a64daeabf9b485a9f086e0f348e03eba11b3a5ca70a0e14bf257bfcc110cd"
+            },
+            "job": "judgment",
+            "budget": "small",
+            "warning": null,
+            "settingsRevision": 1
+          }
+        },
+        {
+          "id": "88f419f3-23bb-4ac9-ac45-3572e8badf7f",
+          "hostPid": 2095378,
+          "runnerPid": 2096010,
+          "sessionId": "01a134ee-f914-79b2-adea-430d0601c6ad",
+          "runnerProfile": "a79f5343ba8e029d00d3dd8a14642edbf372d48bee3b3acd4dc9d4dd4b8d574f",
+          "model": {
+            "requested": {
+              "model": "offering:codex:codex:gpt-6-astra",
+              "effort": "low"
+            },
+            "resolved": {
+              "adapter": "codex",
+              "provider": "codex",
+              "id": "gpt-6-astra",
+              "api": "codex-app-server",
+              "selector": "codex/gpt-6-astra",
+              "effort": "low",
+              "resolvedModel": null,
+              "efforts": [
+                "low"
+              ],
+              "inputs": [
+                "text"
+              ],
+              "tools": true
+            },
+            "selection": {
+              "schemaVersion": 1,
+              "intendedModel": "offering:codex:codex:gpt-6-astra",
+              "modelSource": "role_override",
+              "effortSource": "role_override",
+              "requestedEffort": "low",
+              "offering": {
+                "key": "offering:codex:codex:gpt-6-astra",
+                "harness": "codex",
+                "provider": "codex",
+                "selector": "gpt-6-astra",
+                "displayName": "GPT-6-Astra",
+                "api": "codex-app-server",
+                "observedModel": null,
+                "capabilities": {
+                  "efforts": [
+                    "low"
+                  ],
+                  "inputs": [
+                    "text"
+                  ],
+                  "tools": true
+                },
+                "access": "configured",
+                "executionProfile": "codex-0.162.0-dynamic-tools-v1",
+                "inference": null
+              },
+              "advertisedCapabilities": {
+                "efforts": [
+                  "low",
+                  "medium",
+                  "high",
+                  "xhigh",
+                  "max",
+                  "ultra"
+                ],
+                "inputs": [
+                  "text",
+                  "image"
+                ],
+                "tools": null
+              },
+              "identity": {
+                "binary": "/home/crewroom/.local/share/mise/installs/codex/0.162.0/bin/codex",
+                "canonicalBinary": "/home/crewroom/.local/share/mise/installs/codex/0.162.0/bin/codex",
+                "binarySha256": "50ed828f357c655a3c82054d346cab8434f24901f14ec19b8267571bdd008b38",
+                "binaryStamp": "/home/crewroom/.local/share/mise/installs/codex/0.162.0/bin/codex:57:18930511:294410952:1791479572:0",
+                "version": "codex-cli 0.162.0",
+                "profile": "codex-codex-cli 0.162.0-metadata-v1"
+              },
+              "configurationRevision": "6f3164d97bbfd894506380b7dea2b6f07df8050eb8c79e51b6cfcf4e6a916040",
+              "catalogRevision": 4,
+              "policyRevision": "ac0ecb718f80335a886d953988ffb71592b5b1c4fa32f835e220533a8090e043",
+              "roleRevision": "781007b8dc6b223186ad4a3e63485b3ae9e521c344fceb932cc3ece3c646f865",
+              "reason": "Exact offering selected.",
+              "previewRevision": "02560d94cbdfbc25360747f556316c96075008374ab6e1bbf3cae7894f7b2648"
+            },
+            "job": "judgment",
+            "budget": "small",
+            "warning": null,
+            "settingsRevision": 1
+          }
+        }
+      ],
+      "externalMail": {
+        "id": "a46eb144-3d3a-4606-81f8-61deacb29a38",
+        "disposition": "received"
+      },
+      "attemptReadbacks": [
+        {
+          "attemptId": "c61f08ba-2f86-4339-9b79-38680c3f5107",
+          "model": {
+            "adapter": "codex",
+            "provider": "codex",
+            "id": "gpt-6-astra",
+            "api": "codex-app-server",
+            "selector": "codex/gpt-6-astra",
+            "effort": "low",
+            "resolvedModel": null,
+            "efforts": [
+              "low"
+            ],
+            "inputs": [
+              "text"
+            ],
+            "tools": true
+          },
+          "effort": "low",
+          "observedModel": null,
+          "readbackSource": "host_ready after adapter model/effort verification",
+          "runnerVersion": "codex-cli 0.162.0",
+          "runnerProfile": "a79f5343ba8e029d00d3dd8a14642edbf372d48bee3b3acd4dc9d4dd4b8d574f",
+          "ownership": "stopped",
+          "events": {
+            "path": "/tmp/cr-mh4-codex-live-06/cr-wf-SIIeo1/runtime/c61f08ba-2f86-4339-9b79-38680c3f5107/events.jsonl",
+            "sha256": "0b51973471d65edd50b1e91653e298f52f3dc944d85aac6c3cd180c24ee7f617"
+          }
+        },
+        {
+          "attemptId": "88f419f3-23bb-4ac9-ac45-3572e8badf7f",
+          "model": {
+            "adapter": "codex",
+            "provider": "codex",
+            "id": "gpt-6-astra",
+            "api": "codex-app-server",
+            "selector": "codex/gpt-6-astra",
+            "effort": "low",
+            "resolvedModel": null,
+            "efforts": [
+              "low"
+            ],
+            "inputs": [
+              "text"
+            ],
+            "tools": true
+          },
+          "effort": "low",
+          "observedModel": null,
+          "readbackSource": "host_ready after adapter model/effort verification",
+          "runnerVersion": "codex-cli 0.162.0",
+          "runnerProfile": "a79f5343ba8e029d00d3dd8a14642edbf372d48bee3b3acd4dc9d4dd4b8d574f",
+          "ownership": "stopped",
+          "events": {
+            "path": "/tmp/cr-mh4-codex-live-06/cr-wf-SIIeo1/runtime/88f419f3-23bb-4ac9-ac45-3572e8badf7f/events.jsonl",
+            "sha256": "bc7e9d3390865999147f9c1ca0f950fbd2cb37da50efc92cba8387dccd8b3f6a"
+          }
+        },
+        {
+          "attemptId": "9602874d-55e9-4ff4-ad35-66329bb94236",
+          "model": {
+            "adapter": "codex",
+            "provider": "codex",
+            "id": "gpt-6-astra",
+            "api": "codex-app-server",
+            "selector": "codex/gpt-6-astra",
+            "effort": "low",
+            "resolvedModel": null,
+            "efforts": [
+              "low"
+            ],
+            "inputs": [
+              "text"
+            ],
+            "tools": true
+          },
+          "effort": "low",
+          "observedModel": null,
+          "readbackSource": "host_ready after adapter model/effort verification",
+          "runnerVersion": "codex-cli 0.162.0",
+          "runnerProfile": "a79f5343ba8e029d00d3dd8a14642edbf372d48bee3b3acd4dc9d4dd4b8d574f",
+          "ownership": "stopped",
+          "events": {
+            "path": "/tmp/cr-mh4-codex-live-06/cr-wf-SIIeo1/runtime/9602874d-55e9-4ff4-ad35-66329bb94236/events.jsonl",
+            "sha256": "1ae6e1d66569233079c3530a204364ea614ba3cf2d925d6d3fac31dfd5f0dbe5"
+          }
+        },
+        {
+          "attemptId": "d4fb1996-dec5-429b-85fd-565a2322a950",
+          "model": {
+            "adapter": "codex",
+            "provider": "codex",
+            "id": "gpt-6-astra",
+            "api": "codex-app-server",
+            "selector": "codex/gpt-6-astra",
+            "effort": "low",
+            "resolvedModel": null,
+            "efforts": [
+              "low"
+            ],
+            "inputs": [
+              "text"
+            ],
+            "tools": true
+          },
+          "effort": "low",
+          "observedModel": null,
+          "readbackSource": "host_ready after adapter model/effort verification",
+          "runnerVersion": "codex-cli 0.162.0",
+          "runnerProfile": "a79f5343ba8e029d00d3dd8a14642edbf372d48bee3b3acd4dc9d4dd4b8d574f",
+          "ownership": "stopped",
+          "events": {
+            "path": "/tmp/cr-mh4-codex-live-06/cr-wf-SIIeo1/runtime/d4fb1996-dec5-429b-85fd-565a2322a950/events.jsonl",
+            "sha256": "398e0674777e5ea9cc3db205a6f53dbc5bb7c419726c4963c846c09081a1e04a"
+          }
+        }
+      ],
+      "finalRunStatus": "completed",
+      "finalCatalog": {
+        "receipt": {
+          "path": "/tmp/cr-mh4-codex-live-06/cr-wf-SIIeo1/runtime/model-catalog/catalog.json",
+          "sha256": "f6870071a6a8e1f2f1667935448a2f443d35de42036fdc6897904870156a6487"
+        },
+        "revision": 8,
+        "state": "partial",
+        "harnesses": [
+          {
+            "harness": "omp",
+            "outcome": "error",
+            "offeringCount": 0
+          },
+          {
+            "harness": "codex",
+            "outcome": "success",
+            "offeringCount": 8
+          },
+          {
+            "harness": "claude-code",
+            "outcome": "error",
+            "offeringCount": 0
+          }
+        ]
+      },
+      "cleanupVerified": true
+    },
+    {
+      "adapter": "claude",
+      "receipt": {
+        "path": "/tmp/cr-mh4-claude-live-02/workflow-result.json",
+        "sha256": "8f69ee79eeeae313f974389f187d949bfd97e1e505face43400aefa1cf6c2de1"
+      },
+      "scope": "LIVE claude-code, native catalog picker and production Rust daemon, real external Rust Mail",
+      "passed": true,
+      "checks": [
+        "native keyboard model picker, refresh, low effort, persisted Code job and coordinator/specialist selections",
+        "refresh and saved budget changes leave both executing assignments byte-for-byte equal",
+        "model-based route, native login, exact separately owned host/runner pairs",
+        "real addressed host tool through workflow authorization and external Rust Mail to independent recipient",
+        "controller SIGKILL and exact live-process reattachment without another Mail effect",
+        "pause verifies stopped ownership; resume uses new processes, same durable threads and original Mail effect",
+        "specialist submits addressed artifact; coordinator completion is durable after controller restart; no duplicate external Mail effect"
+      ],
+      "selection": "offering:claude-code:claude-code:sonnet",
+      "catalogRevisionAtSelection": 4,
+      "roles": {
+        "coordinator": {
+          "requested": {
+            "model": "offering:claude-code:claude-code:sonnet",
+            "effort": "low"
+          },
+          "resolved": {
+            "adapter": "claude-code",
+            "provider": "claude-code",
+            "id": "sonnet",
+            "api": "claude-code-stream",
+            "selector": "claude-code/sonnet",
+            "effort": "low",
+            "resolvedModel": "claude-sonnet-5-5",
+            "efforts": [
+              "low"
+            ],
+            "inputs": [
+              "text"
+            ],
+            "tools": true
+          },
+          "selection": {
+            "schemaVersion": 1,
+            "intendedModel": "offering:claude-code:claude-code:sonnet",
+            "modelSource": "role_override",
+            "effortSource": "role_override",
+            "requestedEffort": "low",
+            "offering": {
+              "key": "offering:claude-code:claude-code:sonnet",
+              "harness": "claude-code",
+              "provider": "claude-code",
+              "selector": "sonnet",
+              "displayName": "Sonnet",
+              "api": "claude-code-stream",
+              "observedModel": {
+                "model": "claude-sonnet-5-5",
+                "source": "discovery-metadata",
+                "observedAt": 1791888986
+              },
+              "capabilities": {
+                "efforts": [
+                  "low"
+                ],
+                "inputs": [
+                  "text"
+                ],
+                "tools": true
+              },
+              "access": "configured",
+              "executionProfile": "claude-2.1.296-safe-sdk-tools-v1",
+              "inference": null
+            },
+            "advertisedCapabilities": {
+              "efforts": [
+                "low",
+                "medium",
+                "high",
+                "xhigh",
+                "max"
+              ],
+              "inputs": null,
+              "tools": null
+            },
+            "identity": {
+              "binary": "/home/crewroom/.local/share/claude/versions/2.1.296",
+              "canonicalBinary": "/home/crewroom/.local/share/claude/versions/2.1.296",
+              "binarySha256": "24972e3bc859fab2b46ed4c1e51f7d6130f06d3bd550811a114640de3370d0de",
+              "binaryStamp": "/home/crewroom/.local/share/claude/versions/2.1.296:57:19312954:257068216:1791835660:566657409",
+              "version": "2.1.296 (Claude Code)",
+              "profile": "claude-code-2.1.296 (Claude Code)-metadata-v1"
+            },
+            "configurationRevision": "559901acf86083bdb7dfb8ef58a8b0c3980949089fed6ff18717fecc72f1391f",
+            "catalogRevision": 4,
+            "policyRevision": "8fcae5fdfd85414559c4bc8ba3d8eb1ac13ac78c5bb6d6bdf5d44142c4e7e70e",
+            "roleRevision": "4c3d12d00326aa938d43e51294b88a40a0a0a4ecb03db66804733e29db8a2b33",
+            "reason": "Exact offering selected.",
+            "previewRevision": "ef8960f848116f175d3f33c7b310215ba2087fd41d86c89949b93f2837bf7bd5"
+          },
+          "job": "judgment",
+          "budget": "small",
+          "warning": null,
+          "settingsRevision": 1
+        },
+        "tech-writer": {
+          "requested": {
+            "model": "offering:claude-code:claude-code:sonnet",
+            "effort": "low"
+          },
+          "resolved": {
+            "adapter": "claude-code",
+            "provider": "claude-code",
+            "id": "sonnet",
+            "api": "claude-code-stream",
+            "selector": "claude-code/sonnet",
+            "effort": "low",
+            "resolvedModel": "claude-sonnet-5-5",
+            "efforts": [
+              "low"
+            ],
+            "inputs": [
+              "text"
+            ],
+            "tools": true
+          },
+          "selection": {
+            "schemaVersion": 1,
+            "intendedModel": "offering:claude-code:claude-code:sonnet",
+            "modelSource": "role_override",
+            "effortSource": "role_override",
+            "requestedEffort": "low",
+            "offering": {
+              "key": "offering:claude-code:claude-code:sonnet",
+              "harness": "claude-code",
+              "provider": "claude-code",
+              "selector": "sonnet",
+              "displayName": "Sonnet",
+              "api": "claude-code-stream",
+              "observedModel": {
+                "model": "claude-sonnet-5-5",
+                "source": "discovery-metadata",
+                "observedAt": 1791888986
+              },
+              "capabilities": {
+                "efforts": [
+                  "low"
+                ],
+                "inputs": [
+                  "text"
+                ],
+                "tools": true
+              },
+              "access": "configured",
+              "executionProfile": "claude-2.1.296-safe-sdk-tools-v1",
+              "inference": null
+            },
+            "advertisedCapabilities": {
+              "efforts": [
+                "low",
+                "medium",
+                "high",
+                "xhigh",
+                "max"
+              ],
+              "inputs": null,
+              "tools": null
+            },
+            "identity": {
+              "binary": "/home/crewroom/.local/share/claude/versions/2.1.296",
+              "canonicalBinary": "/home/crewroom/.local/share/claude/versions/2.1.296",
+              "binarySha256": "24972e3bc859fab2b46ed4c1e51f7d6130f06d3bd550811a114640de3370d0de",
+              "binaryStamp": "/home/crewroom/.local/share/claude/versions/2.1.296:57:19312954:257068216:1791835660:566657409",
+              "version": "2.1.296 (Claude Code)",
+              "profile": "claude-code-2.1.296 (Claude Code)-metadata-v1"
+            },
+            "configurationRevision": "559901acf86083bdb7dfb8ef58a8b0c3980949089fed6ff18717fecc72f1391f",
+            "catalogRevision": 4,
+            "policyRevision": "8fcae5fdfd85414559c4bc8ba3d8eb1ac13ac78c5bb6d6bdf5d44142c4e7e70e",
+            "roleRevision": "37e0cad51821e8882d5a78c82aea513a16e37811e0b80acf0d26afded3d33377",
+            "reason": "Exact offering selected.",
+            "previewRevision": "0fb20c07634e67d13c1934f876df72b5b8a35e9c91bc2114541aaa3cce4cbfb0"
+          },
+          "job": "judgment",
+          "budget": "small",
+          "warning": null,
+          "settingsRevision": 1
+        }
+      },
+      "initialProcesses": [
+        {
+          "id": "13872f92-2b51-4767-b3a7-5ae310c096bc",
+          "hostPid": 2045081,
+          "runnerPid": 2047874,
+          "sessionId": "1406bc6e-470e-40e8-9492-7dc130ae4549",
+          "runnerProfile": "b0dbad9c96a66e7642499ade21f3966527a05f700c7a5dd9bd5a38e2f50efe63",
+          "observedModel": "claude-sonnet-5-5",
+          "model": {
+            "requested": {
+              "model": "offering:claude-code:claude-code:sonnet",
+              "effort": "low"
+            },
+            "resolved": {
+              "adapter": "claude-code",
+              "provider": "claude-code",
+              "id": "sonnet",
+              "api": "claude-code-stream",
+              "selector": "claude-code/sonnet",
+              "effort": "low",
+              "resolvedModel": "claude-sonnet-5-5",
+              "efforts": [
+                "low"
+              ],
+              "inputs": [
+                "text"
+              ],
+              "tools": true
+            },
+            "selection": {
+              "schemaVersion": 1,
+              "intendedModel": "offering:claude-code:claude-code:sonnet",
+              "modelSource": "role_override",
+              "effortSource": "role_override",
+              "requestedEffort": "low",
+              "offering": {
+                "key": "offering:claude-code:claude-code:sonnet",
+                "harness": "claude-code",
+                "provider": "claude-code",
+                "selector": "sonnet",
+                "displayName": "Sonnet",
+                "api": "claude-code-stream",
+                "observedModel": {
+                  "model": "claude-sonnet-5-5",
+                  "source": "discovery-metadata",
+                  "observedAt": 1791888986
+                },
+                "capabilities": {
+                  "efforts": [
+                    "low"
+                  ],
+                  "inputs": [
+                    "text"
+                  ],
+                  "tools": true
+                },
+                "access": "configured",
+                "executionProfile": "claude-2.1.296-safe-sdk-tools-v1",
+                "inference": null
+              },
+              "advertisedCapabilities": {
+                "efforts": [
+                  "low",
+                  "medium",
+                  "high",
+                  "xhigh",
+                  "max"
+                ],
+                "inputs": null,
+                "tools": null
+              },
+              "identity": {
+                "binary": "/home/crewroom/.local/share/claude/versions/2.1.296",
+                "canonicalBinary": "/home/crewroom/.local/share/claude/versions/2.1.296",
+                "binarySha256": "24972e3bc859fab2b46ed4c1e51f7d6130f06d3bd550811a114640de3370d0de",
+                "binaryStamp": "/home/crewroom/.local/share/claude/versions/2.1.296:57:19312954:257068216:1791835660:566657409",
+                "version": "2.1.296 (Claude Code)",
+                "profile": "claude-code-2.1.296 (Claude Code)-metadata-v1"
+              },
+              "configurationRevision": "559901acf86083bdb7dfb8ef58a8b0c3980949089fed6ff18717fecc72f1391f",
+              "catalogRevision": 4,
+              "policyRevision": "8fcae5fdfd85414559c4bc8ba3d8eb1ac13ac78c5bb6d6bdf5d44142c4e7e70e",
+              "roleRevision": "4c3d12d00326aa938d43e51294b88a40a0a0a4ecb03db66804733e29db8a2b33",
+              "reason": "Exact offering selected.",
+              "previewRevision": "ef8960f848116f175d3f33c7b310215ba2087fd41d86c89949b93f2837bf7bd5"
+            },
+            "job": "judgment",
+            "budget": "small",
+            "warning": null,
+            "settingsRevision": 1
+          }
+        },
+        {
+          "id": "2dcba81d-1db0-4c58-8a88-b91498dfab9c",
+          "hostPid": 2049954,
+          "runnerPid": 2051646,
+          "sessionId": "70a77457-84d5-4d07-afcd-591255a00eb7",
+          "runnerProfile": "b0dbad9c96a66e7642499ade21f3966527a05f700c7a5dd9bd5a38e2f50efe63",
+          "observedModel": "claude-sonnet-5-5",
+          "model": {
+            "requested": {
+              "model": "offering:claude-code:claude-code:sonnet",
+              "effort": "low"
+            },
+            "resolved": {
+              "adapter": "claude-code",
+              "provider": "claude-code",
+              "id": "sonnet",
+              "api": "claude-code-stream",
+              "selector": "claude-code/sonnet",
+              "effort": "low",
+              "resolvedModel": "claude-sonnet-5-5",
+              "efforts": [
+                "low"
+              ],
+              "inputs": [
+                "text"
+              ],
+              "tools": true
+            },
+            "selection": {
+              "schemaVersion": 1,
+              "intendedModel": "offering:claude-code:claude-code:sonnet",
+              "modelSource": "role_override",
+              "effortSource": "role_override",
+              "requestedEffort": "low",
+              "offering": {
+                "key": "offering:claude-code:claude-code:sonnet",
+                "harness": "claude-code",
+                "provider": "claude-code",
+                "selector": "sonnet",
+                "displayName": "Sonnet",
+                "api": "claude-code-stream",
+                "observedModel": {
+                  "model": "claude-sonnet-5-5",
+                  "source": "discovery-metadata",
+                  "observedAt": 1791888986
+                },
+                "capabilities": {
+                  "efforts": [
+                    "low"
+                  ],
+                  "inputs": [
+                    "text"
+                  ],
+                  "tools": true
+                },
+                "access": "configured",
+                "executionProfile": "claude-2.1.296-safe-sdk-tools-v1",
+                "inference": null
+              },
+              "advertisedCapabilities": {
+                "efforts": [
+                  "low",
+                  "medium",
+                  "high",
+                  "xhigh",
+                  "max"
+                ],
+                "inputs": null,
+                "tools": null
+              },
+              "identity": {
+                "binary": "/home/crewroom/.local/share/claude/versions/2.1.296",
+                "canonicalBinary": "/home/crewroom/.local/share/claude/versions/2.1.296",
+                "binarySha256": "24972e3bc859fab2b46ed4c1e51f7d6130f06d3bd550811a114640de3370d0de",
+                "binaryStamp": "/home/crewroom/.local/share/claude/versions/2.1.296:57:19312954:257068216:1791835660:566657409",
+                "version": "2.1.296 (Claude Code)",
+                "profile": "claude-code-2.1.296 (Claude Code)-metadata-v1"
+              },
+              "configurationRevision": "559901acf86083bdb7dfb8ef58a8b0c3980949089fed6ff18717fecc72f1391f",
+              "catalogRevision": 4,
+              "policyRevision": "8fcae5fdfd85414559c4bc8ba3d8eb1ac13ac78c5bb6d6bdf5d44142c4e7e70e",
+              "roleRevision": "37e0cad51821e8882d5a78c82aea513a16e37811e0b80acf0d26afded3d33377",
+              "reason": "Exact offering selected.",
+              "previewRevision": "0fb20c07634e67d13c1934f876df72b5b8a35e9c91bc2114541aaa3cce4cbfb0"
+            },
+            "job": "judgment",
+            "budget": "small",
+            "warning": null,
+            "settingsRevision": 1
+          }
+        }
+      ],
+      "externalMail": {
+        "id": "8855fde5-6b55-485d-b45b-8fa7f3eb64c4",
+        "disposition": "received"
+      },
+      "attemptReadbacks": [
+        {
+          "attemptId": "13872f92-2b51-4767-b3a7-5ae310c096bc",
+          "model": {
+            "adapter": "claude-code",
+            "provider": "claude-code",
+            "id": "sonnet",
+            "api": "claude-code-stream",
+            "selector": "claude-code/sonnet",
+            "effort": "low",
+            "resolvedModel": "claude-sonnet-5-5",
+            "efforts": [
+              "low"
+            ],
+            "inputs": [
+              "text"
+            ],
+            "tools": true
+          },
+          "effort": "low",
+          "observedModel": "claude-sonnet-5-5",
+          "readbackSource": "host_ready after adapter model/effort verification",
+          "runnerVersion": "2.1.296 (Claude Code)",
+          "runnerProfile": "b0dbad9c96a66e7642499ade21f3966527a05f700c7a5dd9bd5a38e2f50efe63",
+          "ownership": "stopped",
+          "events": {
+            "path": "/tmp/cr-mh4-claude-live-02/cr-wf-0BbuCb/runtime/13872f92-2b51-4767-b3a7-5ae310c096bc/events.jsonl",
+            "sha256": "e3c6bb18ecd0de678761c927300c5dcf545eaea62c7c30193009c9e4eb913cd0"
+          }
+        },
+        {
+          "attemptId": "2dcba81d-1db0-4c58-8a88-b91498dfab9c",
+          "model": {
+            "adapter": "claude-code",
+            "provider": "claude-code",
+            "id": "sonnet",
+            "api": "claude-code-stream",
+            "selector": "claude-code/sonnet",
+            "effort": "low",
+            "resolvedModel": "claude-sonnet-5-5",
+            "efforts": [
+              "low"
+            ],
+            "inputs": [
+              "text"
+            ],
+            "tools": true
+          },
+          "effort": "low",
+          "observedModel": "claude-sonnet-5-5",
+          "readbackSource": "host_ready after adapter model/effort verification",
+          "runnerVersion": "2.1.296 (Claude Code)",
+          "runnerProfile": "b0dbad9c96a66e7642499ade21f3966527a05f700c7a5dd9bd5a38e2f50efe63",
+          "ownership": "stopped",
+          "events": {
+            "path": "/tmp/cr-mh4-claude-live-02/cr-wf-0BbuCb/runtime/2dcba81d-1db0-4c58-8a88-b91498dfab9c/events.jsonl",
+            "sha256": "b047a1da83f8bb6cf84d1fa45e052c731ca7a1f532453d6333261fcc7c0a8cba"
+          }
+        },
+        {
+          "attemptId": "834cf2f7-6c36-4475-8e31-19b66b39472c",
+          "model": {
+            "adapter": "claude-code",
+            "provider": "claude-code",
+            "id": "sonnet",
+            "api": "claude-code-stream",
+            "selector": "claude-code/sonnet",
+            "effort": "low",
+            "resolvedModel": "claude-sonnet-5-5",
+            "efforts": [
+              "low"
+            ],
+            "inputs": [
+              "text"
+            ],
+            "tools": true
+          },
+          "effort": "low",
+          "observedModel": "claude-sonnet-5-5",
+          "readbackSource": "host_ready after adapter model/effort verification",
+          "runnerVersion": "2.1.296 (Claude Code)",
+          "runnerProfile": "b0dbad9c96a66e7642499ade21f3966527a05f700c7a5dd9bd5a38e2f50efe63",
+          "ownership": "stopped",
+          "events": {
+            "path": "/tmp/cr-mh4-claude-live-02/cr-wf-0BbuCb/runtime/834cf2f7-6c36-4475-8e31-19b66b39472c/events.jsonl",
+            "sha256": "c7f899e5c7513c77c87d351522b2764b23aa9341ff608132f6096f35d5c3b211"
+          }
+        },
+        {
+          "attemptId": "40f59268-a423-40cd-ba19-02f27139704e",
+          "model": {
+            "adapter": "claude-code",
+            "provider": "claude-code",
+            "id": "sonnet",
+            "api": "claude-code-stream",
+            "selector": "claude-code/sonnet",
+            "effort": "low",
+            "resolvedModel": "claude-sonnet-5-5",
+            "efforts": [
+              "low"
+            ],
+            "inputs": [
+              "text"
+            ],
+            "tools": true
+          },
+          "effort": "low",
+          "observedModel": "claude-sonnet-5-5",
+          "readbackSource": "host_ready after adapter model/effort verification",
+          "runnerVersion": "2.1.296 (Claude Code)",
+          "runnerProfile": "b0dbad9c96a66e7642499ade21f3966527a05f700c7a5dd9bd5a38e2f50efe63",
+          "ownership": "stopped",
+          "events": {
+            "path": "/tmp/cr-mh4-claude-live-02/cr-wf-0BbuCb/runtime/40f59268-a423-40cd-ba19-02f27139704e/events.jsonl",
+            "sha256": "5d033dce26e29678a900f195ccc30b1d9dc105f5720639a613cfccc6502efd17"
+          }
+        }
+      ],
+      "finalRunStatus": "completed",
+      "finalCatalog": {
+        "receipt": {
+          "path": "/tmp/cr-mh4-claude-live-02/cr-wf-0BbuCb/runtime/model-catalog/catalog.json",
+          "sha256": "7ab86891dd3a1d378153c6802c2e2f2895f7d315ad75f22f7dda08b575398d12"
+        },
+        "revision": 8,
+        "state": "partial",
+        "harnesses": [
+          {
+            "harness": "omp",
+            "outcome": "error",
+            "offeringCount": 0
+          },
+          {
+            "harness": "codex",
+            "outcome": "error",
+            "offeringCount": 0
+          },
+          {
+            "harness": "claude-code",
+            "outcome": "success",
+            "offeringCount": 5
+          }
+        ]
+      },
+      "cleanupVerified": true
+    },
+    {
+      "adapter": "omp",
+      "receipt": {
+        "path": "/tmp/cr-mh4-omp-live-04/workflow-result.json",
+        "sha256": "5466e9defadc7f97bee109e4ecdf158478c807529f3be88833f1d9e453f4f68c"
+      },
+      "scope": "LIVE omp, native catalog picker and production Rust daemon, real external Rust Mail",
+      "passed": true,
+      "checks": [
+        "native keyboard model picker, refresh, low effort, persisted Code job and coordinator/specialist selections",
+        "refresh and saved budget changes leave both executing assignments byte-for-byte equal",
+        "model-based route, native login, exact separately owned host/runner pairs",
+        "real addressed host tool through workflow authorization and external Rust Mail to independent recipient",
+        "controller SIGKILL and exact live-process reattachment without another Mail effect",
+        "pause verifies stopped ownership; resume uses new processes, same durable threads and original Mail effect",
+        "specialist submits addressed artifact; coordinator completion is durable after controller restart; no duplicate external Mail effect"
+      ],
+      "selection": "offering:omp:meta:muse-spark-1.1",
+      "catalogRevisionAtSelection": 4,
+      "roles": {
+        "coordinator": {
+          "requested": {
+            "model": "offering:omp:meta:muse-spark-1.1",
+            "effort": "low"
+          },
+          "resolved": {
+            "adapter": "omp",
+            "provider": "meta",
+            "id": "muse-spark-1.1",
+            "api": "openai-responses",
+            "selector": "meta/muse-spark-1.1",
+            "effort": "low",
+            "resolvedModel": "muse-spark-1.1",
+            "efforts": [
+              "low"
+            ],
+            "inputs": [
+              "text"
+            ],
+            "tools": true
+          },
+          "selection": {
+            "schemaVersion": 1,
+            "intendedModel": "offering:omp:meta:muse-spark-1.1",
+            "modelSource": "role_override",
+            "effortSource": "role_override",
+            "requestedEffort": "low",
+            "offering": {
+              "key": "offering:omp:meta:muse-spark-1.1",
+              "harness": "omp",
+              "provider": "meta",
+              "selector": "muse-spark-1.1",
+              "displayName": "Muse Spark 1.1",
+              "api": "openai-responses",
+              "observedModel": {
+                "model": "muse-spark-1.1",
+                "source": "discovery-metadata",
+                "observedAt": 1791889658
+              },
+              "capabilities": {
+                "efforts": [
+                  "low"
+                ],
+                "inputs": [
+                  "text"
+                ],
+                "tools": true
+              },
+              "access": "configured",
+              "executionProfile": "omp-18.4.12-host-tools-v2",
+              "inference": null
+            },
+            "advertisedCapabilities": {
+              "efforts": [
+                "minimal",
+                "low",
+                "medium",
+                "high",
+                "xhigh"
+              ],
+              "inputs": [
+                "text",
+                "image"
+              ],
+              "tools": null
+            },
+            "identity": {
+              "binary": "/home/crewroom/Projects/crewroom/.crewroom/mh2-omp-fixture/node_modules/.bin/omp",
+              "canonicalBinary": "/home/crewroom/Projects/crewroom/.crewroom/mh2-omp-fixture/node_modules/@oh-my-pi/pi-coding-agent/dist/cli.js",
+              "binarySha256": "d659505080c80a091524de1335caccdb815e05367bd825048cda4a0e98d8b7a0",
+              "binaryStamp": "/home/crewroom/Projects/crewroom/.crewroom/mh2-omp-fixture/node_modules/@oh-my-pi/pi-coding-agent/dist/cli.js:57:19347166:28360917:1791841307:553301594",
+              "version": "omp/18.4.12",
+              "profile": "omp-omp/18.4.12-metadata-v1"
+            },
+            "configurationRevision": "3609a06197ee47caf6cf0cd2d4512f61decea5a40906d79a57efffac4b485bc6",
+            "catalogRevision": 4,
+            "policyRevision": "ea63cc24d3fe14ec68a60185f3cbd200b60516b5af92341eb2907ddbc109b13f",
+            "roleRevision": "4a40a9572a9c8932a0714d278691bcc5c5faeb231c234c5e4730a5f1c2329d3e",
+            "reason": "Exact offering selected.",
+            "previewRevision": "da1526c93240c3621b836a342bee1d0f454f0443f888ecfc68e1e00ef381858c"
+          },
+          "job": "judgment",
+          "budget": "small",
+          "warning": null,
+          "settingsRevision": 1
+        },
+        "tech-writer": {
+          "requested": {
+            "model": "offering:omp:meta:muse-spark-1.1",
+            "effort": "low"
+          },
+          "resolved": {
+            "adapter": "omp",
+            "provider": "meta",
+            "id": "muse-spark-1.1",
+            "api": "openai-responses",
+            "selector": "meta/muse-spark-1.1",
+            "effort": "low",
+            "resolvedModel": "muse-spark-1.1",
+            "efforts": [
+              "low"
+            ],
+            "inputs": [
+              "text"
+            ],
+            "tools": true
+          },
+          "selection": {
+            "schemaVersion": 1,
+            "intendedModel": "offering:omp:meta:muse-spark-1.1",
+            "modelSource": "role_override",
+            "effortSource": "role_override",
+            "requestedEffort": "low",
+            "offering": {
+              "key": "offering:omp:meta:muse-spark-1.1",
+              "harness": "omp",
+              "provider": "meta",
+              "selector": "muse-spark-1.1",
+              "displayName": "Muse Spark 1.1",
+              "api": "openai-responses",
+              "observedModel": {
+                "model": "muse-spark-1.1",
+                "source": "discovery-metadata",
+                "observedAt": 1791889658
+              },
+              "capabilities": {
+                "efforts": [
+                  "low"
+                ],
+                "inputs": [
+                  "text"
+                ],
+                "tools": true
+              },
+              "access": "configured",
+              "executionProfile": "omp-18.4.12-host-tools-v2",
+              "inference": null
+            },
+            "advertisedCapabilities": {
+              "efforts": [
+                "minimal",
+                "low",
+                "medium",
+                "high",
+                "xhigh"
+              ],
+              "inputs": [
+                "text",
+                "image"
+              ],
+              "tools": null
+            },
+            "identity": {
+              "binary": "/home/crewroom/Projects/crewroom/.crewroom/mh2-omp-fixture/node_modules/.bin/omp",
+              "canonicalBinary": "/home/crewroom/Projects/crewroom/.crewroom/mh2-omp-fixture/node_modules/@oh-my-pi/pi-coding-agent/dist/cli.js",
+              "binarySha256": "d659505080c80a091524de1335caccdb815e05367bd825048cda4a0e98d8b7a0",
+              "binaryStamp": "/home/crewroom/Projects/crewroom/.crewroom/mh2-omp-fixture/node_modules/@oh-my-pi/pi-coding-agent/dist/cli.js:57:19347166:28360917:1791841307:553301594",
+              "version": "omp/18.4.12",
+              "profile": "omp-omp/18.4.12-metadata-v1"
+            },
+            "configurationRevision": "3609a06197ee47caf6cf0cd2d4512f61decea5a40906d79a57efffac4b485bc6",
+            "catalogRevision": 4,
+            "policyRevision": "ea63cc24d3fe14ec68a60185f3cbd200b60516b5af92341eb2907ddbc109b13f",
+            "roleRevision": "0f72ffe97f3f28b066c9f9bb2a6b394273c30faec1235833607475a6fbf33b13",
+            "reason": "Exact offering selected.",
+            "previewRevision": "103780f2e698b330fe35d8252510e6adac5255913bc12af46433f262e736bd17"
+          },
+          "job": "judgment",
+          "budget": "small",
+          "warning": null,
+          "settingsRevision": 1
+        }
+      },
+      "initialProcesses": [
+        {
+          "id": "ddeed8ee-d303-4ea3-9c86-2203f8bec16b",
+          "hostPid": 2105891,
+          "runnerPid": 2105913,
+          "sessionId": "01a134f3-d61e-7000-b9ec-1d5191a7600f",
+          "model": {
+            "requested": {
+              "model": "offering:omp:meta:muse-spark-1.1",
+              "effort": "low"
+            },
+            "resolved": {
+              "adapter": "omp",
+              "provider": "meta",
+              "id": "muse-spark-1.1",
+              "api": "openai-responses",
+              "selector": "meta/muse-spark-1.1",
+              "effort": "low",
+              "resolvedModel": "muse-spark-1.1",
+              "efforts": [
+                "low"
+              ],
+              "inputs": [
+                "text"
+              ],
+              "tools": true
+            },
+            "selection": {
+              "schemaVersion": 1,
+              "intendedModel": "offering:omp:meta:muse-spark-1.1",
+              "modelSource": "role_override",
+              "effortSource": "role_override",
+              "requestedEffort": "low",
+              "offering": {
+                "key": "offering:omp:meta:muse-spark-1.1",
+                "harness": "omp",
+                "provider": "meta",
+                "selector": "muse-spark-1.1",
+                "displayName": "Muse Spark 1.1",
+                "api": "openai-responses",
+                "observedModel": {
+                  "model": "muse-spark-1.1",
+                  "source": "discovery-metadata",
+                  "observedAt": 1791889658
+                },
+                "capabilities": {
+                  "efforts": [
+                    "low"
+                  ],
+                  "inputs": [
+                    "text"
+                  ],
+                  "tools": true
+                },
+                "access": "configured",
+                "executionProfile": "omp-18.4.12-host-tools-v2",
+                "inference": null
+              },
+              "advertisedCapabilities": {
+                "efforts": [
+                  "minimal",
+                  "low",
+                  "medium",
+                  "high",
+                  "xhigh"
+                ],
+                "inputs": [
+                  "text",
+                  "image"
+                ],
+                "tools": null
+              },
+              "identity": {
+                "binary": "/home/crewroom/Projects/crewroom/.crewroom/mh2-omp-fixture/node_modules/.bin/omp",
+                "canonicalBinary": "/home/crewroom/Projects/crewroom/.crewroom/mh2-omp-fixture/node_modules/@oh-my-pi/pi-coding-agent/dist/cli.js",
+                "binarySha256": "d659505080c80a091524de1335caccdb815e05367bd825048cda4a0e98d8b7a0",
+                "binaryStamp": "/home/crewroom/Projects/crewroom/.crewroom/mh2-omp-fixture/node_modules/@oh-my-pi/pi-coding-agent/dist/cli.js:57:19347166:28360917:1791841307:553301594",
+                "version": "omp/18.4.12",
+                "profile": "omp-omp/18.4.12-metadata-v1"
+              },
+              "configurationRevision": "3609a06197ee47caf6cf0cd2d4512f61decea5a40906d79a57efffac4b485bc6",
+              "catalogRevision": 4,
+              "policyRevision": "ea63cc24d3fe14ec68a60185f3cbd200b60516b5af92341eb2907ddbc109b13f",
+              "roleRevision": "4a40a9572a9c8932a0714d278691bcc5c5faeb231c234c5e4730a5f1c2329d3e",
+              "reason": "Exact offering selected.",
+              "previewRevision": "da1526c93240c3621b836a342bee1d0f454f0443f888ecfc68e1e00ef381858c"
+            },
+            "job": "judgment",
+            "budget": "small",
+            "warning": null,
+            "settingsRevision": 1
+          }
+        },
+        {
+          "id": "d142aca7-596d-47f4-be7c-7709b01d01ed",
+          "hostPid": 2106026,
+          "runnerPid": 2106048,
+          "sessionId": "01a134f3-e1c1-7000-b26f-c937193ddaf5",
+          "model": {
+            "requested": {
+              "model": "offering:omp:meta:muse-spark-1.1",
+              "effort": "low"
+            },
+            "resolved": {
+              "adapter": "omp",
+              "provider": "meta",
+              "id": "muse-spark-1.1",
+              "api": "openai-responses",
+              "selector": "meta/muse-spark-1.1",
+              "effort": "low",
+              "resolvedModel": "muse-spark-1.1",
+              "efforts": [
+                "low"
+              ],
+              "inputs": [
+                "text"
+              ],
+              "tools": true
+            },
+            "selection": {
+              "schemaVersion": 1,
+              "intendedModel": "offering:omp:meta:muse-spark-1.1",
+              "modelSource": "role_override",
+              "effortSource": "role_override",
+              "requestedEffort": "low",
+              "offering": {
+                "key": "offering:omp:meta:muse-spark-1.1",
+                "harness": "omp",
+                "provider": "meta",
+                "selector": "muse-spark-1.1",
+                "displayName": "Muse Spark 1.1",
+                "api": "openai-responses",
+                "observedModel": {
+                  "model": "muse-spark-1.1",
+                  "source": "discovery-metadata",
+                  "observedAt": 1791889658
+                },
+                "capabilities": {
+                  "efforts": [
+                    "low"
+                  ],
+                  "inputs": [
+                    "text"
+                  ],
+                  "tools": true
+                },
+                "access": "configured",
+                "executionProfile": "omp-18.4.12-host-tools-v2",
+                "inference": null
+              },
+              "advertisedCapabilities": {
+                "efforts": [
+                  "minimal",
+                  "low",
+                  "medium",
+                  "high",
+                  "xhigh"
+                ],
+                "inputs": [
+                  "text",
+                  "image"
+                ],
+                "tools": null
+              },
+              "identity": {
+                "binary": "/home/crewroom/Projects/crewroom/.crewroom/mh2-omp-fixture/node_modules/.bin/omp",
+                "canonicalBinary": "/home/crewroom/Projects/crewroom/.crewroom/mh2-omp-fixture/node_modules/@oh-my-pi/pi-coding-agent/dist/cli.js",
+                "binarySha256": "d659505080c80a091524de1335caccdb815e05367bd825048cda4a0e98d8b7a0",
+                "binaryStamp": "/home/crewroom/Projects/crewroom/.crewroom/mh2-omp-fixture/node_modules/@oh-my-pi/pi-coding-agent/dist/cli.js:57:19347166:28360917:1791841307:553301594",
+                "version": "omp/18.4.12",
+                "profile": "omp-omp/18.4.12-metadata-v1"
+              },
+              "configurationRevision": "3609a06197ee47caf6cf0cd2d4512f61decea5a40906d79a57efffac4b485bc6",
+              "catalogRevision": 4,
+              "policyRevision": "ea63cc24d3fe14ec68a60185f3cbd200b60516b5af92341eb2907ddbc109b13f",
+              "roleRevision": "0f72ffe97f3f28b066c9f9bb2a6b394273c30faec1235833607475a6fbf33b13",
+              "reason": "Exact offering selected.",
+              "previewRevision": "103780f2e698b330fe35d8252510e6adac5255913bc12af46433f262e736bd17"
+            },
+            "job": "judgment",
+            "budget": "small",
+            "warning": null,
+            "settingsRevision": 1
+          }
+        }
+      ],
+      "externalMail": {
+        "id": "15f2ebfb-23c9-4567-8ccc-655c9397642c",
+        "disposition": "received"
+      },
+      "attemptReadbacks": [
+        {
+          "attemptId": "ddeed8ee-d303-4ea3-9c86-2203f8bec16b",
+          "model": {
+            "provider": "meta",
+            "id": "muse-spark-1.1",
+            "api": "openai-responses"
+          },
+          "effort": "low",
+          "observedModel": null,
+          "readbackSource": "host_ready after adapter model/effort verification",
+          "runnerVersion": null,
+          "runnerProfile": null,
+          "ownership": "stopped",
+          "events": {
+            "path": "/tmp/cr-mh4-omp-live-04/cr-wf-Yps4Os/runtime/ddeed8ee-d303-4ea3-9c86-2203f8bec16b/events.jsonl",
+            "sha256": "d850e2f807201cb4f7b8a75f739a87b29cb16c3089d9ad2efa27d0709caa2be3"
+          }
+        },
+        {
+          "attemptId": "d142aca7-596d-47f4-be7c-7709b01d01ed",
+          "model": {
+            "provider": "meta",
+            "id": "muse-spark-1.1",
+            "api": "openai-responses"
+          },
+          "effort": "low",
+          "observedModel": null,
+          "readbackSource": "host_ready after adapter model/effort verification",
+          "runnerVersion": null,
+          "runnerProfile": null,
+          "ownership": "stopped",
+          "events": {
+            "path": "/tmp/cr-mh4-omp-live-04/cr-wf-Yps4Os/runtime/d142aca7-596d-47f4-be7c-7709b01d01ed/events.jsonl",
+            "sha256": "ad866c7ef5d2a377dc5d5c6f3600cf62c0aaf2d2f25e1cec934fb11cce786630"
+          }
+        },
+        {
+          "attemptId": "225a2ea6-6e53-4232-813a-5b6aa93c05d2",
+          "model": {
+            "provider": "meta",
+            "id": "muse-spark-1.1",
+            "api": "openai-responses"
+          },
+          "effort": "low",
+          "observedModel": null,
+          "readbackSource": "host_ready after adapter model/effort verification",
+          "runnerVersion": null,
+          "runnerProfile": null,
+          "ownership": "stopped",
+          "events": {
+            "path": "/tmp/cr-mh4-omp-live-04/cr-wf-Yps4Os/runtime/225a2ea6-6e53-4232-813a-5b6aa93c05d2/events.jsonl",
+            "sha256": "41e3660b08f926c8d8861ad3a4151114ef5dcb71e95556b5b07d4632141e58bd"
+          }
+        },
+        {
+          "attemptId": "5fce3d64-079a-403e-9b08-cd73adde082c",
+          "model": {
+            "provider": "meta",
+            "id": "muse-spark-1.1",
+            "api": "openai-responses"
+          },
+          "effort": "low",
+          "observedModel": null,
+          "readbackSource": "host_ready after adapter model/effort verification",
+          "runnerVersion": null,
+          "runnerProfile": null,
+          "ownership": "stopped",
+          "events": {
+            "path": "/tmp/cr-mh4-omp-live-04/cr-wf-Yps4Os/runtime/5fce3d64-079a-403e-9b08-cd73adde082c/events.jsonl",
+            "sha256": "3d28a814fe4192a661954c0bf66466a51bd07780de1fda9829dc82fe87621b05"
+          }
+        }
+      ],
+      "finalRunStatus": "completed",
+      "finalCatalog": {
+        "receipt": {
+          "path": "/tmp/cr-mh4-omp-live-04/cr-wf-Yps4Os/runtime/model-catalog/catalog.json",
+          "sha256": "e32e58bf7e14ce5ed876c4db76ed237c9246c1340240807c5c9350b083ce197a"
+        },
+        "revision": 8,
+        "state": "partial",
+        "harnesses": [
+          {
+            "harness": "omp",
+            "outcome": "success",
+            "offeringCount": 7
+          },
+          {
+            "harness": "codex",
+            "outcome": "error",
+            "offeringCount": 0
+          },
+          {
+            "harness": "claude-code",
+            "outcome": "error",
+            "offeringCount": 0
+          }
+        ]
+      },
+      "cleanupVerified": true
+    }
+  ],
+  "metadataOnly": [
+    {
+      "harness": "codex",
+      "identity": {
+        "binary": "/home/crewroom/.local/share/mise/installs/codex/0.162.0/bin/codex",
+        "canonicalBinary": "/home/crewroom/.local/share/mise/installs/codex/0.162.0/bin/codex",
+        "binarySha256": "50ed828f357c655a3c82054d346cab8434f24901f14ec19b8267571bdd008b38",
+        "version": "codex-cli 0.162.0",
+        "profile": "codex-codex-cli 0.162.0-metadata-v1"
+      },
+      "offeringCount": 8,
+      "inferenceRequested": false,
+      "cleanupVerified": true,
+      "receipt": {
+        "path": "/tmp/crewroom-mh4-discovery-73h72kzp/codex.json",
+        "sha256": "ade8514e7361103698dafde6e8671d0670b3b9558e3922fe72ebbc4b6e8cefcf"
+      }
+    },
+    {
+      "harness": "claude-code",
+      "identity": {
+        "binary": "/home/crewroom/.local/share/claude/versions/2.1.296",
+        "canonicalBinary": "/home/crewroom/.local/share/claude/versions/2.1.296",
+        "binarySha256": "24972e3bc859fab2b46ed4c1e51f7d6130f06d3bd550811a114640de3370d0de",
+        "version": "2.1.296 (Claude Code)",
+        "profile": "claude-code-2.1.296 (Claude Code)-metadata-v1"
+      },
+      "offeringCount": 5,
+      "inferenceRequested": false,
+      "cleanupVerified": true,
+      "receipt": {
+        "path": "/tmp/crewroom-mh4-discovery-73h72kzp/claude-code.json",
+        "sha256": "6abaa90f30df431ba3dfb799efab3eeac4c6139751a9775bc8d30464d30473ff"
+      }
+    },
+    {
+      "harness": "omp",
+      "identity": {
+        "binary": "/home/crewroom/Projects/crewroom/.crewroom/mh2-omp-fixture/node_modules/.bin/omp",
+        "canonicalBinary": "/home/crewroom/Projects/crewroom/.crewroom/mh2-omp-fixture/node_modules/@oh-my-pi/pi-coding-agent/dist/cli.js",
+        "binarySha256": "d659505080c80a091524de1335caccdb815e05367bd825048cda4a0e98d8b7a0",
+        "version": "omp/18.4.12",
+        "profile": "omp-omp/18.4.12-metadata-v1"
+      },
+      "offeringCount": 0,
+      "inferenceRequested": false,
+      "cleanupVerified": true,
+      "receipt": {
+        "path": "/tmp/crewroom-mh4-omp-discovery-141jhf5z/result.json",
+        "sha256": "4b954379d46522ed85c04b3b71ffdc0103b5c990ea4e65d2f739c48504460776"
+      },
+      "configuration": "Empty isolated provider configuration; live OMP later discovers 7 offerings with its explicit private provider profile."
+    }
+  ],
+  "simulatedProviders": [
+    {
+      "scope": "actual OMP 18.4.12 with synthetic provider responses",
+      "cases": 12,
+      "passed": true,
+      "allOwnedProcessesExited": true,
+      "receipt": {
+        "path": "/tmp/cr-mh4-omp-rpc/report.json",
+        "sha256": "99de01511695f6930c3c5f8e34fc789e9c9cdf4b64b9cc76c00eb185be30c775"
+      }
+    },
+    {
+      "scope": "actual OMP 18.4.12 with synthetic provider responses",
+      "cases": 11,
+      "passed": true,
+      "allOwnedProcessesExited": true,
+      "receipt": {
+        "path": "/tmp/cr-mh4-omp-host/report.json",
+        "sha256": "58a4db07c6170717c40b5e099d4896abdf9a6f4a912cf1188e5b8f71c01553a9"
+      }
+    },
+    {
+      "scope": "actual OMP 18.4.12 with synthetic provider responses",
+      "cases": 4,
+      "passed": true,
+      "allOwnedProcessesExited": true,
+      "receipt": {
+        "path": "/tmp/cr-mh4-omp-supervisor/report.json",
+        "sha256": "70d4bb96bcdeb16c3a48acffc0003008fb11fe341573be5ba57e2a8095be97ad"
+      }
+    },
+    {
+      "scope": "actual OMP 18.4.12 with synthetic provider responses",
+      "cases": 4,
+      "passed": true,
+      "allOwnedProcessesExited": true,
+      "receipt": {
+        "path": "/tmp/cr-mh4-omp-gateway/report.json",
+        "sha256": "0bc27d5db73912b3fbe5425272f9e38c63367c8a0a9434a96b8241f4bff3b875"
+      }
+    }
+  ],
+  "restartCleanup": {
+    "receipt": {
+      "path": "/tmp/cr-mh4-catalog-restart-release/report.json",
+      "sha256": "156051624cae8164eef7ea768fed23217766e69a2ae95baee613d7bcd1b7d439"
+    },
+    "passed": true,
+    "scope": "synthetic metadata only; no inference or assignments",
+    "outcome": "interrupted",
+    "ownedProcessesStoppedBeforeReady": true,
+    "assignmentsCreated": 0,
+    "cleanupStopped": true
+  },
+  "independentReview": {
+    "standards": {
+      "remainingFindings": 0,
+      "report": {
+        "path": "/tmp/crewroom-mh4-validation/standards-review-release.md",
+        "sha256": "bb0683aaf02a47cf087b51a23c012c87725dc5272795111ec0007e74fe98a6fe"
+      },
+      "text": "Standards release follow-up for FOR-9.\n\nReviewed three-dot diff: `5492f48f642f063811a531e6df113d97a1bc50f3...f3c47066487ba4de73753c6eb89888fdf6243c02`.\n\nDiff SHA-256: `c0e0f4cdf713684e782df3648879d0bd78c64333c7070828b28bbbea27654088`.\n\n**Zero remaining actionable Standards findings.** All findings from the retained initial and follow-up reports are resolved:\n\n- Missing advertised efforts remain unknown and block catalog admission; the regression now enables the role and reaches model eligibility.\n- Validated encoded offering keys fit the documented public selection bound.\n- Refresh and interrupted-open recovery share the bounded snapshot writer. Oversize interrupted recovery preserves the previous readable file, reports persistence failure, blocks new admissions, and leaves startup ownership cleanup and refresh retry available. It cannot replace the saved file with an unreadable oversized snapshot.\n\nReviewed regressions include near-limit interruption/reopen/refresh, oversized-refresh history preservation, shared picker/admission eligibility, frozen applied-team replay, and startup discovery-process cleanup. The retained logs show snapshot tests 5/5 and catalog-policy tests 6/6 passing. The earlier fixture failure remains diagnostic history and is not counted as passing evidence.\n\nNo additional actionable baseline smell. Private authentication, exact offering identity, bounded metadata discovery, frozen assignment recovery and independent process ownership remain aligned with `AGENTS.md`, `docs/architecture.md`, and `docs/testing/mh4-model-contract.md`.\n\nThis is a static Standards review plus inspection of the focused logs. The root agent owns final full-suite/build/Clippy and live-execution validation; this report does not pre-claim their results. Earlier review files are retained unchanged.\n"
+    },
+    "spec": {
+      "remainingFindings": 0,
+      "report": {
+        "path": "/tmp/crewroom-mh4-validation/spec-review-release.md",
+        "sha256": "49adf8d9e17be45a21d38fda51ab175050225c54577be177067380a60eb46141"
+      },
+      "text": "Final independent Spec review: **zero remaining findings**.\n\nReviewed revision: `f3c47066487ba4de73753c6eb89888fdf6243c02`.\nBaseline: `5492f48f642f063811a531e6df113d97a1bc50f3`.\nDiff command: `git diff 5492f48f642f063811a531e6df113d97a1bc50f3...f3c47066487ba4de73753c6eb89888fdf6243c02`.\nDiff SHA-256: `c0e0f4cdf713684e782df3648879d0bd78c64333c7070828b28bbbea27654088`.\n\nThis report carries forward the completed baseline review and the resolved findings in `spec-review-final.md`, then reviews the narrow `3c51dcc..f3c4706` delta. The original report and failing repro remain preserved.\n\nThe additional repair satisfies FOR-9's atomic persistence, interrupted-refresh recovery and admission-blocking contracts. A shared bounded writer now covers both accepted refresh snapshots and startup's interrupted-state rewrite. If added diagnostics would exceed 16 MiB, startup retains the readable disk snapshot, exposes the interrupted state and persistence error in memory, and blocks catalog admission. Workflow initialization can still perform owned-process cleanup; a new refresh clears interrupted diagnostics before attempting another bounded write. The near-limit regression covers retained disk bytes, blocked admission, visible interruption, subsequent refresh and reopen.\n\nThe unknown-effort regression now enables its fixture role, ensuring its admission assertion reaches capability validation instead of passing through the disabled-role guard.\n\nThe earlier lifecycle repairs remain intact: applied proposals bypass new-admission resolution; invalid pending proposals are durably rejected and release their matching transition; startup awaits discovery ownership cleanup before readiness. No new Spec regression identified.\n\nThis follow-up reviewed source and regression assertions. Final full-suite/native/live-adapter rerun evidence and repository/Linear completion records are being assembled by the coordinating agent and remain separate acceptance obligations.\n"
+    }
+  },
+  "renderedNativeWalkthrough": {
+    "scope": "Linux/Xwayland actual native refresh/search/save/reopen/role override/disabled reasons/draft guard/390px geometry and seeded history",
+    "root": "/tmp/crewroom-mh4-native-k29idhjk",
+    "screenshots": [
+      {
+        "path": "/tmp/crewroom-mh4-native-k29idhjk/models-refreshed.png",
+        "sha256": "5b341dced88f4727450237adc15336b0280fa2b60dee3fe63e5b4899086ab3fd"
+      },
+      {
+        "path": "/tmp/crewroom-mh4-native-k29idhjk/models-search.png",
+        "sha256": "8d6bc52441deab348b271ddfff6b4a0bb5f6afc5a7318714bbd40a8bc6df9bde"
+      },
+      {
+        "path": "/tmp/crewroom-mh4-native-k29idhjk/models-selected.png",
+        "sha256": "9de0cb260f6c4c009031d995820cfbee47d62bb9de927098adedabda827ea1bc"
+      },
+      {
+        "path": "/tmp/crewroom-mh4-native-k29idhjk/narrow-final.png",
+        "sha256": "4820ef7063c26e9842ccd927c6830f73b113641235e5456857521fa38504417f"
+      },
+      {
+        "path": "/tmp/crewroom-mh4-native-k29idhjk/role-inherited.png",
+        "sha256": "30ed38bd5c87ed83fbf0057cf3e3baa8e69e4d79f60b4caa1e6b4588cc6b8294"
+      },
+      {
+        "path": "/tmp/crewroom-mh4-native-k29idhjk/role-disabled.png",
+        "sha256": "1099d1b8ab9763427b18f257b7e19988d36ec2e379f8cf96de77a1e5f14ae6bc"
+      },
+      {
+        "path": "/tmp/crewroom-mh4-native-k29idhjk/dirty-guard.png",
+        "sha256": "45097f93f622bdcabb01121f54ba7003804d8b05287cf47f8ab3cb74fec0bdad"
+      },
+      {
+        "path": "/tmp/crewroom-mh4-native-k29idhjk/history-frozen.png",
+        "sha256": "d00bd4e763f253eb68d579131e76835b539eecda3c4825e9a6656958fb20130c"
+      }
+    ],
+    "uxReview": "snitchfindings/crewroom/UX_REVIEW.md",
+    "limits": "Launch preview assessed by source and GPUI; seeded history is not live execution. OS screen-reader and Japanese IME remain outside this scope."
+  },
+  "diagnostics": [
+    {
+      "name": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "-p",
+        "crewroom-core",
+        "-p",
+        "crewroom-runtime",
+        "-p",
+        "crewroom-service",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "startedAt": "2026-10-13T10:33:35.939661+00:00",
+      "finishedAt": "2026-10-13T10:33:47.886126+00:00",
+      "exitCode": 101,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/clippy.log",
+        "sha256": "83cc5f9cd76d29e5e71d915fe6369a5db00e9b9911e821b2aa12966b124e709c"
+      }
+    },
+    {
+      "name": "native-journeys",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-desktop",
+        "-j6",
+        "native_journey",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ],
+      "startedAt": "2026-10-13T10:34:43.514819+00:00",
+      "finishedAt": "2026-10-13T10:35:31.739134+00:00",
+      "exitCode": 101,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/native-journeys.log",
+        "sha256": "e838f879f2594f95166ed48994c8952f4a642f5a79a80ded75a6cb7e01c0da42"
+      }
+    },
+    {
+      "name": "native-journeys-final",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-desktop",
+        "-j6",
+        "native_journey",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ],
+      "startedAt": "2026-10-13T10:37:32.192627+00:00",
+      "finishedAt": "2026-10-13T10:38:30.075521+00:00",
+      "exitCode": 101,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/native-journeys-final.log",
+        "sha256": "bd4c7455a882ffe7e629d9a6733d938469a75176e28190cffc8dd1ae05fa2d98"
+      }
+    },
+    {
+      "name": "unknown-effort-red",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-runtime",
+        "--test",
+        "catalog_policy",
+        "configured_profile_cannot_supply_missing_discovery_efforts",
+        "--",
+        "--test-threads=1"
+      ],
+      "startedAt": "2026-10-13T10:42:40.536802+00:00",
+      "finishedAt": "2026-10-13T10:42:41.087611+00:00",
+      "exitCode": 101,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/unknown-effort-red.log",
+        "sha256": "6dc6aefc66a61104e312ce6ca729a08206df5aa8e6a920d89123d58a06ecefd0"
+      }
+    },
+    {
+      "name": "snapshot-bound-red",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-runtime",
+        "--lib",
+        "oversized_snapshot_keeps_the_last_readable_snapshot_on_disk",
+        "--",
+        "--test-threads=1"
+      ],
+      "startedAt": "2026-10-13T10:45:16.460039+00:00",
+      "finishedAt": "2026-10-13T10:45:19.380505+00:00",
+      "exitCode": 101,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/snapshot-bound-red.log",
+        "sha256": "b53e80fd56708e885d0a6609bfc8fb1dee07063f87b7b41bfe03a716825db9b2"
+      }
+    },
+    {
+      "name": "snapshot-final",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-runtime",
+        "model_catalog::store::tests",
+        "--",
+        "--test-threads=1"
+      ],
+      "startedAt": "2026-10-13T10:59:00.659069+00:00",
+      "finishedAt": "2026-10-13T10:59:10.231905+00:00",
+      "exitCode": 101,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/snapshot-final.log",
+        "sha256": "913acdf7edbb5004d92c432f38525c26bc3e5b80fd7776ed5816fcf15ccad0b8"
+      }
+    },
+    {
+      "name": "live-codex-final",
+      "command": [
+        "python3",
+        "scripts/verify_catalog_workflow.py",
+        "--configuration",
+        "/tmp/cr-mh4-access-s2_gi09f/codex.json",
+        "--output",
+        "/tmp/cr-mh4-codex-live-05",
+        "--mail",
+        "/home/crewroom/Projects/crewroom/.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail"
+      ],
+      "startedAt": "2026-10-13T10:56:20.656352+00:00",
+      "finishedAt": "2026-10-13T10:59:15.787942+00:00",
+      "exitCode": 1,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/live-codex-final.log",
+        "sha256": "29efee9b3e0153f9e2b1e4dc44d0ab34d3a18401614af273bb8d49c5e4793808"
+      }
+    },
+    {
+      "name": "live-omp-final",
+      "command": [
+        "python3",
+        "scripts/verify_catalog_workflow.py",
+        "--configuration",
+        "/tmp/cr-mh4-access-s2_gi09f/omp.json",
+        "--output",
+        "/tmp/cr-mh4-omp-live-02",
+        "--mail",
+        "/home/crewroom/Projects/crewroom/.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail"
+      ],
+      "startedAt": "2026-10-13T10:57:37.664871+00:00",
+      "finishedAt": "2026-10-13T11:02:17.725077+00:00",
+      "exitCode": 1,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/live-omp-final.log",
+        "sha256": "d1d5da55c71042dfc8090b114e844ff6c74c8928fb71a36d6d912cd18c7b23de"
+      }
+    },
+    {
+      "name": "live-omp-release",
+      "command": [
+        "python3",
+        "scripts/verify_catalog_workflow.py",
+        "--configuration",
+        "/tmp/cr-mh4-access-s2_gi09f/omp.json",
+        "--output",
+        "/tmp/cr-mh4-omp-live-03",
+        "--mail",
+        "/home/crewroom/Projects/crewroom/.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail"
+      ],
+      "startedAt": "2026-10-13T11:04:27.933333+00:00",
+      "finishedAt": "2026-10-13T11:06:27.107566+00:00",
+      "exitCode": 1,
+      "log": {
+        "path": "/tmp/crewroom-mh4-validation/live-omp-release.log",
+        "sha256": "3345c5ccd2456a037ede8340680969248f022bcda473d4ad09433f936823aaf5"
+      }
+    }
+  ],
+  "diagnosticExplanations": [
+    "Initial OMP metadata version spelling was corrected; final actual exchange passed.",
+    "Rendered long-row overlap and disabled keyboard selection were repaired and interaction-tested. Early geometry assertions required GPUI observation instrumentation.",
+    "The initial legacy-history fixture incorrectly claimed active process ownership and caused continuous observations; the native fixture now seeds never-executed admissions. HTTP separately covers uncertain ownership.",
+    "Initial Codex live01 file-open error, live02 offscreen control activation, and live03 changing research snapshot409 are retained locally. Final driver uses keyboard activation and retries only that precise read409; production gates unchanged.",
+    "OMP live02 retained selected identity/recovery and one marked message but the model declined the artifact request; the run timed out after six checks. This is retained as a live-model failure; fresh live04 is required to pass. No duplicated marked Mail effect or production bypass was observed.",
+    "OMP live03 held at the existing input-budget gate because opaque provider reasoning could not be accounted for (unknown_reasoning). The guard was preserved; cleanup passed. This remains an explicit provider/accounting limitation.",
+    "Codex live05 timed out on production start during concurrent final validation, after picker success. Cleanup completed; no cause was established. Fresh live06 must pass before this receipt is emitted.",
+    "Native journey fixture repair closes the narrow details drawer and waits for target-refresh observation. Results compose4/5 plus final continuation1/1 and separate retired-history1/1.",
+    "Review repaired unknown effort, encoded selector size, snapshot write bounds, applied proposal replay, stale proposal rejection and discovery startup ownership cleanup. Follow-up added the interrupted-write bound and corrected enabled-role test setup.",
+    "unknown-effort-red reproduced the actual capability defect. snapshot-bound-red failed due to missing initial fixture file, not the size defect. snapshot-final failed because the synthetic exact-limit file left no room for a real timestamp; leaving64bytes retained the interrupted-growth boundary and passed.",
+    "Known browser terminal diagnostics and bundle-size warning remain; tests and builds have explicit successful exits."
+  ],
+  "limits": [
+    "Linux debug/source acceptance only; no new macOS or installed release acceptance.",
+    "Supported profiles remain OMP18.4.12, Codex0.162.0 and Claude Code2.1.296; live models are meta/muse-spark-1.1, gpt-6-astra and sonnet→claude-sonnet-5-5 at low effort.",
+    "Metadata/configured access do not establish subscription entitlement or inference success for every offering. Explicit equivalence mappings only; none installed by default.",
+    "Native request counts and provider/subscription billing remain unavailable; reasoning budget is not a spending cap. Claude cost remains a list-price estimate and ambiguous/compacted/replaced history holds recovery.",
+    "No active installation, reusable operator role file, global harness upgrade, unrelated Jira/PR write or MH5/MH6 implementation is included."
+  ],
+  "finalCleanup": {
+    "receipt": {
+      "path": "/tmp/crewroom-mh4-validation/release-cleanup.json",
+      "sha256": "047e1397977ec649c44239c3158d81791c9cb280ea71f65886ce833cfd225f08"
+    },
+    "result": {
+      "candidates": [],
+      "protected": []
+    }
+  },
+  "finalDocumentationReview": {
+    "reviewedReceiptBeforeAddingThisMetadataSha256": "2ebdc9280751f7a89cc19057f46a8f0478c75601ee2254f4e73319c3db49925b",
+    "note": "The independent reviewers verified the receipt and final documentation; this field only attaches their reports after that review. Implementation and acceptance claims are unchanged.",
+    "documents": {
+      "docs/status.md": "1688ba8e623471933b0e34eabb53dbcb1b347eef12ec75072768c5dc31a7d7c8",
+      "docs/testing/mvp-progress.md": "119bbb43edf425b58b173e15c216125d450a34d3e81c5af647c5f89e49c5e097",
+      "docs/testing/mh4-model-contract.md": "31a9a35311ca5c8a4e9440142e92756c64c77bb4a3a44c67b018853d053cdc18",
+      "docs/multi-harness-plan.md": "c9be59705cf4b8bb61673ea9d75611cc55ab0b65b42257cace938f01ad1f7ac8"
+    },
+    "reviews": {
+      "standards": {
+        "remainingFindings": 0,
+        "path": "/tmp/crewroom-mh4-validation/standards-evidence-review.md",
+        "sha256": "35d4a94f3030ecf137b7c02e685f3aebd5f575c085ac2fe97074984db23762fa",
+        "text": "FOR-9 final documentation/evidence Standards review.\n\n**Zero remaining actionable findings.** Implementation is explicitly pinned to `f3c47066487ba4de73753c6eb89888fdf6243c02`; the reviewed implementation diff hash remains `c0e0f4cdf713684e782df3648879d0bd78c64333c7070828b28bbbea27654088`.\n\nVerified all 62 receipt source-file hashes against that commit and all 72 referenced artifact hashes against retained local files. Counts agree: Rust 217, desktop 49, domain 332, browser 31. Final live Codex06, Claude02 and OMP04 receipts each show seven flow checks, four stopped initial/replacement attempts, completed workflow and verified cleanup. Final cleanup reports no candidates.\n\nProvenance honestly distinguishes final Rust coverage, unchanged browser/domain sources, earlier desktop/Claude coverage and the final persistence delta covered by focused/full Rust, rebuilt binaries and live Codex/OMP. Composed native-journey results, ignored fixtures, seeded history, metadata-only discovery and actual-binary simulated providers remain distinct. Failed Codex/OMP reruns and fixture diagnostics are retained rather than represented as passing evidence.\n\nThe 1,000-byte selection limit, 16 MiB snapshot bound, bounded discovery, private authentication, unavailable native billing/request counts, reasoning-budget limitations and Claude estimated cost/recovery holds are consistent with the implementation. No raw credentials, native account metadata or secret material was found in the reviewed documents. Local artifact paths and identity hashes are intentional provenance.\n\nThe stale blanket Linux live-provider limitation was corrected before this report. Current scope is bounded Linux source/debug and adapter/model-selection evidence; installed/macOS acceptance and live Jira/PR delivery are not claimed. FOR-10 remains unstarted.\n\nExact SHA-256 values of the reviewed uncommitted documents:\n\n- `docs/status.md`: `1688ba8e623471933b0e34eabb53dbcb1b347eef12ec75072768c5dc31a7d7c8`\n- `docs/testing/mvp-progress.md`: `119bbb43edf425b58b173e15c216125d450a34d3e81c5af647c5f89e49c5e097`\n- `docs/testing/mh4-model-contract.md`: `31a9a35311ca5c8a4e9440142e92756c64c77bb4a3a44c67b018853d053cdc18`\n- `docs/multi-harness-plan.md`: `c9be59705cf4b8bb61673ea9d75611cc55ab0b65b42257cace938f01ad1f7ac8`\n- `docs/testing/mh4-model-catalog-2026-10-13.json`: `2ebdc9280751f7a89cc19057f46a8f0478c75601ee2254f4e73319c3db49925b`\n"
+      },
+      "spec": {
+        "remainingFindings": 0,
+        "path": "/tmp/crewroom-mh4-validation/spec-evidence-review.md",
+        "sha256": "3e95456ebe3733e10cc58e444874cc5ede0cbb4ef59dbb492a17ffc4a7a402da",
+        "text": "Independent final Spec/evidence consistency review: **zero remaining findings**.\n\nImplementation: `f3c47066487ba4de73753c6eb89888fdf6243c02`; baseline `5492f48f642f063811a531e6df113d97a1bc50f3`; reviewed implementation diff SHA-256 `c0e0f4cdf713684e782df3648879d0bd78c64333c7070828b28bbbea27654088`.\n\nThe receipt's implementation tree and all 62 source hashes match the pinned commit. All 72 referenced receipt/log/review/image hashes match their files. Underlying logs confirm domain 332/332, browser 31/31, Rust 217/217 (one documented subprocess entry point ignored), and desktop 49/49 (11 documented fixtures ignored). Final live Codex06, Claude02 and OMP04 each record seven checks, four stopped attempt readbacks, completed status and cleanup. Final cleanup records no candidates. No new provider operations were performed by this review.\n\nDocumentation consistently distinguishes live inference, actual-binary simulated providers, metadata-only discovery and seeded native history. It records the final persistence delta's validation separately from earlier desktop/Claude checks, preserves failed runs and conservative accounting holds, and does not claim every model or new platform/package acceptance. FOR-10 remains unstarted. The status item's overly broad “live-provider delivery” limitation was corrected to “live Jira/PR delivery”; the corrected wording is verified below. `git diff --check` passes.\n\nExact reviewed uncommitted document SHA-256 hashes:\n\n| File | SHA-256 |\n| --- | --- |\n| `docs/status.md` | `1688ba8e623471933b0e34eabb53dbcb1b347eef12ec75072768c5dc31a7d7c8` |\n| `docs/testing/mvp-progress.md` | `119bbb43edf425b58b173e15c216125d450a34d3e81c5af647c5f89e49c5e097` |\n| `docs/testing/mh4-model-contract.md` | `31a9a35311ca5c8a4e9440142e92756c64c77bb4a3a44c67b018853d053cdc18` |\n| `docs/multi-harness-plan.md` | `c9be59705cf4b8bb61673ea9d75611cc55ab0b65b42257cace938f01ad1f7ac8` |\n| `docs/testing/mh4-model-catalog-2026-10-13.json` | `2ebdc9280751f7a89cc19057f46a8f0478c75601ee2254f4e73319c3db49925b` |\n\nCommit/push and final Linear readback remain the coordinating agent's handoff steps, outside this read-only consistency check.\n"
+      }
+    }
+  },
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

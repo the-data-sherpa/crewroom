@@ -1,0 +1,1120 @@
+{
+  "schemaVersion": 1,
+  "issue": "FOR-8",
+  "recordedAt": "2026-10-13T07:33:57.675019+00:00",
+  "implementationRevision": "fb2606a5938a03b272de4b7e5d1ab788c86b7870",
+  "baseRevision": "31b8c3eddcc1ac5318d8e96d4c7057375d258821",
+  "sourceFiles": {
+    "Cargo.lock": "f46ccc4862856d7cfab215a88d35b688160897839d5f6b873608da813c3344ae",
+    "Cargo.toml": "3000bda76be6d4f9cef9c451769bda6afb455630f5b7fa4b4bf88ecb72f13ef8",
+    "crates/crewroom-core/src/attempts.rs": "4d486fab312fe0e2be719753c506010fc5ad32e517352dac5144806d895b1d0e",
+    "crates/crewroom-core/src/runner_identity.rs": "9ac5cb7e906cc111bcf97b6896afb541d8d154f4a405020cf32afe57228c28cd",
+    "crates/crewroom-desktop/src/wall.rs": "51486530e9f90e4481ec12e67a2cf04964e4d343435656f5c62aaaf62139fbed",
+    "crates/crewroom-desktop/src/workbench/results.rs": "6b6681092584d5e063775c04775723ffb07b5908bf5a4138926b2e9f6a901c1c",
+    "crates/crewroom-runtime/examples/codex-fixture.rs": "666db9c568941279325a05b527c5be27cfc989414bf7a670c33ad64badb28dff",
+    "crates/crewroom-runtime/src/host.rs": "c48a131165afdf0f04dd2a8b881374d7ea56a1c6b7bb8c06526380ec1ee38626",
+    "crates/crewroom-runtime/src/host_journal.rs": "10f19ffff1f7ccd1aad288cb8f5fa7c3ccdb206cb3a54958db716a82df8eff53",
+    "crates/crewroom-runtime/src/runner/auth.rs": "4025b146a80c1f584004f0b5f70fb61044d4d030dcabd29005c6d9aef4aa3515",
+    "crates/crewroom-runtime/src/runner/claude.rs": "5b5e7c8b9157c5fb73819aa0a4ac8f2f6b537378f311e56873722aa190b28bfe",
+    "crates/crewroom-runtime/src/runner/claude_history.rs": "6577eccba860ff96d1139423f11ee85bb75d00786f605e9eef5ae0f5d5c11dcb",
+    "crates/crewroom-runtime/src/runner/claude_profile.rs": "1ce79f05e2afe99dfff0bf39a0b6be22bb647acffd6ed68495742569a235be09",
+    "crates/crewroom-runtime/src/runner/codex.rs": "2124addae3e55a3e380ae768bad83aef3e2a9bde9e80561c761533f55105f623",
+    "crates/crewroom-runtime/src/runner/journal.rs": "8c11c0db98d0423ede45c2fe6e4c0c7b578943c462b1ce6543cc1ef409832366",
+    "crates/crewroom-runtime/src/runner/jsonl.rs": "0051241e544dabd4200faa224c73752b87dc30675453176e796549e64227cd1c",
+    "crates/crewroom-runtime/src/runner/mod.rs": "6a07c832a7f0654213a5e552e7def5dbc43b93945740b77f438020e00f0ee248",
+    "crates/crewroom-runtime/src/runner/omp.rs": "13097603a9fded03c4c5e1e0dbff45f6133c23302db51af2a1c8fa930fad03b4",
+    "crates/crewroom-runtime/src/runner/profile.rs": "f872c06914b7569513b5c40fb0a9a167abc29ada8648078f1cb03923ab30e026",
+    "crates/crewroom-runtime/src/supervisor/hosts/launch.rs": "54b688cf4613e8588e9718a8981ec08db8aafe11df8a06ad45ae8358ac237d86",
+    "crates/crewroom-runtime/src/supervisor/workflow/configuration.rs": "8a73f270a29ec0f9f55aa692b18e1b70ec4ed94af5d5105ce5873fe1fa3cd2c2",
+    "crates/crewroom-runtime/tests/claude_adapter.rs": "385455eb151a80b4b9b12ff50c66b87e69711fbab5914e096fef25eecd22f99f",
+    "crates/crewroom-runtime/tests/fixtures/claude-rpc.py": "0570b045482056fa1de4c1184d4883ba6e46b6aeddf6751ebbec99702da08e92",
+    "crates/crewroom-service/src/views/history.rs": "f33fd6bc03dfd957283e6eb1477751e67890963445f045fbed3c142226513d8e",
+    "docs/research/claude-mh3-protocol-2026-10-13.md": "8ae69d0956a716cb0a0b81ff4f7e17e296c30eda9debf6bc81b63a08a5f294a2",
+    "docs/testing/mh3-runtime-acceptance.md": "b68ac4bc5740d5abdf10712cc1bed7070403856255710fec4f42abd147156db3",
+    "package-lock.json": "247158e6a19bb432bacb696a1951f2e8e17dc2e71047cb22762f1dc3faf1a9df",
+    "package.json": "4ea3d3c8e80f0653551556d54932e61c310f7fbc23a9e1f501c12e4a87fecb9f",
+    "scripts/native_adapter_fixture.py": "99e9b5ae057fe15dccf2ebfc6c75c71751388413719907eda20759f3427dc465",
+    "scripts/native_workflow_fixture.py": "d20a3177ac3ffa40b01cea6ad99db13e634f704bee363cd2337bb44e923e8754",
+    "scripts/probe_claude_auth.py": "66691c28605fd2c8a778490ee22c0e61a3529f763e53bd75ace4eded30049ef4",
+    "scripts/probe_claude_runtime.py": "f2b073e06dc08bbcaf8e625fc6608a5e13a6d9e841bdced08895da41065a2f6f",
+    "scripts/rust/verify-codex-workflow.ts": "29076ba64bec2aa8a46b4fa6652ff36d4dae4e554016ff0882343dab349e2d45",
+    "scripts/rust/verify-native-workflow.ts": "599face4869428f79931ad8d0ceffc628907d1e79b54a1e6bf5d5f6c1372927d",
+    "scripts/rust/verify-omp-gateway.py": "ef43cff0fdb5fe27d0e49322d3929630fa88b4c8b81ec2966839d6a4d96d87e4",
+    "scripts/rust/verify-omp-host.py": "d18d9780bb860b68dbab1de5b51b41f898abae450fc0da08f7285166ff26a328",
+    "scripts/rust/verify-omp-rpc.py": "f222a0b378fe15f9db82688ef1a75b1de89ae5af01bb97147b8b83b914605d22",
+    "scripts/rust/verify-omp-supervisor.py": "8b28207f3be58492be067b299688586239c8f930ac7436e8f8aebf2a48a24798",
+    "scripts/rust/workflow-support.ts": "815007571eb555f9d893f961d9d3ca7cd01f145ac15782f92f32e40808faf342",
+    "scripts/verify_claude_adapter.py": "fa5ac0c67639150a0cb9cbf64e8d6a49a58ccc3356f2c68a89d9f5656ee792b8",
+    "scripts/verify_claude_workflow.py": "6d277ed92d7e6818879277c3c124116bb23caa3c307ce7bc84f6e319bdae75b6",
+    "scripts/verify_codex_adapter.py": "84bc0879113fead6fb56a0b8f57f4beb1283a1cbf0ac5944e28d247765f3c60d",
+    "scripts/verify_codex_workflow.py": "55ef86b63476f695d103d6e3121a57f6aee5e76000d09523e4b00bd277a5c00b",
+    "server/run-usage.ts": "40e87f5c74306c97e1b4febe66fd775497b7e08175a05e9c81825ca596d58593",
+    "server/runtime/types.ts": "d6cb7d5813c5b954e85fccc644a530c3082d9b0f5fad7e8beabd09d2be2ae4af",
+    "src/usage.tsx": "91de6c19c799bade3010e45df1235368a1a2817d658ea82676ce8c8ef6206664",
+    "src/wall.tsx": "f59fa96c6bf32e2a2f954bfc2cf4fbb4a76687ec35401739d6107369eb45934e"
+  },
+  "validationProvenance": [
+    "Final 187-test Rust gate, strict Clippy, native build, ten Claude fault tests and final live Claude adapter/workflow cover the unchanged implementation source recorded here.",
+    "Domain/browser/desktop gates cover the final affected domain and view files. Subsequent changes were confined to Claude protocol/recovery, its tests and documentation; those received the final Rust and live production reruns.",
+    "Actual OMP31-case synthetic-provider and live Codex/Mail regressions cover the final shared transport/journal/fixture changes. Later repairs changed only Claude code and tests.",
+    "The ten ignored desktop tests require external fixtures; the one ignored Rust unit is a subprocess entry point exercised by its parent-death test. No ignored check is counted as passed."
+  ],
+  "checks": [
+    {
+      "name": "domain",
+      "command": "npm test",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/cr-mh3-npm-test.log",
+        "sha256": "1cee0374e390dbaa1249e2ba1fe6eb31e3cc73a8470df63675783121fa434d50"
+      },
+      "passed": 332,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "browserBuild",
+      "command": "npm run build",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/cr-mh3-build.log",
+        "sha256": "17e75a8cf2e47746565ae12fb92305e51e5bac42bb4bb10a0c65069bd3e3b32f"
+      }
+    },
+    {
+      "name": "browser",
+      "command": "npm run test:e2e",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/cr-mh3-e2e.log",
+        "sha256": "2977e49fd829ccd8d56cd617f20522877a925e716a6ca9bdc1cecfefe388b309"
+      },
+      "passed": 31,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "rust",
+      "command": "cargo test --locked -p crewroom-core -p crewroom-runtime -p crewroom-service -- --test-threads=1",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/cr-mh3-rust-release.log",
+        "sha256": "4a2c1199ad1a30f222be3eb4a581bf3e21e18c6a26a7fa5a3512236d6adc5bb1"
+      },
+      "passed": 187,
+      "failed": 0,
+      "ignored": 1
+    },
+    {
+      "name": "desktop",
+      "command": "cargo test --locked -p crewroom-desktop -j6",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/cr-mh3-desktop.log",
+        "sha256": "f5254bd62c4bc6bf63198756b7f6d5555aab52ea477c7e0f574c47ad089adcaa"
+      },
+      "passed": 47,
+      "failed": 0,
+      "ignored": 10
+    },
+    {
+      "name": "clippy",
+      "command": "cargo clippy --locked -p crewroom-core -p crewroom-runtime -p crewroom-service --all-targets -- -D warnings",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/cr-mh3-clippy-release.log",
+        "sha256": "ffd9c1ba8f0b10c61d3c6df7c4e03c90f4be1590dfe51882ecab538892355cc4"
+      }
+    },
+    {
+      "name": "nativeBuild",
+      "command": "cargo build --locked --workspace -j6",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/cr-mh3-workspace-release.log",
+        "sha256": "b5e53081dc48fe14fd93e08cd84e420dbbbb0208f4c373298995c0dd8e10f060"
+      }
+    },
+    {
+      "name": "runtimeExamples",
+      "command": "cargo build --locked -p crewroom-runtime -p crewroom-service --bins --examples",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/cr-mh3-runtime-release.log",
+        "sha256": "e7a0e788c2f011df0653279f56cd58dcca091a34d28573a86e1b886eaa34b4d9"
+      }
+    },
+    {
+      "name": "format",
+      "command": "cargo fmt --all -- --check",
+      "exitCode": 0
+    },
+    {
+      "name": "whitespace",
+      "command": "git diff --check",
+      "exitCode": 0
+    },
+    {
+      "name": "pythonCompile",
+      "command": "python3 -m py_compile scripts/probe_claude_auth.py scripts/probe_claude_runtime.py scripts/native_adapter_fixture.py scripts/native_workflow_fixture.py scripts/verify_claude_adapter.py scripts/verify_claude_workflow.py",
+      "exitCode": 0
+    }
+  ],
+  "environment": {
+    "node": "24.21.0",
+    "claude": {
+      "path": "/home/crewroom/.local/share/claude/versions/2.1.296",
+      "version": "2.1.296 (Claude Code)",
+      "sha256": "24972e3bc859fab2b46ed4c1e51f7d6130f06d3bd550811a114640de3370d0de"
+    },
+    "codexVersion": "0.162.0",
+    "ompFixture": "18.4.12",
+    "nativeBuildEnvironment": {
+      "ZIG": "/home/crewroom/Projects/crewroom/.crewroom/toolchains/zig-x86_64-linux-0.16.0/zig",
+      "LIBRARY_PATH": "/home/crewroom/Projects/crewroom/.crewroom/linux-libs/root/usr/lib",
+      "LD_LIBRARY_PATH": "/home/crewroom/Projects/crewroom/.crewroom/linux-libs/root/usr/lib"
+    },
+    "activeInstallationChanged": false,
+    "globalOmpChanged": false,
+    "binaries": {
+      "target/debug/crewroom-process": "18b2d557424414a3de53c964ae60afc70c88fb608b92f38c17ab2887d3df4a8e",
+      "target/debug/crewroom-host": "51efb6e633406c07e661e6ec31bc7d81a2bcb12f62fd01b700cccdb3dca37c68",
+      "target/debug/examples/codex-fixture": "b178d3726dfb95ad003bf2256c9260e39e7d31ee7e361c957657dfbdca2ba908",
+      "target/debug/examples/workflow-fixture": "fc3f0ccf5b7818dbe12c3d2291599f927d40a75aabf1d4efd8c6de3ce6ee7da5"
+    }
+  },
+  "liveClaude": {
+    "adapter": {
+      "scope": "LIVE production Rust claude-code adapter; disposable host driver",
+      "model": "sonnet",
+      "passed": true,
+      "effects": 1,
+      "checks": [
+        "correct model, separate host and runner processes",
+        "addressed dynamic tool and normalized output",
+        "SIGKILL, verified stopped ownership, fresh process, same history, no duplicate effect",
+        "busy text interruption is aborted, not successful completion",
+        "busy interruption and durable unresolved-tool recovery hold"
+      ],
+      "cleanup": [
+        {
+          "state": "stopped",
+          "exitCode": -9
+        },
+        {
+          "state": "stopped",
+          "exitCode": 0
+        },
+        {
+          "state": "stopped",
+          "exitCode": 1
+        },
+        {
+          "state": "stopped",
+          "exitCode": 0
+        },
+        {
+          "state": "stopped",
+          "exitCode": 0
+        },
+        {
+          "state": "stopped",
+          "exitCode": -9
+        }
+      ],
+      "identities": [
+        {
+          "hostPid": 1555954,
+          "runnerKind": "claude-code",
+          "runnerPid": 1556486,
+          "runnerVersion": "2.1.296 (Claude Code)",
+          "runnerProfile": "b0dbad9c96a66e7642499ade21f3966527a05f700c7a5dd9bd5a38e2f50efe63",
+          "model": {
+            "adapter": "claude-code",
+            "provider": "claude-code",
+            "id": "sonnet",
+            "selector": "claude-code/sonnet",
+            "effort": "low",
+            "api": "claude-code-stream",
+            "resolvedModel": "claude-sonnet-5-5"
+          },
+          "observedModel": "claude-sonnet-5-5",
+          "thinkingLevel": "low",
+          "sessionId": "43ca7a21-8f45-430c-a7d0-d4ff2a592a94",
+          "sessionDirectory": "/home/crewroom/.claude/projects/-tmp-cr-mh3-claude-adapter-release-assignment-a",
+          "capabilities": {
+            "authentication": "native-claude",
+            "usage": "cumulative-tokens",
+            "cost": "list-price-estimate",
+            "preRequestBudget": false,
+            "hardOutputLimit": false,
+            "compaction": "harness-managed",
+            "toolAuthority": "crewroom"
+          }
+        },
+        {
+          "hostPid": 1556502,
+          "runnerKind": "claude-code",
+          "runnerPid": 1556769,
+          "runnerVersion": "2.1.296 (Claude Code)",
+          "runnerProfile": "b0dbad9c96a66e7642499ade21f3966527a05f700c7a5dd9bd5a38e2f50efe63",
+          "model": {
+            "adapter": "claude-code",
+            "provider": "claude-code",
+            "id": "sonnet",
+            "selector": "claude-code/sonnet",
+            "effort": "low",
+            "api": "claude-code-stream",
+            "resolvedModel": "claude-sonnet-5-5"
+          },
+          "observedModel": "claude-sonnet-5-5",
+          "thinkingLevel": "low",
+          "sessionId": "dd98ac4e-b7c6-477d-a069-848aed1479ac",
+          "sessionDirectory": "/home/crewroom/.claude/projects/-tmp-cr-mh3-claude-adapter-release-assignment-b",
+          "capabilities": {
+            "authentication": "native-claude",
+            "usage": "cumulative-tokens",
+            "cost": "list-price-estimate",
+            "preRequestBudget": false,
+            "hardOutputLimit": false,
+            "compaction": "harness-managed",
+            "toolAuthority": "crewroom"
+          }
+        }
+      ],
+      "receipt": {
+        "path": "/tmp/cr-mh3-claude-adapter-release/result.json",
+        "sha256": "0171ce559b97b0f2cf56270ff8ec77569db2e6a28639cd8e2bbb690dae915e00"
+      },
+      "command": "python3 scripts/verify_claude_adapter.py --claude /home/crewroom/.local/share/claude/versions/2.1.296 --native-home /home/crewroom --output /tmp/cr-mh3-claude-adapter-release"
+    },
+    "workflow": {
+      "receipt": {
+        "path": "/tmp/cr-mh3-claude-workflow-release/workflow-result.json",
+        "sha256": "98e9b82cd68035833f7a4b3c4399661e7296f31ba978eab004bb946f54fbf6d9"
+      },
+      "scope": "LIVE native claude-code, full Rust workflow, real external Rust Mail",
+      "passed": true,
+      "checks": [
+        "model-based route, native login, exact separately owned host/runner pairs",
+        "real addressed host tool through workflow authorization and external Rust Mail to independent recipient",
+        "controller SIGKILL and exact live-process reattachment without another Mail effect",
+        "pause verifies stopped ownership; resume uses new processes, same durable threads and original Mail effect"
+      ],
+      "identities": [
+        {
+          "id": "4be8399b-66d8-4b7a-a057-446da3709fe3",
+          "hostPid": 1556322,
+          "runnerPid": 1556557,
+          "sessionId": "9a1c1064-3df8-4f6f-85e3-f96395007868",
+          "runnerProfile": "b0dbad9c96a66e7642499ade21f3966527a05f700c7a5dd9bd5a38e2f50efe63"
+        },
+        {
+          "id": "87b800f9-9dd7-48e7-81c5-919819ff1e11",
+          "hostPid": 1556623,
+          "runnerPid": 1556840,
+          "sessionId": "9c7b433c-64df-4821-b6c6-a6dd29f6188a",
+          "runnerProfile": "b0dbad9c96a66e7642499ade21f3966527a05f700c7a5dd9bd5a38e2f50efe63"
+        }
+      ],
+      "message": {
+        "id": "3679cd55-2e39-4586-b4ce-3abdb21fc39e",
+        "disposition": "received"
+      },
+      "finalOwnership": [
+        {
+          "attemptId": "4be8399b-66d8-4b7a-a057-446da3709fe3",
+          "state": "stopped",
+          "hostPid": 1556322,
+          "runnerPid": 1556557,
+          "sessionId": "9a1c1064-3df8-4f6f-85e3-f96395007868"
+        },
+        {
+          "attemptId": "87b800f9-9dd7-48e7-81c5-919819ff1e11",
+          "state": "stopped",
+          "hostPid": 1556623,
+          "runnerPid": 1556840,
+          "sessionId": "9c7b433c-64df-4821-b6c6-a6dd29f6188a"
+        },
+        {
+          "attemptId": "5cb58614-7a56-4731-81fc-0a6cbe6bbfd5",
+          "state": "stopped",
+          "hostPid": 1557445,
+          "runnerPid": 1557660,
+          "sessionId": "9a1c1064-3df8-4f6f-85e3-f96395007868"
+        },
+        {
+          "attemptId": "d0dae1c1-f657-482d-b7f1-9c81a4abc207",
+          "state": "stopped",
+          "hostPid": 1557725,
+          "runnerPid": 1557876,
+          "sessionId": "9c7b433c-64df-4821-b6c6-a6dd29f6188a"
+        }
+      ],
+      "mail": {
+        "binary": "/home/crewroom/Projects/crewroom/.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail",
+        "sha256": "6d0a2000c4e33066b1bca36a15ccdb3ccbccfc90362feee2fa4ca8c6f33f729b",
+        "release": "v0.3.36"
+      },
+      "command": "PATH=/home/crewroom/.local/share/mise/installs/node/24/bin:$PATH python3 scripts/verify_claude_workflow.py --claude /home/crewroom/.local/share/claude/versions/2.1.296 --native-home /home/crewroom --mail /home/crewroom/Projects/crewroom/.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail --output /tmp/cr-mh3-claude-workflow-release"
+    }
+  },
+  "liveCodexRegression": {
+    "receipt": {
+      "path": "/tmp/cr-mh3-codex-workflow-final/workflow-result.json",
+      "sha256": "3f8f27a7f159fc2eb60d30c8f1bc440f814fbf4f8f6db61d11975b5c34df234e"
+    },
+    "scope": "LIVE native codex, full Rust workflow, real external Rust Mail",
+    "passed": true,
+    "checks": [
+      "model-based route, native login, exact separately owned host/runner pairs",
+      "real addressed host tool through workflow authorization and external Rust Mail to independent recipient",
+      "controller SIGKILL and exact live-process reattachment without another Mail effect",
+      "pause verifies stopped ownership; resume uses new processes, same durable threads and original Mail effect"
+    ],
+    "identities": [
+      {
+        "id": "805be8c4-0b8d-4afe-a2d1-7ac3ffd15d63",
+        "hostPid": 1496645,
+        "runnerPid": 1498335,
+        "sessionId": "01a1341f-da85-7f90-a947-bf026a1017fb",
+        "runnerProfile": "a79f5343ba8e029d00d3dd8a14642edbf372d48bee3b3acd4dc9d4dd4b8d574f"
+      },
+      {
+        "id": "6f858b40-b151-4bde-8d29-99dc70776f91",
+        "hostPid": 1498460,
+        "runnerPid": 1499784,
+        "sessionId": "01a1341f-f4a0-7553-85a7-fc5e56cf28ed",
+        "runnerProfile": "a79f5343ba8e029d00d3dd8a14642edbf372d48bee3b3acd4dc9d4dd4b8d574f"
+      }
+    ],
+    "message": {
+      "id": "58b79fd8-ab21-4528-9e10-c153d8869fa1",
+      "disposition": "received"
+    },
+    "finalOwnership": [
+      {
+        "attemptId": "805be8c4-0b8d-4afe-a2d1-7ac3ffd15d63",
+        "state": "stopped",
+        "hostPid": 1496645,
+        "runnerPid": 1498335,
+        "sessionId": "01a1341f-da85-7f90-a947-bf026a1017fb"
+      },
+      {
+        "attemptId": "6f858b40-b151-4bde-8d29-99dc70776f91",
+        "state": "stopped",
+        "hostPid": 1498460,
+        "runnerPid": 1499784,
+        "sessionId": "01a1341f-f4a0-7553-85a7-fc5e56cf28ed"
+      },
+      {
+        "attemptId": "61947b8b-aacb-4f8f-93ef-05ff06613357",
+        "state": "stopped",
+        "hostPid": 1501597,
+        "runnerPid": 1501906,
+        "sessionId": "01a1341f-da85-7f90-a947-bf026a1017fb"
+      },
+      {
+        "attemptId": "36841b5e-0361-42ed-ad16-9868fd47cbb3",
+        "state": "stopped",
+        "hostPid": 1501981,
+        "runnerPid": 1502209,
+        "sessionId": "01a1341f-f4a0-7553-85a7-fc5e56cf28ed"
+      }
+    ],
+    "mail": {
+      "binary": "/home/crewroom/Projects/crewroom/.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail",
+      "sha256": "6d0a2000c4e33066b1bca36a15ccdb3ccbccfc90362feee2fa4ca8c6f33f729b",
+      "release": "v0.3.36"
+    },
+    "command": "PATH=/home/crewroom/.local/share/mise/installs/node/24/bin:$PATH python3 scripts/verify_codex_workflow.py --codex /home/crewroom/.local/share/mise/installs/codex/latest/bin/codex --auth-file /home/crewroom/.codex/auth.json --mail /home/crewroom/Projects/crewroom/.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail --output /tmp/cr-mh3-codex-workflow-final"
+  },
+  "ompSynthetic": [
+    {
+      "kind": "rpc",
+      "receipt": {
+        "path": "/tmp/cr-mh3-omp-rpc/report.json",
+        "sha256": "2c2ac330c66872595fb67f69f625824c9d9e92efacb0c0b860cc357733a472e3"
+      },
+      "command": "python3 scripts/rust/verify-omp-rpc.py --output /tmp/cr-mh3-omp-rpc",
+      "cases": [
+        {
+          "name": "exact native preflight and model request",
+          "selector": "aperture-openai/openai.gpt-6-sol",
+          "effort": "low",
+          "identity": {
+            "model": {
+              "provider": "aperture-openai",
+              "id": "openai.gpt-6-sol",
+              "api": "openai-responses"
+            },
+            "thinkingLevel": "low",
+            "sessionId": "01a1341f-c43b-7000-a4b7-aef8a5bc6b43",
+            "isStreaming": false,
+            "autoCompactionEnabled": false
+          },
+          "ompPid": 1496943,
+          "bridgePid": 1496923,
+          "status": "passed"
+        },
+        {
+          "name": "429 bounded HTTP retry retains model",
+          "status": "passed"
+        },
+        {
+          "name": "403 exposes failure without fallback",
+          "status": "passed"
+        },
+        {
+          "name": "actual OMP v2 arguments and input artifact retain 1.2 MB; provider result explicitly truncated",
+          "utf8Bytes": 1200000,
+          "sha256": "57d1bc32102a791bd10d7ee22ddd51fb77f735e4aed02994bcbc4dbb3bfc7ec3",
+          "providerRequests": 2,
+          "resultProjection": {
+            "direction": "middle",
+            "truncatedBy": "middle",
+            "totalLines": 1,
+            "totalBytes": 1200000,
+            "outputLines": 3,
+            "outputBytes": 40985,
+            "maxBytes": 40960,
+            "elidedLines": 0,
+            "elidedBytes": 1159040,
+            "artifactId": "0"
+          },
+          "status": "passed"
+        },
+        {
+          "name": "exact native preflight and model request",
+          "selector": "aperture-anthropic/anthropic.claude-sonnet-5",
+          "effort": "medium",
+          "identity": {
+            "model": {
+              "provider": "aperture-anthropic",
+              "id": "anthropic.claude-sonnet-5",
+              "api": "anthropic-messages"
+            },
+            "thinkingLevel": "medium",
+            "sessionId": "01a1341f-dc49-7000-bf2e-e57aa65392c0",
+            "isStreaming": false,
+            "autoCompactionEnabled": false
+          },
+          "ompPid": 1498187,
+          "bridgePid": 1498166,
+          "status": "passed"
+        },
+        {
+          "name": "exact native preflight and model request",
+          "selector": "aperture-google/gemini-3.8-flash",
+          "effort": "low",
+          "identity": {
+            "model": {
+              "provider": "aperture-google",
+              "id": "gemini-3.8-flash",
+              "api": "google-generative-ai"
+            },
+            "thinkingLevel": "low",
+            "sessionId": "01a1341f-e593-7000-8250-8e20d04fbcc1",
+            "isStreaming": false,
+            "autoCompactionEnabled": false
+          },
+          "ompPid": 1498924,
+          "bridgePid": 1498905,
+          "status": "passed"
+        },
+        {
+          "name": "unsupported declared effort rejected before launch",
+          "selector": "aperture-openai/zai-org/GLM-5.2",
+          "status": "passed"
+        },
+        {
+          "name": "stale effort refused by real runner readback",
+          "selector": "aperture-openai/zai-org/GLM-5.2",
+          "status": "passed"
+        },
+        {
+          "name": "unsupported declared effort rejected before launch",
+          "selector": "aperture-google/gemini-3.1-pro-preview",
+          "status": "passed"
+        },
+        {
+          "name": "stale effort refused by real runner readback",
+          "selector": "aperture-google/gemini-3.1-pro-preview",
+          "status": "passed"
+        },
+        {
+          "name": "unsupported declared effort rejected before launch",
+          "selector": "aperture-bedrock-compat/us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "status": "passed"
+        },
+        {
+          "name": "stale effort refused by real runner readback",
+          "selector": "aperture-bedrock-compat/us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "status": "passed"
+        }
+      ],
+      "guard": {
+        "fixture_port_allowed": true,
+        "external_denied": true,
+        "other_loopback_denied": true,
+        "child_egress_denied": true
+      },
+      "runner": {
+        "version": "omp/18.4.12",
+        "cliSha256": "d659505080c80a091524de1335caccdb815e05367bd825048cda4a0e98d8b7a0",
+        "bunSha256": "9fd36f87e4b90b07632b987a2e4ec81ca15a62c81bf983190cea6d715be2ad74"
+      },
+      "passed": true,
+      "allOwnedProcessesExited": true,
+      "providerRequests": 8,
+      "providerErrors": []
+    },
+    {
+      "kind": "host",
+      "receipt": {
+        "path": "/tmp/cr-mh3-omp-host/report.json",
+        "sha256": "f4396ff7391b1ffc3847a9ff843b4a63e500b12ff609d85fc708e100cbe7f145"
+      },
+      "command": "python3 scripts/rust/verify-omp-host.py --output /tmp/cr-mh3-omp-host",
+      "cases": [
+        {
+          "name": "independent host text and routed tool with reported synthetic usage",
+          "selector": "aperture-openai/openai.gpt-6-sol",
+          "identity": {
+            "model": {
+              "provider": "aperture-openai",
+              "id": "openai.gpt-6-sol",
+              "api": "openai-responses"
+            },
+            "thinkingLevel": "low",
+            "sessionId": "01a1341f-c3dc-7000-ae50-24418f652f65",
+            "isStreaming": false,
+            "autoCompactionEnabled": false,
+            "hostPid": 1496785,
+            "ompPid": 1496803,
+            "sessionDirectory": "/tmp/cr-mh3-omp-host/family-0/sessions"
+          },
+          "providerRequests": 3,
+          "status": "passed"
+        },
+        {
+          "name": "independent host text and routed tool with reported synthetic usage",
+          "selector": "aperture-anthropic/anthropic.claude-sonnet-5",
+          "identity": {
+            "model": {
+              "provider": "aperture-anthropic",
+              "id": "anthropic.claude-sonnet-5",
+              "api": "anthropic-messages"
+            },
+            "thinkingLevel": "medium",
+            "sessionId": "01a1341f-cdd1-7000-8fad-0cff6e590672",
+            "isStreaming": false,
+            "autoCompactionEnabled": false,
+            "hostPid": 1497379,
+            "ompPid": 1497397,
+            "sessionDirectory": "/tmp/cr-mh3-omp-host/family-1/sessions"
+          },
+          "providerRequests": 3,
+          "status": "passed"
+        },
+        {
+          "name": "independent host text and routed tool with reported synthetic usage",
+          "selector": "aperture-google/gemini-3.8-flash",
+          "identity": {
+            "model": {
+              "provider": "aperture-google",
+              "id": "gemini-3.8-flash",
+              "api": "google-generative-ai"
+            },
+            "thinkingLevel": "low",
+            "sessionId": "01a1341f-d7e6-7000-a33e-85f62a9a952f",
+            "isStreaming": false,
+            "autoCompactionEnabled": false,
+            "hostPid": 1497874,
+            "ompPid": 1497907,
+            "sessionDirectory": "/tmp/cr-mh3-omp-host/family-2/sessions"
+          },
+          "providerRequests": 3,
+          "status": "passed"
+        },
+        {
+          "name": "restore actual session directory and subsequent turn",
+          "identity": {
+            "model": {
+              "provider": "aperture-openai",
+              "id": "openai.gpt-6-sol",
+              "api": "openai-responses"
+            },
+            "thinkingLevel": "low",
+            "sessionId": "01a1341f-c3dc-7000-ae50-24418f652f65",
+            "isStreaming": false,
+            "autoCompactionEnabled": false,
+            "hostPid": 1498659,
+            "ompPid": 1498677,
+            "sessionDirectory": "/tmp/cr-mh3-omp-host/family-0/sessions",
+            "recoveryMode": "session"
+          },
+          "status": "passed"
+        },
+        {
+          "name": "wrong-id actual session directory and subsequent turn",
+          "identity": {
+            "model": {
+              "provider": "aperture-openai",
+              "id": "openai.gpt-6-sol",
+              "api": "openai-responses"
+            },
+            "thinkingLevel": "low",
+            "sessionId": "01a1341f-ed54-7000-b8e1-788a13da4209",
+            "isStreaming": false,
+            "autoCompactionEnabled": false,
+            "hostPid": 1499082,
+            "ompPid": 1499100,
+            "sessionDirectory": "/tmp/cr-mh3-omp-host/wrong-id/sessions",
+            "recoveryMode": "replacement"
+          },
+          "status": "passed"
+        },
+        {
+          "name": "empty history uses new attempt session directory",
+          "status": "passed"
+        },
+        {
+          "name": "denied exposes terminal error without upstream substitution",
+          "terminal": {
+            "type": "prompt_result",
+            "id": "58819e64fcf84f309bcd17cf9374274f",
+            "agentInvoked": true,
+            "status": "error",
+            "sessionSettled": true,
+            "error": {
+              "message": "403 Synthetic failure\nSynthetic failure (type=fixture_error)",
+              "kind": "authorization",
+              "retryable": false,
+              "provider": "aperture-openai",
+              "model": "openai.gpt-6-sol"
+            }
+          },
+          "providerRequests": 1,
+          "status": "passed"
+        },
+        {
+          "name": "effort exposes terminal error without upstream substitution",
+          "terminal": {
+            "type": "prompt_result",
+            "id": "b343f1f0319749beb552fd6991fd4393",
+            "agentInvoked": true,
+            "status": "error",
+            "sessionSettled": true,
+            "error": {
+              "message": "403 Crewroom rejected a model or effort substitution.\nCrewroom rejected a model or effort substitution. (type=crewroom_assignment_policy)",
+              "kind": "rejected",
+              "retryable": false,
+              "provider": "aperture-openai",
+              "model": "openai.gpt-6-sol"
+            }
+          },
+          "providerRequests": 1,
+          "status": "passed"
+        },
+        {
+          "name": "runner rejects changed working directory; cancelled restore never becomes ready",
+          "status": "passed"
+        },
+        {
+          "name": "dedicated tmux reconnect, readable native host and external reconciliation after host death",
+          "identity": {
+            "model": {
+              "provider": "aperture-openai",
+              "id": "openai.gpt-6-sol",
+              "api": "openai-responses"
+            },
+            "thinkingLevel": "low",
+            "sessionId": "01a13420-1172-7000-ad86-7c0e6dec50a2",
+            "isStreaming": false,
+            "autoCompactionEnabled": false,
+            "hostPid": 1500802,
+            "ompPid": 1500824,
+            "sessionDirectory": "/tmp/cr-mh3-omp-host/tmux/sessions"
+          },
+          "runnerOwnershipAfterHostDeath": {
+            "state": "live",
+            "owner": {
+              "pid": 1500824,
+              "pgid": 1500824,
+              "started": "Tue Oct 13 03:17:57 2026",
+              "token": "REDACTED-LOCAL-FIXTURE-CAPABILITY"
+            },
+            "members": [
+              1500824,
+              1500828,
+              1500829
+            ]
+          },
+          "status": "passed"
+        },
+        {
+          "name": "actual OMP oversized host tool retained and routed in full",
+          "utf8Bytes": 1200000,
+          "sha256": "57d1bc32102a791bd10d7ee22ddd51fb77f735e4aed02994bcbc4dbb3bfc7ec3",
+          "terminal": {
+            "type": "prompt_result",
+            "id": "32efcce4ac3041afa431431ed73bc5e2",
+            "agentInvoked": true,
+            "status": "error",
+            "sessionSettled": true,
+            "error": {
+              "message": "409 Provider request exceeded its limit.",
+              "kind": "malformed",
+              "retryable": true,
+              "provider": "aperture-openai",
+              "model": "openai.gpt-6-sol"
+            }
+          },
+          "providerRequests": 1,
+          "status": "passed"
+        }
+      ],
+      "guard": {
+        "fixture_port_allowed": true,
+        "external_denied": true,
+        "other_loopback_denied": true,
+        "child_egress_denied": true
+      },
+      "runner": {
+        "version": "omp/18.4.12",
+        "cliSha256": "d659505080c80a091524de1335caccdb815e05367bd825048cda4a0e98d8b7a0",
+        "bunSha256": "9fd36f87e4b90b07632b987a2e4ec81ca15a62c81bf983190cea6d715be2ad74"
+      },
+      "passed": true,
+      "allOwnedProcessesExited": true,
+      "providerRequests": 16,
+      "providerErrors": [],
+      "backendRequests": 4
+    },
+    {
+      "kind": "supervisor",
+      "receipt": {
+        "path": "/tmp/cr-mh3-omp-supervisor/report.json",
+        "sha256": "cf52caadeccf706fd93dca2c39a50ab1fd707218e52329dfb5d08e0634c5269c"
+      },
+      "command": "python3 scripts/rust/verify-omp-supervisor.py --output /tmp/cr-mh3-omp-supervisor",
+      "cases": [
+        {
+          "name": "native supervisor actual OMP text/tool/usage and visible tmux host",
+          "selector": "aperture-openai/openai.gpt-6-sol",
+          "identity": {
+            "hostPid": 1496861,
+            "sessionId": "01a1341f-c407-7000-bfdd-3d7e813d6e54",
+            "hostUrl": "http://127.0.0.1:50837",
+            "pane": "%0",
+            "runnerCwd": "/tmp/cr-mh3-omp-supervisor/workspace",
+            "ompPid": 1496887,
+            "sessionDirectory": "/tmp/cr-mh3-omp-supervisor/hosts/f9224ccd-06fd-4e93-badf-d4f4bf14654c/sessions"
+          },
+          "providerRequests": 3,
+          "status": "passed"
+        },
+        {
+          "name": "actual controller SIGKILL and same OMP process/session reattachment with subsequent turn",
+          "identity": {
+            "hostPid": 1496861,
+            "sessionId": "01a1341f-c407-7000-bfdd-3d7e813d6e54",
+            "hostUrl": "http://127.0.0.1:50837",
+            "pane": "%0",
+            "runnerCwd": "/tmp/cr-mh3-omp-supervisor/workspace",
+            "ompPid": 1496887,
+            "sessionDirectory": "/tmp/cr-mh3-omp-supervisor/hosts/f9224ccd-06fd-4e93-badf-d4f4bf14654c/sessions"
+          },
+          "status": "passed"
+        },
+        {
+          "name": "native supervisor actual OMP text/tool/usage and visible tmux host",
+          "selector": "aperture-anthropic/anthropic.claude-sonnet-5",
+          "identity": {
+            "hostPid": 1497514,
+            "sessionId": "01a1341f-d0ce-7000-b910-f626f8684b07",
+            "hostUrl": "http://127.0.0.1:55141",
+            "pane": "%1",
+            "runnerCwd": "/tmp/cr-mh3-omp-supervisor/workspace",
+            "ompPid": 1497536,
+            "sessionDirectory": "/tmp/cr-mh3-omp-supervisor/hosts/e51eee0c-2a34-464b-a606-970345745ec4/sessions"
+          },
+          "providerRequests": 3,
+          "status": "passed"
+        },
+        {
+          "name": "native supervisor actual OMP text/tool/usage and visible tmux host",
+          "selector": "aperture-google/gemini-3.8-flash",
+          "identity": {
+            "hostPid": 1498219,
+            "sessionId": "01a1341f-dc8c-7000-a8d0-4cd673cd6567",
+            "hostUrl": "http://127.0.0.1:55559",
+            "pane": "%2",
+            "runnerCwd": "/tmp/cr-mh3-omp-supervisor/workspace",
+            "ompPid": 1498259,
+            "sessionDirectory": "/tmp/cr-mh3-omp-supervisor/hosts/5e5b9d32-0a87-44ba-b513-7c8a64f827ae/sessions"
+          },
+          "providerRequests": 3,
+          "status": "passed"
+        }
+      ],
+      "guard": {
+        "fixture_port_allowed": true,
+        "external_denied": true,
+        "other_loopback_denied": true,
+        "child_egress_denied": true
+      },
+      "runner": {
+        "version": "omp/18.4.12",
+        "cliSha256": "d659505080c80a091524de1335caccdb815e05367bd825048cda4a0e98d8b7a0",
+        "bunSha256": "9fd36f87e4b90b07632b987a2e4ec81ca15a62c81bf983190cea6d715be2ad74"
+      },
+      "passed": true,
+      "allOwnedProcessesExited": true,
+      "providerRequests": 10,
+      "providerErrors": [],
+      "backendRequests": 3
+    },
+    {
+      "kind": "gateway",
+      "receipt": {
+        "path": "/tmp/cr-mh3-omp-gateway/report.json",
+        "sha256": "0bc27d5db73912b3fbe5425272f9e38c63367c8a0a9434a96b8241f4bff3b875"
+      },
+      "command": "python3 scripts/rust/verify-omp-gateway.py --output /tmp/cr-mh3-omp-gateway",
+      "cases": [
+        {
+          "name": "two real OMP turns through native gateway with actual synthetic usage",
+          "selector": "aperture-openai/openai.gpt-6-sol",
+          "providerRequests": 2,
+          "usage": [
+            {
+              "type": "provider_usage",
+              "status": 200,
+              "state": "actual",
+              "usage": {
+                "input": 10.0,
+                "output": 5.0,
+                "cacheRead": 0.0,
+                "cacheWrite": 0,
+                "reasoning": 0.0,
+                "total": 15.0
+              }
+            },
+            {
+              "type": "provider_usage",
+              "status": 200,
+              "state": "actual",
+              "usage": {
+                "input": 10.0,
+                "output": 5.0,
+                "cacheRead": 0.0,
+                "cacheWrite": 0,
+                "reasoning": 0.0,
+                "total": 15.0
+              }
+            }
+          ],
+          "status": "passed"
+        },
+        {
+          "name": "two real OMP turns through native gateway with actual synthetic usage",
+          "selector": "aperture-anthropic/anthropic.claude-sonnet-5",
+          "providerRequests": 2,
+          "usage": [
+            {
+              "type": "provider_usage",
+              "status": 200,
+              "state": "actual",
+              "usage": {
+                "input": 10.0,
+                "output": 5.0,
+                "cacheRead": 0.0,
+                "cacheWrite": 0.0,
+                "reasoning": 0,
+                "total": 15.0
+              }
+            },
+            {
+              "type": "provider_usage",
+              "status": 200,
+              "state": "actual",
+              "usage": {
+                "input": 10.0,
+                "output": 5.0,
+                "cacheRead": 0.0,
+                "cacheWrite": 0.0,
+                "reasoning": 0,
+                "total": 15.0
+              }
+            }
+          ],
+          "status": "passed"
+        },
+        {
+          "name": "two real OMP turns through native gateway with actual synthetic usage",
+          "selector": "aperture-google/gemini-3.8-flash",
+          "providerRequests": 2,
+          "usage": [
+            {
+              "type": "provider_usage",
+              "status": 200,
+              "state": "actual",
+              "usage": {
+                "input": 10.0,
+                "output": 5.0,
+                "cacheRead": 0.0,
+                "cacheWrite": 0,
+                "reasoning": 0.0,
+                "total": 15.0
+              }
+            },
+            {
+              "type": "provider_usage",
+              "status": 200,
+              "state": "actual",
+              "usage": {
+                "input": 10.0,
+                "output": 5.0,
+                "cacheRead": 0.0,
+                "cacheWrite": 0,
+                "reasoning": 0.0,
+                "total": 15.0
+              }
+            }
+          ],
+          "status": "passed"
+        },
+        {
+          "name": "OMP effort substitution blocked before a second upstream request",
+          "providerRequests": 1,
+          "status": "passed"
+        }
+      ],
+      "guard": {
+        "fixture_port_allowed": true,
+        "external_denied": true,
+        "other_loopback_denied": true,
+        "child_egress_denied": true
+      },
+      "runner": {
+        "version": "omp/18.4.12",
+        "cliSha256": "d659505080c80a091524de1335caccdb815e05367bd825048cda4a0e98d8b7a0",
+        "bunSha256": "9fd36f87e4b90b07632b987a2e4ec81ca15a62c81bf983190cea6d715be2ad74"
+      },
+      "passed": true,
+      "allOwnedProcessesExited": true,
+      "providerRequests": 7,
+      "providerErrors": []
+    }
+  ],
+  "claudeSyntheticAuthority": [
+    {
+      "receipt": {
+        "path": "/tmp/cr-mh3-denied-final/result.json",
+        "sha256": "7fe027ca57596be245aeef6cda5727283898a7c9506d089b37aa0aa531c3741b"
+      },
+      "scope": "actual Claude, isolated fake API credentials and synthetic provider",
+      "binarySha256": "24972e3bc859fab2b46ed4c1e51f7d6130f06d3bd550811a114640de3370d0de",
+      "safeMode": true,
+      "terminal": "success",
+      "toolCatalogs": [
+        [
+          "mcp__crewroom__echo"
+        ],
+        [
+          "mcp__crewroom__echo"
+        ],
+        [
+          "mcp__crewroom__echo"
+        ]
+      ],
+      "hookCalls": 1,
+      "effects": 0,
+      "forbiddenFileExists": false,
+      "inputAcknowledged": true,
+      "initializationSucceeded": true
+    },
+    {
+      "receipt": {
+        "path": "/tmp/cr-mh3-allowed-final/result.json",
+        "sha256": "2f47529e2251b6540ca3017b91d4041454b683325ff1e503a51bc1502ad52157"
+      },
+      "scope": "actual Claude, isolated fake API credentials and synthetic provider",
+      "binarySha256": "24972e3bc859fab2b46ed4c1e51f7d6130f06d3bd550811a114640de3370d0de",
+      "safeMode": true,
+      "terminal": "success",
+      "toolCatalogs": [
+        [
+          "mcp__crewroom__echo"
+        ],
+        [
+          "mcp__crewroom__echo"
+        ],
+        [
+          "mcp__crewroom__echo"
+        ]
+      ],
+      "hookCalls": 1,
+      "effects": 1,
+      "forbiddenFileExists": false,
+      "inputAcknowledged": true,
+      "initializationSucceeded": true
+    }
+  ],
+  "claudeFakeAuth": {
+    "receipt": {
+      "path": "docs/testing/mh3-claude-auth-2026-10-13.json",
+      "sha256": "9cd22cb93b877c3a6a4a4ba2f517dfb72b53e02800520b4a9af054c986d4946e"
+    },
+    "cases": 5,
+    "assertions": 28,
+    "scope": "actual native CLI; fake login, fake OAuth rotation, synthetic provider; loopback-only namespace"
+  },
+  "review": {
+    "method": "Independent code-review skill Spec and Standards agents with repeated verification of repairs",
+    "baselineRevision": "31b8c3eddcc1ac5318d8e96d4c7057375d258821",
+    "finalDiffSha256": "8b1ba6f7722038a2a405051540810a8dfc8de6d96910361d10568117d964343e",
+    "standardsFindings": 0,
+    "specFindings": 0,
+    "fixed": [
+      "Shared native verification scenarios instead of duplicated fixtures",
+      "Harness-neutral retained tool receipt contract",
+      "Parent-chain/checkpoint and content-replacement recovery holds",
+      "Partial physical-frame read deadline",
+      "Folded input and terminal/ack correlation",
+      "Failure closes buffered output/completion admission",
+      "Unknown effect and cancelled receipt hold in the same process and replacement",
+      "Tool result delivery bookkeeping serialized with terminal settlement; premature success rejected"
+    ]
+  },
+  "limitations": [
+    "Automatic Claude replacement supports an unambiguous append-only history chain. Compaction, relinking/sibling branches and stored content replacements hold for reconciliation; no automatic replay.",
+    "Claude cost is a cumulative list-price estimate; provider request counts, subscription charges/billing, pre-request budget and hard output/spend guarantees are unavailable.",
+    "Live acceptance covers Linux Claude sonnet -> claude-sonnet-5-5/low and Codex gpt-6-astra/low, not every model or a new macOS package.",
+    "Auth fault/refresh checks use fake credentials and loopback-only networking. Refresh-owner death is verified before remote token rotation; loss of a real rotated-token response remains unverified.",
+    "Native provider errors are conservatively non-success. No deliberate live account throttling, expiry, unrelated Jira update or PR publication was performed.",
+    "Native transcript/call/control bounds conservatively stop admission rather than allowing unbounded session state.",
+    "Existing native fixture ignores and pre-existing legacy terminal/chunk-size diagnostics remain explicit."
+  ],
+  "observedDiagnostics": {
+    "priorAttempts": [
+      "Initial synthetic SSE fixture emitted incomplete tool arguments; corrected before allowance/denial and live proof.",
+      "Initial live adapter tool interrupt rejected notifications/cancelled; protocol handling added and later live runs passed.",
+      "Initial parallel runtime unit run hit two transient journal writer conflicts; focused rerun and repeated full serial release suites passed. Prior MH2 evidence records the same parallel-spawn issue.",
+      "Initial new recovery test reused an attempt ownership directory; corrected to fresh per-attempt roots matching production.",
+      "Initial partial-frame test helper treated expected model-policy rejection as a test failure; corrected to observe the following closed-stream event.",
+      "Strict Clippy initially caught collapsible-if and needless-lifetime warnings; repaired before final gates.",
+      "Expanded live text-interrupt check revealed aborted_streaming was classified as error. Raw native probe established its cancellation semantics; final live text/tool checks pass.",
+      "Independent review reproduced premature successful completion with an unresolved fake tool. Completion now rejects it, and a delivery lock resolves the related successful-write/terminal race."
+    ],
+    "textInterruptProbe": {
+      "path": "/tmp/cr-mh3-text-interrupt-probe/frames.json",
+      "sha256": "2dc8953199c6bec8a253bdafe586e5e5ee727fb45b9734433fcf43e44f44e6a9"
+    },
+    "preexistingBrowserTerminalDiagnostics": 4,
+    "browserChunkSizeWarning": true
+  },
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

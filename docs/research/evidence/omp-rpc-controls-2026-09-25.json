@@ -1,0 +1,69 @@
+{
+  "version": "omp/18.3.1",
+  "scope": "Isolated control probe; idle steering may start a turn; no inherited provider credentials or enabled tools",
+  "observations": {
+    "initial": {
+      "sessionId": "01a0db9b-bb80-7760-996c-20a0d07506ff",
+      "sessionName": null,
+      "isStreaming": false,
+      "isCompacting": false,
+      "queuedMessageCount": 0,
+      "messageCount": 0,
+      "model": {
+        "provider": "amazon-bedrock",
+        "id": "us.anthropic.claude-opus-5-5"
+      }
+    },
+    "after_steer_ack": {
+      "sessionId": "01a0db9b-bb80-7760-996c-20a0d07506ff",
+      "sessionName": "Crewroom control contract probe",
+      "isStreaming": true,
+      "isCompacting": false,
+      "queuedMessageCount": 0,
+      "messageCount": 0,
+      "model": {
+        "provider": "amazon-bedrock",
+        "id": "us.anthropic.claude-opus-5-5"
+      }
+    },
+    "idle_steer_started_turn": true,
+    "after_abort_ack": {
+      "sessionId": "01a0db9b-bb80-7760-996c-20a0d07506ff",
+      "sessionName": "Crewroom control contract probe",
+      "isStreaming": false,
+      "isCompacting": false,
+      "queuedMessageCount": 0,
+      "messageCount": 2,
+      "model": {
+        "provider": "amazon-bedrock",
+        "id": "us.anthropic.claude-opus-5-5"
+      }
+    },
+    "assistant_stop_reasons": [
+      "aborted"
+    ],
+    "first_shutdown": {
+      "exit_code": 0,
+      "forced": false
+    },
+    "reopened": {
+      "sessionId": "01a0db9b-bb80-7760-996c-20a0d07506ff",
+      "sessionName": "Crewroom control contract probe",
+      "isStreaming": false,
+      "isCompacting": false,
+      "queuedMessageCount": 0,
+      "messageCount": 1,
+      "model": {
+        "provider": "amazon-bedrock",
+        "id": "us.anthropic.claude-opus-5-5"
+      }
+    },
+    "same_session_reopened": true,
+    "final_shutdown": {
+      "exit_code": 0,
+      "forced": false
+    }
+  },
+  "passed": true,
+  "recorded_date": "2026-09-25"
+}

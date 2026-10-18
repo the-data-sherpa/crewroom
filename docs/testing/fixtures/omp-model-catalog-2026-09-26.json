@@ -1,0 +1,1114 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-09-26T06:53:23.084507+00:00",
+  "ompVersion": "18.3.1",
+  "source": {
+    "kind": "explicit-local-models-yml",
+    "path": "~/.omp/agent/models.yml",
+    "modifiedAt": "2026-09-23T19:14:55.681586+00:00",
+    "method": "Offline allowlist extraction; no provider discovery, authentication probe, or model request.",
+    "notIncluded": [
+      "credentials",
+      "endpoints",
+      "custom headers",
+      "cost declarations",
+      "unconfigured cached provider catalogs"
+    ]
+  },
+  "semantics": {
+    "configured": "Explicit model entry in the local user configuration.",
+    "catalogListed": "Not rechecked; the models listing command can make network requests.",
+    "previousCrewroomExercise": "Prior successful message probes only; no coding benchmark or current availability guarantee.",
+    "metadata": "User-declared values; not verified against provider APIs.",
+    "fixtureOnly": true
+  },
+  "providerCounts": {
+    "aperture-anthropic": 6,
+    "aperture-bedrock-compat": 10,
+    "aperture-google": 9,
+    "aperture-openai": 25
+  },
+  "modelCount": 50,
+  "models": [
+    {
+      "provider": "aperture-anthropic",
+      "id": "anthropic.claude-fable-5",
+      "selector": "aperture-anthropic/anthropic.claude-fable-5",
+      "api": "anthropic-messages",
+      "declaredContextWindow": 1000000,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "anthropic-adaptive",
+      "declaredThinkingEfforts": [
+        "low",
+        "medium",
+        "high",
+        "max"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-anthropic",
+      "id": "anthropic.claude-haiku-4-5",
+      "selector": "aperture-anthropic/anthropic.claude-haiku-4-5",
+      "api": "anthropic-messages",
+      "declaredContextWindow": 200000,
+      "declaredMaxOutputTokens": 64000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "anthropic-adaptive",
+      "declaredThinkingEfforts": [
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-anthropic",
+      "id": "anthropic.claude-opus-4-8",
+      "selector": "aperture-anthropic/anthropic.claude-opus-4-8",
+      "api": "anthropic-messages",
+      "declaredContextWindow": 1000000,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "anthropic-adaptive",
+      "declaredThinkingEfforts": [
+        "low",
+        "medium",
+        "high",
+        "max"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-anthropic",
+      "id": "anthropic.claude-opus-5",
+      "selector": "aperture-anthropic/anthropic.claude-opus-5",
+      "api": "anthropic-messages",
+      "declaredContextWindow": 1000000,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "anthropic-adaptive",
+      "declaredThinkingEfforts": [
+        "low",
+        "medium",
+        "high",
+        "max"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-anthropic",
+      "id": "anthropic.claude-opus-5-5",
+      "selector": "aperture-anthropic/anthropic.claude-opus-5-5",
+      "api": "anthropic-messages",
+      "declaredContextWindow": 1000000,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "anthropic-adaptive",
+      "declaredThinkingEfforts": [
+        "low",
+        "medium",
+        "high",
+        "max"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-anthropic",
+      "id": "anthropic.claude-sonnet-5",
+      "selector": "aperture-anthropic/anthropic.claude-sonnet-5",
+      "api": "anthropic-messages",
+      "declaredContextWindow": 1000000,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "anthropic-adaptive",
+      "declaredThinkingEfforts": [
+        "low",
+        "medium",
+        "high",
+        "max"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-bedrock-compat",
+      "id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+      "selector": "aperture-bedrock-compat/us.anthropic.claude-haiku-4-5-20251001-v1:0",
+      "api": "openai-responses",
+      "declaredContextWindow": 200000,
+      "declaredMaxOutputTokens": 64000,
+      "declaredReasoning": false,
+      "declaredThinkingMode": null,
+      "declaredThinkingEfforts": [],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-bedrock-compat",
+      "id": "us.anthropic.claude-opus-4-5-20251101-v1:0",
+      "selector": "aperture-bedrock-compat/us.anthropic.claude-opus-4-5-20251101-v1:0",
+      "api": "openai-responses",
+      "declaredContextWindow": 200000,
+      "declaredMaxOutputTokens": 64000,
+      "declaredReasoning": false,
+      "declaredThinkingMode": null,
+      "declaredThinkingEfforts": [],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-bedrock-compat",
+      "id": "us.anthropic.claude-opus-4-6-v1",
+      "selector": "aperture-bedrock-compat/us.anthropic.claude-opus-4-6-v1",
+      "api": "openai-responses",
+      "declaredContextWindow": 1000000,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": false,
+      "declaredThinkingMode": null,
+      "declaredThinkingEfforts": [],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-bedrock-compat",
+      "id": "us.anthropic.claude-opus-4-7",
+      "selector": "aperture-bedrock-compat/us.anthropic.claude-opus-4-7",
+      "api": "openai-responses",
+      "declaredContextWindow": 1000000,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": false,
+      "declaredThinkingMode": null,
+      "declaredThinkingEfforts": [],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-bedrock-compat",
+      "id": "us.anthropic.claude-opus-4-8",
+      "selector": "aperture-bedrock-compat/us.anthropic.claude-opus-4-8",
+      "api": "openai-responses",
+      "declaredContextWindow": 1000000,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": false,
+      "declaredThinkingMode": null,
+      "declaredThinkingEfforts": [],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-bedrock-compat",
+      "id": "us.anthropic.claude-opus-5",
+      "selector": "aperture-bedrock-compat/us.anthropic.claude-opus-5",
+      "api": "openai-responses",
+      "declaredContextWindow": 1000000,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": false,
+      "declaredThinkingMode": null,
+      "declaredThinkingEfforts": [],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-bedrock-compat",
+      "id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+      "selector": "aperture-bedrock-compat/us.anthropic.claude-sonnet-4-20250514-v1:0",
+      "api": "openai-responses",
+      "declaredContextWindow": 1000000,
+      "declaredMaxOutputTokens": 64000,
+      "declaredReasoning": false,
+      "declaredThinkingMode": null,
+      "declaredThinkingEfforts": [],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-bedrock-compat",
+      "id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+      "selector": "aperture-bedrock-compat/us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+      "api": "openai-responses",
+      "declaredContextWindow": 200000,
+      "declaredMaxOutputTokens": 64000,
+      "declaredReasoning": false,
+      "declaredThinkingMode": null,
+      "declaredThinkingEfforts": [],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-bedrock-compat",
+      "id": "us.anthropic.claude-sonnet-4-6",
+      "selector": "aperture-bedrock-compat/us.anthropic.claude-sonnet-4-6",
+      "api": "openai-responses",
+      "declaredContextWindow": 1000000,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": false,
+      "declaredThinkingMode": null,
+      "declaredThinkingEfforts": [],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-bedrock-compat",
+      "id": "us.anthropic.claude-sonnet-5",
+      "selector": "aperture-bedrock-compat/us.anthropic.claude-sonnet-5",
+      "api": "openai-responses",
+      "declaredContextWindow": 1000000,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": false,
+      "declaredThinkingMode": null,
+      "declaredThinkingEfforts": [],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-google",
+      "id": "gemini-2.5-flash",
+      "selector": "aperture-google/gemini-2.5-flash",
+      "api": "google-generative-ai",
+      "declaredContextWindow": 1048576,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "google-level",
+      "declaredThinkingEfforts": [
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-google",
+      "id": "gemini-2.5-flash-lite",
+      "selector": "aperture-google/gemini-2.5-flash-lite",
+      "api": "google-generative-ai",
+      "declaredContextWindow": 1048576,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "google-level",
+      "declaredThinkingEfforts": [
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-google",
+      "id": "gemini-2.5-pro",
+      "selector": "aperture-google/gemini-2.5-pro",
+      "api": "google-generative-ai",
+      "declaredContextWindow": 1048576,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "google-level",
+      "declaredThinkingEfforts": [
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-google",
+      "id": "gemini-3-flash-preview",
+      "selector": "aperture-google/gemini-3-flash-preview",
+      "api": "google-generative-ai",
+      "declaredContextWindow": 1048576,
+      "declaredMaxOutputTokens": 65536,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "google-level",
+      "declaredThinkingEfforts": [
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-google",
+      "id": "gemini-3-pro-image-preview",
+      "selector": "aperture-google/gemini-3-pro-image-preview",
+      "api": "google-generative-ai",
+      "declaredContextWindow": 65536,
+      "declaredMaxOutputTokens": 16384,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "google-level",
+      "declaredThinkingEfforts": [
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-google",
+      "id": "gemini-3.1-pro-preview",
+      "selector": "aperture-google/gemini-3.1-pro-preview",
+      "api": "google-generative-ai",
+      "declaredContextWindow": 1048576,
+      "declaredMaxOutputTokens": 65536,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "google-level",
+      "declaredThinkingEfforts": [
+        "low",
+        "high"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-google",
+      "id": "gemini-3.5-flash",
+      "selector": "aperture-google/gemini-3.5-flash",
+      "api": "google-generative-ai",
+      "declaredContextWindow": 1048576,
+      "declaredMaxOutputTokens": 64000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "google-level",
+      "declaredThinkingEfforts": [
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-google",
+      "id": "gemini-3.6-flash",
+      "selector": "aperture-google/gemini-3.6-flash",
+      "api": "google-generative-ai",
+      "declaredContextWindow": 1048576,
+      "declaredMaxOutputTokens": 64000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "google-level",
+      "declaredThinkingEfforts": [
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-google",
+      "id": "gemini-3.8-flash",
+      "selector": "aperture-google/gemini-3.8-flash",
+      "api": "google-generative-ai",
+      "declaredContextWindow": 1048576,
+      "declaredMaxOutputTokens": 64000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "google-level",
+      "declaredThinkingEfforts": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-openai",
+      "id": "deepseek-ai/DeepSeek-V4-Pro",
+      "selector": "aperture-openai/deepseek-ai/DeepSeek-V4-Pro",
+      "api": "openai-responses",
+      "declaredContextWindow": 1048576,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "effort",
+      "declaredThinkingEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-openai",
+      "id": "gpt-5.3-codex",
+      "selector": "aperture-openai/gpt-5.3-codex",
+      "api": "openai-responses",
+      "declaredContextWindow": 272000,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "effort",
+      "declaredThinkingEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-openai",
+      "id": "gpt-5.4",
+      "selector": "aperture-openai/gpt-5.4",
+      "api": "openai-responses",
+      "declaredContextWindow": 1050000,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "effort",
+      "declaredThinkingEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-openai",
+      "id": "gpt-5.5",
+      "selector": "aperture-openai/gpt-5.5",
+      "api": "openai-responses",
+      "declaredContextWindow": 1050000,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "effort",
+      "declaredThinkingEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-openai",
+      "id": "gpt-5.6-luna",
+      "selector": "aperture-openai/gpt-5.6-luna",
+      "api": "openai-responses",
+      "declaredContextWindow": 922000,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "effort",
+      "declaredThinkingEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-openai",
+      "id": "gpt-5.6-sol",
+      "selector": "aperture-openai/gpt-5.6-sol",
+      "api": "openai-responses",
+      "declaredContextWindow": 922000,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "effort",
+      "declaredThinkingEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-openai",
+      "id": "gpt-5.6-terra",
+      "selector": "aperture-openai/gpt-5.6-terra",
+      "api": "openai-responses",
+      "declaredContextWindow": 922000,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "effort",
+      "declaredThinkingEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-openai",
+      "id": "gpt-6-astra",
+      "selector": "aperture-openai/gpt-6-astra",
+      "api": "openai-responses",
+      "declaredContextWindow": 922000,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "effort",
+      "declaredThinkingEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-openai",
+      "id": "moonshotai.kimi-k2.5",
+      "selector": "aperture-openai/moonshotai.kimi-k2.5",
+      "api": "openai-responses",
+      "declaredContextWindow": 256000,
+      "declaredMaxOutputTokens": 16000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "effort",
+      "declaredThinkingEfforts": [
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-openai",
+      "id": "moonshotai/Kimi-K3",
+      "selector": "aperture-openai/moonshotai/Kimi-K3",
+      "api": "openai-responses",
+      "declaredContextWindow": 1048576,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "effort",
+      "declaredThinkingEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-openai",
+      "id": "nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B",
+      "selector": "aperture-openai/nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B",
+      "api": "openai-responses",
+      "declaredContextWindow": 202800,
+      "declaredMaxOutputTokens": 50000,
+      "declaredReasoning": false,
+      "declaredThinkingMode": null,
+      "declaredThinkingEfforts": [],
+      "declaredInput": [
+        "text"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-openai",
+      "id": "openai.gpt-5.4",
+      "selector": "aperture-openai/openai.gpt-5.4",
+      "api": "openai-responses",
+      "declaredContextWindow": 272000,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "effort",
+      "declaredThinkingEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-openai",
+      "id": "openai.gpt-5.5",
+      "selector": "aperture-openai/openai.gpt-5.5",
+      "api": "openai-responses",
+      "declaredContextWindow": 272000,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "effort",
+      "declaredThinkingEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-openai",
+      "id": "openai.gpt-6-astra",
+      "selector": "aperture-openai/openai.gpt-6-astra",
+      "api": "openai-responses",
+      "declaredContextWindow": 1050000,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "effort",
+      "declaredThinkingEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-openai",
+      "id": "openai.gpt-6-luna",
+      "selector": "aperture-openai/openai.gpt-6-luna",
+      "api": "openai-responses",
+      "declaredContextWindow": 1050000,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "effort",
+      "declaredThinkingEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-openai",
+      "id": "openai.gpt-6-sol",
+      "selector": "aperture-openai/openai.gpt-6-sol",
+      "api": "openai-responses",
+      "declaredContextWindow": 1050000,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "effort",
+      "declaredThinkingEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "successful-message-roundtrip"
+    },
+    {
+      "provider": "aperture-openai",
+      "id": "openai.gpt-daybreak-blue-5.6-sol",
+      "selector": "aperture-openai/openai.gpt-daybreak-blue-5.6-sol",
+      "api": "openai-responses",
+      "declaredContextWindow": 1050000,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "effort",
+      "declaredThinkingEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-openai",
+      "id": "qwen.qwen3-coder-next",
+      "selector": "aperture-openai/qwen.qwen3-coder-next",
+      "api": "openai-responses",
+      "declaredContextWindow": 256000,
+      "declaredMaxOutputTokens": 65536,
+      "declaredReasoning": false,
+      "declaredThinkingMode": null,
+      "declaredThinkingEfforts": [],
+      "declaredInput": [
+        "text"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-openai",
+      "id": "thinkingmachines/inkling-small",
+      "selector": "aperture-openai/thinkingmachines/inkling-small",
+      "api": "openai-responses",
+      "declaredContextWindow": 1048576,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": false,
+      "declaredThinkingMode": null,
+      "declaredThinkingEfforts": [],
+      "declaredInput": [
+        "text"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-openai",
+      "id": "xai.grok-4.6",
+      "selector": "aperture-openai/xai.grok-4.6",
+      "api": "openai-responses",
+      "declaredContextWindow": 500000,
+      "declaredMaxOutputTokens": 500000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "effort",
+      "declaredThinkingEfforts": [
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-openai",
+      "id": "zai-org/GLM-5.2",
+      "selector": "aperture-openai/zai-org/GLM-5.2",
+      "api": "openai-responses",
+      "declaredContextWindow": 1048576,
+      "declaredMaxOutputTokens": 64000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "effort",
+      "declaredThinkingEfforts": [
+        "high",
+        "max"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-openai",
+      "id": "zai-org/GLM-5.3",
+      "selector": "aperture-openai/zai-org/GLM-5.3",
+      "api": "openai-responses",
+      "declaredContextWindow": 1048576,
+      "declaredMaxOutputTokens": 128000,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "effort",
+      "declaredThinkingEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-openai",
+      "id": "zai.glm-4.7",
+      "selector": "aperture-openai/zai.glm-4.7",
+      "api": "openai-responses",
+      "declaredContextWindow": 203000,
+      "declaredMaxOutputTokens": 131072,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "effort",
+      "declaredThinkingEfforts": [
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-openai",
+      "id": "zai.glm-4.7-flash",
+      "selector": "aperture-openai/zai.glm-4.7-flash",
+      "api": "openai-responses",
+      "declaredContextWindow": 203000,
+      "declaredMaxOutputTokens": 131072,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "effort",
+      "declaredThinkingEfforts": [
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    },
+    {
+      "provider": "aperture-openai",
+      "id": "zai.glm-5",
+      "selector": "aperture-openai/zai.glm-5",
+      "api": "openai-responses",
+      "declaredContextWindow": 200000,
+      "declaredMaxOutputTokens": 101376,
+      "declaredReasoning": true,
+      "declaredThinkingMode": "effort",
+      "declaredThinkingEfforts": [
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "declaredInput": [
+        "text",
+        "image"
+      ],
+      "declaredToolSupport": null,
+      "availabilityEvidence": "explicit-user-configuration",
+      "previousCrewroomExercise": "not-exercised-by-crewroom"
+    }
+  ]
+}

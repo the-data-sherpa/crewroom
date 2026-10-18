@@ -1,0 +1,416 @@
+{
+  "schemaVersion": 1,
+  "fixtureOnly": true,
+  "catalog": "fixtures/omp-model-catalog-2026-09-26.json",
+  "purpose": "Illustrative routing coverage, not a quality ranking, verified availability, or modification to user role defaults.",
+  "executionStatus": "Specified input profiles; Crewroom runner and model-routing tests are not implemented.",
+  "roles": [
+    {
+      "id": "coordinator",
+      "implementationStatus": "planned"
+    },
+    {
+      "id": "triage",
+      "implementationStatus": "scaffold"
+    },
+    {
+      "id": "implementer",
+      "implementationStatus": "scaffold"
+    },
+    {
+      "id": "reviewer",
+      "implementationStatus": "scaffold"
+    },
+    {
+      "id": "product-strategist",
+      "implementationStatus": "scaffold"
+    },
+    {
+      "id": "customer-advocate",
+      "implementationStatus": "scaffold"
+    },
+    {
+      "id": "ux-principal",
+      "implementationStatus": "scaffold"
+    },
+    {
+      "id": "principal-architect",
+      "implementationStatus": "scaffold"
+    },
+    {
+      "id": "security-engineer",
+      "implementationStatus": "scaffold"
+    },
+    {
+      "id": "sre",
+      "implementationStatus": "scaffold"
+    },
+    {
+      "id": "applied-ai-engineer",
+      "implementationStatus": "scaffold"
+    },
+    {
+      "id": "test-architect",
+      "implementationStatus": "scaffold"
+    },
+    {
+      "id": "qa-breaker",
+      "implementationStatus": "scaffold"
+    },
+    {
+      "id": "cribl-stream-expert",
+      "implementationStatus": "scaffold"
+    },
+    {
+      "id": "cribl-platform-expert",
+      "implementationStatus": "scaffold"
+    },
+    {
+      "id": "cribl-edge-expert",
+      "implementationStatus": "scaffold"
+    },
+    {
+      "id": "premortem-skeptic",
+      "implementationStatus": "scaffold"
+    },
+    {
+      "id": "tech-writer",
+      "implementationStatus": "scaffold"
+    },
+    {
+      "id": "delivery-reporter",
+      "implementationStatus": "planned"
+    }
+  ],
+  "modelPool": {
+    "sol": {
+      "provider": "aperture-openai",
+      "modelId": "openai.gpt-6-sol",
+      "effort": "low",
+      "selector": "aperture-openai/openai.gpt-6-sol",
+      "effortMeaning": "Explicit simulated effort; supported by captured declared metadata."
+    },
+    "sonnet": {
+      "provider": "aperture-anthropic",
+      "modelId": "anthropic.claude-sonnet-5",
+      "effort": "low",
+      "selector": "aperture-anthropic/anthropic.claude-sonnet-5",
+      "effortMeaning": "Explicit simulated effort; supported by captured declared metadata."
+    },
+    "flash": {
+      "provider": "aperture-google",
+      "modelId": "gemini-3.8-flash",
+      "effort": "low",
+      "selector": "aperture-google/gemini-3.8-flash",
+      "effortMeaning": "Explicit simulated effort; supported by captured declared metadata."
+    },
+    "luna": {
+      "provider": "aperture-openai",
+      "modelId": "openai.gpt-6-luna",
+      "effort": "low",
+      "selector": "aperture-openai/openai.gpt-6-luna",
+      "effortMeaning": "Explicit simulated effort; supported by captured declared metadata."
+    },
+    "haiku": {
+      "provider": "aperture-bedrock-compat",
+      "modelId": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+      "effort": null,
+      "selector": "aperture-bedrock-compat/us.anthropic.claude-haiku-4-5-20251001-v1:0",
+      "effortMeaning": "Omit reasoning control; configured reasoning is false."
+    }
+  },
+  "profiles": [
+    {
+      "id": "baseline",
+      "assignments": [
+        {
+          "roleId": "coordinator",
+          "modelKey": "sol"
+        },
+        {
+          "roleId": "triage",
+          "modelKey": "sol"
+        },
+        {
+          "roleId": "implementer",
+          "modelKey": "sol"
+        },
+        {
+          "roleId": "reviewer",
+          "modelKey": "sol"
+        },
+        {
+          "roleId": "product-strategist",
+          "modelKey": "sol"
+        },
+        {
+          "roleId": "customer-advocate",
+          "modelKey": "sol"
+        },
+        {
+          "roleId": "ux-principal",
+          "modelKey": "sol"
+        },
+        {
+          "roleId": "principal-architect",
+          "modelKey": "sol"
+        },
+        {
+          "roleId": "security-engineer",
+          "modelKey": "sol"
+        },
+        {
+          "roleId": "sre",
+          "modelKey": "sol"
+        },
+        {
+          "roleId": "applied-ai-engineer",
+          "modelKey": "sol"
+        },
+        {
+          "roleId": "test-architect",
+          "modelKey": "sol"
+        },
+        {
+          "roleId": "qa-breaker",
+          "modelKey": "sol"
+        },
+        {
+          "roleId": "cribl-stream-expert",
+          "modelKey": "sol"
+        },
+        {
+          "roleId": "cribl-platform-expert",
+          "modelKey": "sol"
+        },
+        {
+          "roleId": "cribl-edge-expert",
+          "modelKey": "sol"
+        },
+        {
+          "roleId": "premortem-skeptic",
+          "modelKey": "sol"
+        },
+        {
+          "roleId": "tech-writer",
+          "modelKey": "sol"
+        },
+        {
+          "roleId": "delivery-reporter",
+          "modelKey": "sol"
+        }
+      ]
+    },
+    {
+      "id": "heterogeneous",
+      "assignments": [
+        {
+          "roleId": "coordinator",
+          "modelKey": "sol"
+        },
+        {
+          "roleId": "triage",
+          "modelKey": "sol"
+        },
+        {
+          "roleId": "implementer",
+          "modelKey": "sonnet"
+        },
+        {
+          "roleId": "reviewer",
+          "modelKey": "flash"
+        },
+        {
+          "roleId": "product-strategist",
+          "modelKey": "sonnet"
+        },
+        {
+          "roleId": "customer-advocate",
+          "modelKey": "luna"
+        },
+        {
+          "roleId": "ux-principal",
+          "modelKey": "flash"
+        },
+        {
+          "roleId": "principal-architect",
+          "modelKey": "sol"
+        },
+        {
+          "roleId": "security-engineer",
+          "modelKey": "sonnet"
+        },
+        {
+          "roleId": "sre",
+          "modelKey": "sol"
+        },
+        {
+          "roleId": "applied-ai-engineer",
+          "modelKey": "flash"
+        },
+        {
+          "roleId": "test-architect",
+          "modelKey": "sonnet"
+        },
+        {
+          "roleId": "qa-breaker",
+          "modelKey": "flash"
+        },
+        {
+          "roleId": "cribl-stream-expert",
+          "modelKey": "sonnet"
+        },
+        {
+          "roleId": "cribl-platform-expert",
+          "modelKey": "sol"
+        },
+        {
+          "roleId": "cribl-edge-expert",
+          "modelKey": "luna"
+        },
+        {
+          "roleId": "premortem-skeptic",
+          "modelKey": "flash"
+        },
+        {
+          "roleId": "tech-writer",
+          "modelKey": "luna"
+        },
+        {
+          "roleId": "delivery-reporter",
+          "modelKey": "haiku"
+        }
+      ]
+    },
+    {
+      "id": "rotated",
+      "assignments": [
+        {
+          "roleId": "coordinator",
+          "modelKey": "sonnet"
+        },
+        {
+          "roleId": "triage",
+          "modelKey": "sonnet"
+        },
+        {
+          "roleId": "implementer",
+          "modelKey": "flash"
+        },
+        {
+          "roleId": "reviewer",
+          "modelKey": "luna"
+        },
+        {
+          "roleId": "product-strategist",
+          "modelKey": "flash"
+        },
+        {
+          "roleId": "customer-advocate",
+          "modelKey": "haiku"
+        },
+        {
+          "roleId": "ux-principal",
+          "modelKey": "luna"
+        },
+        {
+          "roleId": "principal-architect",
+          "modelKey": "sonnet"
+        },
+        {
+          "roleId": "security-engineer",
+          "modelKey": "flash"
+        },
+        {
+          "roleId": "sre",
+          "modelKey": "sonnet"
+        },
+        {
+          "roleId": "applied-ai-engineer",
+          "modelKey": "luna"
+        },
+        {
+          "roleId": "test-architect",
+          "modelKey": "flash"
+        },
+        {
+          "roleId": "qa-breaker",
+          "modelKey": "luna"
+        },
+        {
+          "roleId": "cribl-stream-expert",
+          "modelKey": "flash"
+        },
+        {
+          "roleId": "cribl-platform-expert",
+          "modelKey": "sonnet"
+        },
+        {
+          "roleId": "cribl-edge-expert",
+          "modelKey": "haiku"
+        },
+        {
+          "roleId": "premortem-skeptic",
+          "modelKey": "luna"
+        },
+        {
+          "roleId": "tech-writer",
+          "modelKey": "haiku"
+        },
+        {
+          "roleId": "delivery-reporter",
+          "modelKey": "sol"
+        }
+      ]
+    }
+  ],
+  "matrix": {
+    "roleCount": 19,
+    "configuredSelectors": 50,
+    "identityBindings": 950,
+    "status": "planned",
+    "scope": "Pure model identity binding for every role × selector. Capability/policy-negative rows must fail dispatch; binding does not certify role suitability.",
+    "expansion": "Do not run all combinations through real models. Use profiles for complete scenarios and cover effort/API/failure dimensions pairwise."
+  },
+  "negativeFixtures": [
+    {
+      "case": "RTE-04",
+      "mutation": "Remove the selected model from a copy of the captured catalog; never mutate the source capture.",
+      "expected": "missing-model-before-launch"
+    },
+    {
+      "case": "RTE-06",
+      "selector": "aperture-openai/zai-org/GLM-5.2",
+      "requestedEffort": "medium",
+      "expected": "unsupported-effort"
+    },
+    {
+      "case": "RTE-06",
+      "selector": "aperture-google/gemini-3.1-pro-preview",
+      "requestedEffort": "medium",
+      "expected": "unsupported-effort"
+    },
+    {
+      "case": "RTE-06",
+      "selector": "aperture-bedrock-compat/us.anthropic.claude-haiku-4-5-20251001-v1:0",
+      "requestedEffort": "high",
+      "expected": "reasoning-disabled"
+    },
+    {
+      "case": "RTE-07",
+      "selector": "aperture-openai/qwen.qwen3-coder-next",
+      "requiredInput": "image",
+      "expected": "incompatible-input"
+    },
+    {
+      "case": "RTE-07",
+      "mutation": "Leave declaredToolSupport null and provide no runtime capability evidence.",
+      "expected": "unknown-tool-support-not-implicitly-true"
+    },
+    {
+      "case": "RTE-08",
+      "mutation": "Launch assigned Sol but report Luna in runner state or captured provider request.",
+      "expected": "model-mismatch-stops-effects"
+    }
+  ]
+}

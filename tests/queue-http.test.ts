@@ -1,0 +1,56 @@
+import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { test } from 'node:test';
+import { startServer } from '../server/app';
+import { Workbench } from '../server/workbench';
+import { seedRepository, saveRepositoryFixture } from './fixtures/repository';
+
+test('QUE-05: HTTP queue launch, stale controls and keyed replay expose ordered plans', async t => {
+  const root = mkdtempSync(join(tmpdir(), 'crewroom-queue-http-'));
+  seedRepository(root);
+  const store = new Workbench(join(root, 'workflow.sqlite'));
+  const repository = saveRepositoryFixture(store, { name: 'Fixture', path: root, targetBranch: 'main' });
+  const tasks = ['One', 'Two'].map(title => {
+    const task = store.createTask({ title, description: '', repositoryId: repository.id });
+    return store.refine(task.id, { revision: task.revision, sourceRevision: 1, brief: title, criteria: ['Keep behavior'] });
+  });
+  store.close();
+  const server = await startServer({ port: 0, dataDir: root, serveUi: false, rolePath: join(root, 'roles.json') });
+  t.after(async () => { await server.close(); rmSync(root, { recursive: true, force: true }); });
+  const post = async (path: string, body: unknown) => {
+    const response = await fetch(`${server.origin}/api${path}`, { method: 'POST', headers: { Origin: server.origin, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    return { status: response.status, body: await response.json() };
+  };
+  const launch = { team: [{ name: 'Coordinator', roleId: 'coordinator', coordinator: true, input: 'Coordinate.' }], repository: { mode: 'new' } };
+  const firstRequest = { revision: tasks[0].revision, launch, requestId: randomUUID() };
+  const first = await post(`/tasks/${tasks[0].id}/runs`, firstRequest);
+  assert.equal(first.status, 201); assert.equal(first.body.launch.team[0].roleId, 'coordinator');
+  assert.deepEqual((await post(`/tasks/${tasks[0].id}/runs`, firstRequest)).body, first.body);
+  assert.equal((await post(`/tasks/${tasks[0].id}/runs`, { ...firstRequest, launch: { ...launch, team: [{ ...launch.team[0], roleId: 'reviewer' }] } })).status, 409);
+  assert.equal((await post(`/tasks/${tasks[1].id}/runs`, { revision: tasks[1].revision, launch: { ...launch, team: [{ ...launch.team[0], roleId: 'not-configured' }] }, requestId: randomUUID() })).status, 409);
+  const second = await post(`/tasks/${tasks[1].id}/runs`, { revision: tasks[1].revision, requestId: randomUUID() });
+  assert.equal(second.status, 201);
+  const set = { requestId: randomUUID(), launch };
+  assert.equal((await post(`/runs/${second.body.id}/launch`, set)).body.launch.team[0].roleId, 'coordinator');
+  assert.equal((await post(`/runs/${second.body.id}/launch`, set)).status, 200);
+  const before = await (await fetch(`${server.origin}/api/workspace`)).json();
+  const order = { requestId: randomUUID(), expectedRevision: before.queue.revision, runIds: [second.body.id, first.body.id] };
+  const reordered = await post('/queue/order', order);
+  assert.equal(reordered.status, 200);
+  assert.deepEqual(reordered.body.plans.map((plan: { id: string }) => plan.id), order.runIds);
+  assert.deepEqual((await post('/queue/order', order)).body, reordered.body);
+  assert.equal((await post('/queue/order', { requestId: randomUUID(), expectedRevision: before.queue.revision, runIds: order.runIds })).status, 409);
+  assert.equal((await post('/queue/order', { requestId: randomUUID(), expectedRevision: reordered.body.revision, runIds: [first.body.id, first.body.id] })).status, 409);
+  assert.deepEqual((await (await fetch(`${server.origin}/api/workspace`)).json()).queue, reordered.body);
+  const remove = { requestId: randomUUID() };
+  const cancelled = await post(`/queue/${first.body.id}/remove`, remove);
+  assert.equal(cancelled.status, 200); assert.equal(cancelled.body.status, 'cancelled');
+  assert.deepEqual((await post(`/queue/${first.body.id}/remove`, remove)).body, cancelled.body);
+  assert.deepEqual((await post(`/runs/${first.body.id}/cancel`, { requestId: randomUUID() })).body, cancelled.body);
+  const final = await (await fetch(`${server.origin}/api/workspace`)).json();
+  assert.deepEqual(final.queue.plans.map((plan: { id: string }) => plan.id), [second.body.id]);
+  assert.deepEqual(final.activity, []);
+});

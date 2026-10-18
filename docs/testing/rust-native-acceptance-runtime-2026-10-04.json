@@ -1,0 +1,1805 @@
+{
+  "sourceManifestSha256": "692f6746b3c621ad7980a63b4d63771120f7c3e173a96c3324d1f8bca43d8ed7",
+  "sourceSha256": {
+    "Cargo.lock": "0ebe145cab3a1311031df1325c4377ff066021d43ad1bf409d9cfdff056305fe",
+    "Cargo.toml": "66662906006a373f9f540a7eae01422577c58d4fccf6f55be8f2e203932757f6",
+    "crates/crewroom-core/Cargo.toml": "7eab2e7eb22a55b13d0ce1e511ccfc336f5384c04774d2549227f247eaf98e3c",
+    "crates/crewroom-core/examples/date-oracle.rs": "b42f0cf8789e4f7bec673dca97dbdbbe2fe1815b9b8ed2e4d0d4174d09f61931",
+    "crates/crewroom-core/examples/json-oracle.rs": "2dbbb518fc88dd5cb7a10669220d1e4ac6549fa2d7390add13493ff8fb586993",
+    "crates/crewroom-core/examples/ledger-oracle.rs": "4d97490129a108c49b32a90a65cacf3b9d6f8535b7fc340472170218a5c5e521",
+    "crates/crewroom-core/examples/upgrade-store.rs": "49eeef10564b2d2ef5b4ba83efa388ad9b2b38f7904b74cf01076bf185a4840f",
+    "crates/crewroom-core/licenses/V8-LICENSE": "6ab33af8774a0f396ee3aeeb761e3229057682d6f9fa7f572e390c2cb3a6e509",
+    "crates/crewroom-core/src/active_time.rs": "3895c79876df87e009d544b03ccaf8c814bbde3627485c43e7ec4b1bf98c9787",
+    "crates/crewroom-core/src/attempts.rs": "19301cc215689f82fa378f0ab2ddee82e6e1da5e832602fd19dce6b94e3927a4",
+    "crates/crewroom-core/src/authority.rs": "becad8eb287fb38da6a1d22cccfbbfa10c3a84043ae6e97445b978b41a3e5fe8",
+    "crates/crewroom-core/src/briefs.rs": "25bc93de94bb367fc837192e08736bf3657e5fc8cd6a3ac57468645c9176ba76",
+    "crates/crewroom-core/src/continuations.rs": "09262a5cbf285987ed39aeb57547e3ed8deadbbaf9f5b0270916ab25da170ccd",
+    "crates/crewroom-core/src/default-roles.json": "95dd06eaaad48ee79cb0a2f439c61893df00caaf1c1d1f06622f2bfcd43ee680",
+    "crates/crewroom-core/src/dependencies.rs": "49f81bae69abf8b240d772fce235d20b60f92f1989ab4d29628f886b6c5c05fb",
+    "crates/crewroom-core/src/feedback_resume.rs": "60dc77f87371385ad1be131f09ee9b295adc682b1c7d5da88b031d3058f6fa1d",
+    "crates/crewroom-core/src/jira.rs": "5663ca6b46316729cefbac870d43369542bf3f7b1b512f1b9b1c4f6708b8ee0e",
+    "crates/crewroom-core/src/launch.rs": "02493bc9f19066a9629a0b99f8d81fe5503eb4331d9332f867777f32b71632d0",
+    "crates/crewroom-core/src/learning.rs": "a0b12626670b2c58bb0a389886d91ada751c45bd7e0e0be468bba983bbc44b1c",
+    "crates/crewroom-core/src/lib.rs": "4140aa5998392127c3c6797a80307daebb52643fb2753b1f7653a8227f386c06",
+    "crates/crewroom-core/src/lifecycle.rs": "75c0c28ec61391192714b56bbf56b121856f866e2958ae0fdeae3de5c9809bee",
+    "crates/crewroom-core/src/messages.rs": "30bbe9323d762fc61555ce50b7b927874ede99c60c5be67936b38caf08143ae1",
+    "crates/crewroom-core/src/migrations.rs": "31db7f26c2629a05d2bdb34f8c946477231620328bfca3e6a2320c31f2538468",
+    "crates/crewroom-core/src/migrations/proof.rs": "343143d55d258408c33d8d1221e126baddea81aea5aeba68fda0d665a0ed89dc",
+    "crates/crewroom-core/src/migrations/schema.json": "ba32f8f3883cb6ff36485a81d0435dbdf99483fd74dbff81bb53c7e7e998513c",
+    "crates/crewroom-core/src/observations.rs": "f59b6e28477880c168d242eaf91a7ffa4d2fc9e249c99daf93bc09e9bd8f4c4b",
+    "crates/crewroom-core/src/outcomes.rs": "b655cb3d863456b8f5a510d9fd136388cd7d6dbdd7d22084b8373ff2f7316593",
+    "crates/crewroom-core/src/provider_records.rs": "e065bc1104ad72429e7a444632e299b094508924e08e1427ba078e38c8ffd02f",
+    "crates/crewroom-core/src/repositories.rs": "61b7a41688c71c458e873faa6dd4ea7b74f5aa03c67a91b42e45db3df6186996",
+    "crates/crewroom-core/src/repository_work.rs": "d37e6ef90769f8e6379d08547467d98ef104285ff43180c9ba8ddc3803e2706c",
+    "crates/crewroom-core/src/requirements.rs": "77595a118699ff81a2b200c19f3a6e6e27d07827dedd79237f1649b907cd4034",
+    "crates/crewroom-core/src/research.rs": "5583e3ae5e3a9072df2c602123dffe94fb9ae41931567600a42df7078139fc27",
+    "crates/crewroom-core/src/roles.rs": "d2f414e40e1aa9f48c91fce93b2b12d954707c897f6de6f23c099933c5dfd4bd",
+    "crates/crewroom-core/src/scheduling.rs": "bbe17329e5c813e3a8f74ed77fe0806fb178f067c5c122c876af966a25cff4d2",
+    "crates/crewroom-core/src/schema.sql": "3c62ce4b96dfe279a0b34c5f1532f5a864e3a13bc7f0ce463082c4b712f1a9f9",
+    "crates/crewroom-core/src/serialized.rs": "e84826006d8e83e5767e53d331fb9af4d0d8ed7eefc7e687854ebc2d35bc8442",
+    "crates/crewroom-core/src/source_time.rs": "9eb67d068d17fedb3c4db1905b211c457464d24fcf020819fede89114ec24ef5",
+    "crates/crewroom-core/src/store.rs": "a8e53407a55c3f63e071ea8324081927b84c367ecd1180590c4bc0d49994f583",
+    "crates/crewroom-core/src/target_recovery.rs": "e86e41cb0693cbc87b2290edfe700e35dc1e2e08c586feb94a3a6c8c7188243c",
+    "crates/crewroom-core/src/teams.rs": "7defac68ac0676357433695f3cd21b985282b8f9e5169fdf421c3fb3fa5edca1",
+    "crates/crewroom-core/src/workflow.rs": "b816761a1378253d377b6ff178cecac0414fdd572f95929b37fe33fdc7cc20cc",
+    "crates/crewroom-core/tests/attempts.rs": "adfe33ffbb0fce0ab3aa314e98c2afbc537b738effab9c056276d85af817e371",
+    "crates/crewroom-core/tests/continuations.rs": "311a2e660d5ded05afa2ffaa6c3064c9626a26f9340d08edc30d7f608163227c",
+    "crates/crewroom-core/tests/fixtures/historical-schemas.json": "5e66e62dcfee918bcafb9122f00b4675112da1c09af3077eb4e1fe67f6f97be4",
+    "crates/crewroom-core/tests/learning.rs": "cf6e4173254e09c828e79301fbadeabc8478a3be7de66d3b977893bd116b2763",
+    "crates/crewroom-core/tests/lifecycle-corpus.json.gz": "da30ee997f23eb8e55ae42245546d1d10a285e1387c40382066da36fabc89c7b",
+    "crates/crewroom-core/tests/lifecycle.rs": "8111c7765c1141be5acc748207a3222d5a32a1896903f2ef62bead1d1c735f68",
+    "crates/crewroom-core/tests/messages.rs": "1c603ff26aaae2a260dbe20b87f865a39bda0f6a3a0db14268613e99969e621e",
+    "crates/crewroom-core/tests/migrations.rs": "9adc059be2b9f3c6f2623b4c47fc27a1bf280c61823e3256886df9168ef8d33c",
+    "crates/crewroom-core/tests/outcomes.rs": "a93504303f8408f8033fe19ca5caacc7cd72e33471a5a9f4067d109a8ec35edc",
+    "crates/crewroom-core/tests/preflight.rs": "08331bd44b6f8d45ecd1f11b5d89cc33450fca3c42ba48c966e3bbdf3830c2aa",
+    "crates/crewroom-core/tests/provider_records.rs": "3f8f392d860ca3ab5ce8e7cd5bb0c3d776704e84d53fa2e747f35b7e7d258635",
+    "crates/crewroom-core/tests/release_schedules.rs": "78657c62a5944df8f86c10806b9317cd1b5c93dfc594442ed90e8ea2022e4baa",
+    "crates/crewroom-core/tests/repository_work.rs": "baeff3fb40b586091ac1a1eeed2f9e17d0cd28d50aa9a68914e4645dd8c92319",
+    "crates/crewroom-core/tests/scheduling.rs": "172a3407a3ca55fb340c87b9168fb2b56cd748567410325ec53d2037f0087441",
+    "crates/crewroom-core/tests/store.rs": "8d74b1235cd0614285833f617cc94f057881a382a159d3ba17dd93b73ae21f19",
+    "crates/crewroom-core/tests/teams.rs": "cfe8c016d8cbb147b79bb0b9ce0c3d23a2197634d8391b5f988242a2955b81bc",
+    "crates/crewroom-core/tests/transaction_composition.rs": "bd8cd89546066f2d8f4bbbfcd5d09f17f7af6fe0a2e08e5156408e1bd19cb289",
+    "crates/crewroom-core/tests/workflow.rs": "27e929b09a9b1c24781134280a20b7768ddcb727a83351566929a3955ba04629",
+    "crates/crewroom-desktop/Cargo.toml": "e461383970175707c407862f8c49592c756e5b489b66597399c7287f06d1bbb0",
+    "crates/crewroom-desktop/src/client.rs": "a5bf06065db2bfa8ccc68209544e10cc77e157c07c0e54940572ea6a12b94293",
+    "crates/crewroom-desktop/src/main.rs": "47fbf5ca359aef8a4c668d2bcd02699e9eb09aa7bdef6c1d5ddbae058ea99bad",
+    "crates/crewroom-desktop/src/workbench.rs": "e5b57a646c721224d71f4d62e109714562ef20432a44e824385dac423aed4d83",
+    "crates/crewroom-desktop/src/workbench/planning.rs": "c8854e3f97173e88bf7c65c30c7bd92d21fa01c98c69c70f4bd2b55ec706db3f",
+    "crates/crewroom-desktop/src/workbench/planning/tests.rs": "c5e91d1b0aa6e2f720ee04fc2af6d8199f138e3f2f3ff1a63cfe67d8f6ea14ad",
+    "crates/crewroom-desktop/src/workbench/settings.rs": "64e7b60a492560f11d68897742094ec0faa149ea4fa5595b97f4f490e0b39af6",
+    "crates/crewroom-desktop/src/workbench/settings/tests.rs": "714778f34afd4f9936fe168887cb71083171fca5f367414a89edbd548dea72ba",
+    "crates/crewroom-desktop/src/workbench/test_support.rs": "912407443af7da4cad62dbfb4842c02efdfcebd3954e614d79d052ea8e60047a",
+    "crates/crewroom-runtime/Cargo.toml": "2884ea5a87b447e838822ba3eacae4b0913788542e1dbb0cf9498ad00b97d4b4",
+    "crates/crewroom-runtime/examples/container-fixture.rs": "b161157585717a8f63bee41b7bbcb5153f3ee73bfc52827109c16c949542d2cf",
+    "crates/crewroom-runtime/examples/gateway-fixture.rs": "07350f6ccc5c6b5e9750fea25f0c8326e273d0d3ac11ade95b324cd858a1c9ac",
+    "crates/crewroom-runtime/examples/host-journal-fixture.rs": "11a977e42fe3b863568088099c5bf908c062662dfac8ccb2f1b6c3d538cf7268",
+    "crates/crewroom-runtime/examples/host-oracle.rs": "39f95e116d2a6bbf5181a214a919e53aac4ca3e30e20e573390ada7b89cb9e67",
+    "crates/crewroom-runtime/examples/mail-fixture.rs": "f19bad722a2a39d580bb69c19f1f21f9abb5c039e6c3fc2e4c264c17bb33273d",
+    "crates/crewroom-runtime/examples/observation-oracle.rs": "be2dfea1c2c1a04c5b130162328ba7e27bb2a993d3534c72cfb0d805378d53f3",
+    "crates/crewroom-runtime/examples/policy-oracle.rs": "b02fb259a278f41d8ddbc939367655006ce2ffab4d3acaea3e806a2459e98d51",
+    "crates/crewroom-runtime/examples/provider-client-fixture.rs": "6d77f3e8c3b54231dd3ceeaa23c9dc734319f8c51e9607fe35ddb0d70e22faae",
+    "crates/crewroom-runtime/examples/provider-config-fixture.rs": "e18ae39f9b2113073de26397d22523c5c74da5db12d512c6d50015008e3eef0e",
+    "crates/crewroom-runtime/examples/provider-oracle.rs": "fee05a93b483ef120b7190bb42ac95eeccf34b748b85977d8782749f5d4a4fad",
+    "crates/crewroom-runtime/examples/publication-git-fixture.rs": "7968e8eca4d353a55350c3b32b25a2cacd0c1c6a742217f3f4dcecf7228792f2",
+    "crates/crewroom-runtime/examples/publication-policy.rs": "4be877ee4d5929ff173cc9df4f61925c1feff9937fd33bc82b388cf2777e35c2",
+    "crates/crewroom-runtime/examples/repository-fixture.rs": "9b654fa110ab5db70b64b60f04823294ba9ea7ec0a52bbbb69898e4afa9d3ca6",
+    "crates/crewroom-runtime/examples/rpc-bridge.rs": "c14f351781d0f2405d06d28608960ae7eee1321b0b8b1caa92cd5c00eed3ae55",
+    "crates/crewroom-runtime/examples/supervisor-fixture.rs": "284afc52cd28d2c13202624a67fb1fc8a52d239bb59c6b1c9b93ef754c5b76ca",
+    "crates/crewroom-runtime/examples/workflow-fixture.rs": "b97af636e8471bc34ae3725732fbce7f1f609835ca1af0cf541ec984ed4b2d2f",
+    "crates/crewroom-runtime/examples/workflow-inputs.rs": "f45ed6379811edbc5565f6fbeff8e971377c2fa1d334786147fe83e760a8e6dd",
+    "crates/crewroom-runtime/src/container_command.rs": "914653e5310fe76d5e57f0abacb9fa43a87d949da7fc8eac2d6a632642aee4b0",
+    "crates/crewroom-runtime/src/delivery_flight.rs": "5da15cc3d9cd0bfaf08b9d6214c3f549d7a307a588e425f7eb09d9099659f73b",
+    "crates/crewroom-runtime/src/evidence/artifacts.rs": "283149d06fbcd73fb06f852892013d836df246c0fc8909735f7c9ef5bbebc763",
+    "crates/crewroom-runtime/src/evidence/candidates.rs": "ee365a4390e04b6b30162ea5961400b27f82944f595a16b0e9c649b70974c01a",
+    "crates/crewroom-runtime/src/evidence/checks.rs": "f13f6e8ea2d4def0120c7f4b79d595a0609f6b81d79f1072f3ecb76e301d59c6",
+    "crates/crewroom-runtime/src/evidence/mod.rs": "f48f9d0759820c79e5127e61c78ecdd06af5fa9e4eb3cd27d442f7362c6c0067",
+    "crates/crewroom-runtime/src/evidence/policy.rs": "d42d45522dedb744a7d8e281ec7c3536271d637505086855cf9695e28731dbf6",
+    "crates/crewroom-runtime/src/evidence/readiness.rs": "f86ddfe8ef9266fc4274382a4d65d77d0317bc6ac166dd2e86a2973ebdd057f6",
+    "crates/crewroom-runtime/src/evidence/research.rs": "de3dadbc962f79bf8075e7617964ed7389563059001c24cb9cf74b2ae2d3aea7",
+    "crates/crewroom-runtime/src/evidence/reviews.rs": "33e23cf1884d642b6f142efe8eff5cf4ac30d7f4fd3b809609b08e952d479ee3",
+    "crates/crewroom-runtime/src/helper.rs": "633c5f315ea7d54941dff1d6e1bc59f94d230f726e917719c3d96b1d328c0d1b",
+    "crates/crewroom-runtime/src/host-tools.json": "6e3fef80243e6fc84a60dfc1712f8f50d2ba37e51449a0aff03c3dfa6694b802",
+    "crates/crewroom-runtime/src/host.rs": "7af1f378381afa721c5f1bda09eca232def2be68f490f4157afeee3fc5fa6f7a",
+    "crates/crewroom-runtime/src/host/tools.rs": "1904903752ed07f0fdace6fdea3ee8fe0f1f32f18f6cbf78c5b2300387fda656",
+    "crates/crewroom-runtime/src/host_journal.rs": "56930093f68c342965c226902b529cbbb911712f28752d0ff0133f9edcbb14cb",
+    "crates/crewroom-runtime/src/host_main.rs": "e6e748a5e1be6b685e9f380e5cf214f533c6c080d4a43612624e7861c2385b63",
+    "crates/crewroom-runtime/src/host_protocol.rs": "66eb5272fbfd8a223c5d0b814b6396ef3ce6dc7a8c5e3298419187c6efa032ae",
+    "crates/crewroom-runtime/src/inspect.rs": "118f5732e017b254e69e5ec3cf6845814a0a02d3e795438be401d0b20d0d8288",
+    "crates/crewroom-runtime/src/jira_delivery/dispatch.rs": "284f7add6efe17b37c5c60dfd57f20a29dbd56ea74b3a22288fe5daabff229d3",
+    "crates/crewroom-runtime/src/jira_delivery/mod.rs": "e32c85e96a87f522c3c81dbb3684b7668083727429c098eff6b3a0f0d414d289",
+    "crates/crewroom-runtime/src/jira_delivery/prepare.rs": "9dcf96b74485be44a8aa217b8220e12c68d0a277729f5662f712b9ec240f7be5",
+    "crates/crewroom-runtime/src/jira_sync.rs": "9756390980f8fa80fec57984293ad92d7a12de49fdf171bffe60d71eb9a5ee18",
+    "crates/crewroom-runtime/src/lib.rs": "7992ec4c1060a2fcdf67c1a694d591787c411a35bcc8eb4a7cb173e35fa6e2ef",
+    "crates/crewroom-runtime/src/mail.rs": "7b7ffbb6ec5c40067ab740473e93807edb724cedacbd79bcb801fab79cd4119f",
+    "crates/crewroom-runtime/src/main.rs": "8584375a339109b5323cdc7f14b9bf020fb1c9e5ffe723c9c3de9588b7b66d45",
+    "crates/crewroom-runtime/src/messaging.rs": "db9620127db3128a7d6fad556102e6d4c2c1114b62c386fcf2ecbfa06de57c84",
+    "crates/crewroom-runtime/src/model_policy.rs": "7c9d1dcda4dd110fcb028ee4843a1f5164e7d695644d06be2937af04bc8c6222",
+    "crates/crewroom-runtime/src/observation.rs": "aec437f251a7a36087ac15cde176ebd66aa937a7250a9108ef9e75effb134620",
+    "crates/crewroom-runtime/src/pane.rs": "145a540976b12b9433293f92972b7075342b8f9e83d398360e8dea72f4595131",
+    "crates/crewroom-runtime/src/provider_body.rs": "72d97938d748fa9d2c34f96c48c135f4ac76e0b91c4b39a35dc121d43ec1bbbe",
+    "crates/crewroom-runtime/src/provider_gateway.rs": "089b1e3f311dd7207846890a248f09518d7b5ff93f6264b71215868bc2dc0d5c",
+    "crates/crewroom-runtime/src/provider_input.rs": "7b6afc214679c76e9c507eb00deb5f908e93788fc544a0a99d8db145acfb33cf",
+    "crates/crewroom-runtime/src/provider_usage.rs": "71f77df5dbcde5c61934e65efef1497960792c9837170ab73780a971784a551c",
+    "crates/crewroom-runtime/src/providers/bitbucket.rs": "823fbb2b6cabbfdfa9bef6ce142345fc68ddc619f97305e624f6fe06e4e0970e",
+    "crates/crewroom-runtime/src/providers/bitbucket_schema.rs": "963d2a5fadc4374810553a5c4a7eac7fe8cac59aaf5aa5c83cc0e5d08841f668",
+    "crates/crewroom-runtime/src/providers/config.rs": "af4ca702fc884f1f8403f51345c600840e3a6fd2607561fa6fb636da895ed512",
+    "crates/crewroom-runtime/src/providers/jira.rs": "b719039f3b2785152f2d3a5147af6055e705fd6c11685cefbb048187cb504a38",
+    "crates/crewroom-runtime/src/providers/mod.rs": "3aa91005558de716767953423297122f734ec307808759ea08ad0131a948a051",
+    "crates/crewroom-runtime/src/providers/schema.rs": "9a0b400d600809e6cf20fd8155e655542e43fee1f59191bbea745b4cdf1cfd10",
+    "crates/crewroom-runtime/src/providers/singleflight.rs": "1907ad11ebd7f5ff8bf5018b9425a7579a623d0f0b00b83e14c272b61b957ec8",
+    "crates/crewroom-runtime/src/providers/transport.rs": "27f8bf2255c7eb4a8abbbdee9a19b6171f203dfddb3dcd03f8fa727df9c60d76",
+    "crates/crewroom-runtime/src/publication/dispatch.rs": "d22814a408d1524998d0cfb1c8ebdceedff7aa9360c4ee6ab09a2b3024de4458",
+    "crates/crewroom-runtime/src/publication/mod.rs": "a20c516ea1070423131f788bbb164ce097dbc08073f166e59601068a690e23f4",
+    "crates/crewroom-runtime/src/publication/policy.rs": "27c196a27bd1f2f9fde0cf0fb7913e368866fd9ef63cc96fcdcd315dff1b3a0b",
+    "crates/crewroom-runtime/src/publication/prepare.rs": "000e69d35f451a81b9debe0c0cfb0d70e7cbe681b7d2244b9e5c2f8e63b6088c",
+    "crates/crewroom-runtime/src/publication_git.rs": "bc2380fe86ffe51dfffdbffc657fabf2119d2d549dbb4c7b44ceb226a1814234",
+    "crates/crewroom-runtime/src/publication_remote/lifecycle.rs": "b91f2ab8473d61a326a286e21f78102586c5042e746ca152f79710ce0a287b48",
+    "crates/crewroom-runtime/src/publication_remote/mod.rs": "3081432f71646f1faee86b028d641f0f0e53a0d35087dc6404d4a9ba408073a9",
+    "crates/crewroom-runtime/src/repository/claims.rs": "455ea0eaaab30cfd8df662e703736cbd730aeab0a2b36342a0291080b81f4b96",
+    "crates/crewroom-runtime/src/repository/completion.rs": "2cb1900fe0d2d49b2b44a48ae557ad6a453e7a98bec9786a0ff964ff443db18b",
+    "crates/crewroom-runtime/src/repository/edits.rs": "4ff6d02c47d5680e40366f1c667bb58054494c29b57eec29d5acecb927795e39",
+    "crates/crewroom-runtime/src/repository/files.rs": "0d6d061fa3ee00ff9be4cf660c1eb8496fa387cc956f8bf147fcbe5c0d72b74d",
+    "crates/crewroom-runtime/src/repository/git.rs": "15d8113da5b86012c92c30bf368d78dff42e8a1b2acdad038898b69da8e94f42",
+    "crates/crewroom-runtime/src/repository/git/lifecycle.rs": "15ccbedef76e0404cf4a2b491d097e6aa98bdaa6ee24096a1da74f0c69de1567",
+    "crates/crewroom-runtime/src/repository/git/records.rs": "67caa6daa1eff989cf485d713442e200b8cfa4cb6ec1615cc69379cb93c52d33",
+    "crates/crewroom-runtime/src/repository/git/shutdown.rs": "6b6f04e2339e05b1f384c77141b205a940b454c9e9b04524a6ea2e33d0213e15",
+    "crates/crewroom-runtime/src/repository/mod.rs": "cad8d36ca2d1d8f26ba9aad0bdb5d4c384aca0bfa3b76b8a6792666ecac0b330",
+    "crates/crewroom-runtime/src/repository/retained.rs": "d8aba228aa734fcbe6c301d80991a882e086cab163e6ac9207ceb6484f9d7fb2",
+    "crates/crewroom-runtime/src/repository/shutdown.rs": "cb936377a093f7923cd92fc9148ec11944b622bd01bf4ef7bd03408e4c7770eb",
+    "crates/crewroom-runtime/src/repository/source.rs": "f381ddf16bbd88623784e8df0aa04365e8413f556134f52a54ba9f4ccbca7052",
+    "crates/crewroom-runtime/src/repository/target.rs": "87b8ef0cf034d28a74f3813f047cb248727293df6abf247f4629857eb9266395",
+    "crates/crewroom-runtime/src/repository/target/cleanup.rs": "f6150cbf92dffec06e276cdab79d7033a8c6d7647fbec1bbca297fd357a117eb",
+    "crates/crewroom-runtime/src/repository/target/continuation.rs": "db7d56ffd36cff0876148ea96cc7d319d46252775070646ddd36f88b8bd9d0df",
+    "crates/crewroom-runtime/src/repository/target/promotion.rs": "6909b128651111c734ee8d2db13295ff78e8824e16531c1566afe01d4095ed8c",
+    "crates/crewroom-runtime/src/repository/target/resolution.rs": "4bb78bf40dfb42c16c88ffbd7b110dcd44468d12cf3f4a113c7f5909b6c90eca",
+    "crates/crewroom-runtime/src/rpc.rs": "64f8919cc425ba1edb1f1d638c0ae88f5b4659b9b2605d7019d5f157e9cf8144",
+    "crates/crewroom-runtime/src/rpc_frame.rs": "bd8c25a7997d3782ca33c8225f694b5af11b504862213d066a2e2f876a6e3c03",
+    "crates/crewroom-runtime/src/spec.rs": "5f8dafc783c2dce310bd618ac4ed7e0090238544d12e20717adfdc558b03e35a",
+    "crates/crewroom-runtime/src/supervisor/client.rs": "63979fe33703c5b74e54e19308774b09851609ed5b2c00b1beb69aff3eb4da25",
+    "crates/crewroom-runtime/src/supervisor/hosts.rs": "4331924b0ca3c76e3452495141c1e021d39c73f27e693fa52d6533adf7bb0c92",
+    "crates/crewroom-runtime/src/supervisor/hosts/launch.rs": "c04c775be230580415c3adf899102e3f3332fa1fe24659d40e67e050f57016e3",
+    "crates/crewroom-runtime/src/supervisor/hosts/observe.rs": "545c9c09ec4fb15325ab5fa0eaae0049ef975f644b8a51af01c67a5ecd0428d1",
+    "crates/crewroom-runtime/src/supervisor/hosts/recovery.rs": "cec87a3395a765832a62db6545e7f8a77b82508f531d4c479bf751d66bac5f4f",
+    "crates/crewroom-runtime/src/supervisor/journal.rs": "ff35ceb0ee76be2987626f26348361c83422eb095c0dd7651d7b4b13514ba4ec",
+    "crates/crewroom-runtime/src/supervisor/mod.rs": "2e6af2aeceef1dff8fb8908f5594086aeba5823fda035d9b9abb95da58ab0505",
+    "crates/crewroom-runtime/src/supervisor/tasks.rs": "fb908c578138d838fa228aab9c37fe773284282e0503797888b3aaaeb0f4d2c3",
+    "crates/crewroom-runtime/src/supervisor/workflow/configuration.rs": "7d331db7468e175e604ce48fb83e333e53e2cce10fbfd508e6d8438674fdda76",
+    "crates/crewroom-runtime/src/supervisor/workflow/context.rs": "b5e981339ac8ec3f3919dd188044ea595a1446b887a249c4bceab351fd96d1c8",
+    "crates/crewroom-runtime/src/supervisor/workflow/continuation.rs": "1b9c81cc0fcaa2bc52f9b6e336f0fa1aa5164cd8bebf0ae47a2c0c2f93f9b64b",
+    "crates/crewroom-runtime/src/supervisor/workflow/delivery.rs": "c6a25e1afea1281566a8bcec7f5d81623a2196c4f8cd3087df21ffda729121f4",
+    "crates/crewroom-runtime/src/supervisor/workflow/mod.rs": "597c09630a1f0d4b132019200786ba77e6fedb333c325fc782989b662c70d5bf",
+    "crates/crewroom-runtime/src/supervisor/workflow/preparation.rs": "4e5735acbb0be46c66dcecdab0d24a582ad3820da3f4c1d6a49113b8f260b5e5",
+    "crates/crewroom-runtime/src/supervisor/workflow/recovery.rs": "04016c2ed4cf628143b71c677d742726fe5e38430f5fa667c6f9fd2317e56719",
+    "crates/crewroom-runtime/src/supervisor/workflow/start.rs": "dfd6051ec8a6536c01777d205517b7b5681546aa27cea93ec4c45514e562071a",
+    "crates/crewroom-runtime/src/supervisor/workflow/stop.rs": "78a6baafde2624c9c7283bb5692eff0c5025859c178ef741e69bf1743655a500",
+    "crates/crewroom-runtime/src/supervisor/workflow/tools.rs": "221ba07b1d37e8c02fac86ccd625be693bb373aa0fe5dd33462d3f8232599a7a",
+    "crates/crewroom-runtime/src/supervisor/workflow/transitions.rs": "f532ae9f6a5e8acc0c0d26976f4da6089f9fb528ccba2cd61a4d1eb91ced75b1",
+    "crates/crewroom-runtime/src/target_refresh.rs": "714ce77d633665eb606ff7cf2d81b55899e3faf0bdce52f3b3852203d28cdc20",
+    "crates/crewroom-runtime/tests/container_command.rs": "b3044d72894f4819418fdf2d12324b81ecb6527d65c40cd0da01448ad3350f41",
+    "crates/crewroom-runtime/tests/host_protocol.rs": "f3d07528be81e20db53d79c16fcf1dc30df16f4f8c6b03762903bfa6f49c09b2",
+    "crates/crewroom-runtime/tests/provider_gateway.rs": "218462c2efa04b8e354a79cc73965650730b8f7a97b6095e1dc72332212014bf",
+    "crates/crewroom-runtime/tests/rpc.rs": "0774b905e05d3ecbd121c5550727341afab6c016c76b376ddb6197387245c3f8",
+    "crates/crewroom-runtime/tests/supervisor_tasks.rs": "d28a4a0ddaf219616693e6b3cdbf5946b3bd0f8b86b249ad455f21cadfba97e3",
+    "crates/crewroom-service/Cargo.toml": "1bc3187d436a1ea2958713617fb3c2e88cf584e2fcc07a6841c87ac08aa88147",
+    "crates/crewroom-service/examples/provider-daemon.rs": "a4095b2bf267018578ee1bb2de1cf9a3727a117efeb1ecbe6acb1617223096ef",
+    "crates/crewroom-service/src/execution.rs": "17c0387a7e8937d0820a68021b5f6470dd8094286d5d249ac44d75304101b45e",
+    "crates/crewroom-service/src/lib.rs": "96ac5787db04dbe367fde27ed59c76baa88268edae84ca62ac69cae1a4ba889e",
+    "crates/crewroom-service/src/main.rs": "4f4e2a9583e42f9e09d7a9278030db85e9cfeb742f705d95e3500ec6b4d39cea",
+    "crates/crewroom-service/src/routes.rs": "1295a17ecc8734df664450feeb1a06bbcb0e11d463ed86b8e1f3dd81e5a6a026",
+    "crates/crewroom-service/src/scheduler.rs": "81a5c5c725be623c978688d2ce86565dfe17de7d5cd92df4cc4a58d5d9092ab7",
+    "crates/crewroom-service/src/views.rs": "fe86803195cd263f650298d30ea844c0f6d55c0697d69aa70695407bc9fbf017",
+    "crates/crewroom-service/src/views/history.rs": "fa6429acf77fb3764570b69554ffa20a159c819cbb64b77b5879fb01027a0eaf",
+    "crates/crewroom-service/tests/daemon.rs": "08b8f158325aa26fa1b4599eac33bbf878fcc4d2d573748af37a24f30b84e900",
+    "crates/crewroom-service/tests/http.rs": "3cf4c9172dfa0c0b0faefc2c79f943276e1817607df4d50fe4128063e98ce761",
+    "docs/testing/fixtures/omp-model-catalog-2026-09-26.json": "beaaf07d178d6044f03dbb0b686c9acf44b20c56e79747ca2ea27a204103e055",
+    "docs/testing/fixtures/saved-filter-app/GUIDE.md": "4482d065429d09f38e08a6299e5bca877a69d978c28da812730a6df885b7b4c0",
+    "docs/testing/fixtures/saved-filter-app/browser.mjs": "3ba7dc947dd2852d92ce91ad1ff7e74549b49584171e6a1c3f8b4977a09e64fe",
+    "docs/testing/fixtures/saved-filter-app/filters.mjs": "dc3813c0416174bdaf779010f7b823c4c31cd4f023806c8780e365464f32182c",
+    "docs/testing/fixtures/saved-filter-app/index.html": "6164be037aa4e04de461417837fc33423d1225dbbe78e031340ae63ce2624125",
+    "docs/testing/fixtures/saved-filter-app/unit.mjs": "025a841f2b156d17106c62cd2314d2c3fd08665927c0af2eb8a9421e0438ef05",
+    "docs/testing/model-profiles.json": "1145fe98ed1ecd7affdfb7103a7179eb99c0425313cfb066232fbb7e353338f9",
+    "package-lock.json": "247158e6a19bb432bacb696a1951f2e8e17dc2e71047cb22762f1dc3faf1a9df",
+    "package.json": "c9c3a7caafcf1d211fea2289d1322872eac969b6d297efc5658b570c19678950",
+    "rust-toolchain.toml": "559f488c181e0e9e77cf17c29de663977f036ec7ff2e2060585714bf53c52d62",
+    "scripts/backend-fixture.ts": "543c89273d29d75ab673862b6675d445c8c67a3919423a328ee2a2b632992703",
+    "scripts/bootstrap-native.py": "375392221c47ad655ef39e4a7a9cad62187e1332a4c0ca8291be6a6c88821ad3",
+    "scripts/check-conductor-environment.ts": "0cac22405c8cca52143f514689b170ca0ba48db9c2044c7eb0bd845462d559eb",
+    "scripts/check-conductor-regression.ts": "2849a1bc5955f9d90f1e393a23e81ad7e08d19a90d88ae4b8ee436d75521c3e4",
+    "scripts/check-jira-intake.ts": "4599abb46f765e47ad9c9668320bbe329a7980028abd3995954e761dbf34073b",
+    "scripts/check-live-models.py": "0ed91c929db11dfd6f32050df041e809c3e47f3327a1ead0d920237d21d8a5da",
+    "scripts/check-omp-reuse.py": "244f8398add1a92c44a0fd728cb6301198cf3c71f8e2cd9b7f992a781347bdf9",
+    "scripts/check-pilot-migration.ts": "2a988c104040f48813abd40267a9cbd72b439034331585650e5f458cd20b124c",
+    "scripts/check-publication-access.ts": "1e328b06da225bfd2766e49f8fdc24328ca8d596c2141b5c877805f5c21f2c38",
+    "scripts/coding-driver.ts": "827583030b9c0c7e24ad1294b256b532453bd0bab998af2b0be6830c840a1c1b",
+    "scripts/coding_fixture.py": "cdc2542c26c1e8160ddcd61195ca82b9ecc96fa20472ca7f8aa058d1036fcd0a",
+    "scripts/committed_send_proxy.py": "ebf5a8b7de6410f008d3435cb87e7d87bd9fee2f43a601b00eec41b17dd08063",
+    "scripts/complex-driver.ts": "e8fa1168c5c9a4e1380e135f542cbe94f0ad1e3677d51f702701d9cf785ade93",
+    "scripts/complex_fixture.py": "6ab90f479d6cec37168dd4ca9afd5a080c93ead26c68f2e034201b928fde720e",
+    "scripts/concurrent-driver.ts": "52c09252eef6df13a33a9b6a8837480af39381eafa72bf7cd0ac59f2b1f282ba",
+    "scripts/conductor-browser-probe.mjs": "b81c1094caaaee00bac1996c2a0dc1935b9e57177754a28fb487f41bf64157c9",
+    "scripts/conductor-checks.Dockerfile": "93e5e1673d6ad1d35faa3028965539f603efb4e561d133eed47a9c067f672cda",
+    "scripts/conductor-integration-check.sh": "c4ae337b3b310e8607af2008efda6378090a5e197c664203b00c527f2843fcdc",
+    "scripts/conductor-integration.Dockerfile": "99a699c9e05fc6c3ad1ac808ed8535da7e877ce74d1cbd64b508e5bc29a7e224",
+    "scripts/continuity-driver.ts": "1ad9fa408d16cc36e2e24c7a5b4c692ef02ee0ffcf655e5ed2b16e769cbf00f5",
+    "scripts/delivery-driver.ts": "e1e9548db7a50cbf400f486cb56e53f9621a07c7eea265568a835045f79a8d68",
+    "scripts/delivery-provider-fixture.ts": "01c943c11140d96cfcdb05002145b66bd48dd6acc6717eb3289a4836b825bdc7",
+    "scripts/fixture-repository.ts": "3f87038faffaa33d13f49532677b5b3da23db7df1e636b8663ed5a7afa019ea8",
+    "scripts/installation-driver.ts": "1deedc5f13e4c3f106aa13552262a07c784764c07fc230e62d1044c600d5515b",
+    "scripts/interruption-driver.ts": "1f0ee69f46948946ce62eb947f1ccef75b3e3dec72cb7ade36cb6c4d55ecdd96",
+    "scripts/jira-driver.ts": "45414160cb8df02a44386922fbe14a25ee8c1389d540518e1e221408cec6495e",
+    "scripts/launch-native.sh": "eef0c15e3936fad9ac7f1a64550f9c45b6e89f8737a7f56763d32a6c1fa8142c",
+    "scripts/live-connection.ts": "fad580b0d43f0a79d6cb8453c0d407c8b3145e37ff70a7e567ee94b34ef8a0f6",
+    "scripts/live-model-driver.ts": "51a4cb81465640c1687a210a2d6577c8ec1a88abb1eef69609ea9a1b7aa67c6c",
+    "scripts/mail-window-worker.ts": "fdf8f6cb484fa302c24a3c461b39bca3eb0e83fc1ae9f71d78a84c96015dd137",
+    "scripts/mailbox_contract_fixture.py": "013c517dd0bc57cc6d0a89247b32beee82d5f470ec4427a7d76fd22887559aea",
+    "scripts/measure-native-footprint.py": "d465f6cc6f0d1107ce7b4373d8bcce7ce2f57da6addc0a521ba00515ec4b3641",
+    "scripts/messaging-driver.ts": "0baa119bc3e374abb8b52d12ac7b463fe85139507baae8c724935c970450a178",
+    "scripts/model-guard-driver.ts": "6fd7e3205ea326845b99976d570c7fe8890ae6d5978c6b879260407bc41d9059",
+    "scripts/model-policy-driver.ts": "245f4e10158a3c5739be1cf8298904cc55188f6d1ca4da987cdb013af00d9b04",
+    "scripts/native-installation-backend.ts": "2fe99632d3abdddd82fea7d1007cf373a3bed208892f06c66069f7c8b4f91480",
+    "scripts/native-installation-driver.ts": "b434b2ee2d2e84c62f5c687d1c4249f52fb79bdc90f543bd35b1cabb07be5941",
+    "scripts/offline_network.py": "8e5430d17df0f6ea997ff115bc9802be61f1e884f5c87c23c4d37e9c289c0f3b",
+    "scripts/omp_mailbox_pane_fixture.py": "762d21034379eaa16e0be3fd204b70e502cee03546d783694592895c2501ab25",
+    "scripts/omp_offline_fixture.py": "70a6871a711149533d42c67fdaec0dc50e4f946a76217e67c7e4a13afb7717f2",
+    "scripts/package-native.py": "88662d320fceeaf52b8525bc0f329e22d43f6198df76b701b3bd6010d81fd2dc",
+    "scripts/prepare-rust-mail-test.py": "4f63b13d2f77cfe7141f5404e48c7b21b768dee759758a86ff29b06661a62d48",
+    "scripts/probe-omp-external-messages.py": "592b5b102fbf913f40d828e680ed1666a1b58f7d956c5f1a98449ca05185b487",
+    "scripts/probe-omp-roundtrip.py": "1c53c7b3789629f8730e272e29577a45164ec01e29b932ec8f1cc9debc781189",
+    "scripts/probe-omp-rpc.py": "67e2431a85bf69ff17c4d53cdeb6e7a820a6b95cfaef8feda78b76f147586fc9",
+    "scripts/provider-recovery-driver.ts": "036fef6122799d32e6b5479fcd71567d717bca23dbca1b2b07325fb5e0bc2df3",
+    "scripts/receipt-restart-driver.ts": "4f84900aaa671b823a787b03ca39675942dca50e93a88ff13e4a79c32b9fb5ce",
+    "scripts/results-driver.ts": "6d2dca2c3d0ece14e19a0459631d457670c68df3f8a85240d608aa11baf6bef3",
+    "scripts/run-native.sh": "9c88a07aa32b88006b4ff2fd4bbc29a50e96c5275aa1f105e7712f87380c16ec",
+    "scripts/run-offline-suite.py": "dc4437cf0d6f32e156563a6c2e14f11a499bb9d74358ae8884d762185097422f",
+    "scripts/runtime-driver.ts": "8e917a51f798b53ed8af1db4a87b04e1933dbb557a376d2cfd90421a6165128c",
+    "scripts/runtime-observer.ts": "f9cb9d6d0c4e95b63a407899d7918126cb303dd0f61cbd5504b067d6c817ab21",
+    "scripts/rust/bitbucket-boundaries.test.ts": "a9aad5458b418c2388052c1ee517f7cb96596d06de73f96dcbc363bd94485f6b",
+    "scripts/rust/bitbucket-client.test.ts": "59079eef8bc52e1973e4c57fd8901e77b715588944e53726fd8d34db9ef29899",
+    "scripts/rust/conflict-promotion-fixture.ts": "f6d48a32a313a2cf767fcc56fed0e76438a54c548100ad7c3cd4ded81c507c5c",
+    "scripts/rust/conflict-promotion.test.ts": "e1c14c5ac4816f7470df776e3939351f218d84f1a2f0b619568c3cc6c611acf9",
+    "scripts/rust/conflict-recovery.test.ts": "7eaadad706fedfc1576611db9060c85f5d82cc109c5095492a00e889976f729e",
+    "scripts/rust/container-adapter.ts": "96930eb597f47554a80a7e25b9461d945c300a79c554a1afb111ee95e452ad5a",
+    "scripts/rust/container-extra.test.ts": "ace493cb5eee3c359e375a88263e9471eefe2bbe26014ce5275c15086d81c7b4",
+    "scripts/rust/daemon-client.ts": "4089e023e2b0e2d1f31f120c6d53461ce5e59fdd8b2e07691a4267388281b00c",
+    "scripts/rust/daemon-fallback-live.ts": "580ac474f395b2b1946dfcf420ec4ef771ee3e6bf86dd88d5d730eeebd564de2",
+    "scripts/rust/daemon-interruption.test.ts": "2b194bca8e70fecf56f3aa4f3fca84c6ea76adbde3ec2e931266734d3d4293c6",
+    "scripts/rust/daemon-scheduling.test.ts": "dba3c7ede5fd94f8190eecec3d56b44d6ff1b8b72effd54469b6efc973f3c641",
+    "scripts/rust/daemon-workflow.test.ts": "af115771737e718eb3ec451ab9241da8e4e2b87cbac3ab97fe4f2ff1d7e5a73c",
+    "scripts/rust/evidence.test.ts": "9ef7ef79042e25443f922d9c20d8db0a4774f2ca5095aa658a68077a9df6b016",
+    "scripts/rust/export-roles.ts": "3c228c8390db93b3596992c7dcc940b1b68cb87708f2629cf545bcfafde4412b",
+    "scripts/rust/export-schema.ts": "be77013a3dda00c306ea0ea3d11e49d673230dc39ec899103e7979c3ad9ff775",
+    "scripts/rust/gateway-adapter.ts": "27c37cf5fbf269afbada116a2aa7c8c21f9b1aa9bb2ee17a116147b8c2d1ff7c",
+    "scripts/rust/gateway-compression.test.ts": "4d13feb34fa2a45674529a3dadfe120dafb11e0724b76f30f9bd7290dfeec9b1",
+    "scripts/rust/host-container.test.ts": "1594d8f8e8537bed73c7aa82edc89b276480acecf2a1c377214fd5820421ac9c",
+    "scripts/rust/host-contract.ts": "da04b539bb3fe1c2cefc30fe9ecb0a0b17c3eacebea5fed5722fe95a264b1990",
+    "scripts/rust/host-fixture-rpc.py": "7e8a85f43f5ab38c69f190e0c5b3022bb0ea091ff7d8e31600ad0d2f637b8c5d",
+    "scripts/rust/host-fixture.ts": "c2b5d2d43d41238456a543c02116997cfa5b33a9e39ca77d57ad5074f76ce2f0",
+    "scripts/rust/host-journal.test.ts": "e47766706be3a3e4dcb885bf6f59f2d268e7d43eeb4d9bfebc3ce9b1829c80a6",
+    "scripts/rust/host.test.ts": "1597e7b749ccd16542582346a1cb37f958a5afc76db6c07582c9437fc144a6c8",
+    "scripts/rust/jira-client.test.ts": "193ce7142cc9e8e2b9da334f566db3db4e76e88729f628f105aad770d9967918",
+    "scripts/rust/jira-delivery.test.ts": "4d95f97435813a6b21dc362be16498d0afc8dbee5662b3ab5c207bd2e708ac6b",
+    "scripts/rust/jira-durability.test.ts": "2920fff29f0270d1a42fa863ac4e2736f0bd5be9fa38abef6cfaaf5bd359c823",
+    "scripts/rust/jira-evidence.test.ts": "ea2960dc0b163c184446bf145b518c027310f85105a32300e84a7a5342a3a81f",
+    "scripts/rust/jira-sync.test.ts": "a56bdd2fd8b42e231270bd517fabe50e134b04fbfdb4e483a7026e41d76c642e",
+    "scripts/rust/jira-workflow-fixture.ts": "bd42b067962319f61346cb24e99a3d5e4baab277cdf69e92297226cbb7c670be",
+    "scripts/rust/lifecycle-corpus.ts": "2b72ed988f29a95cffea213024ca6cc6eacd9600856ce7d7ce0bf4f6f7e60466",
+    "scripts/rust/mail-adapter.ts": "79b0cd091b578748dbf635eb90c7c3c2a8e6a3eb66b47092e006e1aecd7a059c",
+    "scripts/rust/mail-window-worker.ts": "b65f550a09650a8b881a32f381617c4772a27a4db3290f9091cc607696bae901",
+    "scripts/rust/mail.test.ts": "c6c371de66e7f3b9b1e01ffe1be0cdd22598cfa5bc720a1ac6507613c79c6d70",
+    "scripts/rust/messaging-fixture.ts": "ef8ff631d398ad7882e7430740f2ca96091a917afde57afa301a5ea113485a13",
+    "scripts/rust/messaging-live.ts": "d10f33603cd1713b52555a97837bed27be9ef59cafcd205b07d202991e7585cf",
+    "scripts/rust/messaging.test.ts": "ffb215024fe2d1609e4acacfdde4eea71e36038d6c247d29abd6b6af2020f864",
+    "scripts/rust/process-adapter.ts": "7d61a2f76a30531f147deb0753e27f4c5062c0bde6a39dd9f25287d5cadfadcd",
+    "scripts/rust/process-extra.test.ts": "f6493a7b654e3ad36cb662b92f8456c8932fc9fcce2e7a6f5551c818543b928c",
+    "scripts/rust/provider-client-adapter.ts": "03755ef623c6e4865a8c9bae9830f89c9352327d5f8d9f15c4a8b1a3307b87ba",
+    "scripts/rust/provider-config-adapter.ts": "c5c970b9b1d40a206cc119d304d9df7d7a21cea9cffbd1e164e390e77b327e81",
+    "scripts/rust/provider-config.test.ts": "bd39bf45514db477c27f763e8f6e6586ba67e10e34ca4e955a56522979a70c32",
+    "scripts/rust/provider-transport.test.ts": "f3c156c3041d175eaaac3d7af9e5be0f2453964e65f5f6b46fd507ae4028db67",
+    "scripts/rust/publication-git-adapter.ts": "5b1f1d78979fc584237df3e36ea244b180bb1236869e8d40cef71cb85bf81536",
+    "scripts/rust/publication-git.test.ts": "0795bab105e692f78683dcf80fa015eba9d834a8632347ea64c161e7f42be612",
+    "scripts/rust/publication-recovery.test.ts": "b18f11291653f4357519d931f7ad38f39e6cd5ef8058cc4e5124ebef29ce4796",
+    "scripts/rust/publication-service.test.ts": "9991427928d3ebe561f9e2ed928ccd116d62b92c63410b029b6f13bb3a8eb1ec",
+    "scripts/rust/publication-successors.test.ts": "661d0f296108506e32b73b07c9ac75ec30d3f9c74a853726b00aba9358a835a2",
+    "scripts/rust/publication-support.ts": "31e138f00398467b8f8692220d6537b73ff7a26af1b591f3a7515f8e7ea4ff2c",
+    "scripts/rust/publication-workflow-fixture.ts": "19139ae80fe94e0f42e91f345efa082e3da381c07ac64ea35cc7407109217fff",
+    "scripts/rust/release-profiles-live.ts": "11ca36568ae4804f445c134901ae82a93dcae1524257ecad39c83da5433b8c50",
+    "scripts/rust/repository-adapter.ts": "dde0f6b52a48e258b58dfd1428c5d1ff02ac39638eaf347de81c2f0e89951686",
+    "scripts/rust/repository-shutdown.test.ts": "bae67a6bb2cda142dc6203124a61d8231f6de42e49014eb3e66d29b5954b8076",
+    "scripts/rust/repository.test.ts": "bd8b63e3640d865d1371f965b7d532d7aa1ea88130152aebf3ea488a6f9fe67a",
+    "scripts/rust/retained-work.test.ts": "a0a09c17e5a65c55135ff2458ad4c97656e6b4284a9a77cfa4aa716c930f4bf8",
+    "scripts/rust/supervisor-adapter.ts": "4f75c55f02f7d678e850594448ded502bf333a9f77a55ef3f222a70b9f06b4c0",
+    "scripts/rust/supervisor-cleanup.test.ts": "bbcb647bec28aadd0957ac4ccadd140b35069d52aad289963b0d771e127a67ef",
+    "scripts/rust/supervisor-lifecycle.test.ts": "384e1f16dc6c41059a06ec2b33be1088b417ddcca41860c5ff5e4f36b30ca995",
+    "scripts/rust/supervisor-observation.test.ts": "31ac4b261ea5789da86a0b8d6909b6e8aeee5b6da585284bb80ef923d768b136",
+    "scripts/rust/supervisor-support.ts": "d89e30e8bab4244f7a8257d8798849a4f9c39d722d318544fc5c59a4e3aa01ae",
+    "scripts/rust/target-fixture.ts": "53871b745c1450e1811cf8f387daa08c3b0924ceca667ea9327b8e7af3368128",
+    "scripts/rust/target-refresh.test.ts": "14a3ea2d50a50a1567155d99e595a37607eecdc22f03844668b667410a8f1c21",
+    "scripts/rust/target-service.test.ts": "d6a3ee3709f01f1d31302baf419baf184a1d056af3a0f30691c223414631805c",
+    "scripts/rust/upgrade-legacy-audit.test.ts": "7d0f61521ba96c24a2008583f3b832e1d84bb7b9851ebf3623947dd13d5f0562",
+    "scripts/rust/upgrade-parity.ts": "3da1d54094459d344b3b521514dce06a6a8ac7bad3e611b47afbfb8077320965",
+    "scripts/rust/verify-attempts.ts": "95c688af77849dc89c16a5fdacbdcbfdde8c0fcb3b284e38616a588d7244a125",
+    "scripts/rust/verify-boundaries.ts": "224dd6c48f847f470e20b3bb7455a16e5884de2d9feebdbb9b75ebd068cfb466",
+    "scripts/rust/verify-closure.ts": "9edd60c3f37da381f1646f4fd5a8b1545ad54b410ab73ad34d38ee5099b86776",
+    "scripts/rust/verify-compatibility.ts": "258462d7e7c4fb76587d0a5209476f2820bbf456b1b36b67818e084b5ee3d711",
+    "scripts/rust/verify-containers.ts": "113a6ae0fd7ee3cd4ad212b5c941bbbc480823f450047dcd0d8edf58579c3c6b",
+    "scripts/rust/verify-continuations.ts": "dc1f5d0f08a35ded1fbab9c7661b9110689eb154bce069311e14a7ce193f136c",
+    "scripts/rust/verify-dates.ts": "be7b23aa130634678aed6bae8ef94f99d28637938ffb2429424a8150b648f5a4",
+    "scripts/rust/verify-gateway.ts": "6112aa9425adf078b40fd8564377abf31f14987f97bfd7813c917d4e3d205be5",
+    "scripts/rust/verify-host-protocol.ts": "74215943ee936b6b9493d0ca916b89b315a1c2643cab7946ed2ee8ad22ba7830",
+    "scripts/rust/verify-learning.ts": "b35afa59747cf983bcaf390056ecb0a17636983fc34b1d7a9420d6f5fdbc74db",
+    "scripts/rust/verify-mail.py": "b7fcded68128ab30e36d11d43684e0d04e8f3456d2dcceb636d0c58f7c1795eb",
+    "scripts/rust/verify-messages.ts": "b1500f5b57bb41a86b5f575a1c6a4c6b3fa6857cc3ca96dc2740c16b73e9ad88",
+    "scripts/rust/verify-model-policy.ts": "125dfcfbbc214215fabdf819a460655fbdc1a9179fe661f09810d7b7d2701057",
+    "scripts/rust/verify-observation.ts": "2817d894bdd7909214ae783636ad7ccfb77faa49018fd0750690ddeb892270c3",
+    "scripts/rust/verify-omp-gateway.py": "6d3f4e1cd2f81e04ad01e45cba39f1522eed1e95e51b841b72517bdb35b68983",
+    "scripts/rust/verify-omp-host.py": "253552441e8552e01abfe7ba272f0d861c32205dea2f00ca7b204f766428228a",
+    "scripts/rust/verify-omp-rpc.py": "5ac9662c3c1570c0cbdbd199334c9321f90fdef74e39e9f0bbd5ca4bc33540f2",
+    "scripts/rust/verify-omp-supervisor.py": "f10885970ab8a718a1e5917e76dc32787c07482e576b442f555e0126ce5f6d23",
+    "scripts/rust/verify-operation-map.ts": "b13e0d9608252385ad139a1e3868c4bfbff27594c0d3ebece5b1f3caf9cd5005",
+    "scripts/rust/verify-outcomes.ts": "cd18b71c56c13f92cfde3f3f6108ef826a3f26632cf34858584e4a81d70a1344",
+    "scripts/rust/verify-processes.ts": "2d5501e39ec779380c09279137ee2b9dfd201187127f8032a58d138ba083d0e3",
+    "scripts/rust/verify-provider-protocol.ts": "dce4d634c85278dce80a1fd122f5f80ad87710406912efaecaa2bcb13c9c32e0",
+    "scripts/rust/verify-providers.ts": "5c99a4830da59c38f773aa279553f3e57c85349c1381b884c251fbdbaff17cb3",
+    "scripts/rust/verify-publication-policy.ts": "be08cfea3d2f7a461dfb6a56f63775123b244e47f7cec35a06e1b82688b36bd5",
+    "scripts/rust/verify-release-models.ts": "e9be810645c77d90be9a1df73fa97e0cb24ab351a295d7f88422950c8f241adb",
+    "scripts/rust/verify-release-profiles.py": "04d83f8dd55f330e6393771fe8fb46824de4a8d00e81a553c9cff72966adabfa",
+    "scripts/rust/verify-replay.ts": "37301c09acfa3d7870b13c4584000041ce18391ebffb666b0f16040817b08e36",
+    "scripts/rust/verify-repository-work.ts": "37839e82ee7272b862457f8ca4ac7c387f6f77b3d6afa2ce6de2fbff5c25a4d7",
+    "scripts/rust/verify-scheduling.ts": "d1e8a28b9b8aea3422cc3aa3d21cef119a3ae849ab283b6b852ee46f594551f4",
+    "scripts/rust/verify-serialization.ts": "858778954eb803972f528b443f083cd4b96f2e7b1c5ec953e878e4ce55385151",
+    "scripts/rust/verify-teams.ts": "be858396c4ca7c2d6c188aa2d0bf55d97f3b8d288003f82dd27f7bd85b615ff4",
+    "scripts/rust/verify-workflow-inputs.ts": "ee67f6781a5b375296430fa8f249f2ca613354ca377d0587b109aaf35934b381",
+    "scripts/rust/verify-workflow-live.py": "d3797344b30162e040bee10c1458cb04cbae40f3ca78e0c9a9a85d333abad5c3",
+    "scripts/rust/verify-workflow.ts": "a4683218ae24a9091398ae26ed08961a92e2e95ec4307d89a1379bb9af4c4ac3",
+    "scripts/rust/workflow-coding-fixture.ts": "c4d9581f5d89b81a1c7ca482e6afc2178a9abb9929490246c884b15d98b59779",
+    "scripts/rust/workflow-command.test.ts": "ce6f029e7aa7f04a2e931a608a8060e7e5987479b029877ce2cad199f053d21e",
+    "scripts/rust/workflow-configuration.test.ts": "24be393678947291e8775f6d810a3212ca7691c491648c82cb60f362e402289a",
+    "scripts/rust/workflow-delivery.test.ts": "238a17aebe9fa0bbb5b547a5fb5684ef27597e5c8e551dd6ec331bb3f8d5b129",
+    "scripts/rust/workflow-fixture-rpc.py": "b451342cb148eb92e729a37b649754297dc5d12d8937d934748d503ff3f2c7d2",
+    "scripts/rust/workflow-interruption.test.ts": "0aa8ffebcfd2565d785f7841424c5a4cea6f27ceaaeafd9d5864d3f55570d285",
+    "scripts/rust/workflow-lifecycle.test.ts": "e9c8778d92a0cd8d9f8a5ea3c14d3bd61d1c9b9c1533145537c7eb1e78727780",
+    "scripts/rust/workflow-live.ts": "e1339925f95f24323cc36831d74d4c0f74ce42363d85d5672bfbe6a295ad8758",
+    "scripts/rust/workflow-providers.test.ts": "8ed3acb083c54fed278573ca554c6b18aeb9b5de1916d6f3ca0a3b1999ea2341",
+    "scripts/rust/workflow-recovery.test.ts": "a997ff3b251f9023e4f179886ed0c63c4169ac32cc0849d090d46917ac89b781",
+    "scripts/rust/workflow-support.ts": "dd582bfc770009a751740ae4f8bca68249bfd4631360686dc2e0d11a5c33735f",
+    "scripts/rust/workflow-transitions.test.ts": "b34da9360eeb6a5c3c7e15ace2d242319870ed8b7e429166d7751dc6fc977ca2",
+    "scripts/send-recovery-driver.ts": "79ed19d02d287c67c8133a1d921575eaaebb7da05359f399d7726d7d2a871551",
+    "scripts/serve-relaycast-probe.mjs": "1618ef27c3e4a7ca7b21870b0bb8f030c64af9ed20367df8d5c553855efd0f2d",
+    "scripts/supervision-driver.ts": "8748f98f853be73d0ac3786af5c68e07327ecb1632021ca5ade25859f45aa1ff",
+    "scripts/team-driver.ts": "a8fcf0a1ca785b7339a98a5cb4e0d76b9c370f03c61a2b3297a3de63d740d1d7",
+    "scripts/team-restart-driver.ts": "7dc79d1788c9d0f15b8c77be2f019924315c6a6a2b86fbe8ef7af330132ddcc3",
+    "scripts/test-application-continuity.py": "b1abefdd5be8f48531b018dc1f8b3ce8fbabc0c443ee19cd1b31b55f22805c30",
+    "scripts/test-application-interruption.py": "61a11af6eb361f748798004c89b6ada151b96564a13f42cfb02049d835fb44f7",
+    "scripts/test-application-mail.py": "067535e65436ed448dc446378c76baa18cfdf5970a14190facd302279d4da854",
+    "scripts/test-application-model-guard.py": "b7264c4919e300fa0ff2d84feae88793fe27d65bb237d1eaf4f863118284c634",
+    "scripts/test-application-runtime.py": "9cd177d9ec6cda86cc7eb8483f30f48c5541af10c4dc7641b8d32bfaf3d86c9e",
+    "scripts/test-authority.py": "5e674f0750d7e9b80019f9a47c705a46f11695611f992c23acff17e5f4203994",
+    "scripts/test-installation.py": "78995e4e2b7aa3b4bb3ed7e45f7e8c12d9569e0c46c1941408e0f1aaaf714cde",
+    "scripts/test-mailbox-offline.py": "0c18cbf32f7b61b4fee26d8bb32f3680a603e70bf06b59a46596c7e2b498cbae",
+    "scripts/test-model-preflight.py": "30a3d4cff0114d28e88c5030351d7e57b1b774178fd3a22f6caa719a2afc496f",
+    "scripts/test-native-installation.py": "ef4402732c41d7cc2cdd33329165d93b7ee5d20ee8dd05438c385f49e248a46f",
+    "scripts/test-native-launcher.py": "3283617696e1ad159804619d261e5755ee1b9a85e901332c58b8f8f59b48e188",
+    "scripts/test-native-package.py": "753837ffa9b7b62874a2e6c56ec2a56a5bbf8d74adc7f649c0a25bbb3540e4f0",
+    "scripts/test-omp-offline-faults.py": "bc84f5a179cf447ec2bd6d221393ddc8c7183eb70bf2978f942e525154b42d66",
+    "scripts/test-omp-offline.py": "5d5d4d838cb455f87ff0041295cac538f25ed056046fe7f54c9fbfdbdad1eb85",
+    "scripts/test-provider-matrix.py": "7e16eeb82b875fae8cd908d29a70c1a50591957f0060f5d73bb3343a8d38de93",
+    "scripts/test-provider-recovery.py": "e44c1ab1b859bb86bdc531afec2be334f49cac8b067337f962dc5c1863e69412",
+    "scripts/test-rust-mail-offline.py": "5193970396011e4c6a62cdca956a76645ae6fdd299d51df39fef6403a3443e95",
+    "scripts/test-rust-mail-omp-tmux.py": "c165ecb4c2725e2409428102760f810108ffb6ebaa9e0a6c6c5243432970da69",
+    "scripts/test_release_manifest.py": "141325bfcb2f808b2896ffe53c01331bab49e3899241302a3d2ee4f2c544387a",
+    "scripts/validate-native-release.sh": "0e6c92fcd203a7fd086891e211c0baef3ac2424ca0afbe119a871bc1a7c045f7",
+    "scripts/verify-omp-roundtrip.py": "5be7e0ae11e863f60290c343e1ea5061b11d2b793c383d69ac92ddd70b6d89a9",
+    "server/active-time.ts": "31e7b5f96646a937ee46f2fbfb7d59ed3fc15cd308e5bad482c3ddec7715618c",
+    "server/app.ts": "ae46553f5b44b86ef293ea0e6cb407703f1ab3b411dfcdc08f30fa4a977b9e98",
+    "server/bitbucket-client.ts": "3755fbc10720a3a9384985ebd065d0e85660911c13ace9c907e4a593ace8aab2",
+    "server/check-policy.ts": "f00878ab4122f0abddf6a9164c5cd63fa8ac32b80c98d6f9c36bd8238fa31a0e",
+    "server/checks.ts": "24fba142303ff12d276c4be3c2a5a4882a7adc392600183410f0f7f803e426ea",
+    "server/coding-scheduler.ts": "d0a1c1cc1b6713855ba37174e4ff29ba348a362097f4bd3507ad2f393458f8a7",
+    "server/coding.ts": "4ab37269f2efe36a85b89971352b44187d5f2b743ae46d4b67d9843dd24c38b5",
+    "server/continuation-request.ts": "a8cc36631d0616376a0bffdf90bfe2efeac9e8d2bce2dcfc217048b0100f6412",
+    "server/evidence.ts": "d0c04059241d7bb61f8d296aeeb1d8d5771c2897bde7fd0883f525b55c9a92d9",
+    "server/execution-policy.ts": "abb2945f3251ba01296ff51e597d7673d38df6dd134a53e4cebcce7b9f4cc04e",
+    "server/index.ts": "abde2cd3002767a8fa52491d2b1f48a654708116eb64dc5eb39c71b64dc234ac",
+    "server/jira-client.ts": "611044e9149711ba65a4eae72e0f07b4c2b533c818489be1162a257886101d4f",
+    "server/jira-connection.ts": "08c5cc3da4dc30f928801fe290a709f04a982c73d8389868a133f3bd9cce75a7",
+    "server/jira-delivery.ts": "10e2977730c1b13b9ce79693095f510d440a9345f6eb5ff159b29dde34fbdaae",
+    "server/jira-sync.ts": "aa69530b11fb847db434d19211536ee604019229db62d340b4666d695b31c979",
+    "server/jira.ts": "b80cdaeabad4425e52cfc1e165277d97b4051db2d2870d87678bf35b1598ab43",
+    "server/learning.ts": "f7197bfd62999b80cd3fee5963c22261c3b3f9926d1a795644499c00895c2c46",
+    "server/live.ts": "88be79de57ffe9c9a506a261b16b31a5e386f7d5ae969746a642d01ec73fd984",
+    "server/publication-connection.ts": "8962b29a21c5bd88b6e91e870ef2ed262ab3783f870b9b2438812cd4381dfa78",
+    "server/publication-git.ts": "862983bb35ad788ad44445b78b910d00178738a4b55458d805f8f973fda55233",
+    "server/publication.ts": "774d251127e057d310fc688deb2224a51b6f122278e50b111c1d5c21b87040a5",
+    "server/repository-configuration.ts": "db725ca9a402f5c5d6ae011170bd4e0c4fcdd47bab43249f05ed83331234bf75",
+    "server/repository-request.ts": "8814ade31e95932accc1ab9da3855c229489239dd7568c1dfe734e198483bb16",
+    "server/repository-work.ts": "6c00736f5a4f31f0a1680cfd866af1b91af4be507e2dc1909f4a4a3f997b79bb",
+    "server/research.ts": "e9e0a8f6e0d3dc58faea1539d5a1773b1fe24c563214ae711f841bd69d914a50",
+    "server/results.ts": "6915adeaedecf67eea74a5615faca47bfd813af5e6e67c5b764c8089830dd583",
+    "server/roles.ts": "0095596aa24a1fcd33067ef79195abe0225503d51f3a83733e31cf9613fe582d",
+    "server/run-continuation.ts": "2f0e5fe3e27f436ede5686a46360609e8142cc7ec2d70e7a63106805cd1eea10",
+    "server/run-history.ts": "035a07510b8d22d87263ad539871422c92a8d662ae7172ffc5e831d352ebba4a",
+    "server/run-launch.ts": "356c43759357256393f92340a8c1945b8b205d0bf6e98144a95afee951ecde09",
+    "server/run-lifecycle.ts": "a838d614db28cebfa51ecafae529c23dee0f1b191686bcbe805016912f59c291",
+    "server/run-usage.ts": "9d176a9ee92f1e2fcd9d0b0325f7270077aae2c968215e1985804bd3900a1c26",
+    "server/runtime/brief-request.ts": "6769c1c74efe88f4d20241065d090f108ad6d457bf82fec56cedd48ea790bc4f",
+    "server/runtime/brief.ts": "bed17342122fa5099b151ae85d3fca498295dcbd5be50dafcc78d7a926ac1cb3",
+    "server/runtime/coding-tools.ts": "1481197a35c162dc2ed1ccf225fc8a2b1edaa6554e572f4b84cd4908e89e15b4",
+    "server/runtime/container-command.ts": "fcffc9aa03a2bc2091e64339125eee7551c4dac74754d22d75a6a27039953227",
+    "server/runtime/host.ts": "fb26ad266558c5bf7c80370109f0aeb53443eedf343bdda04944b42b9ba31597",
+    "server/runtime/inputs.ts": "7578b3b12c99325a7dfdb717f30a80895daa593c6b3277e58e09fec44ba59a14",
+    "server/runtime/jira-tools.ts": "5c9de1c066a09f9d995d2268774bb3b2d0a34821fd12887c2061ed01d5a5b78f",
+    "server/runtime/messaging.ts": "0eb5b0dd065d0ae5bb7b88c8d3557a675f02f0dd146dfbfc324d14678da9f2ed",
+    "server/runtime/model-policy.ts": "2ef7e46eccaa70769003cbbb061d53967d74f42ebdf28eec48c717e552c01ca2",
+    "server/runtime/observation.ts": "4fd77bf9600c9d7ea75da2e4311c2a175788ce12db5c60f566d1db8d2669e8bb",
+    "server/runtime/pane-format.ts": "9067aaa0e617968e59ce16fba1f15c146ce3f14a0753dd121dbf8cf3b7390689",
+    "server/runtime/process-lease.py": "348892e2088c2106e88ced99479deb1df8763082fee3c573cd859aaf9fbca215",
+    "server/runtime/processes.ts": "436713ece4206843f3fc889b01063205814ecf5e2a8b12e4d5bd789ad77bf801",
+    "server/runtime/provider-gateway.ts": "db56f873a3e95bb6cb4bf00136286fce8b0ad694e71f648d435bddb902c230a4",
+    "server/runtime/provider-input.ts": "f269e8b92816086945c7d1a64154ec52e6ebef1b18b8aedd7b682e149e683b47",
+    "server/runtime/provider-usage.ts": "ea025bc8144748a745e0ca990dc795076642c0134a63fe4ba6a1fbe3a5f9f01c",
+    "server/runtime/publication-tools.ts": "3b32501f9f3d165c9ebec2e5634dafe132a259be89c65b145b69882cb240abdd",
+    "server/runtime/research-tools.ts": "9007b6663266452e035cbe4c9916a2519deea2afd3bbc22e0b7cd8ff8d961ad5",
+    "server/runtime/rpc.ts": "160da3cf73e7724b10d0c66c04e99c144e3b00b5074a8470575551a146092c41",
+    "server/runtime/supervisor.ts": "4bcec605f1a7158663ae874fe0b2c626c47a169d4976e775fbe85b866ea928a7",
+    "server/runtime/types.ts": "310b5061f408811f7a968c4fb7b3e6dbc24d019ca582002e897a3faab67f4a68",
+    "server/seed.ts": "6563abc9e2722dcc9320d6a370352386854c083c1dd7d654945add9594c67384",
+    "server/target-refresh.ts": "1c1eac738885a4b32a2bceb9f4d4b62fd024cbd59f50f7fd89102ab70c80ab9e",
+    "server/terminals.ts": "90dc41ee3eaa40c73d8840c67e22d585d3633c4d66d2968e9eaf772e1c872bf4",
+    "server/workbench.ts": "42758cd84ce350916af44d6bfe052bdd1da0bb87b038bf64639eabcc9e7a769d",
+    "shared/delivery.ts": "280dcbead3b4b6da5b49409866ab772a7b78728eae1924b35c48bcf233738d98",
+    "shared/evidence.ts": "a592170f96f91475158afdd455b5963f0d64eb2c68c9bb5814bb11a75a592014",
+    "shared/insertion.ts": "ff9a9c2ab525cf3c73bb29c0be5009dcc0d0dfefd3476020c6bae62b6aae0688",
+    "shared/jira.ts": "c7a13836a973b7ff30519e1d7e199eebf9b42ce52a256061a7f6771f11e5b720",
+    "shared/learning.ts": "50b5665cfc34a8a22b592e46b6580b88c0465e6c8492ba8da80420447da22f7c",
+    "shared/publication.ts": "722e0796aabaa46785bb147435b63e5bcea534d5d372423f3b54cbb1d9fb4edf",
+    "shared/refinement.ts": "eebf5414f76998c33b632e4f87689b3519f76cdcae08f971f5a689a6d25b397e",
+    "shared/repository.ts": "55a5d838dcc8291e5eeae38ea6124973e620f499ce7d3bad5fb1ce907727d30b",
+    "shared/requirements.ts": "cc7fbb9fb529de19f3b90a852a4f413358d8b2266b059422b7c28510896553fe",
+    "shared/research.ts": "d9737313fa5b01bbb2c406ece2204d3014607fed10762e10933d4d35befe51b2",
+    "shared/run-history.ts": "04de6b60a921e6970b69b022ddd4464c080f037f51028a78d6d7658282f0b8b4",
+    "shared/steering.ts": "aac4501347206fde5c9947870196dcc5b2569757b4b2ad71bba194dba2f5582c",
+    "shared/types.ts": "36a474c0ecfa76eb333cb4748a0b5d4d705469513f900264830ed024dcbff7ef",
+    "tests/active-time.test.ts": "42c03db5408b89e9bc81f0e47a35ec2e4e9b7fce44593f2e1b476c00e3b8c7f4",
+    "tests/admission-adoption-review.test.ts": "dace1b04eed93c52f05f0410a14bb0815cb60260581782bb9ab3e9492417cd55",
+    "tests/admission-restart-review.test.ts": "0e9a051fa02f20fcd2ceb885ed7cf044de9478dbb38de0bf6e4211e2fe05725c",
+    "tests/assignments.test.ts": "e0274f6ece0312b744906947393ad72d6d324a79b6d8fe1e5af9d83a8e404493",
+    "tests/bitbucket.test.ts": "650cc6fd8544506374d5ec1483abd14aff58974e74d8ea908833c966f2e3ac03",
+    "tests/brief.test.ts": "cd095354e58e8b09ca4fb3d8a687f46586d1c4a290e188f11bd56b20bb3ef464",
+    "tests/cancel-continuation.test.ts": "44fcb3b0f00a5a22783d63f7d6873579d7b544bfa08c78f7a8d1966c9c7ce217",
+    "tests/check-environment.test.ts": "d2772d2d5462cc8a007370539a0f40ce9db815ee09a979e8ce8cc6873ab0782c",
+    "tests/checks.integration.ts": "5159a983903142b6862b6a2908e29fff492ef24ec8b004b06783accda7c785c3",
+    "tests/cleanup.integration.ts": "ef01c99f0d51e0c767f0c065778be1be21d2f0c484d45521154f9cf2d367d72f",
+    "tests/coding-slot.test.ts": "0afdfefcef3058ffa5ca60d818208372e988e89fe07df34a03618ef572e11b01",
+    "tests/coding.test.ts": "146dd2df4152a27b891fa23364fef8089a4f923c01f9a038285c753683cef3d9",
+    "tests/container.integration.ts": "5fc0cbe8dfbf0981ea0e4ff257df352042a538573d470f4ba7cf216409d624b9",
+    "tests/delivery-notices.test.ts": "4db600ca67330ca09df201840eb1d2a8acde32a1cd520b34e629e7acf5fa6be9",
+    "tests/dependencies.test.ts": "cc0edbec23195bc4f85eedab549030fc67cd940df22456117ec7a57c4fb67c47",
+    "tests/e2e/cancel-continuation.spec.ts": "ed54d91082d695e5470d75c6919c21c9f7d302b83ee094ff0f7c645a0e53f9c3",
+    "tests/e2e/check-environment.spec.ts": "df35af2dd459f7e9debff1762a0dd231233fbf00ad9954d230e34dfea68f1e8f",
+    "tests/e2e/cleanup.ts": "a2c9955933d4a06702075090fe0b69a0413e57ed44fe25c190a7ab65be1c1c60",
+    "tests/e2e/feedback.spec.ts": "e862a65cddc1fb79c38ac17ed443278085cb6b78606ef82d373ce491aa977796",
+    "tests/e2e/history.spec.ts": "06e973dfa772b2d463f9040274c9bda3338b8a6be35f1884df43fd2fb1480ddb",
+    "tests/e2e/insertion.spec.ts": "09ecdda3689f247f015b7ae33890b56b700743f4e3d3b6ae888f0b423e65f2b8",
+    "tests/e2e/jira.spec.ts": "10317866fb5752f06ebae36fbc9550bcb45dd690c1d62c86508d04e72d1382f8",
+    "tests/e2e/learning.spec.ts": "8d717afe1ed62e257f005c696e17e7c9b23ad14fa8666d4ba25f92a32751a5f4",
+    "tests/e2e/process-fixture.ts": "97d3589be75c92dff57e4b61694aeede83ce4c6b43f229bc62db24aaf397ec2a",
+    "tests/e2e/publication.spec.ts": "0ff2f406a2b72b485e5d8a06c0cec1ceb4ed733a998d717d373f02c1ca048d17",
+    "tests/e2e/refinement.spec.ts": "99d94169507506db143ed4fff1aa85a2607ba3597fea6c0447e7840b9ae12cc6",
+    "tests/e2e/repositories.spec.ts": "b4315b15d34bf76b9c722cdc8affffe63f79da292c29912a8b2510d98f286782",
+    "tests/e2e/research.spec.ts": "06b17d69e56f0e09e850e207b4d0f19bda6be2a22ac67b91291b80760f4ee4d2",
+    "tests/e2e/steering.spec.ts": "e794129b80907a20d15f450bda67cac64e03bf4be6837a650d2cca82f0ca207f",
+    "tests/e2e/target-conflict.spec.ts": "0475d6354a2fc664046dbf7b1856d07065ec67ac345c1a9343c0d314d3e80c13",
+    "tests/e2e/wall.spec.ts": "424a42d2228b68290f45e3dfe84c11c24ddcf1085a1276f644910494db946bdb",
+    "tests/e2e/workbench.spec.ts": "6bc9da39e3a44b42a89356e495006c56f5260f76c1fd909ad0adaf31799ac122",
+    "tests/evidence.test.ts": "1defcc98e13d539bab56c3a14637bb2baac0ee975f50c15dbbb0bf1e78bd2a55",
+    "tests/feedback-continuation.test.ts": "6ca633aeae5bea4d4b4e0bb7c15845bf56fd252320261947155241b9a6c7ce54",
+    "tests/fixtures/cancel-continuation.ts": "edabf04850fa453c48a409300d369bee7c7be763dbaf6cfef795026e9fd20521",
+    "tests/fixtures/git-latch.ts": "ca012539b7aca5e61b01b85ead1a53ad2f935f94a0b83c9703245b5c139dc961",
+    "tests/fixtures/history.ts": "875b3bbbeb28c66bd4340c865e7dc652cffcfe571c1489d9a5618c17af320e19",
+    "tests/fixtures/insertion.ts": "c4396dd3ffab201be617c266fcf4e236564f2a2df89b152e5c43a127754b5c13",
+    "tests/fixtures/publication.ts": "036db1b6352f8ea8d145d4a886cdb51ea7024e3a64a92763facdd663c8d61779",
+    "tests/fixtures/repository.ts": "41cd8da36d83ad148370a1ca92f37351de60c9da03e15285d6c884c9319af567",
+    "tests/fixtures/steering.ts": "a8df0926a4998fe050afe38ae3759e81892c2e3493f467233e97cd579764167f",
+    "tests/http.test.ts": "fdba217d377ea19878df37ae2da3ab3403089780d16d2f18f1ded18d54135eb0",
+    "tests/insertion.test.ts": "82c61d35e31853df7ebd18cb6e91589a3ad0dba7c84517da95971c6217ffdcdf",
+    "tests/jira-delivery.test.ts": "1b04622bfccf7293d356b1ccc14cbea45181f7357a335505729ac4488d37049a",
+    "tests/jira-sync.test.ts": "434e543f30dc5576def6f0a267b670c31197ccb8ff3322f74748e57246a3acf1",
+    "tests/jira.test.ts": "dc066ac79054f4cdaedbe4f8047fec77902a680761f4ba6c6346c8a9994f2fcf",
+    "tests/learning.test.ts": "3af8b7c23ddca46901661276ee0136215a844cb19633eb3e2fbaca9c1a7009bb",
+    "tests/live-viewer.test.ts": "6b4ee47dbc4d4244d9be06f1048379375648d05c489fc092b21476db11505284",
+    "tests/live.test.ts": "9303fa83e3192502634a84c745180e1698bb2df5503c518f11c073c135caaf0c",
+    "tests/messaging.test.ts": "dbdb71ed45d55fa657a33e149f3436853c8caafd8ebd7aa05ca24aa9b317af70",
+    "tests/model-policy.test.ts": "86079df9144d84175ae43801dc8ab564eb95027e85f70b6f68500beaa375c383",
+    "tests/observation.test.ts": "17701c13db2e52d496aa5e55b7f9c7ff306b23fad3b731304768fb5457aa1417",
+    "tests/processes.test.ts": "03217b01048b0bee2765cda8890aa458e2049d5182a59ab1df16d1cbc3e3d44b",
+    "tests/provider-gateway.test.ts": "35f8c105a19d157ac03d56ae61b1b6c13850c2d741bace0f5bbb0df5ccfb9642",
+    "tests/provider-usage.test.ts": "e859307362a772fd1c04a6231acbe15e12778a66a8bdaecc53795b881791ea5f",
+    "tests/publication-connection.test.ts": "a1e636f045480796d1737f7651a2601f0d17372a352df1848b03eb478a37034d",
+    "tests/publication-git.test.ts": "86e7cec7f6c98a856e596b12b6eef6524b30998aab291b46f923f150eb3e6ff1",
+    "tests/publication.test.ts": "933bc5a64da75dc1d5a02a75d8ca3392b3800f2cf3ddc765dacaafab5cb67dba",
+    "tests/queue-http.test.ts": "0c73c77d7abc54322a3a34ab28ec83f7e1a7a7210b198b3652bdcae6aa20b2d5",
+    "tests/queue.test.ts": "2cbbd6e0645df91aa3f65e0d7f6c2848b08e0c6175c564112c752a0f2d2db109",
+    "tests/refinement.test.ts": "027f4d3d39f927a2af62c481a6ded77a575c31994ab7d67c84c30cd1a072f4c8",
+    "tests/release-contracts.test.ts": "eb00a2b9b385a0b5b535b3d92b14968d9f39b9deb49890cca07e7ea625d39c8c",
+    "tests/repository-config.test.ts": "c217eb12ff722db06828659c12bae16a2702af111c5843ea0d800dfe44c45e15",
+    "tests/repository-http.test.ts": "f0040136de024bc271a4d8c62d3ef1d1086fb426f37ccde1d150b38458ca03a9",
+    "tests/repository-work.test.ts": "8ffc628b2e64f2ee86406b8d729be51b3762db862f42bad44437541e4e6ab184",
+    "tests/research-no-repo.test.ts": "9b4c7f351bf3ffd239e0d94a0d46526d5c4c9e7e56bec978bc523e69c831716c",
+    "tests/research-review-repair.test.ts": "d6a3d1651fb15f359bd987b68badab7d1eeecca431f0c8073da7beca3224417c",
+    "tests/research.test.ts": "2b7281637b91764a02b233e0c276c3a34e227e3033e99d0647ed449903ee1660",
+    "tests/results.test.ts": "0d8129781e471ccbf143799f229795a404e1ff5b0dce05d6a037ef6bf1ddead9",
+    "tests/roles.test.ts": "a67d709e52f68ec475b1e2347ad9538e8c948ee23e89f59e9fe5bde6e0f885bb",
+    "tests/run-history.test.ts": "0797a70e7e20562f8b4425b2017bfb917074cf9b8a25ad5647f9ec567ade533f",
+    "tests/run-lifecycle.test.ts": "51ef40984f157666a15ec45c8f385e948a3bdde70185dd6c9803ef43f1b14186",
+    "tests/runtime-fallback.test.ts": "72ae62da20769c6b66ca5e762a08923b2876caa514a1c895b3e0990c529d5136",
+    "tests/runtime.test.ts": "57857b4ee1dcc56f16fe5e1a849fec4afa147431d9b3ca11c72a063916e3bc13",
+    "tests/scheduler-http.test.ts": "3b02ce982f252418212cc50865481d73c52ad47c61d17de7847beebe303a231b",
+    "tests/scheduler-replay-holds.test.ts": "f8d724eeb98da9272234b0adbe574adc98c981b5b4f38eff548fd033808c8ceb",
+    "tests/scheduler-review-repair.test.ts": "a65b05b2739e67b06caa400bf7d3c8ab1c09b6a4275febe1986de75160ad400c",
+    "tests/seed.test.ts": "7fa1251d144f3049ff587ee416520aaff5b16802e25034f886c643ffa42cd907",
+    "tests/steering.test.ts": "c1c6c5c90cd418ef3f210c374f9fe5a73ea00eb4f27ebb7fa20e6b44925f8232",
+    "tests/store.test.ts": "837528f66b6f5c2e8c772a31ebf26092c0ae6dcc72281fe85764783c7ec23475",
+    "tests/supervision-hosts.test.ts": "0091227f4508234e8becd27249a9966efd40b6c97dbfa01e5151c9f90a6be414",
+    "tests/supervision-load.test.ts": "53c85a10395950ca8456c28609d116faceb9b763fb38fdebff5cbe2bdb6d8dbe",
+    "tests/target-refresh.test.ts": "3f91f8c9f6a2768a1c89b8a26250dc0155b9c71d88606039f0817a871b2a6b7d",
+    "tsconfig.json": "141c91cf30fbf8a7b6c54517154eaed04e4dd15c6ea35ad446de9755025850eb"
+  },
+  "baseCommit": "3917c70661db1f13c7c87da2c3889646236c303e",
+  "checks": [
+    {
+      "name": "fmt",
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exitCode": 0,
+      "seconds": 1.192,
+      "log": ".crewroom/test-results/native-acceptance-map/final/fmt.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sourceUnchanged": true
+    },
+    {
+      "name": "rust-tests",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-core",
+        "-p",
+        "crewroom-runtime",
+        "-p",
+        "crewroom-service"
+      ],
+      "exitCode": 0,
+      "seconds": 42.796,
+      "log": ".crewroom/test-results/native-acceptance-map/final/rust-tests.log",
+      "logSha256": "cdc170aa8cbad619710cc8a27384a2a33db8cee037c9f045ee6ce769928a31b2",
+      "sourceUnchanged": true
+    },
+    {
+      "name": "schedules",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-core",
+        "--test",
+        "release_schedules",
+        "--",
+        "--nocapture"
+      ],
+      "exitCode": 0,
+      "seconds": 2.018,
+      "log": ".crewroom/test-results/native-acceptance-map/final/schedules.log",
+      "logSha256": "87205741a23a4c4bc9642cf9dc0ee54ba3e803013a28b2b7d5447b65859dc4cf",
+      "sourceUnchanged": true
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "-p",
+        "crewroom-core",
+        "-p",
+        "crewroom-runtime",
+        "-p",
+        "crewroom-service",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exitCode": 0,
+      "seconds": 9.029,
+      "log": ".crewroom/test-results/native-acceptance-map/final/clippy.log",
+      "logSha256": "eac37f6b94df98211d15552ac0e67c343919b5d80a9634a2e2cb3d1a623cd2c7",
+      "sourceUnchanged": true
+    },
+    {
+      "name": "types",
+      "command": [
+        "node_modules/.bin/tsc",
+        "--ignoreConfig",
+        "--noEmit",
+        "--target",
+        "ES2023",
+        "--module",
+        "ESNext",
+        "--moduleResolution",
+        "Bundler",
+        "--strict",
+        "--esModuleInterop",
+        "--skipLibCheck",
+        "--types",
+        "node",
+        "scripts/rust/verify-release-models.ts",
+        "scripts/rust/release-profiles-live.ts"
+      ],
+      "exitCode": 0,
+      "seconds": 0.378,
+      "log": ".crewroom/test-results/native-acceptance-map/final/types.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sourceUnchanged": true
+    },
+    {
+      "name": "models",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/rust/verify-release-models.ts"
+      ],
+      "exitCode": 0,
+      "seconds": 0.509,
+      "log": ".crewroom/test-results/native-acceptance-map/final/models.log",
+      "logSha256": "d0983517ebae25482313d960718fdd1bc69cc5e630c9a5a19c4d41c3e2602162",
+      "sourceUnchanged": true
+    },
+    {
+      "name": "baseline",
+      "command": [
+        "python3",
+        "scripts/rust/verify-release-profiles.py",
+        "--profile",
+        "baseline",
+        "--output",
+        "/private/tmp/cr-n7-matrix5"
+      ],
+      "exitCode": 0,
+      "seconds": 17.503,
+      "log": ".crewroom/test-results/native-acceptance-map/final/baseline.log",
+      "logSha256": "425dbd12e21e14bd0f8f9ed0c2641e34bb1db60fec8d838a7cdb45fd6240f0f5",
+      "sourceUnchanged": true
+    },
+    {
+      "name": "heterogeneous",
+      "command": [
+        "python3",
+        "scripts/rust/verify-release-profiles.py",
+        "--profile",
+        "heterogeneous",
+        "--output",
+        "/private/tmp/cr-n7-matrix6"
+      ],
+      "exitCode": 0,
+      "seconds": 16.098,
+      "log": ".crewroom/test-results/native-acceptance-map/final/heterogeneous.log",
+      "logSha256": "4ee04b284dc9354404291770e835838da4b86c1afbcf56c2471c3a8d655be823",
+      "sourceUnchanged": true
+    },
+    {
+      "name": "rotated",
+      "command": [
+        "python3",
+        "scripts/rust/verify-release-profiles.py",
+        "--profile",
+        "rotated",
+        "--output",
+        "/private/tmp/cr-n7-matrix7"
+      ],
+      "exitCode": 0,
+      "seconds": 16.473,
+      "log": ".crewroom/test-results/native-acceptance-map/final/rotated.log",
+      "logSha256": "198f361bf287e5c47eb657decc46fdd1dd19c1b5d0940ea4925c964d6827dd2c",
+      "sourceUnchanged": true
+    }
+  ],
+  "passed": true,
+  "binarySha256": {
+    "crewroomd": "c65c0415506a330865c64d55803977664a42ebe2921b9c43c87d7191eb4258a1",
+    "crewroom-host": "704412e5da467e7e8a99e834f4ad2318906ebbb548501cda9c4b57d058c88ada",
+    "crewroom-process": "4d59e1987aaf2f6e415114db5c1c58ff7290679c7aded39874a80d8d8f5e10d1",
+    "examples/policy-oracle": "45acf4d15a856a78cedd6ae2907df5a60402b1800748f6559a7bbaf641cf555f"
+  },
+  "recordedAt": "2026-10-04",
+  "scope": "Close native acceptance mapping gaps G01–G04 with bounded fixture evidence. No production runtime changes, UI acceptance, release build or active-data cutover.",
+  "rustTests": 143,
+  "models": {
+    "passed": true,
+    "catalogBindings": 950,
+    "namedProfileBindings": 57,
+    "profiles": [
+      "baseline",
+      "heterogeneous",
+      "rotated"
+    ],
+    "inputSha256": "46425f60802309ceae5393f68a9b3b5382dea28dd4d0faf4a2773c4f83d98784",
+    "resultSha256": "d7b8b8399d14328baa66d85ea7e3f1451e6595ee8c36d25a9cdc59a73d6d13ee",
+    "boundary": "Pure Rust/retained policy comparison of every captured role/model identity and profile binding. No provider calls or execution eligibility claim."
+  },
+  "schedules": {
+    "seeds": [
+      7,
+      42,
+      20261002
+    ],
+    "eventsPerSeed": 100,
+    "executionsPerSeed": 2,
+    "sameReplayTrace": true,
+    "logSha256": "87205741a23a4c4bc9642cf9dc0ee54ba3e803013a28b2b7d5447b65859dc4cf",
+    "boundary": "Same LCG seeds and operation distribution as retained release-contracts test. Actual native SQLite duplicates, delayed receipt, reopen and terminal cancellation. Assignment records do not execute processes; this is not random OS crash injection."
+  },
+  "profiles": [
+    {
+      "profile": "baseline",
+      "passed": true,
+      "localRoot": "/private/tmp/cr-n7-matrix5",
+      "reportSha256": "5dc3a5d2a8a31c2531bce7ea324a4a27939ed8f5b01567ba24cf6542ca0af734",
+      "nativeProofSha256": "13ca4f0afc7da5e25deef24aead731bc562d54a0433a55063050820e6d770557",
+      "providerRequestsSha256": "f6f1e70f0dc2b99544be3e41054af3e9b37d1bd7c1dddc4535ed759fe13550c6",
+      "driverLogSha256": "d99d2be3f55e34912d74b96a5c70e883401d6004746b78e306826e8719fe8f8f",
+      "modelRequests": 10,
+      "providerErrors": [],
+      "guard": {
+        "fixture_port_allowed": true,
+        "external_denied": true,
+        "other_loopback_denied": true,
+        "child_egress_denied": true
+      },
+      "mail": {
+        "binary": "/Users/crewroom/.codex/worktrees/native-upgrades/crewroom/.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail",
+        "sha256": "554d6f0a06d73b2907940350228232f2b479f96630a73ff6b85e590a12b98075",
+        "release": "v0.3.36"
+      },
+      "runner": {
+        "version": "omp/18.4.12",
+        "sha256": "1a81bd323ba6d67374adf5645fe52e194671416e15c69ef17ac18e32b42c55ff"
+      },
+      "identities": [
+        {
+          "name": "Coordinator",
+          "mailboxName": "BlueLake",
+          "role": "coordinator",
+          "assignmentId": "5dfa4461-4e30-4999-9774-7f9fe0240fab",
+          "attemptId": "715db84c-1a71-4165-b393-db94eaee0c45",
+          "hostPid": 40425,
+          "ompPid": 40428,
+          "sessionId": "01a1056b-6600-70c0-9640-5e371a847f95",
+          "planned": {
+            "provider": "aperture-openai",
+            "id": "openai.gpt-6-sol",
+            "api": "openai-responses",
+            "inputs": [
+              "text",
+              "image"
+            ],
+            "efforts": [
+              "off",
+              "low",
+              "medium",
+              "high",
+              "xhigh"
+            ],
+            "tools": true,
+            "selector": "aperture-openai/openai.gpt-6-sol",
+            "effort": "low"
+          },
+          "observed": {
+            "model": {
+              "provider": "aperture-openai",
+              "id": "openai.gpt-6-sol",
+              "api": "openai-responses"
+            },
+            "thinkingLevel": "low",
+            "sessionId": "01a1056b-6600-70c0-9640-5e371a847f95",
+            "isStreaming": false,
+            "autoCompactionEnabled": false,
+            "hostPid": 40425,
+            "ompPid": 40428,
+            "sessionDirectory": "/private/tmp/cr-n7-matrix5/cr-wf-qTTghE/runtime/715db84c-1a71-4165-b393-db94eaee0c45/sessions"
+          }
+        },
+        {
+          "name": "Specialist1",
+          "mailboxName": "GreenCastle",
+          "role": "product-strategist",
+          "assignmentId": "35f7e573-669e-4c31-8913-44ef38b72fa1",
+          "attemptId": "9b237b0b-a6a9-48f4-acf7-65f8bc23a6c6",
+          "hostPid": 40439,
+          "ompPid": 40442,
+          "sessionId": "01a1056b-6948-72e5-9a50-f8adfd8c721b",
+          "planned": {
+            "provider": "aperture-openai",
+            "id": "openai.gpt-6-sol",
+            "api": "openai-responses",
+            "inputs": [
+              "text",
+              "image"
+            ],
+            "efforts": [
+              "off",
+              "low",
+              "medium",
+              "high",
+              "xhigh"
+            ],
+            "tools": true,
+            "selector": "aperture-openai/openai.gpt-6-sol",
+            "effort": "low"
+          },
+          "observed": {
+            "model": {
+              "provider": "aperture-openai",
+              "id": "openai.gpt-6-sol",
+              "api": "openai-responses"
+            },
+            "thinkingLevel": "low",
+            "sessionId": "01a1056b-6948-72e5-9a50-f8adfd8c721b",
+            "isStreaming": false,
+            "autoCompactionEnabled": false,
+            "hostPid": 40439,
+            "ompPid": 40442,
+            "sessionDirectory": "/private/tmp/cr-n7-matrix5/cr-wf-qTTghE/runtime/9b237b0b-a6a9-48f4-acf7-65f8bc23a6c6/sessions"
+          }
+        },
+        {
+          "name": "Specialist2",
+          "mailboxName": "RedPine",
+          "role": "ux-principal",
+          "assignmentId": "f9600237-1b6b-4713-8127-b77495232214",
+          "attemptId": "f6191e89-1572-4516-9fca-e5e65e7c4348",
+          "hostPid": 40452,
+          "ompPid": 40455,
+          "sessionId": "01a1056b-6c97-772a-8320-21c3ca0dfeb3",
+          "planned": {
+            "provider": "aperture-openai",
+            "id": "openai.gpt-6-sol",
+            "api": "openai-responses",
+            "inputs": [
+              "text",
+              "image"
+            ],
+            "efforts": [
+              "off",
+              "low",
+              "medium",
+              "high",
+              "xhigh"
+            ],
+            "tools": true,
+            "selector": "aperture-openai/openai.gpt-6-sol",
+            "effort": "low"
+          },
+          "observed": {
+            "model": {
+              "provider": "aperture-openai",
+              "id": "openai.gpt-6-sol",
+              "api": "openai-responses"
+            },
+            "thinkingLevel": "low",
+            "sessionId": "01a1056b-6c97-772a-8320-21c3ca0dfeb3",
+            "isStreaming": false,
+            "autoCompactionEnabled": false,
+            "hostPid": 40452,
+            "ompPid": 40455,
+            "sessionDirectory": "/private/tmp/cr-n7-matrix5/cr-wf-qTTghE/runtime/f6191e89-1572-4516-9fca-e5e65e7c4348/sessions"
+          }
+        },
+        {
+          "name": "Specialist3",
+          "mailboxName": "SilverHill",
+          "role": "tech-writer",
+          "assignmentId": "ccd0c861-0b4b-4a49-af58-b56637dd4191",
+          "attemptId": "7f2ee821-4e56-41c1-a91e-66936024ef4f",
+          "hostPid": 40469,
+          "ompPid": 40472,
+          "sessionId": "01a1056b-6ffa-7667-9463-5a2a2b801786",
+          "planned": {
+            "provider": "aperture-openai",
+            "id": "openai.gpt-6-sol",
+            "api": "openai-responses",
+            "inputs": [
+              "text",
+              "image"
+            ],
+            "efforts": [
+              "off",
+              "low",
+              "medium",
+              "high",
+              "xhigh"
+            ],
+            "tools": true,
+            "selector": "aperture-openai/openai.gpt-6-sol",
+            "effort": "low"
+          },
+          "observed": {
+            "model": {
+              "provider": "aperture-openai",
+              "id": "openai.gpt-6-sol",
+              "api": "openai-responses"
+            },
+            "thinkingLevel": "low",
+            "sessionId": "01a1056b-6ffa-7667-9463-5a2a2b801786",
+            "isStreaming": false,
+            "autoCompactionEnabled": false,
+            "hostPid": 40469,
+            "ompPid": 40472,
+            "sessionDirectory": "/private/tmp/cr-n7-matrix5/cr-wf-qTTghE/runtime/7f2ee821-4e56-41c1-a91e-66936024ef4f/sessions"
+          }
+        }
+      ],
+      "messages": [
+        {
+          "id": "c81a4979-c1fd-402f-826b-767994c04fc9",
+          "runId": "7e63986e-fd10-45d3-98aa-b66d65103996",
+          "attemptId": "715db84c-1a71-4165-b393-db94eaee0c45",
+          "toolCallId": "call_4046ec9f68e741edb1bd5cbe98de1562|fc_4046ec9f68e741edb1bd5cbe98de1562",
+          "from": "5dfa4461-4e30-4999-9774-7f9fe0240fab",
+          "to": "35f7e573-669e-4c31-8913-44ef38b72fa1",
+          "body": "NATIVE_HOP_1",
+          "createdAt": "2026-10-04T05:38:10.148Z",
+          "disposition": "received",
+          "transportId": 1,
+          "recipientAttemptId": "9b237b0b-a6a9-48f4-acf7-65f8bc23a6c6"
+        },
+        {
+          "id": "b3145a74-7856-4f91-a60f-b029ee9bc138",
+          "runId": "7e63986e-fd10-45d3-98aa-b66d65103996",
+          "attemptId": "9b237b0b-a6a9-48f4-acf7-65f8bc23a6c6",
+          "toolCallId": "call_f17c860e204c4e169198a9310513bc31|fc_f17c860e204c4e169198a9310513bc31",
+          "from": "35f7e573-669e-4c31-8913-44ef38b72fa1",
+          "to": "f9600237-1b6b-4713-8127-b77495232214",
+          "body": "NATIVE_HOP_2",
+          "createdAt": "2026-10-04T05:38:10.463Z",
+          "disposition": "received",
+          "replyTo": "c81a4979-c1fd-402f-826b-767994c04fc9",
+          "transportId": 2,
+          "recipientAttemptId": "f6191e89-1572-4516-9fca-e5e65e7c4348"
+        },
+        {
+          "id": "b2db3b0e-1be8-4c37-a280-ae3c345ea760",
+          "runId": "7e63986e-fd10-45d3-98aa-b66d65103996",
+          "attemptId": "f6191e89-1572-4516-9fca-e5e65e7c4348",
+          "toolCallId": "call_e47df789fbde420382a945c9a627d27f|fc_e47df789fbde420382a945c9a627d27f",
+          "from": "f9600237-1b6b-4713-8127-b77495232214",
+          "to": "35f7e573-669e-4c31-8913-44ef38b72fa1",
+          "body": "NATIVE_HOP_3",
+          "createdAt": "2026-10-04T05:38:10.800Z",
+          "disposition": "received",
+          "replyTo": "b3145a74-7856-4f91-a60f-b029ee9bc138",
+          "transportId": 3,
+          "recipientAttemptId": "9b237b0b-a6a9-48f4-acf7-65f8bc23a6c6"
+        },
+        {
+          "id": "527d4a67-1135-481d-a8b5-461bb25a7a6d",
+          "runId": "7e63986e-fd10-45d3-98aa-b66d65103996",
+          "attemptId": "9b237b0b-a6a9-48f4-acf7-65f8bc23a6c6",
+          "toolCallId": "call_d2c13065e97d472ebb5589426f7731a1|fc_d2c13065e97d472ebb5589426f7731a1",
+          "from": "35f7e573-669e-4c31-8913-44ef38b72fa1",
+          "to": "5dfa4461-4e30-4999-9774-7f9fe0240fab",
+          "body": "NATIVE_HOP_4",
+          "createdAt": "2026-10-04T05:38:11.130Z",
+          "disposition": "received",
+          "replyTo": "b2db3b0e-1be8-4c37-a280-ae3c345ea760",
+          "transportId": 4,
+          "recipientAttemptId": "715db84c-1a71-4165-b393-db94eaee0c45"
+        }
+      ],
+      "externalMailReceipts": [
+        {
+          "transportId": 1,
+          "messageId": "c81a4979-c1fd-402f-826b-767994c04fc9",
+          "body": "NATIVE_HOP_1",
+          "sender": "BlueLake",
+          "recipient": "GreenCastle",
+          "ackAt": 1791092290317488
+        },
+        {
+          "transportId": 2,
+          "messageId": "b3145a74-7856-4f91-a60f-b029ee9bc138",
+          "body": "NATIVE_HOP_2",
+          "sender": "GreenCastle",
+          "recipient": "RedPine",
+          "ackAt": 1791092290630719
+        },
+        {
+          "transportId": 3,
+          "messageId": "b2db3b0e-1be8-4c37-a280-ae3c345ea760",
+          "body": "NATIVE_HOP_3",
+          "sender": "RedPine",
+          "recipient": "GreenCastle",
+          "ackAt": 1791092290962151
+        },
+        {
+          "transportId": 4,
+          "messageId": "527d4a67-1135-481d-a8b5-461bb25a7a6d",
+          "body": "NATIVE_HOP_4",
+          "sender": "GreenCastle",
+          "recipient": "BlueLake",
+          "ackAt": 1791092291298444
+        }
+      ],
+      "allExternalReceiptsMatch": true,
+      "allOwnedProcessesExited": true,
+      "ownedProcesses": [
+        {
+          "path": "/private/tmp/cr-n7-matrix5/cr-wf-qTTghE/runtime/f6191e89-1572-4516-9fca-e5e65e7c4348/host-process",
+          "state": "stopped"
+        },
+        {
+          "path": "/private/tmp/cr-n7-matrix5/cr-wf-qTTghE/runtime/f6191e89-1572-4516-9fca-e5e65e7c4348/omp-process",
+          "state": "stopped"
+        },
+        {
+          "path": "/private/tmp/cr-n7-matrix5/cr-wf-qTTghE/runtime/715db84c-1a71-4165-b393-db94eaee0c45/host-process",
+          "state": "stopped"
+        },
+        {
+          "path": "/private/tmp/cr-n7-matrix5/cr-wf-qTTghE/runtime/715db84c-1a71-4165-b393-db94eaee0c45/omp-process",
+          "state": "stopped"
+        },
+        {
+          "path": "/private/tmp/cr-n7-matrix5/cr-wf-qTTghE/runtime/7f2ee821-4e56-41c1-a91e-66936024ef4f/host-process",
+          "state": "stopped"
+        },
+        {
+          "path": "/private/tmp/cr-n7-matrix5/cr-wf-qTTghE/runtime/7f2ee821-4e56-41c1-a91e-66936024ef4f/omp-process",
+          "state": "stopped"
+        },
+        {
+          "path": "/private/tmp/cr-n7-matrix5/cr-wf-qTTghE/runtime/9b237b0b-a6a9-48f4-acf7-65f8bc23a6c6/host-process",
+          "state": "stopped"
+        },
+        {
+          "path": "/private/tmp/cr-n7-matrix5/cr-wf-qTTghE/runtime/9b237b0b-a6a9-48f4-acf7-65f8bc23a6c6/omp-process",
+          "state": "stopped"
+        }
+      ],
+      "tmux": [
+        {
+          "path": "/private/tmp/cr-n7-matrix5/cr-wf-qTTghE/runtime/tmux.sock",
+          "stopped": true,
+          "connectionDescriptorRemoved": true
+        }
+      ],
+      "sameEightProcessesAfterSigkill": true
+    },
+    {
+      "profile": "heterogeneous",
+      "passed": true,
+      "localRoot": "/private/tmp/cr-n7-matrix6",
+      "reportSha256": "190a4f54e40a15ff56fec17f0c8cf3bd1d1cf03efb6220cddbec42e1ba4241e3",
+      "nativeProofSha256": "1f9484436815ef0079430579ddac4ec6ae29d7fa44398f726f9571bfd9e9b279",
+      "providerRequestsSha256": "fe2e0aa05bc5a315c74781897ffe8994d95c1f4fe84091c4a1b66a874cecc2ea",
+      "driverLogSha256": "e74d04310b50deaa4f43e7742ca177d69ebcaa06650d5aea8f477b1ef34192ad",
+      "modelRequests": 10,
+      "providerErrors": [],
+      "guard": {
+        "fixture_port_allowed": true,
+        "external_denied": true,
+        "other_loopback_denied": true,
+        "child_egress_denied": true
+      },
+      "mail": {
+        "binary": "/Users/crewroom/.codex/worktrees/native-upgrades/crewroom/.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail",
+        "sha256": "554d6f0a06d73b2907940350228232f2b479f96630a73ff6b85e590a12b98075",
+        "release": "v0.3.36"
+      },
+      "runner": {
+        "version": "omp/18.4.12",
+        "sha256": "1a81bd323ba6d67374adf5645fe52e194671416e15c69ef17ac18e32b42c55ff"
+      },
+      "identities": [
+        {
+          "name": "Coordinator",
+          "mailboxName": "BlueLake",
+          "role": "coordinator",
+          "assignmentId": "157e5008-bf2f-475c-872d-dc05a74a4375",
+          "attemptId": "f844e9da-0181-4161-a2e1-7aa0f1c14090",
+          "hostPid": 40687,
+          "ompPid": 40690,
+          "sessionId": "01a1056b-a651-72ad-9196-242f1fb1a286",
+          "planned": {
+            "provider": "aperture-openai",
+            "id": "openai.gpt-6-sol",
+            "api": "openai-responses",
+            "inputs": [
+              "text",
+              "image"
+            ],
+            "efforts": [
+              "off",
+              "low",
+              "medium",
+              "high",
+              "xhigh"
+            ],
+            "tools": true,
+            "selector": "aperture-openai/openai.gpt-6-sol",
+            "effort": "low"
+          },
+          "observed": {
+            "model": {
+              "provider": "aperture-openai",
+              "id": "openai.gpt-6-sol",
+              "api": "openai-responses"
+            },
+            "thinkingLevel": "low",
+            "sessionId": "01a1056b-a651-72ad-9196-242f1fb1a286",
+            "isStreaming": false,
+            "autoCompactionEnabled": false,
+            "hostPid": 40687,
+            "ompPid": 40690,
+            "sessionDirectory": "/private/tmp/cr-n7-matrix6/cr-wf-iZXK6v/runtime/f844e9da-0181-4161-a2e1-7aa0f1c14090/sessions"
+          }
+        },
+        {
+          "name": "Specialist1",
+          "mailboxName": "GreenCastle",
+          "role": "product-strategist",
+          "assignmentId": "553a4b83-c33a-4fc1-a143-702ca106c561",
+          "attemptId": "94bfc10d-0bfd-44bc-8b3f-9cfb91adb8b7",
+          "hostPid": 40704,
+          "ompPid": 40708,
+          "sessionId": "01a1056b-a974-7113-b872-54975cb7d70d",
+          "planned": {
+            "provider": "aperture-anthropic",
+            "id": "anthropic.claude-sonnet-5",
+            "api": "anthropic-messages",
+            "inputs": [
+              "text",
+              "image"
+            ],
+            "efforts": [
+              "off",
+              "low",
+              "medium",
+              "high",
+              "max"
+            ],
+            "tools": true,
+            "selector": "aperture-anthropic/anthropic.claude-sonnet-5",
+            "effort": "low"
+          },
+          "observed": {
+            "model": {
+              "provider": "aperture-anthropic",
+              "id": "anthropic.claude-sonnet-5",
+              "api": "anthropic-messages"
+            },
+            "thinkingLevel": "low",
+            "sessionId": "01a1056b-a974-7113-b872-54975cb7d70d",
+            "isStreaming": false,
+            "autoCompactionEnabled": false,
+            "hostPid": 40704,
+            "ompPid": 40708,
+            "sessionDirectory": "/private/tmp/cr-n7-matrix6/cr-wf-iZXK6v/runtime/94bfc10d-0bfd-44bc-8b3f-9cfb91adb8b7/sessions"
+          }
+        },
+        {
+          "name": "Specialist2",
+          "mailboxName": "RedPine",
+          "role": "ux-principal",
+          "assignmentId": "e5dcb16d-d8ad-4dac-9793-c7c29224f2f9",
+          "attemptId": "378ef993-07ee-4278-bc55-ccd85690e28c",
+          "hostPid": 40723,
+          "ompPid": 40729,
+          "sessionId": "01a1056b-acf4-7586-8b0e-41864ce07ce4",
+          "planned": {
+            "provider": "aperture-google",
+            "id": "gemini-3.8-flash",
+            "api": "google-generative-ai",
+            "inputs": [
+              "text",
+              "image"
+            ],
+            "efforts": [
+              "off",
+              "low",
+              "medium",
+              "high"
+            ],
+            "tools": true,
+            "selector": "aperture-google/gemini-3.8-flash",
+            "effort": "low"
+          },
+          "observed": {
+            "model": {
+              "provider": "aperture-google",
+              "id": "gemini-3.8-flash",
+              "api": "google-generative-ai"
+            },
+            "thinkingLevel": "low",
+            "sessionId": "01a1056b-acf4-7586-8b0e-41864ce07ce4",
+            "isStreaming": false,
+            "autoCompactionEnabled": false,
+            "hostPid": 40723,
+            "ompPid": 40729,
+            "sessionDirectory": "/private/tmp/cr-n7-matrix6/cr-wf-iZXK6v/runtime/378ef993-07ee-4278-bc55-ccd85690e28c/sessions"
+          }
+        },
+        {
+          "name": "Specialist3",
+          "mailboxName": "SilverHill",
+          "role": "tech-writer",
+          "assignmentId": "45171880-30b8-4743-aaba-5f49dc7089ea",
+          "attemptId": "3f31aa3f-0e54-446e-9051-3b87834d05de",
+          "hostPid": 40739,
+          "ompPid": 40742,
+          "sessionId": "01a1056b-b02e-7335-921a-f07c08e00f45",
+          "planned": {
+            "provider": "aperture-openai",
+            "id": "openai.gpt-6-luna",
+            "api": "openai-responses",
+            "inputs": [
+              "text",
+              "image"
+            ],
+            "efforts": [
+              "off",
+              "low",
+              "medium",
+              "high",
+              "xhigh"
+            ],
+            "tools": true,
+            "selector": "aperture-openai/openai.gpt-6-luna",
+            "effort": "low"
+          },
+          "observed": {
+            "model": {
+              "provider": "aperture-openai",
+              "id": "openai.gpt-6-luna",
+              "api": "openai-responses"
+            },
+            "thinkingLevel": "low",
+            "sessionId": "01a1056b-b02e-7335-921a-f07c08e00f45",
+            "isStreaming": false,
+            "autoCompactionEnabled": false,
+            "hostPid": 40739,
+            "ompPid": 40742,
+            "sessionDirectory": "/private/tmp/cr-n7-matrix6/cr-wf-iZXK6v/runtime/3f31aa3f-0e54-446e-9051-3b87834d05de/sessions"
+          }
+        }
+      ],
+      "messages": [
+        {
+          "id": "3cac07a6-1253-4115-bb43-71f80654baeb",
+          "runId": "293d5744-1b68-4dec-bffa-ad6f8bfd64cc",
+          "attemptId": "f844e9da-0181-4161-a2e1-7aa0f1c14090",
+          "toolCallId": "call_464abb3d084e45be87cb9088e722a2ff|fc_464abb3d084e45be87cb9088e722a2ff",
+          "from": "157e5008-bf2f-475c-872d-dc05a74a4375",
+          "to": "553a4b83-c33a-4fc1-a143-702ca106c561",
+          "body": "NATIVE_HOP_1",
+          "createdAt": "2026-10-04T05:38:26.570Z",
+          "disposition": "received",
+          "transportId": 1,
+          "recipientAttemptId": "94bfc10d-0bfd-44bc-8b3f-9cfb91adb8b7"
+        },
+        {
+          "id": "1a6ccbd4-1fef-45bf-aedd-8aef5a320100",
+          "runId": "293d5744-1b68-4dec-bffa-ad6f8bfd64cc",
+          "attemptId": "94bfc10d-0bfd-44bc-8b3f-9cfb91adb8b7",
+          "toolCallId": "toolu_05511c36314845069b1e01620ca6c96a",
+          "from": "553a4b83-c33a-4fc1-a143-702ca106c561",
+          "to": "e5dcb16d-d8ad-4dac-9793-c7c29224f2f9",
+          "body": "NATIVE_HOP_2",
+          "createdAt": "2026-10-04T05:38:26.821Z",
+          "disposition": "received",
+          "replyTo": "3cac07a6-1253-4115-bb43-71f80654baeb",
+          "transportId": 2,
+          "recipientAttemptId": "378ef993-07ee-4278-bc55-ccd85690e28c"
+        },
+        {
+          "id": "0d057d54-42da-4596-b8b7-451cb9e7baff",
+          "runId": "293d5744-1b68-4dec-bffa-ad6f8bfd64cc",
+          "attemptId": "378ef993-07ee-4278-bc55-ccd85690e28c",
+          "toolCallId": "send_message_1791092307051_1",
+          "from": "e5dcb16d-d8ad-4dac-9793-c7c29224f2f9",
+          "to": "553a4b83-c33a-4fc1-a143-702ca106c561",
+          "body": "NATIVE_HOP_3",
+          "createdAt": "2026-10-04T05:38:27.097Z",
+          "disposition": "received",
+          "replyTo": "1a6ccbd4-1fef-45bf-aedd-8aef5a320100",
+          "transportId": 3,
+          "recipientAttemptId": "94bfc10d-0bfd-44bc-8b3f-9cfb91adb8b7"
+        },
+        {
+          "id": "9efe7492-c488-4ece-ab75-82c3643d34d6",
+          "runId": "293d5744-1b68-4dec-bffa-ad6f8bfd64cc",
+          "attemptId": "94bfc10d-0bfd-44bc-8b3f-9cfb91adb8b7",
+          "toolCallId": "toolu_d504ad186ee9462089bd95bc53add315",
+          "from": "553a4b83-c33a-4fc1-a143-702ca106c561",
+          "to": "157e5008-bf2f-475c-872d-dc05a74a4375",
+          "body": "NATIVE_HOP_4",
+          "createdAt": "2026-10-04T05:38:27.350Z",
+          "disposition": "received",
+          "replyTo": "0d057d54-42da-4596-b8b7-451cb9e7baff",
+          "transportId": 4,
+          "recipientAttemptId": "f844e9da-0181-4161-a2e1-7aa0f1c14090"
+        }
+      ],
+      "externalMailReceipts": [
+        {
+          "transportId": 1,
+          "messageId": "3cac07a6-1253-4115-bb43-71f80654baeb",
+          "body": "NATIVE_HOP_1",
+          "sender": "BlueLake",
+          "recipient": "GreenCastle",
+          "ackAt": 1791092306667576
+        },
+        {
+          "transportId": 2,
+          "messageId": "1a6ccbd4-1fef-45bf-aedd-8aef5a320100",
+          "body": "NATIVE_HOP_2",
+          "sender": "GreenCastle",
+          "recipient": "RedPine",
+          "ackAt": 1791092306932364
+        },
+        {
+          "transportId": 3,
+          "messageId": "0d057d54-42da-4596-b8b7-451cb9e7baff",
+          "body": "NATIVE_HOP_3",
+          "sender": "RedPine",
+          "recipient": "GreenCastle",
+          "ackAt": 1791092307201796
+        },
+        {
+          "transportId": 4,
+          "messageId": "9efe7492-c488-4ece-ab75-82c3643d34d6",
+          "body": "NATIVE_HOP_4",
+          "sender": "GreenCastle",
+          "recipient": "BlueLake",
+          "ackAt": 1791092307464222
+        }
+      ],
+      "allExternalReceiptsMatch": true,
+      "allOwnedProcessesExited": true,
+      "ownedProcesses": [
+        {
+          "path": "/private/tmp/cr-n7-matrix6/cr-wf-iZXK6v/runtime/378ef993-07ee-4278-bc55-ccd85690e28c/host-process",
+          "state": "stopped"
+        },
+        {
+          "path": "/private/tmp/cr-n7-matrix6/cr-wf-iZXK6v/runtime/378ef993-07ee-4278-bc55-ccd85690e28c/omp-process",
+          "state": "stopped"
+        },
+        {
+          "path": "/private/tmp/cr-n7-matrix6/cr-wf-iZXK6v/runtime/3f31aa3f-0e54-446e-9051-3b87834d05de/host-process",
+          "state": "stopped"
+        },
+        {
+          "path": "/private/tmp/cr-n7-matrix6/cr-wf-iZXK6v/runtime/3f31aa3f-0e54-446e-9051-3b87834d05de/omp-process",
+          "state": "stopped"
+        },
+        {
+          "path": "/private/tmp/cr-n7-matrix6/cr-wf-iZXK6v/runtime/f844e9da-0181-4161-a2e1-7aa0f1c14090/host-process",
+          "state": "stopped"
+        },
+        {
+          "path": "/private/tmp/cr-n7-matrix6/cr-wf-iZXK6v/runtime/f844e9da-0181-4161-a2e1-7aa0f1c14090/omp-process",
+          "state": "stopped"
+        },
+        {
+          "path": "/private/tmp/cr-n7-matrix6/cr-wf-iZXK6v/runtime/94bfc10d-0bfd-44bc-8b3f-9cfb91adb8b7/host-process",
+          "state": "stopped"
+        },
+        {
+          "path": "/private/tmp/cr-n7-matrix6/cr-wf-iZXK6v/runtime/94bfc10d-0bfd-44bc-8b3f-9cfb91adb8b7/omp-process",
+          "state": "stopped"
+        }
+      ],
+      "tmux": [
+        {
+          "path": "/private/tmp/cr-n7-matrix6/cr-wf-iZXK6v/runtime/tmux.sock",
+          "stopped": true,
+          "connectionDescriptorRemoved": true
+        }
+      ],
+      "sameEightProcessesAfterSigkill": true
+    },
+    {
+      "profile": "rotated",
+      "passed": true,
+      "localRoot": "/private/tmp/cr-n7-matrix7",
+      "reportSha256": "ca01d93636cfdfa0a6ee08aebd5940749943e5814657832aad5f631cf5d519d8",
+      "nativeProofSha256": "90ad04ab58fc34e45f8d1ef242ea77771a036b77e4289df8f6a04ee3f8c03238",
+      "providerRequestsSha256": "464ece329460b8d182fcb182576bf69bde8a3652253e42235ecff38216f09c50",
+      "driverLogSha256": "177c372a1d87802fbc1916fad29af2ee8f413e60dfbe5d77542996a1f884b76a",
+      "modelRequests": 10,
+      "providerErrors": [],
+      "guard": {
+        "fixture_port_allowed": true,
+        "external_denied": true,
+        "other_loopback_denied": true,
+        "child_egress_denied": true
+      },
+      "mail": {
+        "binary": "/Users/crewroom/.codex/worktrees/native-upgrades/crewroom/.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail",
+        "sha256": "554d6f0a06d73b2907940350228232f2b479f96630a73ff6b85e590a12b98075",
+        "release": "v0.3.36"
+      },
+      "runner": {
+        "version": "omp/18.4.12",
+        "sha256": "1a81bd323ba6d67374adf5645fe52e194671416e15c69ef17ac18e32b42c55ff"
+      },
+      "identities": [
+        {
+          "name": "Coordinator",
+          "mailboxName": "BlueLake",
+          "role": "coordinator",
+          "assignmentId": "cea47711-ce27-462f-a25f-0a6edacf771d",
+          "attemptId": "38a860a6-041f-4d8e-8a9d-0767587c3f52",
+          "hostPid": 40935,
+          "ompPid": 40938,
+          "sessionId": "01a1056b-e6c6-77af-8c05-22ad6799a5d2",
+          "planned": {
+            "provider": "aperture-anthropic",
+            "id": "anthropic.claude-sonnet-5",
+            "api": "anthropic-messages",
+            "inputs": [
+              "text",
+              "image"
+            ],
+            "efforts": [
+              "off",
+              "low",
+              "medium",
+              "high",
+              "max"
+            ],
+            "tools": true,
+            "selector": "aperture-anthropic/anthropic.claude-sonnet-5",
+            "effort": "low"
+          },
+          "observed": {
+            "model": {
+              "provider": "aperture-anthropic",
+              "id": "anthropic.claude-sonnet-5",
+              "api": "anthropic-messages"
+            },
+            "thinkingLevel": "low",
+            "sessionId": "01a1056b-e6c6-77af-8c05-22ad6799a5d2",
+            "isStreaming": false,
+            "autoCompactionEnabled": false,
+            "hostPid": 40935,
+            "ompPid": 40938,
+            "sessionDirectory": "/private/tmp/cr-n7-matrix7/cr-wf-hDruJM/runtime/38a860a6-041f-4d8e-8a9d-0767587c3f52/sessions"
+          }
+        },
+        {
+          "name": "Specialist1",
+          "mailboxName": "GreenCastle",
+          "role": "product-strategist",
+          "assignmentId": "4d2739e9-9158-4eb3-98b3-d368d99c324e",
+          "attemptId": "ef5b06d2-64f8-40fe-9f00-ca36c331ab05",
+          "hostPid": 40955,
+          "ompPid": 40958,
+          "sessionId": "01a1056b-e9cb-70b8-be2c-1ae8602a6671",
+          "planned": {
+            "provider": "aperture-google",
+            "id": "gemini-3.8-flash",
+            "api": "google-generative-ai",
+            "inputs": [
+              "text",
+              "image"
+            ],
+            "efforts": [
+              "off",
+              "low",
+              "medium",
+              "high"
+            ],
+            "tools": true,
+            "selector": "aperture-google/gemini-3.8-flash",
+            "effort": "low"
+          },
+          "observed": {
+            "model": {
+              "provider": "aperture-google",
+              "id": "gemini-3.8-flash",
+              "api": "google-generative-ai"
+            },
+            "thinkingLevel": "low",
+            "sessionId": "01a1056b-e9cb-70b8-be2c-1ae8602a6671",
+            "isStreaming": false,
+            "autoCompactionEnabled": false,
+            "hostPid": 40955,
+            "ompPid": 40958,
+            "sessionDirectory": "/private/tmp/cr-n7-matrix7/cr-wf-hDruJM/runtime/ef5b06d2-64f8-40fe-9f00-ca36c331ab05/sessions"
+          }
+        },
+        {
+          "name": "Specialist2",
+          "mailboxName": "RedPine",
+          "role": "ux-principal",
+          "assignmentId": "c33dcede-e753-4515-aa9a-1c9219f4567c",
+          "attemptId": "a2033bb8-590d-4252-bbab-5353365ce0c2",
+          "hostPid": 40969,
+          "ompPid": 40972,
+          "sessionId": "01a1056b-ed09-7176-9906-5541f1e9fffc",
+          "planned": {
+            "provider": "aperture-openai",
+            "id": "openai.gpt-6-luna",
+            "api": "openai-responses",
+            "inputs": [
+              "text",
+              "image"
+            ],
+            "efforts": [
+              "off",
+              "low",
+              "medium",
+              "high",
+              "xhigh"
+            ],
+            "tools": true,
+            "selector": "aperture-openai/openai.gpt-6-luna",
+            "effort": "low"
+          },
+          "observed": {
+            "model": {
+              "provider": "aperture-openai",
+              "id": "openai.gpt-6-luna",
+              "api": "openai-responses"
+            },
+            "thinkingLevel": "low",
+            "sessionId": "01a1056b-ed09-7176-9906-5541f1e9fffc",
+            "isStreaming": false,
+            "autoCompactionEnabled": false,
+            "hostPid": 40969,
+            "ompPid": 40972,
+            "sessionDirectory": "/private/tmp/cr-n7-matrix7/cr-wf-hDruJM/runtime/a2033bb8-590d-4252-bbab-5353365ce0c2/sessions"
+          }
+        },
+        {
+          "name": "Specialist3",
+          "mailboxName": "SilverHill",
+          "role": "tech-writer",
+          "assignmentId": "b2a29f61-932c-47ac-b817-397446d1820b",
+          "attemptId": "3c52c863-b762-4dea-8ea9-78620bf94ef9",
+          "hostPid": 40982,
+          "ompPid": 40985,
+          "sessionId": "01a1056b-f048-73d7-b1ba-db2626b64596",
+          "planned": {
+            "provider": "aperture-bedrock-compat",
+            "id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+            "api": "openai-responses",
+            "inputs": [
+              "text",
+              "image"
+            ],
+            "efforts": [
+              "off"
+            ],
+            "tools": true,
+            "selector": "aperture-bedrock-compat/us.anthropic.claude-haiku-4-5-20251001-v1:0",
+            "effort": "off"
+          },
+          "observed": {
+            "model": {
+              "provider": "aperture-bedrock-compat",
+              "id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+              "api": "openai-responses"
+            },
+            "thinkingLevel": "off",
+            "sessionId": "01a1056b-f048-73d7-b1ba-db2626b64596",
+            "isStreaming": false,
+            "autoCompactionEnabled": false,
+            "hostPid": 40982,
+            "ompPid": 40985,
+            "sessionDirectory": "/private/tmp/cr-n7-matrix7/cr-wf-hDruJM/runtime/3c52c863-b762-4dea-8ea9-78620bf94ef9/sessions"
+          }
+        }
+      ],
+      "messages": [
+        {
+          "id": "81ddcc10-914e-4549-972f-d659ee8c8462",
+          "runId": "59ced686-5dd4-4d2e-99de-31e2c8fb8372",
+          "attemptId": "38a860a6-041f-4d8e-8a9d-0767587c3f52",
+          "toolCallId": "toolu_d2ecea2e4dc2476d9e593f1d0af6d1a1",
+          "from": "cea47711-ce27-462f-a25f-0a6edacf771d",
+          "to": "4d2739e9-9158-4eb3-98b3-d368d99c324e",
+          "body": "NATIVE_HOP_1",
+          "createdAt": "2026-10-04T05:38:43.011Z",
+          "disposition": "received",
+          "transportId": 1,
+          "recipientAttemptId": "ef5b06d2-64f8-40fe-9f00-ca36c331ab05"
+        },
+        {
+          "id": "c0453aaf-819b-4f13-a062-0ea5622acea7",
+          "runId": "59ced686-5dd4-4d2e-99de-31e2c8fb8372",
+          "attemptId": "ef5b06d2-64f8-40fe-9f00-ca36c331ab05",
+          "toolCallId": "send_message_1791092323229_1",
+          "from": "4d2739e9-9158-4eb3-98b3-d368d99c324e",
+          "to": "c33dcede-e753-4515-aa9a-1c9219f4567c",
+          "body": "NATIVE_HOP_2",
+          "createdAt": "2026-10-04T05:38:43.271Z",
+          "disposition": "received",
+          "replyTo": "81ddcc10-914e-4549-972f-d659ee8c8462",
+          "transportId": 2,
+          "recipientAttemptId": "a2033bb8-590d-4252-bbab-5353365ce0c2"
+        },
+        {
+          "id": "812251d7-87a5-4f1f-8d63-7dd76faf9fe8",
+          "runId": "59ced686-5dd4-4d2e-99de-31e2c8fb8372",
+          "attemptId": "a2033bb8-590d-4252-bbab-5353365ce0c2",
+          "toolCallId": "call_b6816d5d223f4a5aa632b97893b5baed|fc_b6816d5d223f4a5aa632b97893b5baed",
+          "from": "c33dcede-e753-4515-aa9a-1c9219f4567c",
+          "to": "4d2739e9-9158-4eb3-98b3-d368d99c324e",
+          "body": "NATIVE_HOP_3",
+          "createdAt": "2026-10-04T05:38:43.548Z",
+          "disposition": "received",
+          "replyTo": "c0453aaf-819b-4f13-a062-0ea5622acea7",
+          "transportId": 3,
+          "recipientAttemptId": "ef5b06d2-64f8-40fe-9f00-ca36c331ab05"
+        },
+        {
+          "id": "cea0f961-d819-495b-96a8-3ec3596397c9",
+          "runId": "59ced686-5dd4-4d2e-99de-31e2c8fb8372",
+          "attemptId": "ef5b06d2-64f8-40fe-9f00-ca36c331ab05",
+          "toolCallId": "send_message_1791092323817_2",
+          "from": "4d2739e9-9158-4eb3-98b3-d368d99c324e",
+          "to": "cea47711-ce27-462f-a25f-0a6edacf771d",
+          "body": "NATIVE_HOP_4",
+          "createdAt": "2026-10-04T05:38:43.865Z",
+          "disposition": "received",
+          "replyTo": "812251d7-87a5-4f1f-8d63-7dd76faf9fe8",
+          "transportId": 4,
+          "recipientAttemptId": "38a860a6-041f-4d8e-8a9d-0767587c3f52"
+        }
+      ],
+      "externalMailReceipts": [
+        {
+          "transportId": 1,
+          "messageId": "81ddcc10-914e-4549-972f-d659ee8c8462",
+          "body": "NATIVE_HOP_1",
+          "sender": "BlueLake",
+          "recipient": "GreenCastle",
+          "ackAt": 1791092323115454
+        },
+        {
+          "transportId": 2,
+          "messageId": "c0453aaf-819b-4f13-a062-0ea5622acea7",
+          "body": "NATIVE_HOP_2",
+          "sender": "GreenCastle",
+          "recipient": "RedPine",
+          "ackAt": 1791092323396039
+        },
+        {
+          "transportId": 3,
+          "messageId": "812251d7-87a5-4f1f-8d63-7dd76faf9fe8",
+          "body": "NATIVE_HOP_3",
+          "sender": "RedPine",
+          "recipient": "GreenCastle",
+          "ackAt": 1791092323721208
+        },
+        {
+          "transportId": 4,
+          "messageId": "cea0f961-d819-495b-96a8-3ec3596397c9",
+          "body": "NATIVE_HOP_4",
+          "sender": "GreenCastle",
+          "recipient": "BlueLake",
+          "ackAt": 1791092324034495
+        }
+      ],
+      "allExternalReceiptsMatch": true,
+      "allOwnedProcessesExited": true,
+      "ownedProcesses": [
+        {
+          "path": "/private/tmp/cr-n7-matrix7/cr-wf-hDruJM/runtime/ef5b06d2-64f8-40fe-9f00-ca36c331ab05/host-process",
+          "state": "stopped"
+        },
+        {
+          "path": "/private/tmp/cr-n7-matrix7/cr-wf-hDruJM/runtime/ef5b06d2-64f8-40fe-9f00-ca36c331ab05/omp-process",
+          "state": "stopped"
+        },
+        {
+          "path": "/private/tmp/cr-n7-matrix7/cr-wf-hDruJM/runtime/3c52c863-b762-4dea-8ea9-78620bf94ef9/host-process",
+          "state": "stopped"
+        },
+        {
+          "path": "/private/tmp/cr-n7-matrix7/cr-wf-hDruJM/runtime/3c52c863-b762-4dea-8ea9-78620bf94ef9/omp-process",
+          "state": "stopped"
+        },
+        {
+          "path": "/private/tmp/cr-n7-matrix7/cr-wf-hDruJM/runtime/a2033bb8-590d-4252-bbab-5353365ce0c2/host-process",
+          "state": "stopped"
+        },
+        {
+          "path": "/private/tmp/cr-n7-matrix7/cr-wf-hDruJM/runtime/a2033bb8-590d-4252-bbab-5353365ce0c2/omp-process",
+          "state": "stopped"
+        },
+        {
+          "path": "/private/tmp/cr-n7-matrix7/cr-wf-hDruJM/runtime/38a860a6-041f-4d8e-8a9d-0767587c3f52/host-process",
+          "state": "stopped"
+        },
+        {
+          "path": "/private/tmp/cr-n7-matrix7/cr-wf-hDruJM/runtime/38a860a6-041f-4d8e-8a9d-0767587c3f52/omp-process",
+          "state": "stopped"
+        }
+      ],
+      "tmux": [
+        {
+          "path": "/private/tmp/cr-n7-matrix7/cr-wf-hDruJM/runtime/tmux.sock",
+          "stopped": true,
+          "connectionDescriptorRemoved": true
+        }
+      ],
+      "sameEightProcessesAfterSigkill": true
+    }
+  ],
+  "mappingResolution": {
+    "G01": {
+      "cases": [
+        "RTE-01"
+      ],
+      "status": "covered",
+      "evidence": "All 19 role identities ×50 captured models =950 native/retained binding comparisons. Unknown tools remain null; binding never claims live dispatch eligibility."
+    },
+    "G02": {
+      "cases": [
+        "RTE-02"
+      ],
+      "status": "covered-with-bounded-profile-scope",
+      "evidence": "All57 named profile selections compared at policy boundary; baseline/heterogeneous/rotated each execute a selected legal coordinator+three-specialist team through actual native daemon/OMP. Every model/provider/API/effort readback and scripted wire request matches its assignment. All five pool selectors and three API families represented. Not all19 roles launched simultaneously, and not12 full named scenario replays."
+    },
+    "G03": {
+      "cases": [
+        "MSG-01"
+      ],
+      "status": "covered",
+      "evidence": "Each profile runs coordinator→specialist1→specialist2→specialist1→coordinator. Four real Mail transport IDs, causal replyTo chain, originating tool events and recipient completion events match native records and external Mail sender/recipient/read acknowledgements. Same eight OS identities survive actual daemon SIGKILL; stopped afterward."
+    },
+    "G04": {
+      "cases": [
+        "LIM-04"
+      ],
+      "status": "covered-retained-contract",
+      "evidence": "Three fixed seeds ×100 message schedule steps run twice with identical normalized event traces. Duplicate keys keep one ID, delayed dispatch cannot undo receipt, reopen preserves history, cancellation is terminal. Existing physical crash fixtures remain separate evidence."
+    }
+  },
+  "developmentFailures": [
+    {
+      "log": ".crewroom/test-results/native-acceptance-map/schedules.log",
+      "logSha256": "54f14fa2398c49f416e45888da31169f01165f2930503b34b40951bb72115db2",
+      "cause": "New fixture used a non-UUID research requestId; corrected to a valid synthetic UUID before the frozen gate."
+    },
+    {
+      "cause": "Initial pure comparator retained TypeScript undefined fallbackFrom property while Rust crossed JSON; normalized expected values at the same JSON boundary. No production difference."
+    },
+    {
+      "localRoot": "/private/tmp/cr-n7-matrix1",
+      "logSha256": "97ac1aed990b575c4d745978cc089239bcde29095c29e245c9a5afff7c8e6c2d",
+      "cause": "New harness expected wrong message field names; fourth idle specialist had no provider input. Correct fields and an explicit harmless private host input now prove every selected wire model. Four Mail hops already completed; owned processes stopped. No production change."
+    }
+  ],
+  "boundaries": [
+    "No live provider/model-quality claims. Capabilities marked true apply only to scripted fixture endpoints.",
+    "Full catalog/profile binding uses captured declared metadata. Stale availability is not promoted to live eligibility.",
+    "A selected idle specialist gets one explicit authenticated fixture input to observe its provider identity; the four-hop chain itself uses actual Mail throughout.",
+    "Existing audit3917c70 remains a frozen snapshot at main e034. This receipt supersedes its G01–G04 gaps; root owns central mapping reconciliation and G05–G14.",
+    "No npm domain/browser rerun: only native test/harness files changed; retained production TypeScript and UI are unchanged. New TypeScript harnesses passed strict type checking;143 native Rust tests, fmt and clippy passed.",
+    "Final combined desktop/release/install/footprint/old-build rollback/default decision remain required."
+  ],
+  "selfAssessment": "On track: all four assigned runtime coverage gaps now have bounded source-bound proof without expanding live-provider scope. Remaining work is integration plus parent-owned UI and release gates.",
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

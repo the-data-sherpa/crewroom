@@ -1,0 +1,137 @@
+import assert from 'node:assert/strict';
+import { spawn } from 'node:child_process';
+import { once } from 'node:events';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import {homedir, tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
+import { test } from 'node:test';
+import { ContainerCommand } from '../server/runtime/container-command';
+import { inspectOwned, launchOwned, stopOwned } from '../server/runtime/processes';
+const engine = { socket: `${homedir()}/.docker/run/docker.sock` };
+const image = 'sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285';
+
+test('SEC-05: a separate cleanup controller survives harness loss and refuses foreign process, path and container identities', async t => {
+  const root = realpathSync(mkdtempSync(join(tmpdir(),'crewroom-cleanup-')));
+  const workspace=join(root,'workspace'); mkdirSync(workspace); writeFileSync(join(workspace,'sentinel'),'unchanged');
+  const foreignRoot=join(root,'foreign');
+  const foreign = new ContainerCommand(foreignRoot,engine);
+  await foreign.start({image,workspace,command:'/bin/sleep',args:['60']});
+  const foreignProcess=launchOwned(join(root,'foreign-process'),'/bin/sleep',['60'],{cwd:root,env:{PATH:process.env.PATH}});
+  t.after(async()=>{ await foreign.stop(); await foreign.remove(); });
+  const deadline=Date.now()+5000;
+  while((await inspectOwned(join(root,'foreign-process'))).state!=='live' && Date.now()<deadline) await new Promise(resolve=>setTimeout(resolve,20));
+  const original=readFileSync(join(root,'foreign-process','owner.json'),'utf8');
+  const stale={...JSON.parse(original),started:'previous occupant of this PID'};
+  writeFileSync(join(root,'foreign-process','owner.json'),JSON.stringify(stale));
+  symlinkSync(join(root,'foreign-process'),join(root,'foreign-path'));
+  symlinkSync(foreignRoot,join(root,'foreign-container-path'));
+  mkdirSync(join(root,'legacy-container'));
+  const legacy=JSON.parse(readFileSync(join(foreignRoot,'container.json'),'utf8')); delete legacy.root;
+  writeFileSync(join(root,'legacy-container','container.json'),JSON.stringify(legacy));
+  mkdirSync(join(root,'journal-link')); symlinkSync(join(root,'legacy-container','container.json'),join(root,'journal-link','container.json'));
+  symlinkSync(root,join(root,'ancestor-link'));
+  const job=new ContainerCommand(join(root,'owned'),engine);
+  const script=`import { ContainerCommand } from './server/runtime/container-command.ts';
+import { launchOwned, inspectOwned } from './server/runtime/processes.ts';
+import { writeFileSync } from 'node:fs';
+const root=process.argv[1];
+const job=new ContainerCommand(root+'/owned',${JSON.stringify(engine)});
+await job.start({image:${JSON.stringify(image)},workspace:root+'/workspace',command:'/bin/sh',args:['-c','echo retained-before-crash; sleep 60']});
+launchOwned(root+'/owned-process','/bin/sleep',['60'],{cwd:root,env:{PATH:process.env.PATH}});
+const deadline=Date.now()+5000;
+while((await inspectOwned(root+'/owned-process')).state!=='live' && Date.now()<deadline) await new Promise(r=>setTimeout(r,20));
+writeFileSync(root+'/ready','ready'); setInterval(()=>{},1000);`;
+  const controller=spawn(process.execPath,['--import','tsx','--input-type=module','-e',script,root],{cwd:resolve('.'),stdio:['ignore','ignore','pipe']});
+  let log=''; controller.stderr.on('data',c=>log+=c);
+  t.after(async()=>{
+    controller.kill('SIGKILL');
+    writeFileSync(join(root,'foreign-process','owner.json'),original);
+    await stopOwned(join(root,'owned-process')); await stopOwned(join(root,'foreign-process')); foreignProcess.stdin.end();
+    await job.stop(); await job.remove(); await foreign.stop(); await foreign.remove();
+    rmSync(root,{recursive:true,force:true});
+  });
+  const readyBy=Date.now()+10000;
+  while(!existsSync(join(root,'ready')) && controller.exitCode===null && Date.now()<readyBy) await new Promise(resolve=>setTimeout(resolve,20));
+  assert.ok(existsSync(join(root,'ready')),log);
+  const killed=once(controller,'exit'); controller.kill('SIGKILL'); assert.equal((await killed)[1],'SIGKILL');
+  assert.equal((await job.inspect()).state,'running');
+  const originalIntent=readFileSync(join(root,'owned','container.json'),'utf8');
+  const foreignIntent=JSON.parse(readFileSync(join(foreignRoot,'container.json'),'utf8'));
+  mkdirSync(join(root,'forged-container'));
+  writeFileSync(join(root,'forged-container','container.json'),JSON.stringify({...JSON.parse(originalIntent),root:join(root,'forged-container'),id:foreignIntent.id,name:foreignIntent.name}));
+  const cleanup=`import assert from 'node:assert/strict';
+import { ContainerCommand } from './server/runtime/container-command.ts';
+import { stopOwned } from './server/runtime/processes.ts';
+import { writeFileSync } from 'node:fs';
+const root=process.argv[1], engine=${JSON.stringify(engine)};
+assert.equal((await stopOwned(root+'/foreign-process')).state,'uncertain');
+assert.equal((await stopOwned(root+'/foreign-path')).state,'uncertain');
+const linked=new ContainerCommand(root+'/foreign-container-path',engine);
+assert.equal((await linked.stop()).state,'uncertain'); await linked.remove();
+for(const path of ['journal-link','ancestor-link/legacy-container']) {
+  const aliased=new ContainerCommand(root+'/'+path,engine);
+  assert.equal((await aliased.stop()).state,'uncertain'); await aliased.remove();
+}
+const forged=new ContainerCommand(root+'/forged-container',engine);
+assert.equal((await forged.stop()).state,'uncertain'); await forged.remove();
+assert.equal((await stopOwned(root+'/owned-process')).state,'stopped');
+const owned=new ContainerCommand(root+'/owned',engine); assert.equal((await owned.stop()).state,'stopped');
+const receipt=await owned.receipt(); assert.match(receipt.output,/retained-before-crash/); assert.equal(receipt.completed,false);
+await owned.remove(); assert.deepEqual(await owned.receipt(),receipt);
+assert.equal((await owned.inspect()).state,'stopped');
+writeFileSync(root+'/cleanup-result',JSON.stringify({passed:true,receipt}));`;
+  const cleaner=spawn(process.execPath,['--import','tsx','--input-type=module','-e',cleanup,root],{cwd:resolve('.'),stdio:['ignore','ignore','pipe']});
+  let errors='';cleaner.stderr.on('data',c=>errors+=c);
+  assert.equal((await once(cleaner,'exit'))[0],0,errors);
+  assert.equal((await foreign.inspect()).state,'running'); process.kill(foreignProcess.pid!,0);
+  assert.equal(readFileSync(join(workspace,'sentinel'),'utf8'),'unchanged');
+  assert.equal(readFileSync(join(foreignRoot,'container.json'),'utf8'),JSON.stringify(foreignIntent));
+  assert.equal(JSON.parse(readFileSync(join(root,'cleanup-result'),'utf8')).passed,true);
+  // Lost deletion reply: exact saved ID is now absent; a restarted controller adopts removal without re-execution.
+  const removed=JSON.parse(readFileSync(join(root,'owned','container.json'),'utf8'));
+  delete removed.removed; writeFileSync(join(root,'owned','container.json'),JSON.stringify(removed));
+  assert.equal((await new ContainerCommand(join(root,'owned'),engine).inspect()).state,'stopped');
+  assert.deepEqual(await job.receipt(),removed.receipt);
+});
+
+test('SEC-05: startup removes a stopped command left after durable pause or cancel without restarting agents', async t => {
+  const { Workbench } = await import('../server/workbench');
+  const { RuntimeSupervisor } = await import('../server/runtime/supervisor');
+  const { defaultRoles } = await import('../server/roles');
+  const { resolveAssignment } = await import('../server/runtime/model-policy');
+  const { seedRepository, saveRepositoryFixture } = await import('./fixtures/repository');
+  for (const cancelled of [false, true]) {
+    const root = realpathSync(mkdtempSync(join(tmpdir(), 'cr-clean-reopen-')));
+    seedRepository(root);
+    let store = new Workbench(join(root, 'data'));
+    const repository = saveRepositoryFixture(store, { name: 'Retained cleanup', path: root, targetBranch: 'main' });
+    const task = store.createTask({ title: 'Retain interrupted command', description: '', repositoryId: repository.id });
+    store.refine(task.id, { revision: 1, sourceRevision: 1, brief: 'Preserve its receipt.', criteria: ['Cleanup survives restart'] });
+    const run = store.queue(task.id, { revision: 2 });
+    const catalog = [{ provider: 'fixture', id: 'model', api: 'openai-responses', inputs: ['text'], efforts: ['low'], tools: true }];
+    const role = { ...defaultRoles[0], model: 'fixture/model', effort: 'low' as const };
+    const model = resolveAssignment(role, catalog, {}, {});
+    const { attempt } = store.admitAssignment(run.id, { name: 'Coordinator', role, model, coordinator: true, input: 'Preserve progress.' });
+    store.claimAttempt(attempt.id);
+    const command = new ContainerCommand(join(root, 'hosts', attempt.id, 'tools', 'interrupted'), engine);
+    let supervisor: InstanceType<typeof RuntimeSupervisor> | undefined;
+    t.after(async () => { await supervisor?.close(); await command.stop(); await command.remove(); store.close(); rmSync(root, { recursive: true, force: true }); });
+    await command.start({ image, workspace: root, command: '/bin/sh', args: ['-c', 'echo retained; sleep 60'] });
+    const by = Date.now() + 5000;
+    while (!(await command.logs()).includes('retained') && Date.now() < by) await new Promise(resolve => setTimeout(resolve, 20));
+    await command.stop();
+    store.recordOwnership(attempt.id, true);
+    store.setDesiredState(run.id, cancelled ? 'cancelled' : 'paused'); store.beginPause(run.id); store.finishPause(run.id);
+    // Durable crash boundary: ownership and terminal pause are saved, removal has not happened.
+    assert.equal(JSON.parse(readFileSync(join(command.root, 'container.json'), 'utf8')).removed, undefined);
+    store.close(); store = new Workbench(join(root, 'data'));
+    supervisor = new RuntimeSupervisor(store, { root: join(root, 'hosts'), socket: join(root, 'tmux.sock'), ompBinary: '/unused',
+      commandEngine: engine, catalog, policy: {}, models: { providers: {} }, mail: { url: 'http://127.0.0.1:9/mcp/', token: 'unused', projectRoot: root, retentionSeconds: 86400, atcDisabled: true } }, 'http://127.0.0.1:9');
+    await supervisor.initialize();
+    assert.equal(JSON.parse(readFileSync(join(command.root, 'container.json'), 'utf8')).removed, true);
+    assert.equal(store.getRun(run.id).status, cancelled ? 'cancelled' : 'paused');
+    assert.equal(store.runtime(run.id).attempts.length, 1);
+    assert.equal((await command.receipt()).completed, false);
+    assert.match((await command.receipt()).output, /retained/);
+  }
+});

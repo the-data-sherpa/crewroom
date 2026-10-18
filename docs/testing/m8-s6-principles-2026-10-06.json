@@ -1,0 +1,106 @@
+{
+  "date": "2026-10-06",
+  "baseRevision": "473a7665d9c5fec75eee0fc5cd9784f9e647eaa0",
+  "sourceFiles": {
+    "crates/crewroom-core/src/lib.rs": "58f47fb7fcb5287ad2207f260608a4793da78c980964e2e412def8fe8af5b06a",
+    "crates/crewroom-core/src/roles.rs": "512e91ceffc889d37df57630d55f9748875e3792af7e61ee2d84f38b9232d9f6",
+    "crates/crewroom-core/src/teams.rs": "3a88ead2f90724a46c85bd2441e882d1feaa6601f5ee544427aee550d6ea6326",
+    "crates/crewroom-desktop/src/workbench.rs": "5fd33a6109db59af57b252daf449787c688b9fa751660486f01802b121cec7aa",
+    "crates/crewroom-desktop/src/workbench/settings.rs": "83c370d1dc5370f8a16ae100ca63f7f2fff9a612978fe569959283d667661050",
+    "crates/crewroom-desktop/src/workbench/settings/roles.rs": "5d173d204d874ccac8a13d8581cff32c91ee2da8d8f6420282e30482edf916bc",
+    "crates/crewroom-desktop/src/workbench/settings/tests.rs": "54f6a5b94374a17f2f560bc35384c4df1df5da6dd3538d9d25e86bdbe2fd46b5",
+    "crates/crewroom-desktop/src/workbench/shell.rs": "188cb018678510aa1d2ab95288753610c1dac13f49a1bbb0a05de00688358e2d",
+    "crates/crewroom-desktop/src/workbench/test_support.rs": "324a017826c7a005b30a01de641c2399f42298dec0deffee5dfceca3ac720c0b",
+    "crates/crewroom-runtime/src/supervisor/workflow/configuration.rs": "3090dc7092bbc30a6faaf0601f4e5733c0996fcbf199364bb776c57fe57f32d7",
+    "crates/crewroom-runtime/src/supervisor/workflow/context.rs": "97c544ee98be114018079bd145153538496308913600349047efaa2e1fc27f4c",
+    "crates/crewroom-runtime/src/supervisor/workflow/preparation.rs": "03fbc00ad3a247409847aec290b7eca9ca4e2ea5f6884b8f5bdecc3d3aa5d7d0",
+    "crates/crewroom-runtime/src/supervisor/workflow/transitions.rs": "feb2cfda1a98b6cd3dba0c252aca06d2157538fa49c1c32dba7156ac6e49ddc0",
+    "crates/crewroom-service/src/lib.rs": "0c47ed9633ca7315fd9f4af1953650311d38121995eff4dfc017a7869ebf20a4",
+    "crates/crewroom-service/src/role_catalog.rs": "fa76740983127154cbbbb07f72468012ab0622f8f922065af9416c9a7451f0ba",
+    "docs/operations.md": "7fdd9a0d8fbcef84a9f7030835782475f779bb9533586153126be10320e1675d",
+    "scripts/rust/release-profiles-live.ts": "f96b1a2ddcfc643ae72a95ff60bd6e47aca927d314b15851ee2ced3346e107e0",
+    "scripts/rust/verify-release-profiles.py": "5634386407d424a972a94187fb6528c5093ddb767db763795b32f30d9a3d0526",
+    "crates/crewroom-core/src/principles.rs": "77e2f4063db02bd16185a3db3d5976cd5f6441174c88199eae4679287c172346",
+    "crates/crewroom-core/tests/principles.rs": "f88db05de292df2824e69c31b05f5cb4584ac6d3073955a6ed1068b576fb83a6",
+    "crates/crewroom-desktop/src/workbench/settings/principles.rs": "bf6b6e30cb43e9571ce06aeca16780ff171651c403ead393c6445c3eb10cf197"
+  },
+  "checks": {
+    "nativeCoreRuntimeService": {
+      "passed": 157,
+      "finalPrinciplesPassed": 2
+    },
+    "desktop": {
+      "fullPassed": 43,
+      "fullFailed": 1,
+      "ignored": 10,
+      "finalAffectedPassed": 1,
+      "note": "Only failure looked up a textarea by a GPUI ElementId that its component does not register. Test now checks registered controls; final affected case passes. Actual macOS textarea visually checked. No single 44/44 run claimed."
+    },
+    "retainedDomain": {
+      "passed": 332
+    },
+    "browser": {
+      "fullPassed": 30,
+      "fullFailed": 1,
+      "focusedPassed": 1,
+      "note": "Known feedback timeout passes unchanged on focused rerun. Legacy ghostty-web diagnostics retained."
+    },
+    "nativeBuild": "passed",
+    "browserBuild": "passed",
+    "clippy": "passed",
+    "format": "passed"
+  },
+  "package": "target/debug/native-package.nVxRbl/Crewroom.app",
+  "guiSha256": "c4375d5854d1b262066d2d6e03c63c05c65165b16ee4cbae7a9356806f600e01",
+  "guiChecks": [
+    "Created and saved a principle in the macOS native editor at 1280px; name, multiline guidance and revision visible.",
+    "Final native interaction test covers attachment, preview, stale preview after edit, referenced deletion refusal and registered-control bounds at 390px."
+  ],
+  "liveRunner": {
+    "passed": true,
+    "boundary": "Actual native daemon/OMP/tmux/Rust Mail; synthetic provider replies only.",
+    "runner": {
+      "version": "omp/18.6.3",
+      "sha256": "ab52491643e21b270682691b1319f1161fe2a2658ae4e9a4e3958b1aeb12dcf4"
+    },
+    "allOwnedProcessesExited": true,
+    "principlesInAllProviderInputs": true
+  },
+  "principlesRunner": {
+    "copiedAtAdmission": true,
+    "editRetainedAssignments": true,
+    "previewUpdated": true,
+    "restartRetainedCopies": true
+  },
+  "liveReport": {
+    "path": "/tmp/crewroom-m8-s6-principles-20261006/report.json",
+    "sha256": "1ac8dc59536f3c0ebfdf84ddd71a7faa6e5e4cc54f61bb9cbde1e9629f48a29e",
+    "driverSha256": "5ccf1edf0671b03fef5e9e145670f3528dffe8885b188d85438c82f6832458c2"
+  },
+  "logs": {
+    "/tmp/crewroom-m8-s6-runner.log": "5746cae864ffe39705a39e9f5b8d75b953fb1b3cd6f09ddbd4cf924341c2062d",
+    "/tmp/crewroom-m8-s6-browser.log": "67b49766762a016d2e47eab556fd7331ff83519f0b4fdeb3fa76dbf2b95c26f4",
+    "/tmp/crewroom-m8-s6-final-principles.log": "be9d1334c524ddc79e8492e4069064b3c3d679479b87392075423c1f3090f76b",
+    "/tmp/crewroom-m8-s6-check.log": "63488e6aaa2b29aec01996c9a3317a6301a246deb753ce4a1fc8afaad9a6d9b3",
+    "/tmp/crewroom-m8-s6-browser-build.log": "2dfaf397a4d16a51fb4e7dd68a258fcbb2eaa07ac0219d794293c69620f67cac",
+    "/tmp/crewroom-m8-s6-clippy.log": "77a4f866175737e4070e784b68af2f7c3969709e99291d870517310ccc4fdf8f",
+    "/tmp/crewroom-m8-s6-build.log": "b56963d7d3b3a8c426e57b15c1acc5a596c48400dc1e9ade844f69efddf553e3",
+    "/tmp/crewroom-m8-s6-ui-check.log": "6b02f40a0d4db81604e3927f4169337ca0cb02e8edc5d1b99ccf72bcf59aad41",
+    "/tmp/crewroom-m8-s6-demo-daemon.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/crewroom-m8-s6-seed.log": "4cdfa3ba289d815897525351170086351c631029ac4920d8952b4acad91b43f7",
+    "/tmp/crewroom-m8-s6-principles.log": "970af4b8f31132e5a0b32ad142750ebd03833fe13de0df00b548da7aa01ed034",
+    "/tmp/crewroom-m8-s6-browser-feedback.log": "2af8cd929179cce14750345118cf7151752e24bb17afde9b6ab44f7ee584bd31",
+    "/tmp/crewroom-m8-s6-final-build.log": "94dc164a149b1bf3b664eafbb601a630c45b058fe3cc851282f7873c22f43dcc",
+    "/tmp/crewroom-m8-s6-desktop.log": "cb333e5e64ff155cb2e2145b957f894cad91f50908e7782dc08b5988ef73b95e",
+    "/tmp/crewroom-m8-s6-final-ui.log": "01b614d3a7ab9a894c3e27cb417a99249a9f2619db45c33c76d11139b1c919f9",
+    "/tmp/crewroom-m8-s6-retained.log": "ca872e7b7ba413a465a680a5bd6400836043a7a28a963b13d7df643d88d3c172",
+    "/tmp/crewroom-m8-s6-domain.log": "ed5202a5aec673bae4ed88f100cc8edb078a71861a42824d91aeed25b21bcba2"
+  },
+  "limitations": [
+    "Actual native daemon, OMP, tmux and external Rust Mail; scripted provider replies, no new live model delivery.",
+    "Linux/Wayland verification remains an explicit follow-up authorized by the operator.",
+    "Initial fixture omitted refinement input/request identity; repaired before final passing domain cases. Initial test visibility/type issues and Clippy correction retained in logs.",
+    "The S6 disposable GUI and exact daemon stopped. Active installation, real role configuration and retained pilot unchanged."
+  ],
+  "implementationRevision": "c3280dd70e0b158b999ce378903786faf05d39ba"
+}

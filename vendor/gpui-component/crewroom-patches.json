@@ -1,0 +1,16 @@
+{
+  "package": "gpui-component",
+  "version": "0.7.0",
+  "archiveSha256": "ac246c9f3d9771e56fbf90bd7d8656d0992d83940b580debf2efab4c44fe91df",
+  "omitted": [
+    ".cargo_vcs_info.json",
+    "Cargo.lock"
+  ],
+  "modified": [
+    {
+      "path": "src/input/input.rs",
+      "upstreamSha256": "d80d9d53e847e55bf632ad5f6d0a9de37561a7d951b9660b2f2f368d8aa71e73",
+      "crewroomSha256": "6c83e82de8b80e24f5e6276ce57cf50c769453ec1a4f6e1baaaef5ab15468b90"
+    }
+  ]
+}

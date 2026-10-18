@@ -1,0 +1,467 @@
+{
+  "candidate": "Relaycast",
+  "started_at": "2026-09-26T05:44:04.081527+00:00",
+  "finished_at": "2026-09-26T05:44:27.906111+00:00",
+  "binary_version": "omp/18.3.1",
+  "passed": true,
+  "processes": {
+    "Coordinator": {
+      "pid": 95672,
+      "process_group": 95672,
+      "session_id": "01a0dc3d-f9e8-71a8-9811-8bbea42eb085",
+      "model": {
+        "provider": "aperture-openai",
+        "id": "openai.gpt-6-sol"
+      }
+    },
+    "SpecialistOne": {
+      "pid": 95673,
+      "process_group": 95673,
+      "session_id": "01a0dc3d-fb2b-7385-93bf-b997bb5efe8b",
+      "model": {
+        "provider": "aperture-openai",
+        "id": "openai.gpt-6-sol"
+      }
+    },
+    "SpecialistTwo": {
+      "pid": 95674,
+      "process_group": 95674,
+      "session_id": "01a0dc3d-fc74-76bd-83a1-36aa3586dabc",
+      "model": {
+        "provider": "aperture-openai",
+        "id": "openai.gpt-6-sol"
+      }
+    }
+  },
+  "rounds": [
+    {
+      "trace": "crewroom-31a477cc272149f6",
+      "elapsed_seconds": 3.63,
+      "passed": true
+    },
+    {
+      "trace": "crewroom-542a65ff277b475b",
+      "elapsed_seconds": 4.48,
+      "passed": true
+    },
+    {
+      "trace": "crewroom-14e4f2943c1749be",
+      "elapsed_seconds": 3.76,
+      "passed": true
+    }
+  ],
+  "sends": [
+    {
+      "from": "Coordinator",
+      "to": "SpecialistOne",
+      "body": "START crewroom-31a477cc272149f6",
+      "message_id": "229478158876790784",
+      "conversation_id": "dm_98a1f1a2bb036760cec2ce17",
+      "tool_call_id": "call_926c207af04258a78857459ba38c6f41|fc_19025e0e5427578d9e473e588b47ed18"
+    },
+    {
+      "from": "SpecialistOne",
+      "to": "SpecialistTwo",
+      "body": "FORWARD crewroom-31a477cc272149f6",
+      "message_id": "229478163960287232",
+      "conversation_id": "dm_7d415a89c411bbdfb9abba09",
+      "tool_call_id": "call_dc6fbe2691f353aaba14c7fb1f939801|fc_a586c3e865735161b3f6a2ce0421e0a2"
+    },
+    {
+      "from": "SpecialistTwo",
+      "to": "SpecialistOne",
+      "body": "S2_ACK crewroom-31a477cc272149f6",
+      "message_id": "229478166564950016",
+      "conversation_id": "dm_7d415a89c411bbdfb9abba09",
+      "tool_call_id": "call_c8c9cc50d25a5deeb647610ffc367f22|fc_17435f32d030508ba4bcc7efb9c450b0"
+    },
+    {
+      "from": "SpecialistOne",
+      "to": "Coordinator",
+      "body": "S1_RELAY S2_ACK crewroom-31a477cc272149f6",
+      "message_id": "229478169123475456",
+      "conversation_id": "dm_98a1f1a2bb036760cec2ce17",
+      "tool_call_id": "call_9961b80096865f469af381a0beadbe1e|fc_293f1cab540755ada44676e3ba43ce1b"
+    },
+    {
+      "from": "Coordinator",
+      "to": "SpecialistOne",
+      "body": "START crewroom-542a65ff277b475b",
+      "message_id": "229478177067487232",
+      "conversation_id": "dm_98a1f1a2bb036760cec2ce17",
+      "tool_call_id": "call_f87ba61b83875bb5b3b9d28d7e27bdc5|fc_605d097550a25a589d894cf40e1e8264"
+    },
+    {
+      "from": "SpecialistOne",
+      "to": "SpecialistTwo",
+      "body": "FORWARD crewroom-542a65ff277b475b",
+      "message_id": "229478179680538624",
+      "conversation_id": "dm_7d415a89c411bbdfb9abba09",
+      "tool_call_id": "call_e045d58690455b9b974df9bb00823a66|fc_21752f2779165dcca64792441d1bb518"
+    },
+    {
+      "from": "SpecialistTwo",
+      "to": "SpecialistOne",
+      "body": "S2_ACK crewroom-542a65ff277b475b",
+      "message_id": "229478183665127424",
+      "conversation_id": "dm_7d415a89c411bbdfb9abba09",
+      "tool_call_id": "call_02f9f0915d125f6893df41f7848cc794|fc_c6c719faf52f5140863240a3c987059a"
+    },
+    {
+      "from": "SpecialistOne",
+      "to": "Coordinator",
+      "body": "S1_RELAY S2_ACK crewroom-542a65ff277b475b",
+      "message_id": "229478187226091520",
+      "conversation_id": "dm_98a1f1a2bb036760cec2ce17",
+      "tool_call_id": "call_3a974303089252768de156db21d1fe96|fc_8c8eba756eaf53c891bede597fdc66cb"
+    },
+    {
+      "from": "Coordinator",
+      "to": "SpecialistOne",
+      "body": "START crewroom-14e4f2943c1749be",
+      "message_id": "229478193286860800",
+      "conversation_id": "dm_98a1f1a2bb036760cec2ce17",
+      "tool_call_id": "call_1f903e00a48a53f8a282e2ff978e3968|fc_1120a05df9f05fa491a911fc9cce209c"
+    },
+    {
+      "from": "SpecialistOne",
+      "to": "SpecialistTwo",
+      "body": "FORWARD crewroom-14e4f2943c1749be",
+      "message_id": "229478196684247040",
+      "conversation_id": "dm_7d415a89c411bbdfb9abba09",
+      "tool_call_id": "call_5413598f51765bb19834c2a019ce7ccf|fc_255cc9eb2489523483779e70d6f3c418"
+    },
+    {
+      "from": "SpecialistTwo",
+      "to": "SpecialistOne",
+      "body": "S2_ACK crewroom-14e4f2943c1749be",
+      "message_id": "229478199964192768",
+      "conversation_id": "dm_7d415a89c411bbdfb9abba09",
+      "tool_call_id": "call_8e4bea98ca1250a0a48f9c069526bd93|fc_d7805df936b457a99c9368d52c2078e4"
+    },
+    {
+      "from": "SpecialistOne",
+      "to": "Coordinator",
+      "body": "S1_RELAY S2_ACK crewroom-14e4f2943c1749be",
+      "message_id": "229478202812125184",
+      "conversation_id": "dm_98a1f1a2bb036760cec2ce17",
+      "tool_call_id": "call_63fc4ec758b05b92b1c391c2c4c15338|fc_6851e0b201b754d9ab15d5952e89f48a"
+    }
+  ],
+  "received": [
+    {
+      "recipient": "SpecialistOne",
+      "message_id": "229478158876790784",
+      "envelope": {
+        "transport": "external-relaycast",
+        "message_id": "229478158876790784",
+        "from": "Coordinator",
+        "to": "SpecialistOne",
+        "body": "START crewroom-31a477cc272149f6"
+      }
+    },
+    {
+      "recipient": "SpecialistTwo",
+      "message_id": "229478163960287232",
+      "envelope": {
+        "transport": "external-relaycast",
+        "message_id": "229478163960287232",
+        "from": "SpecialistOne",
+        "to": "SpecialistTwo",
+        "body": "FORWARD crewroom-31a477cc272149f6"
+      }
+    },
+    {
+      "recipient": "SpecialistOne",
+      "message_id": "229478166564950016",
+      "envelope": {
+        "transport": "external-relaycast",
+        "message_id": "229478166564950016",
+        "from": "SpecialistTwo",
+        "to": "SpecialistOne",
+        "body": "S2_ACK crewroom-31a477cc272149f6"
+      }
+    },
+    {
+      "recipient": "Coordinator",
+      "message_id": "229478169123475456",
+      "envelope": {
+        "transport": "external-relaycast",
+        "message_id": "229478169123475456",
+        "from": "SpecialistOne",
+        "to": "Coordinator",
+        "body": "S1_RELAY S2_ACK crewroom-31a477cc272149f6"
+      }
+    },
+    {
+      "recipient": "SpecialistOne",
+      "message_id": "229478177067487232",
+      "envelope": {
+        "transport": "external-relaycast",
+        "message_id": "229478177067487232",
+        "from": "Coordinator",
+        "to": "SpecialistOne",
+        "body": "START crewroom-542a65ff277b475b"
+      }
+    },
+    {
+      "recipient": "SpecialistTwo",
+      "message_id": "229478179680538624",
+      "envelope": {
+        "transport": "external-relaycast",
+        "message_id": "229478179680538624",
+        "from": "SpecialistOne",
+        "to": "SpecialistTwo",
+        "body": "FORWARD crewroom-542a65ff277b475b"
+      }
+    },
+    {
+      "recipient": "SpecialistOne",
+      "message_id": "229478183665127424",
+      "envelope": {
+        "transport": "external-relaycast",
+        "message_id": "229478183665127424",
+        "from": "SpecialistTwo",
+        "to": "SpecialistOne",
+        "body": "S2_ACK crewroom-542a65ff277b475b"
+      }
+    },
+    {
+      "recipient": "Coordinator",
+      "message_id": "229478187226091520",
+      "envelope": {
+        "transport": "external-relaycast",
+        "message_id": "229478187226091520",
+        "from": "SpecialistOne",
+        "to": "Coordinator",
+        "body": "S1_RELAY S2_ACK crewroom-542a65ff277b475b"
+      }
+    },
+    {
+      "recipient": "SpecialistOne",
+      "message_id": "229478193286860800",
+      "envelope": {
+        "transport": "external-relaycast",
+        "message_id": "229478193286860800",
+        "from": "Coordinator",
+        "to": "SpecialistOne",
+        "body": "START crewroom-14e4f2943c1749be"
+      }
+    },
+    {
+      "recipient": "SpecialistTwo",
+      "message_id": "229478196684247040",
+      "envelope": {
+        "transport": "external-relaycast",
+        "message_id": "229478196684247040",
+        "from": "SpecialistOne",
+        "to": "SpecialistTwo",
+        "body": "FORWARD crewroom-14e4f2943c1749be"
+      }
+    },
+    {
+      "recipient": "SpecialistOne",
+      "message_id": "229478199964192768",
+      "envelope": {
+        "transport": "external-relaycast",
+        "message_id": "229478199964192768",
+        "from": "SpecialistTwo",
+        "to": "SpecialistOne",
+        "body": "S2_ACK crewroom-14e4f2943c1749be"
+      }
+    },
+    {
+      "recipient": "Coordinator",
+      "message_id": "229478202812125184",
+      "envelope": {
+        "transport": "external-relaycast",
+        "message_id": "229478202812125184",
+        "from": "SpecialistOne",
+        "to": "Coordinator",
+        "body": "S1_RELAY S2_ACK crewroom-14e4f2943c1749be"
+      }
+    }
+  ],
+  "acks": [
+    {
+      "recipient": "SpecialistOne",
+      "message_id": "229478158876790784",
+      "delivery_id": "del_229478158876790785",
+      "status": "acked"
+    },
+    {
+      "recipient": "SpecialistTwo",
+      "message_id": "229478163960287232",
+      "delivery_id": "del_229478163960287233",
+      "status": "acked"
+    },
+    {
+      "recipient": "SpecialistOne",
+      "message_id": "229478166564950016",
+      "delivery_id": "del_229478166564950017",
+      "status": "acked"
+    },
+    {
+      "recipient": "Coordinator",
+      "message_id": "229478169123475456",
+      "delivery_id": "del_229478169123475457",
+      "status": "acked"
+    },
+    {
+      "recipient": "SpecialistOne",
+      "message_id": "229478177067487232",
+      "delivery_id": "del_229478177067487233",
+      "status": "acked"
+    },
+    {
+      "recipient": "SpecialistTwo",
+      "message_id": "229478179680538624",
+      "delivery_id": "del_229478179680538625",
+      "status": "acked"
+    },
+    {
+      "recipient": "SpecialistOne",
+      "message_id": "229478183665127424",
+      "delivery_id": "del_229478183665127425",
+      "status": "acked"
+    },
+    {
+      "recipient": "Coordinator",
+      "message_id": "229478187226091520",
+      "delivery_id": "del_229478187226091521",
+      "status": "acked"
+    },
+    {
+      "recipient": "SpecialistOne",
+      "message_id": "229478193286860800",
+      "delivery_id": "del_229478193286860801",
+      "status": "acked"
+    },
+    {
+      "recipient": "SpecialistTwo",
+      "message_id": "229478196684247040",
+      "delivery_id": "del_229478196684247041",
+      "status": "acked"
+    },
+    {
+      "recipient": "SpecialistOne",
+      "message_id": "229478199964192768",
+      "delivery_id": "del_229478199964192769",
+      "status": "acked"
+    },
+    {
+      "recipient": "Coordinator",
+      "message_id": "229478202812125184",
+      "delivery_id": "del_229478202812125185",
+      "status": "acked"
+    }
+  ],
+  "observer_checks": [
+    {
+      "delivery_id": "del_229478158876790785",
+      "unchanged_after_read": true
+    },
+    {
+      "delivery_id": "del_229478163960287233",
+      "unchanged_after_read": true
+    },
+    {
+      "delivery_id": "del_229478166564950017",
+      "unchanged_after_read": true
+    },
+    {
+      "delivery_id": "del_229478169123475457",
+      "unchanged_after_read": true
+    },
+    {
+      "delivery_id": "del_229478177067487233",
+      "unchanged_after_read": true
+    },
+    {
+      "delivery_id": "del_229478179680538625",
+      "unchanged_after_read": true
+    },
+    {
+      "delivery_id": "del_229478183665127425",
+      "unchanged_after_read": true
+    },
+    {
+      "delivery_id": "del_229478187226091521",
+      "unchanged_after_read": true
+    },
+    {
+      "delivery_id": "del_229478193286860801",
+      "unchanged_after_read": true
+    },
+    {
+      "delivery_id": "del_229478196684247041",
+      "unchanged_after_read": true
+    },
+    {
+      "delivery_id": "del_229478199964192769",
+      "unchanged_after_read": true
+    },
+    {
+      "delivery_id": "del_229478202812125185",
+      "unchanged_after_read": true
+    }
+  ],
+  "all_messages_visible_to_independent_observer": true,
+  "shutdown": {
+    "Coordinator": 0,
+    "SpecialistOne": 0,
+    "SpecialistTwo": 0
+  },
+  "ps_snapshot": "95672 95662 95672 /Users/crewroom/.bun/bin/omp\n95673 95662 95673 /Users/crewroom/.bun/bin/omp\n95674 95662 95674 /Users/crewroom/.bun/bin/omp\n",
+  "scope": "Three fresh four-hop message round trips, independent OMP processes, external Relaycast service; no crash/recovery claim",
+  "relaycast_version": "8.13.0",
+  "attempts": [
+    {
+      "attempt": 1,
+      "outcome": "failed",
+      "reason": "50ms idle polling exceeded mailbox rate limit after first recorded completed round"
+    },
+    {
+      "attempt": 2,
+      "outcome": "message transport passed; clean completion not accepted",
+      "reason": "seven exhausted empty-final provider retry sequences found in independent review"
+    },
+    {
+      "attempt": 3,
+      "outcome": "passed cleanly",
+      "reason": "bounded mailbox polling and explicit nonempty SENT final responses"
+    }
+  ],
+  "rpc_observations": {
+    "Coordinator": {
+      "host_tool_calls": 3,
+      "tool_results": 3,
+      "message_events": 202,
+      "exhausted_provider_retries": 0
+    },
+    "SpecialistOne": {
+      "host_tool_calls": 6,
+      "tool_results": 6,
+      "message_events": 283,
+      "exhausted_provider_retries": 0
+    },
+    "SpecialistTwo": {
+      "host_tool_calls": 3,
+      "tool_results": 3,
+      "message_events": 149,
+      "exhausted_provider_retries": 0
+    }
+  },
+  "raw_sha256": {
+    "mailbox-history.json": "9343358a88d619f57a5cac756709684eae977325aa66ddb83c536628dfb51beb",
+    "observer-events.json": "cb852f7e2aa85fba8454b13951dd24aa3fc95a758643d3a9936d7430dba8601c",
+    "observations.jsonl": "02cb83f6619d7a09e19a116035c018af5c7c9f739710528a7e1963c34749a103",
+    "Coordinator/rpc-events.jsonl": "fa3ef3893b83dc5ad6d6e8a4b3e50f8a25f3c11cebed5a9e44362780f7eb11d8",
+    "SpecialistOne/rpc-events.jsonl": "30be16a3577a088a7e37c86bc4151263f9c9a3ce795ab07aea4a1f8f98b5f5a7",
+    "SpecialistTwo/rpc-events.jsonl": "8effbffd727f8eca18984ea84b98e6c8586bc8bdff9f40fbed52bfd6156068cf",
+    "Coordinator/messages.json": "0d5e83339233c01472ff55cb0341fe84440fa1c5ab90c022db4f987deac68ebd",
+    "SpecialistOne/messages.json": "36c1fc0f45269fd50024c8a4c4b41dcc8b86b2c33e1bf61182828006b03b9e64",
+    "SpecialistTwo/messages.json": "5ec86991b63bea359b1c6880c3b604a025e3c2a5889144a9a6befc1c2070321d"
+  },
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

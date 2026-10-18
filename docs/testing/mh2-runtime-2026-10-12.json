@@ -1,0 +1,931 @@
+{
+  "schemaVersion": 1,
+  "issue": "FOR-7",
+  "recordedAt": "2026-10-12T22:00:00.212126+00:00",
+  "implementationRevision": "0cb651b31d5883ee4c07c3748898306fb9dab7f5",
+  "baseRevision": "8b9e9ea44a87ed9167a2bfc3eea47bb8fdfb6b2e",
+  "sourceFiles": {
+    "README.md": "e135e891f6d06b9f1f7c97abcf47f01f1d086e43e048004aef0921a1554b5f34",
+    "crates/crewroom-core/src/attempts.rs": "ae291ee1c257936ec820a7a98b691d08231a9cfca0a31f1afe09625819443c8e",
+    "crates/crewroom-core/src/lib.rs": "73ee45e11a8df8bd9c72338cd8862b0ace2d8f2f4087362e51481a997a1db55a",
+    "crates/crewroom-core/src/runner_identity.rs": "0d681168bb8d8d03b40e452ab9fea530eecf998dbb574c37c51d39f876a6055a",
+    "crates/crewroom-desktop/src/wall.rs": "53fabd80c07ae401bdb22b0d089a301e2b6a53a9a5c5e96cccb61168e7c21bd1",
+    "crates/crewroom-desktop/src/workbench/results.rs": "d89d8da90c38a1231dfeab421fbefd94b95082ed24508761cb8a2da672254af6",
+    "crates/crewroom-runtime/examples/codex-fixture.rs": "666db9c568941279325a05b527c5be27cfc989414bf7a670c33ad64badb28dff",
+    "crates/crewroom-runtime/examples/supervisor-fixture.rs": "7c8b7208ef135da5369be0098458b37f31acf12d52c2f1116aa0e8618759a748",
+    "crates/crewroom-runtime/examples/workflow-fixture.rs": "1b05c99256a80fa9d3800500d047d502570d0ca891468425ce6d1e7373c41067",
+    "crates/crewroom-runtime/src/helper.rs": "e9a59c942c7c14812217a0995e0444d9770147e1d244e946a22f2abb8e7bd6b2",
+    "crates/crewroom-runtime/src/host.rs": "c48a131165afdf0f04dd2a8b881374d7ea56a1c6b7bb8c06526380ec1ee38626",
+    "crates/crewroom-runtime/src/host/tools.rs": "0ce413df478ec6676d249e0a048881f61396ca27de01ae78d87266e9eb83ef07",
+    "crates/crewroom-runtime/src/host_journal.rs": "10f19ffff1f7ccd1aad288cb8f5fa7c3ccdb206cb3a54958db716a82df8eff53",
+    "crates/crewroom-runtime/src/lib.rs": "841206d0f88b20dbbdbefe759b5e0b6407aecf99d456e6cf478562c0c6e2f33a",
+    "crates/crewroom-runtime/src/pane.rs": "0d2bae2bc7a60fbff3c05c936e297e8dd922aefab804355f2e4d37498dc977ae",
+    "crates/crewroom-runtime/src/runner/auth.rs": "4025b146a80c1f584004f0b5f70fb61044d4d030dcabd29005c6d9aef4aa3515",
+    "crates/crewroom-runtime/src/runner/codex.rs": "2124addae3e55a3e380ae768bad83aef3e2a9bde9e80561c761533f55105f623",
+    "crates/crewroom-runtime/src/runner/journal.rs": "a97b3e1c50b54707893a0594b78cd1fc04beffe72d7846dfda7d128153f9ad21",
+    "crates/crewroom-runtime/src/runner/jsonl.rs": "7bc6f6758d54e7380bee5e506ac02ada122e7794c9532e1e6ca79969f36bc6c5",
+    "crates/crewroom-runtime/src/runner/mod.rs": "9e46f05d5891d001af080d921e47c5f135b9700f96ca76717b41a8b348134735",
+    "crates/crewroom-runtime/src/runner/omp.rs": "13097603a9fded03c4c5e1e0dbff45f6133c23302db51af2a1c8fa930fad03b4",
+    "crates/crewroom-runtime/src/runner/profile.rs": "9f31c2b9b620806329c435e96dd64abc45589927deb5ad76eddf1a8cdb87fc59",
+    "crates/crewroom-runtime/src/supervisor/hosts/launch.rs": "a73c2e59ed2875f65db07f6de8fdc83489281c02c40cfadf76d035846d73100f",
+    "crates/crewroom-runtime/src/supervisor/hosts/recovery.rs": "b73511088be8a66b9806a723299e98c185a826f07b27c01bfe7b77ef65e58f2b",
+    "crates/crewroom-runtime/src/supervisor/hosts/terminal.rs": "a536a519eee06ce187753df9cbc25cac15b69696def68b8c3b72784e90dd2fa4",
+    "crates/crewroom-runtime/src/supervisor/workflow/configuration.rs": "dcdc64e6cde4f7ce94da2ff1c43bc3e7517494c89e5f6685516f94689c9215e7",
+    "crates/crewroom-service/src/views.rs": "142fc8250f0183015377cfd2a963f046f9ceb7a8d971b1b71c95ed5afab76e62",
+    "crates/crewroom-service/src/views/history.rs": "b059088337bfac6eec47fafb3db8c2b5ddf31e5093487c73247723a038c9a334",
+    "docs/architecture.md": "600f088dc004d20809473f7677fb262ec089cb398ef629542521d386268aaa9a",
+    "docs/multi-harness-plan.md": "3dfb3ea81e10e4e9a1ef0532cd8eb1fdaaba152087b0062c0293a16955ff1eb0",
+    "docs/research/codex-native-auth-integration-2026-10-12.md": "6a5b1637a62b82fcce7ea133ebc4f56ab7631247b11d7b475b7feafdde21babf",
+    "docs/status.md": "536f961ceac97dd26aa688f8f6147ec980d60dc094a44ce5b0e9a18875bf1ffd",
+    "docs/testing/mh2-runtime-acceptance.md": "f13b4d54af90ea7e24ba85e650636249bb03964a2bf5720344937a401f79295a",
+    "scripts/linux_offline_guard.py": "a12fe2f3d14b9218d8e5c1c1f7b8513abab7a0c779418a439e1e80685363167c",
+    "scripts/omp_offline_fixture.py": "14c156a1efad930be526b78aa1a11f1646c725c4c004d1937efee93cdfecce3a",
+    "scripts/rust/verify-codex-workflow.ts": "27c5c9325c9b3347401d6f542375bc79cdb90d8fa87ab24876571455b9f5501b",
+    "scripts/rust/verify-omp-gateway.py": "ef43cff0fdb5fe27d0e49322d3929630fa88b4c8b81ec2966839d6a4d96d87e4",
+    "scripts/rust/verify-omp-host.py": "d18d9780bb860b68dbab1de5b51b41f898abae450fc0da08f7285166ff26a328",
+    "scripts/rust/verify-omp-rpc.py": "f222a0b378fe15f9db82688ef1a75b1de89ae5af01bb97147b8b83b914605d22",
+    "scripts/rust/verify-omp-supervisor.py": "8b28207f3be58492be067b299688586239c8f930ac7436e8f8aebf2a48a24798",
+    "scripts/rust/workflow-support.ts": "815007571eb555f9d893f961d9d3ca7cd01f145ac15782f92f32e40808faf342",
+    "scripts/test-application-continuity.py": "2132913dba4a378b5f0fb96ea766f13fe3e9928b8e441cc4cd50536091ae0ef2",
+    "scripts/test_linux_offline_guard.py": "d4415d57f2dc444e723f09d947638315b2e21dccb65b11ea34d6a12375552c89",
+    "scripts/verify_codex_adapter.py": "f977e9ebf60c2320cacb8614b5ee8384441030472a1274b1c66fdc076d3a082e",
+    "scripts/verify_codex_workflow.py": "49643d54571f246b4e3513c919c54c2c1279f04743fb630e43b17b3ce9bdac72",
+    "server/run-usage.ts": "a3feac5fabd0d614dcc17404ca3c48478bb695dd5f2a306de0dfe52b692e8232",
+    "server/runtime/types.ts": "7567ea1111a92930a97331d135981a691a5cc23ecb3d2b7e13fc37e1da66ab2b",
+    "src/usage.tsx": "9cd59d19ae6fa546db0bf6e8fdd3a72c0a1f42cc8e0fc7719c5fd348126d5fd9",
+    "src/wall.tsx": "d5cf71e3d3b2ad829503a89c189445512fb4fc77ebc68db354049cae65f88141"
+  },
+  "validationProvenance": "Checks ran on the working tree committed as implementationRevision. Live workflow includes the final notification guard. Subsequent source edits before commit only relocated test modules, removed a needless borrow, and corrected/documented the Linux fixture relay. Fixture and browser checks cover the final relay. No later production behavior change is included in the evidence-only commit.",
+  "checks": [
+    {
+      "name": "domain",
+      "command": "npm test",
+      "passed": 332,
+      "failed": 0,
+      "ignored": 0,
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-for7-npm-test.log",
+        "sha256": "c6ad9117e1315057bc045e4431133dabbfc197eedca2c469f041e8d66f0f7ddf"
+      }
+    },
+    {
+      "name": "browser",
+      "command": "npm run test:e2e",
+      "passed": 31,
+      "failed": 0,
+      "ignored": 0,
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/cr-mh2-e2e-final.log",
+        "sha256": "7593704b6c50a745ca602f5002befa4175b404f175a0902960934a743e3fa0ee"
+      }
+    },
+    {
+      "name": "rust",
+      "command": "cargo test --locked -p crewroom-core -p crewroom-runtime -p crewroom-service -- --test-threads=1",
+      "passed": 177,
+      "failed": 0,
+      "ignored": 1,
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/cr-mh2-rust-tests-final.log",
+        "sha256": "97ded94ff3568e335c180492140f55b80efb4efd3856a53672cac7c94d263eae"
+      }
+    },
+    {
+      "name": "desktop",
+      "command": "cargo test --locked -p crewroom-desktop -j6",
+      "passed": 47,
+      "failed": 0,
+      "ignored": 10,
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/cr-mh2-desktop-tests-final.log",
+        "sha256": "d0184473a33115e2652cb5d580a7f240ef4bbd3f7d5196f229876398de13e5df"
+      }
+    },
+    {
+      "name": "linuxGuard",
+      "command": "python3 -m unittest discover -s scripts -p test_linux_offline_guard.py -v",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/cr-mh2-guard-tests.log",
+        "sha256": "9eee82d958aab35a93c3d1eefc89dad139a000379085d3884ebc859e87412185"
+      }
+    },
+    {
+      "name": "browserBuild",
+      "command": "npm run build",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-for7-build.log",
+        "sha256": "a0b75d0dfa2760692eff8cdf7fa9a095b6b96dac8862d634dd0a37e11f79da38"
+      }
+    },
+    {
+      "name": "nativeBuild",
+      "command": "cargo build --locked --workspace -j6",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/cr-mh2-workspace-build.log",
+        "sha256": "b8bae2bbe2d412d0be254d3af1a6b69e96560b218784eebef913eda132fa43ea"
+      }
+    },
+    {
+      "name": "clippy",
+      "command": "cargo clippy --locked -p crewroom-core -p crewroom-runtime -p crewroom-service --all-targets -- -D warnings",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/cr-mh2-clippy-final2.log",
+        "sha256": "cc87edceb85544416d3995af30e1b6aac3f1faee09851e4fdfeac9e3e1e9cab8"
+      }
+    },
+    {
+      "name": "format",
+      "command": "cargo fmt --all -- --check",
+      "exitCode": 0
+    },
+    {
+      "name": "diff",
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "environment": {
+    "node": "24.21.0",
+    "codex": "0.162.0",
+    "ompFixture": "18.4.12",
+    "globalOmpChanged": false,
+    "activeRuntimeChanged": false,
+    "nativeBuild": "Used existing checkout-local Zig 0.16.0 and verified libc++ libraries; no system package change."
+  },
+  "liveCodex": {
+    "adapter": {
+      "receipt": {
+        "path": ".crewroom/mh2-adapter-final-2026-10-12/result.json",
+        "sha256": "a6b27b2cbcbe932137b0f48389e5e5047667154c354c768147ae8583869bb62d"
+      },
+      "scope": "LIVE production Rust Codex adapter; disposable host driver",
+      "model": "gpt-6-astra",
+      "passed": true,
+      "effects": 1,
+      "checks": [
+        "correct model, separate host and runner processes",
+        "addressed dynamic tool and normalized output",
+        "SIGKILL, verified stopped ownership, fresh process, same history, no duplicate effect",
+        "busy interruption and durable unresolved-tool recovery hold"
+      ],
+      "cleanup": [
+        {
+          "state": "stopped",
+          "exitCode": -9
+        },
+        {
+          "state": "stopped",
+          "exitCode": 0
+        },
+        {
+          "state": "stopped",
+          "exitCode": 1
+        },
+        {
+          "state": "stopped",
+          "exitCode": 0
+        },
+        {
+          "state": "stopped",
+          "exitCode": 0
+        },
+        {
+          "state": "stopped",
+          "exitCode": -9
+        }
+      ],
+      "identities": [
+        {
+          "hostPid": 522867,
+          "runnerKind": "codex",
+          "runnerPid": 523205,
+          "runnerVersion": "codex-cli 0.162.0",
+          "runnerProfile": "a79f5343ba8e029d00d3dd8a14642edbf372d48bee3b3acd4dc9d4dd4b8d574f",
+          "model": {
+            "adapter": "codex",
+            "provider": "codex",
+            "api": "codex-app-server",
+            "id": "gpt-6-astra",
+            "selector": "codex/gpt-6-astra",
+            "effort": "low"
+          },
+          "thinkingLevel": "low",
+          "sessionId": "01a13219-b163-7d13-896c-e7152f9cb436",
+          "sessionDirectory": "/home/crewroom/Projects/crewroom/.crewroom/mh2-adapter-final-2026-10-12/assignment-a/codex-session",
+          "capabilities": {
+            "authentication": "native-chatgpt",
+            "usage": "cumulative-tokens",
+            "cost": "unavailable",
+            "preRequestBudget": false,
+            "hardOutputLimit": false,
+            "compaction": "harness-managed",
+            "toolAuthority": "crewroom"
+          }
+        },
+        {
+          "hostPid": 523281,
+          "runnerKind": "codex",
+          "runnerPid": 523821,
+          "runnerVersion": "codex-cli 0.162.0",
+          "runnerProfile": "a79f5343ba8e029d00d3dd8a14642edbf372d48bee3b3acd4dc9d4dd4b8d574f",
+          "model": {
+            "adapter": "codex",
+            "provider": "codex",
+            "api": "codex-app-server",
+            "id": "gpt-6-astra",
+            "selector": "codex/gpt-6-astra",
+            "effort": "low"
+          },
+          "thinkingLevel": "low",
+          "sessionId": "01a13219-c7cd-75d1-a53c-76b5a85183d5",
+          "sessionDirectory": "/home/crewroom/Projects/crewroom/.crewroom/mh2-adapter-final-2026-10-12/assignment-b/codex-session",
+          "capabilities": {
+            "authentication": "native-chatgpt",
+            "usage": "cumulative-tokens",
+            "cost": "unavailable",
+            "preRequestBudget": false,
+            "hardOutputLimit": false,
+            "compaction": "harness-managed",
+            "toolAuthority": "crewroom"
+          }
+        }
+      ]
+    },
+    "workflow": {
+      "receipt": {
+        "path": "/tmp/cr-mh2-live-workflow-final-20261012/workflow-result.json",
+        "sha256": "7912fd25ce84d77b7b60eaa7042e9a0c14765d17f45ce5b94b47e90d4fc35968"
+      },
+      "passed": true,
+      "checks": [
+        "model-based route, native login, exact separately owned host/runner pairs",
+        "real addressed host tool through workflow authorization and external Rust Mail to independent recipient",
+        "controller SIGKILL and exact live-process reattachment without another Mail effect",
+        "pause verifies stopped ownership; resume uses new processes, same durable threads and original Mail effect"
+      ],
+      "identities": [
+        {
+          "id": "6bc4ee3a-34d0-4a2a-8f49-d2b84896ba1b",
+          "hostPid": 531991,
+          "runnerPid": 532476,
+          "sessionId": "01a1321b-0106-78a1-9330-5a88963a8a34",
+          "runnerProfile": "a79f5343ba8e029d00d3dd8a14642edbf372d48bee3b3acd4dc9d4dd4b8d574f"
+        },
+        {
+          "id": "9383c17c-04d0-4fb5-ba37-77c92f7f220c",
+          "hostPid": 532566,
+          "runnerPid": 533433,
+          "sessionId": "01a1321b-19e5-7093-8c98-17626f4e15d7",
+          "runnerProfile": "a79f5343ba8e029d00d3dd8a14642edbf372d48bee3b3acd4dc9d4dd4b8d574f"
+        }
+      ],
+      "message": {
+        "id": "de2b9b0b-ac6f-4d29-9bcb-2e904ecd024f",
+        "disposition": "received"
+      },
+      "finalOwnership": [
+        "stopped",
+        "stopped",
+        "stopped",
+        "stopped"
+      ],
+      "mailExecutable": {
+        "binary": "/home/crewroom/Projects/crewroom/.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail",
+        "sha256": "6d0a2000c4e33066b1bca36a15ccdb3ccbccfc90362feee2fa4ca8c6f33f729b",
+        "release": "v0.3.36"
+      }
+    },
+    "authRefreshLease": {
+      "codex": "0.162.0",
+      "inferenceTurns": 0,
+      "sameLeaseRetainedAfterExec": true,
+      "otherOwnerBlockedAfterParentClosesLease": true
+    }
+  },
+  "ompSynthetic": [
+    {
+      "kind": "rpc",
+      "receipt": {
+        "path": "/tmp/cr-mh2-omp-rpc-20261012c/report.json",
+        "sha256": "c304cdaf5e6c11d67cccb4a4e83124444fa72bd4b2105304e663fe02e43b2d02"
+      },
+      "cases": [
+        {
+          "name": "exact native preflight and model request",
+          "selector": "aperture-openai/openai.gpt-6-sol",
+          "effort": "low",
+          "identity": {
+            "model": {
+              "provider": "aperture-openai",
+              "id": "openai.gpt-6-sol",
+              "api": "openai-responses"
+            },
+            "thinkingLevel": "low",
+            "sessionId": "01a1321a-1154-7000-900d-6ea5f25ec162",
+            "isStreaming": false,
+            "autoCompactionEnabled": false
+          },
+          "ompPid": 524578,
+          "bridgePid": 524559,
+          "status": "passed"
+        },
+        {
+          "name": "429 bounded HTTP retry retains model",
+          "status": "passed"
+        },
+        {
+          "name": "403 exposes failure without fallback",
+          "status": "passed"
+        },
+        {
+          "name": "actual OMP v2 arguments and input artifact retain 1.2 MB; provider result explicitly truncated",
+          "utf8Bytes": 1200000,
+          "sha256": "57d1bc32102a791bd10d7ee22ddd51fb77f735e4aed02994bcbc4dbb3bfc7ec3",
+          "providerRequests": 2,
+          "resultProjection": {
+            "direction": "middle",
+            "truncatedBy": "middle",
+            "totalLines": 1,
+            "totalBytes": 1200000,
+            "outputLines": 3,
+            "outputBytes": 40985,
+            "maxBytes": 40960,
+            "elidedLines": 0,
+            "elidedBytes": 1159040,
+            "artifactId": "0"
+          },
+          "status": "passed"
+        },
+        {
+          "name": "exact native preflight and model request",
+          "selector": "aperture-anthropic/anthropic.claude-sonnet-5",
+          "effort": "medium",
+          "identity": {
+            "model": {
+              "provider": "aperture-anthropic",
+              "id": "anthropic.claude-sonnet-5",
+              "api": "anthropic-messages"
+            },
+            "thinkingLevel": "medium",
+            "sessionId": "01a1321a-23f2-7000-8fe9-fa2a9c98cddb",
+            "isStreaming": false,
+            "autoCompactionEnabled": false
+          },
+          "ompPid": 524895,
+          "bridgePid": 524876,
+          "status": "passed"
+        },
+        {
+          "name": "exact native preflight and model request",
+          "selector": "aperture-google/gemini-3.8-flash",
+          "effort": "low",
+          "identity": {
+            "model": {
+              "provider": "aperture-google",
+              "id": "gemini-3.8-flash",
+              "api": "google-generative-ai"
+            },
+            "thinkingLevel": "low",
+            "sessionId": "01a1321a-2af6-7000-ba92-82abcc0148ba",
+            "isStreaming": false,
+            "autoCompactionEnabled": false
+          },
+          "ompPid": 525106,
+          "bridgePid": 525087,
+          "status": "passed"
+        },
+        {
+          "name": "unsupported declared effort rejected before launch",
+          "selector": "aperture-openai/zai-org/GLM-5.2",
+          "status": "passed"
+        },
+        {
+          "name": "stale effort refused by real runner readback",
+          "selector": "aperture-openai/zai-org/GLM-5.2",
+          "status": "passed"
+        },
+        {
+          "name": "unsupported declared effort rejected before launch",
+          "selector": "aperture-google/gemini-3.1-pro-preview",
+          "status": "passed"
+        },
+        {
+          "name": "stale effort refused by real runner readback",
+          "selector": "aperture-google/gemini-3.1-pro-preview",
+          "status": "passed"
+        },
+        {
+          "name": "unsupported declared effort rejected before launch",
+          "selector": "aperture-bedrock-compat/us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "status": "passed"
+        },
+        {
+          "name": "stale effort refused by real runner readback",
+          "selector": "aperture-bedrock-compat/us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "status": "passed"
+        }
+      ],
+      "guard": {
+        "fixture_port_allowed": true,
+        "external_denied": true,
+        "other_loopback_denied": true,
+        "child_egress_denied": true
+      },
+      "runner": {
+        "version": "omp/18.4.12",
+        "cliSha256": "d659505080c80a091524de1335caccdb815e05367bd825048cda4a0e98d8b7a0",
+        "bunSha256": "9fd36f87e4b90b07632b987a2e4ec81ca15a62c81bf983190cea6d715be2ad74"
+      },
+      "passed": true,
+      "allOwnedProcessesExited": true,
+      "providerRequests": 8,
+      "providerErrors": []
+    },
+    {
+      "kind": "host",
+      "receipt": {
+        "path": "/tmp/cr-mh2-omp-host-20261012c/report.json",
+        "sha256": "e35970db1b5b8b27ba3a66c3391c6dc15fb39934405f5024fac5388a2f197d46"
+      },
+      "cases": [
+        {
+          "name": "independent host text and routed tool with reported synthetic usage",
+          "selector": "aperture-openai/openai.gpt-6-sol",
+          "identity": {
+            "model": {
+              "provider": "aperture-openai",
+              "id": "openai.gpt-6-sol",
+              "api": "openai-responses"
+            },
+            "thinkingLevel": "low",
+            "sessionId": "01a1321a-3621-7000-adf6-e6fa8a4a6e04",
+            "isStreaming": false,
+            "autoCompactionEnabled": false,
+            "hostPid": 525581,
+            "ompPid": 525616,
+            "sessionDirectory": "/tmp/cr-mh2-omp-host-20261012c/family-0/sessions"
+          },
+          "providerRequests": 3,
+          "status": "passed"
+        },
+        {
+          "name": "independent host text and routed tool with reported synthetic usage",
+          "selector": "aperture-anthropic/anthropic.claude-sonnet-5",
+          "identity": {
+            "model": {
+              "provider": "aperture-anthropic",
+              "id": "anthropic.claude-sonnet-5",
+              "api": "anthropic-messages"
+            },
+            "thinkingLevel": "medium",
+            "sessionId": "01a1321a-3e4f-7000-b79a-f58085ad5312",
+            "isStreaming": false,
+            "autoCompactionEnabled": false,
+            "hostPid": 526006,
+            "ompPid": 526024,
+            "sessionDirectory": "/tmp/cr-mh2-omp-host-20261012c/family-1/sessions"
+          },
+          "providerRequests": 3,
+          "status": "passed"
+        },
+        {
+          "name": "independent host text and routed tool with reported synthetic usage",
+          "selector": "aperture-google/gemini-3.8-flash",
+          "identity": {
+            "model": {
+              "provider": "aperture-google",
+              "id": "gemini-3.8-flash",
+              "api": "google-generative-ai"
+            },
+            "thinkingLevel": "low",
+            "sessionId": "01a1321a-4682-7000-96e6-f20030c09674",
+            "isStreaming": false,
+            "autoCompactionEnabled": false,
+            "hostPid": 526431,
+            "ompPid": 526449,
+            "sessionDirectory": "/tmp/cr-mh2-omp-host-20261012c/family-2/sessions"
+          },
+          "providerRequests": 3,
+          "status": "passed"
+        },
+        {
+          "name": "restore actual session directory and subsequent turn",
+          "identity": {
+            "model": {
+              "provider": "aperture-openai",
+              "id": "openai.gpt-6-sol",
+              "api": "openai-responses"
+            },
+            "thinkingLevel": "low",
+            "sessionId": "01a1321a-3621-7000-adf6-e6fa8a4a6e04",
+            "isStreaming": false,
+            "autoCompactionEnabled": false,
+            "hostPid": 526736,
+            "ompPid": 526754,
+            "sessionDirectory": "/tmp/cr-mh2-omp-host-20261012c/family-0/sessions",
+            "recoveryMode": "session"
+          },
+          "status": "passed"
+        },
+        {
+          "name": "wrong-id actual session directory and subsequent turn",
+          "identity": {
+            "model": {
+              "provider": "aperture-openai",
+              "id": "openai.gpt-6-sol",
+              "api": "openai-responses"
+            },
+            "thinkingLevel": "low",
+            "sessionId": "01a1321a-57ac-7000-b3d3-ea4cf27f34dc",
+            "isStreaming": false,
+            "autoCompactionEnabled": false,
+            "hostPid": 526969,
+            "ompPid": 526987,
+            "sessionDirectory": "/tmp/cr-mh2-omp-host-20261012c/wrong-id/sessions",
+            "recoveryMode": "replacement"
+          },
+          "status": "passed"
+        },
+        {
+          "name": "empty history uses new attempt session directory",
+          "status": "passed"
+        },
+        {
+          "name": "denied exposes terminal error without upstream substitution",
+          "terminal": {
+            "type": "prompt_result",
+            "id": "b74ead1e43f14c3bad8e32f5039befac",
+            "agentInvoked": true,
+            "status": "error",
+            "sessionSettled": true,
+            "error": {
+              "message": "403 Synthetic failure\nSynthetic failure (type=fixture_error)",
+              "kind": "authorization",
+              "retryable": false,
+              "provider": "aperture-openai",
+              "model": "openai.gpt-6-sol"
+            }
+          },
+          "providerRequests": 1,
+          "status": "passed"
+        },
+        {
+          "name": "effort exposes terminal error without upstream substitution",
+          "terminal": {
+            "type": "prompt_result",
+            "id": "a2283906972841e5a0bc78c589d4bbe0",
+            "agentInvoked": true,
+            "status": "error",
+            "sessionSettled": true,
+            "error": {
+              "message": "403 Crewroom rejected a model or effort substitution.\nCrewroom rejected a model or effort substitution. (type=crewroom_assignment_policy)",
+              "kind": "rejected",
+              "retryable": false,
+              "provider": "aperture-openai",
+              "model": "openai.gpt-6-sol"
+            }
+          },
+          "providerRequests": 1,
+          "status": "passed"
+        },
+        {
+          "name": "runner rejects changed working directory; cancelled restore never becomes ready",
+          "status": "passed"
+        },
+        {
+          "name": "dedicated tmux reconnect, readable native host and external reconciliation after host death",
+          "identity": {
+            "model": {
+              "provider": "aperture-openai",
+              "id": "openai.gpt-6-sol",
+              "api": "openai-responses"
+            },
+            "thinkingLevel": "low",
+            "sessionId": "01a1321a-77d0-7000-a43f-c15378710dd9",
+            "isStreaming": false,
+            "autoCompactionEnabled": false,
+            "hostPid": 527715,
+            "ompPid": 527738,
+            "sessionDirectory": "/tmp/cr-mh2-omp-host-20261012c/tmux/sessions"
+          },
+          "runnerOwnershipAfterHostDeath": {
+            "state": "uncertain",
+            "reason": "The leader exited; surviving lock holders require reconciliation.",
+            "owner": {
+              "pid": 527738,
+              "pgid": 527738,
+              "started": "Mon Oct 12 17:52:36 2026",
+              "token": "REDACTED-LOCAL-FIXTURE-CAPABILITY"
+            },
+            "members": [
+              527738,
+              527742,
+              527743
+            ]
+          },
+          "status": "passed"
+        },
+        {
+          "name": "actual OMP oversized host tool retained and routed in full",
+          "utf8Bytes": 1200000,
+          "sha256": "57d1bc32102a791bd10d7ee22ddd51fb77f735e4aed02994bcbc4dbb3bfc7ec3",
+          "terminal": {
+            "type": "prompt_result",
+            "id": "55c41578ff7044478ecf5339be580352",
+            "agentInvoked": true,
+            "status": "error",
+            "sessionSettled": true,
+            "error": {
+              "message": "409 Provider request exceeded its limit.",
+              "kind": "malformed",
+              "retryable": true,
+              "provider": "aperture-openai",
+              "model": "openai.gpt-6-sol"
+            }
+          },
+          "providerRequests": 1,
+          "status": "passed"
+        }
+      ],
+      "guard": {
+        "fixture_port_allowed": true,
+        "external_denied": true,
+        "other_loopback_denied": true,
+        "child_egress_denied": true
+      },
+      "runner": {
+        "version": "omp/18.4.12",
+        "cliSha256": "d659505080c80a091524de1335caccdb815e05367bd825048cda4a0e98d8b7a0",
+        "bunSha256": "9fd36f87e4b90b07632b987a2e4ec81ca15a62c81bf983190cea6d715be2ad74"
+      },
+      "passed": true,
+      "allOwnedProcessesExited": true,
+      "providerRequests": 16,
+      "providerErrors": [],
+      "backendRequests": 4
+    },
+    {
+      "kind": "supervisor",
+      "receipt": {
+        "path": "/tmp/cr-mh2-omp-supervisor-20261012c/report.json",
+        "sha256": "df6901b35ca9d272e200608f85b145fe2a041763847cfd84e64ab318c16a8423"
+      },
+      "cases": [
+        {
+          "name": "native supervisor actual OMP text/tool/usage and visible tmux host",
+          "selector": "aperture-openai/openai.gpt-6-sol",
+          "identity": {
+            "hostPid": 525622,
+            "sessionId": "01a1321a-3636-7000-8de2-fa6e396864d4",
+            "hostUrl": "http://127.0.0.1:39769",
+            "pane": "%0",
+            "runnerCwd": "/tmp/cr-mh2-omp-supervisor-20261012c/workspace",
+            "ompPid": 525644,
+            "sessionDirectory": "/tmp/cr-mh2-omp-supervisor-20261012c/hosts/eaf92f81-8503-4df6-aaa8-b050374f3e05/sessions"
+          },
+          "providerRequests": 3,
+          "status": "passed"
+        },
+        {
+          "name": "actual controller SIGKILL and same OMP process/session reattachment with subsequent turn",
+          "identity": {
+            "hostPid": 525622,
+            "sessionId": "01a1321a-3636-7000-8de2-fa6e396864d4",
+            "hostUrl": "http://127.0.0.1:39769",
+            "pane": "%0",
+            "runnerCwd": "/tmp/cr-mh2-omp-supervisor-20261012c/workspace",
+            "ompPid": 525644,
+            "sessionDirectory": "/tmp/cr-mh2-omp-supervisor-20261012c/hosts/eaf92f81-8503-4df6-aaa8-b050374f3e05/sessions"
+          },
+          "status": "passed"
+        },
+        {
+          "name": "native supervisor actual OMP text/tool/usage and visible tmux host",
+          "selector": "aperture-anthropic/anthropic.claude-sonnet-5",
+          "identity": {
+            "hostPid": 526124,
+            "sessionId": "01a1321a-40b3-7000-bb82-4a3563515fd4",
+            "hostUrl": "http://127.0.0.1:35477",
+            "pane": "%1",
+            "runnerCwd": "/tmp/cr-mh2-omp-supervisor-20261012c/workspace",
+            "ompPid": 526146,
+            "sessionDirectory": "/tmp/cr-mh2-omp-supervisor-20261012c/hosts/ebeab949-cca6-46a8-8d02-4edf1a7f8b58/sessions"
+          },
+          "providerRequests": 3,
+          "status": "passed"
+        },
+        {
+          "name": "native supervisor actual OMP text/tool/usage and visible tmux host",
+          "selector": "aperture-google/gemini-3.8-flash",
+          "identity": {
+            "hostPid": 526610,
+            "sessionId": "01a1321a-4a0c-7000-978e-40261f01a0b5",
+            "hostUrl": "http://127.0.0.1:34253",
+            "pane": "%2",
+            "runnerCwd": "/tmp/cr-mh2-omp-supervisor-20261012c/workspace",
+            "ompPid": 526634,
+            "sessionDirectory": "/tmp/cr-mh2-omp-supervisor-20261012c/hosts/2540dc1f-2b0f-467c-b025-24dd04cc452d/sessions"
+          },
+          "providerRequests": 3,
+          "status": "passed"
+        }
+      ],
+      "guard": {
+        "fixture_port_allowed": true,
+        "external_denied": true,
+        "other_loopback_denied": true,
+        "child_egress_denied": true
+      },
+      "runner": {
+        "version": "omp/18.4.12",
+        "cliSha256": "d659505080c80a091524de1335caccdb815e05367bd825048cda4a0e98d8b7a0",
+        "bunSha256": "9fd36f87e4b90b07632b987a2e4ec81ca15a62c81bf983190cea6d715be2ad74"
+      },
+      "passed": true,
+      "allOwnedProcessesExited": true,
+      "providerRequests": 10,
+      "providerErrors": [],
+      "backendRequests": 3
+    },
+    {
+      "kind": "gateway",
+      "receipt": {
+        "path": "/tmp/cr-mh2-omp-gateway-20261012-final/report.json",
+        "sha256": "0bc27d5db73912b3fbe5425272f9e38c63367c8a0a9434a96b8241f4bff3b875"
+      },
+      "cases": [
+        {
+          "name": "two real OMP turns through native gateway with actual synthetic usage",
+          "selector": "aperture-openai/openai.gpt-6-sol",
+          "providerRequests": 2,
+          "usage": [
+            {
+              "type": "provider_usage",
+              "status": 200,
+              "state": "actual",
+              "usage": {
+                "input": 10.0,
+                "output": 5.0,
+                "cacheRead": 0.0,
+                "cacheWrite": 0,
+                "reasoning": 0.0,
+                "total": 15.0
+              }
+            },
+            {
+              "type": "provider_usage",
+              "status": 200,
+              "state": "actual",
+              "usage": {
+                "input": 10.0,
+                "output": 5.0,
+                "cacheRead": 0.0,
+                "cacheWrite": 0,
+                "reasoning": 0.0,
+                "total": 15.0
+              }
+            }
+          ],
+          "status": "passed"
+        },
+        {
+          "name": "two real OMP turns through native gateway with actual synthetic usage",
+          "selector": "aperture-anthropic/anthropic.claude-sonnet-5",
+          "providerRequests": 2,
+          "usage": [
+            {
+              "type": "provider_usage",
+              "status": 200,
+              "state": "actual",
+              "usage": {
+                "input": 10.0,
+                "output": 5.0,
+                "cacheRead": 0.0,
+                "cacheWrite": 0.0,
+                "reasoning": 0,
+                "total": 15.0
+              }
+            },
+            {
+              "type": "provider_usage",
+              "status": 200,
+              "state": "actual",
+              "usage": {
+                "input": 10.0,
+                "output": 5.0,
+                "cacheRead": 0.0,
+                "cacheWrite": 0.0,
+                "reasoning": 0,
+                "total": 15.0
+              }
+            }
+          ],
+          "status": "passed"
+        },
+        {
+          "name": "two real OMP turns through native gateway with actual synthetic usage",
+          "selector": "aperture-google/gemini-3.8-flash",
+          "providerRequests": 2,
+          "usage": [
+            {
+              "type": "provider_usage",
+              "status": 200,
+              "state": "actual",
+              "usage": {
+                "input": 10.0,
+                "output": 5.0,
+                "cacheRead": 0.0,
+                "cacheWrite": 0,
+                "reasoning": 0.0,
+                "total": 15.0
+              }
+            },
+            {
+              "type": "provider_usage",
+              "status": 200,
+              "state": "actual",
+              "usage": {
+                "input": 10.0,
+                "output": 5.0,
+                "cacheRead": 0.0,
+                "cacheWrite": 0,
+                "reasoning": 0.0,
+                "total": 15.0
+              }
+            }
+          ],
+          "status": "passed"
+        },
+        {
+          "name": "OMP effort substitution blocked before a second upstream request",
+          "providerRequests": 1,
+          "status": "passed"
+        }
+      ],
+      "guard": {
+        "fixture_port_allowed": true,
+        "external_denied": true,
+        "other_loopback_denied": true,
+        "child_egress_denied": true
+      },
+      "runner": {
+        "version": "omp/18.4.12",
+        "cliSha256": "d659505080c80a091524de1335caccdb815e05367bd825048cda4a0e98d8b7a0",
+        "bunSha256": "9fd36f87e4b90b07632b987a2e4ec81ca15a62c81bf983190cea6d715be2ad74"
+      },
+      "passed": true,
+      "allOwnedProcessesExited": true,
+      "providerRequests": 7,
+      "providerErrors": []
+    }
+  ],
+  "review": {
+    "method": "Independent code-review skill spec and standards agents, with follow-up verification",
+    "remainingFindings": 0,
+    "addressed": [
+      "Steering acknowledgment only after acceptance",
+      "Unknown effect holds and no automatic replay",
+      "Durable cumulative usage replay and cross-attempt deduplication",
+      "Unavailable or partial native request counts in both UIs",
+      "Thread/turn notification identity including idle malformed items",
+      "Canonical-login refresh lock shared across runtime roots",
+      "Refresh child retains source lease after host death",
+      "Bounded profile output",
+      "Linux guard header EOF/timeout and inbound target capture"
+    ]
+  },
+  "limitations": [
+    "Codex native request counts/cost and gateway pre-request/hard output-budget enforcement are unavailable; cumulative tokens remain partial.",
+    "Refresh concurrency/parent-death tests use fake credentials; pinned real Codex lease retention uses zero inference. No deliberate real login expiry.",
+    "Unrelated interactive Codex clients do not share Crewroom refresh locking.",
+    "Any host tool error conservatively holds native admission until its original outcome is reconciled, including ordinary argument/read failures.",
+    "Live acceptance uses gpt-6-astra/low; no live claim for every bundled model.",
+    "OMP provider responses are synthetic; this slice performs no live Jira/PR publication and adds no Claude Code execution or native model picker.",
+    "Ten existing desktop external-fixture tests remain ignored; the ignored runtime test is a subprocess entry point exercised by the parent-death regression."
+  ],
+  "observedDiagnostics": {
+    "legacyBrowserTerminalRangeErrors": 4,
+    "browserChunkSizeWarning": true,
+    "priorAttempts": [
+      "Initial OMP Linux guard lacked observable outer ownership and absolute command path; corrected before final 31 real-OMP cases.",
+      "Initial browser 29/31 because inbound relay captured a later mount-loop path; regression fixed it and full rerun passed 31/31.",
+      "Initial native build lacked ZIG environment; reused existing local toolchain and full build/test passed.",
+      "Clippy test-module ordering and needless borrow corrected; final strict Clippy passed.",
+      "One parallel runtime unit run observed a transient journal-writer conflict during concurrent subprocess spawning; complete serial runtime gate passed twice.",
+      "Full native desktop suite passed 47/47 in 158 seconds. An unnecessary subsequent isolated role-editor diagnostic with a 60-second deadline timed out; it did not replace the complete suite result.",
+      "Earlier live workflow fixture startup timing assumptions were corrected before both full successful runs."
+    ]
+  },
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

@@ -1,0 +1,6 @@
+Crewroom's crates/crewroom-core/src/source_time.rs adapts V8's DateParser
+at revision e3ddb93205db9db66565447a4eee2143dfe72710.
+
+Copyright 2011 the V8 project authors. All rights reserved.
+
+The adaptation is distributed under the BSD terms in V8-LICENSE.

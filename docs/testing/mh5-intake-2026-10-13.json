@@ -1,0 +1,3790 @@
+{
+  "schemaVersion": 1,
+  "issue": "FOR-10",
+  "recordedAt": "2026-10-13T16:54:45.396304+00:00",
+  "implementationRevision": "7fe0afa859c3cdbd2a15b379dbd15ef4be22bdc9",
+  "implementationTree": "6468cbb74c37130d6450453fe38a53e4cecfe114",
+  "baseRevision": "6fdf3bd938f7d999155d4072d74adf00abe10c32",
+  "reviewedDiffSha256": "8a931e21712c72e58fc725db55ea40f8866fcbbb130eae5b2e4ba18572844c94",
+  "sourceFiles": {
+    "CONTEXT.md": "a79f24d3c922c5d1af12e71a7bb3b6ae89809ee70d6f4f1fc2869a2ee2f3a6ea",
+    "crates/crewroom-core/src/attempts.rs": "22865412c41325cb4bea216ef42f29dd8de93bf10fb1528a0ed2433d0c3d9ffd",
+    "crates/crewroom-core/src/continuations.rs": "c671f6ed1df7fb62a7953dd480b1f0aa75a5f65730a41abe21f254c0e5247eeb",
+    "crates/crewroom-core/src/intake/dialogue.rs": "d3cfc44a038cfa8d955571e7b5aca04631000cf5fb8f5b0a85a8653eb5333fcd",
+    "crates/crewroom-core/src/intake/mod.rs": "420c1b4f9ee8ef033d18b26bf3d68fd08081a63487940644ba10ed0952531b5e",
+    "crates/crewroom-core/src/intake/plan.rs": "27846e9a9aece88db2da2f65b68fddcb906cb7870075e2a5a59024f1414016dc",
+    "crates/crewroom-core/src/intake/requests.rs": "475b88ceb63011e2411923b2507984cf226a3f8aaffb885b3ab88cc3f86d4c43",
+    "crates/crewroom-core/src/intake/source.rs": "0d19b5a8ecfecd14bcf9b0c25f9bdf7388c99b5f1423947568668ed7344a0413",
+    "crates/crewroom-core/src/lib.rs": "7381be4608ce3d52419e843e6d516aee7d11e2c30a91ec616d6c6e3a6a38023a",
+    "crates/crewroom-core/src/migrations.rs": "771dfddf4c6036bceee06ebe78272e68c42bdf264439a90fcdfb9fcc781f8531",
+    "crates/crewroom-core/src/migrations/schema.json": "ff8f74d7b3bc270e90aee58bb0662c7d8fd32c0f858a539a5c08c6c57612c59a",
+    "crates/crewroom-core/src/repositories.rs": "17b34526ee786c21c9ed3c0f196688b0e281ddc71c6615dbee1b833d627f6197",
+    "crates/crewroom-core/src/repository_work.rs": "206d81eb5c0eb2008d8c8c6b5fb195eee27a95db51987bfeabdf9ea9d3ceb431",
+    "crates/crewroom-core/src/scheduling.rs": "82c6a64efac9ff748915a3cb2f7d302b0fa137f25d2fdad024c275e2f6a93d3a",
+    "crates/crewroom-core/src/schema.sql": "03f0bed2edfc4ce69d90733664ceae7a6122713885b759d350fd0199d1219709",
+    "crates/crewroom-core/src/store.rs": "bc89ae5784a8e8d7f9d4340ee02c2d600537da633155dc8b230cc8b8068140d6",
+    "crates/crewroom-core/src/workflow.rs": "9c7e3bac6a9d5dab904229b0815475db6b9beed2849d1aa98fda4a905844d23c",
+    "crates/crewroom-core/tests/continuations.rs": "8061924552e73ac8e42d0091796020bc54ce66515ce8a75182db8c95cf415f26",
+    "crates/crewroom-core/tests/intake.rs": "75a6612e03dab65d83aa5a6bd715596d2c6a25636eaab02984c0e65b845397a7",
+    "crates/crewroom-core/tests/migrations.rs": "8c57ba75cbd5c73750c3bd1d0c904a0214eb2eb8e101d01f26a24ed088bf99a2",
+    "crates/crewroom-core/tests/playbooks.rs": "b953173e4bedaa33e40faef665859b5d4a9617da44cc9b59bc276068d0a18884",
+    "crates/crewroom-core/tests/repository_work.rs": "a316ba44ddd583a4b2973e854506c6f4784a054f920824eb702f01caba7306ff",
+    "crates/crewroom-core/tests/role_learning.rs": "aea050efd63eaafb81c85505dee56e1350d822a97cdc4b538a48bbd272a0d559",
+    "crates/crewroom-core/tests/scheduling.rs": "731f3a883a5e53c58c335a9520f9b8ec9b2cee86d49c2cbe327d43c305f92c16",
+    "crates/crewroom-core/tests/store.rs": "c711918171aeecd6fa7ef0a02959da7ea3d7b5f3fda43cc16e05f6a553313940",
+    "crates/crewroom-core/tests/support/mod.rs": "ea128c7f40cad97fc035843865d3d5ac2d5f89317b7983ac64f61a9578b404a2",
+    "crates/crewroom-desktop/src/workbench.rs": "0f1046b4bc416bd3ae5b38ab9fab0ede8b9c8f7deff351e9c1dfd586a456b621",
+    "crates/crewroom-desktop/src/workbench/acceptance_tests.rs": "54dd33ac6a7fe7ba68f831157a263fa48e466b3efe656c1f1935fb117761c198",
+    "crates/crewroom-desktop/src/workbench/collaboration.rs": "68ed052410da2e9f3c36fca0ba17b1d303e1f3fbbc557e4fc824c905bfd10579",
+    "crates/crewroom-desktop/src/workbench/collaboration/conversation.rs": "b2b13fd9948c5397e49f174ba5abeacc4a630fec57cffa49eb8382af6cea484a",
+    "crates/crewroom-desktop/src/workbench/collaboration/refinement.rs": "f3af78e2c3ef0ccfdd432215320660041181c96480158bdfe96c5462d60e6949",
+    "crates/crewroom-desktop/src/workbench/collaboration/tests.rs": "eba44d825a6c5438e2c0b54985512cec8066a6e637aa336f2a477b200a734b2a",
+    "crates/crewroom-desktop/src/workbench/demo_seed.rs": "9e6b23a52065429ace7f9e495b48bb8fe880856ae7b82d3edecfd6d313e12e8a",
+    "crates/crewroom-desktop/src/workbench/intake.rs": "24ecfc7b5310a07eceead7990ebaf5956cf4daff3c46eec92390ed73d72c887d",
+    "crates/crewroom-desktop/src/workbench/journey_tests.rs": "cf845cc0d3d6cfd8342424a50a3feedd5244d74d86edb15fcc44bbb3fbd0686a",
+    "crates/crewroom-desktop/src/workbench/lifecycle_tests.rs": "31e6991d269e007ede264c2e5fad2132548f4164fbb2aee13813012ed69bb5aa",
+    "crates/crewroom-desktop/src/workbench/planning.rs": "1d2318a0cd9345a356efc9c78f47e6d36c8dca8f970f24cf3438bbecba01b682",
+    "crates/crewroom-desktop/src/workbench/planning/tests.rs": "2fe2448e72a95b2bccbb043801bfcba42a8bd7c2372d6b046818a6d705153a78",
+    "crates/crewroom-desktop/src/workbench/settings/tests.rs": "64eaf407d060c2a0ff87a10b49de56f09dba9da89aa45dd82bfd706ba0f1e40d",
+    "crates/crewroom-desktop/src/workbench/test_support.rs": "ccb2940d0eb63fc4fb5890bc54ab07df9a04df7bfd5e9b23fc41ce8056b0455a",
+    "crates/crewroom-runtime/examples/workflow-fixture.rs": "acf6950c5ee70795bcf8ee1506fb45c75123029237a685fe36c6177ea1f83c51",
+    "crates/crewroom-runtime/src/host-tools.json": "dedc625abbe5895fb4c2f854953d194919aa35b38527388ba09f8e4f944dba11",
+    "crates/crewroom-runtime/src/host_protocol.rs": "89c266f9444c95f61441d5ec3ecb664331576f2d16f802496a978c7328471f75",
+    "crates/crewroom-runtime/src/provider_gateway.rs": "9c73400f8cd83b9bf1a56abfc984f70b79ad4f19d1066e78623dd5e7d08d657c",
+    "crates/crewroom-runtime/src/provider_usage.rs": "86c39e93ee5674d50e1181f48171bf48cd16cc1714900be37c03d832b86adf44",
+    "crates/crewroom-runtime/src/repository/mod.rs": "ca0f8cda56e9472c3c2348afc052af1b0a58b71b98603f03e3aeaff3c2b565fd",
+    "crates/crewroom-runtime/src/repository/source.rs": "0ad3a06970753d1689ca7c4541438fcc886a21ba293a291427dec44b85a662a8",
+    "crates/crewroom-runtime/src/supervisor/workflow/configuration.rs": "00170e0c6380c7bf3844f6dfb2fece3e05cfb7978165ecdb0521049e22e9d2b0",
+    "crates/crewroom-runtime/src/supervisor/workflow/continuation.rs": "c19aca76cf570138590d396209279f78e525282aec7a3597b064bb05cbd7943b",
+    "crates/crewroom-runtime/src/supervisor/workflow/start.rs": "0396f9c8efbd9d75da926f2ae1bd8c0c17a16335bcfea1f911a17cfbf6f474af",
+    "crates/crewroom-runtime/src/supervisor/workflow/tools.rs": "29e0c1f0e90c3f3bae0c989a55237489c81dfecf322351f91965559e4d8e1606",
+    "crates/crewroom-runtime/tests/provider_gateway.rs": "94838ba0fcd866b3d05def4b72dfde8278cf1753b2e0e54ec7b77d0c3b66fab9",
+    "crates/crewroom-service/src/intake.rs": "64f8d370e1cf66124099bce1ac2c75a560b337da09197522a6587ec2186a2836",
+    "crates/crewroom-service/src/lib.rs": "24a74fb9b33e30151a96ff811244271f5d8e34a2d5be9b77382d931441f716b3",
+    "crates/crewroom-service/src/scheduler.rs": "4128c3bf5dbc83d31b779cd1bc83de976360cd88a70c967c01812143e16533e5",
+    "crates/crewroom-service/src/scheduler/intake.rs": "1386194c6ab27710fd1e71e99fac5c6992c8bc5b063c2bed5483f28335c7011c",
+    "crates/crewroom-service/tests/http.rs": "fc83e6815dc69fe56f6c6e2ae9e69a1f005b93ad5c73d63fb30df8369b22a7b5",
+    "docs/architecture.md": "93efbe8a208b9223e44a476917d350bb4fc8f41054ab95729621cf57ab6137a1",
+    "docs/multi-harness-plan.md": "c7717192cf5320b03205f3a6b918252315015c4068b8d888f7bd50d2311cf345",
+    "docs/operations.md": "45f01512fcbd1932b957c9496dafead103c504c0920fe5b82444dccc293a9525",
+    "docs/product.md": "bcc83ef29f4510931d3144c464ec01302653d49720bc35308c50df856816e35f",
+    "docs/status.md": "3e2f519b746a2da51378e140dc18800411662a8b22d9f640314d1ac3c232f874",
+    "docs/testing/mh5-intake-contract.md": "1c881923c25959b181e245947aee2acdf2fe0bf574101e462045c43d3b81740c",
+    "scripts/rust/daemon-client.ts": "052695517b4d0e31ef1a51b59a47bc0fa651cc2c05381eaaf4c21200d9b91b8b",
+    "scripts/rust/intake-workflow.test.ts": "7b2dcc81b90951ae938608f76914abb7cde292bea77e7f7b772fa47e7c29d481",
+    "scripts/rust/verify-intake-workflow.ts": "828819fa4b422db8f3045b2fd88c175d1b099e22724dda005737ab721e7890a7",
+    "scripts/rust/workflow-coding-fixture.ts": "19472c244d4e274916e41cc0581436ea43e40aa2a5975a128ab1f1ac5089e852",
+    "scripts/rust/workflow-support.ts": "b6e1c8a99231e9550b03e301ed9276958eb51293684efda27191f3c137ef9fd7",
+    "scripts/verify_intake_rollback.py": "adf79a4a78e157d2f6b04291a31d7ec5aefaedbbdb2d32b9af5d564fd66234b8",
+    "scripts/verify_intake_workflow.py": "dd4b4ac6d82fcbc5982d51bf4b2ac96c8cb876e60b19195084e14a34cec333c5"
+  },
+  "validationProvenance": [
+    "Each check links its original source-file manifest and log by hash. sourceChangesSinceCheck makes intermediate checks explicit; final code is the pinned implementation commit.",
+    "Live adapter runs predate only equivalent Clippy condition collapses and native fixture/UI/accessibility repairs. Final Rust, native, build and rollback checks cover those deltas; the last test-only commit adds an executed pending-answer crash/replay boundary.",
+    "Full desktop: 53 passed, 12 ignored. Final identity-only changes have the separate workbench rerun. Ignored fixtures are never counted as passed.",
+    "Production-daemon coding fixture uses scripted inference and scripted Mail; Git, process supervision and Docker checks are actual. Live intake uses actual OMP/Codex/Claude inference and external Rust Mail. No publication or Jira mutation was requested."
+  ],
+  "checks": [
+    {
+      "name": "npm-test",
+      "command": [
+        "npm",
+        "test"
+      ],
+      "startedAt": "2026-10-13T15:57:57.393412+00:00",
+      "finishedAt": "2026-10-13T16:00:04.644955+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/npm-test.log",
+        "sha256": "a973844037d0847448ab197809f346452179488f0f2c571a15ab82bdb6dd7f2b"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/npm-test.json",
+        "sha256": "c086d501089f4e016e48ec03a53087fe068ce2648e20ccb0dc04fa72fe1835c8"
+      },
+      "sourceChangesSinceCheck": [
+        {
+          "path": "CONTEXT.md",
+          "checkedSha256": null,
+          "implementationSha256": "a79f24d3c922c5d1af12e71a7bb3b6ae89809ee70d6f4f1fc2869a2ee2f3a6ea"
+        },
+        {
+          "path": "crates/crewroom-core/src/attempts.rs",
+          "checkedSha256": "1bd2402e01c6120aeb4937640418b819df37a36be9308db4508e94c641d7af90",
+          "implementationSha256": "22865412c41325cb4bea216ef42f29dd8de93bf10fb1528a0ed2433d0c3d9ffd"
+        },
+        {
+          "path": "crates/crewroom-core/src/intake/dialogue.rs",
+          "checkedSha256": "49a7f17bf26250dcfbc1d16d08d458efc710212886ace9a510fc6eb925a3e4ab",
+          "implementationSha256": "d3cfc44a038cfa8d955571e7b5aca04631000cf5fb8f5b0a85a8653eb5333fcd"
+        },
+        {
+          "path": "crates/crewroom-core/src/intake/mod.rs",
+          "checkedSha256": "151109f73f0e602e10dcf9cb112e88319b95c47fa5e4cf0d933e744332a2fff6",
+          "implementationSha256": "420c1b4f9ee8ef033d18b26bf3d68fd08081a63487940644ba10ed0952531b5e"
+        },
+        {
+          "path": "crates/crewroom-core/src/intake/plan.rs",
+          "checkedSha256": "9526cecef06e4c4687c4b08b77c83c59ac52e025589763c56bb8fdf1c258c5e9",
+          "implementationSha256": "27846e9a9aece88db2da2f65b68fddcb906cb7870075e2a5a59024f1414016dc"
+        },
+        {
+          "path": "crates/crewroom-core/src/intake/requests.rs",
+          "checkedSha256": "7f2f2ba405fd88809f55aad8c35193e0383122c6094b6ca12d53174b9f514363",
+          "implementationSha256": "475b88ceb63011e2411923b2507984cf226a3f8aaffb885b3ab88cc3f86d4c43"
+        },
+        {
+          "path": "crates/crewroom-core/src/repository_work.rs",
+          "checkedSha256": "59acea39a3b76cfec1244ba94f8ff1cf844a8c68fbda3f5c215ee96f16742649",
+          "implementationSha256": "206d81eb5c0eb2008d8c8c6b5fb195eee27a95db51987bfeabdf9ea9d3ceb431"
+        },
+        {
+          "path": "crates/crewroom-core/src/workflow.rs",
+          "checkedSha256": "371844ebf83d5d6567303ef018c5f5806baf684e6643095d1b687b1506eca186",
+          "implementationSha256": "9c7e3bac6a9d5dab904229b0815475db6b9beed2849d1aa98fda4a905844d23c"
+        },
+        {
+          "path": "crates/crewroom-core/tests/repository_work.rs",
+          "checkedSha256": "c4b039daced3314a1ace1fc0579aea17854ce08943bf15d936e0d3152369176d",
+          "implementationSha256": "a316ba44ddd583a4b2973e854506c6f4784a054f920824eb702f01caba7306ff"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/collaboration/conversation.rs",
+          "checkedSha256": "af2791942fd836a67b8526bcc36e4695d5a44cb4fb76bfbc3ec7c21aed7fda3d",
+          "implementationSha256": "b2b13fd9948c5397e49f174ba5abeacc4a630fec57cffa49eb8382af6cea484a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+          "checkedSha256": "b007db24400d647c6a95ec6bdbaa3c247cc2a3cdc5dffc1cd9c8ca64da2f8a67",
+          "implementationSha256": "eba44d825a6c5438e2c0b54985512cec8066a6e637aa336f2a477b200a734b2a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/demo_seed.rs",
+          "checkedSha256": null,
+          "implementationSha256": "9e6b23a52065429ace7f9e495b48bb8fe880856ae7b82d3edecfd6d313e12e8a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/intake.rs",
+          "checkedSha256": "67bdbbd17eae593467ea68a6182070b5baf936a0a8b43a90ecdc2d9af5468dcf",
+          "implementationSha256": "24ecfc7b5310a07eceead7990ebaf5956cf4daff3c46eec92390ed73d72c887d"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/planning.rs",
+          "checkedSha256": "c5f4436c07840d43b016b0d4430dd38af89df48eb9de62dc7a4b8ad3f5422870",
+          "implementationSha256": "1d2318a0cd9345a356efc9c78f47e6d36c8dca8f970f24cf3438bbecba01b682"
+        },
+        {
+          "path": "docs/architecture.md",
+          "checkedSha256": null,
+          "implementationSha256": "93efbe8a208b9223e44a476917d350bb4fc8f41054ab95729621cf57ab6137a1"
+        },
+        {
+          "path": "docs/multi-harness-plan.md",
+          "checkedSha256": null,
+          "implementationSha256": "c7717192cf5320b03205f3a6b918252315015c4068b8d888f7bd50d2311cf345"
+        },
+        {
+          "path": "docs/operations.md",
+          "checkedSha256": null,
+          "implementationSha256": "45f01512fcbd1932b957c9496dafead103c504c0920fe5b82444dccc293a9525"
+        },
+        {
+          "path": "docs/product.md",
+          "checkedSha256": null,
+          "implementationSha256": "bcc83ef29f4510931d3144c464ec01302653d49720bc35308c50df856816e35f"
+        },
+        {
+          "path": "scripts/rust/intake-workflow.test.ts",
+          "checkedSha256": "2271591a75e04b6187bdaf2253ece72f8cba5aad7471e70fbcfb56925f0b3663",
+          "implementationSha256": "7b2dcc81b90951ae938608f76914abb7cde292bea77e7f7b772fa47e7c29d481"
+        },
+        {
+          "path": "scripts/rust/workflow-coding-fixture.ts",
+          "checkedSha256": "3e533a99e051b0c81b0073be60947f7f3d947b513b735453f669d9136aa25ae2",
+          "implementationSha256": "19472c244d4e274916e41cc0581436ea43e40aa2a5975a128ab1f1ac5089e852"
+        },
+        {
+          "path": "scripts/verify_intake_rollback.py",
+          "checkedSha256": null,
+          "implementationSha256": "adf79a4a78e157d2f6b04291a31d7ec5aefaedbbdb2d32b9af5d564fd66234b8"
+        }
+      ]
+    },
+    {
+      "name": "browser-build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "startedAt": "2026-10-13T15:57:57.393993+00:00",
+      "finishedAt": "2026-10-13T15:57:59.866454+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/browser-build.log",
+        "sha256": "09a9937868a8558dc7245dd4785f0387931ce4b97d44550f4d70be8378b2a4f7"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/browser-build.json",
+        "sha256": "ec4de1ebb6a3860cbebfbf748d1f23daa2c9dfb60a01c7e4a40f7b7a3e620371"
+      },
+      "sourceChangesSinceCheck": [
+        {
+          "path": "CONTEXT.md",
+          "checkedSha256": null,
+          "implementationSha256": "a79f24d3c922c5d1af12e71a7bb3b6ae89809ee70d6f4f1fc2869a2ee2f3a6ea"
+        },
+        {
+          "path": "crates/crewroom-core/src/attempts.rs",
+          "checkedSha256": "1bd2402e01c6120aeb4937640418b819df37a36be9308db4508e94c641d7af90",
+          "implementationSha256": "22865412c41325cb4bea216ef42f29dd8de93bf10fb1528a0ed2433d0c3d9ffd"
+        },
+        {
+          "path": "crates/crewroom-core/src/intake/dialogue.rs",
+          "checkedSha256": "49a7f17bf26250dcfbc1d16d08d458efc710212886ace9a510fc6eb925a3e4ab",
+          "implementationSha256": "d3cfc44a038cfa8d955571e7b5aca04631000cf5fb8f5b0a85a8653eb5333fcd"
+        },
+        {
+          "path": "crates/crewroom-core/src/intake/mod.rs",
+          "checkedSha256": "151109f73f0e602e10dcf9cb112e88319b95c47fa5e4cf0d933e744332a2fff6",
+          "implementationSha256": "420c1b4f9ee8ef033d18b26bf3d68fd08081a63487940644ba10ed0952531b5e"
+        },
+        {
+          "path": "crates/crewroom-core/src/intake/plan.rs",
+          "checkedSha256": "9526cecef06e4c4687c4b08b77c83c59ac52e025589763c56bb8fdf1c258c5e9",
+          "implementationSha256": "27846e9a9aece88db2da2f65b68fddcb906cb7870075e2a5a59024f1414016dc"
+        },
+        {
+          "path": "crates/crewroom-core/src/intake/requests.rs",
+          "checkedSha256": "7f2f2ba405fd88809f55aad8c35193e0383122c6094b6ca12d53174b9f514363",
+          "implementationSha256": "475b88ceb63011e2411923b2507984cf226a3f8aaffb885b3ab88cc3f86d4c43"
+        },
+        {
+          "path": "crates/crewroom-core/src/repository_work.rs",
+          "checkedSha256": "59acea39a3b76cfec1244ba94f8ff1cf844a8c68fbda3f5c215ee96f16742649",
+          "implementationSha256": "206d81eb5c0eb2008d8c8c6b5fb195eee27a95db51987bfeabdf9ea9d3ceb431"
+        },
+        {
+          "path": "crates/crewroom-core/src/workflow.rs",
+          "checkedSha256": "371844ebf83d5d6567303ef018c5f5806baf684e6643095d1b687b1506eca186",
+          "implementationSha256": "9c7e3bac6a9d5dab904229b0815475db6b9beed2849d1aa98fda4a905844d23c"
+        },
+        {
+          "path": "crates/crewroom-core/tests/repository_work.rs",
+          "checkedSha256": "c4b039daced3314a1ace1fc0579aea17854ce08943bf15d936e0d3152369176d",
+          "implementationSha256": "a316ba44ddd583a4b2973e854506c6f4784a054f920824eb702f01caba7306ff"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/collaboration/conversation.rs",
+          "checkedSha256": "af2791942fd836a67b8526bcc36e4695d5a44cb4fb76bfbc3ec7c21aed7fda3d",
+          "implementationSha256": "b2b13fd9948c5397e49f174ba5abeacc4a630fec57cffa49eb8382af6cea484a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+          "checkedSha256": "b007db24400d647c6a95ec6bdbaa3c247cc2a3cdc5dffc1cd9c8ca64da2f8a67",
+          "implementationSha256": "eba44d825a6c5438e2c0b54985512cec8066a6e637aa336f2a477b200a734b2a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/demo_seed.rs",
+          "checkedSha256": null,
+          "implementationSha256": "9e6b23a52065429ace7f9e495b48bb8fe880856ae7b82d3edecfd6d313e12e8a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/intake.rs",
+          "checkedSha256": "67bdbbd17eae593467ea68a6182070b5baf936a0a8b43a90ecdc2d9af5468dcf",
+          "implementationSha256": "24ecfc7b5310a07eceead7990ebaf5956cf4daff3c46eec92390ed73d72c887d"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/planning.rs",
+          "checkedSha256": "c5f4436c07840d43b016b0d4430dd38af89df48eb9de62dc7a4b8ad3f5422870",
+          "implementationSha256": "1d2318a0cd9345a356efc9c78f47e6d36c8dca8f970f24cf3438bbecba01b682"
+        },
+        {
+          "path": "docs/architecture.md",
+          "checkedSha256": null,
+          "implementationSha256": "93efbe8a208b9223e44a476917d350bb4fc8f41054ab95729621cf57ab6137a1"
+        },
+        {
+          "path": "docs/multi-harness-plan.md",
+          "checkedSha256": null,
+          "implementationSha256": "c7717192cf5320b03205f3a6b918252315015c4068b8d888f7bd50d2311cf345"
+        },
+        {
+          "path": "docs/operations.md",
+          "checkedSha256": null,
+          "implementationSha256": "45f01512fcbd1932b957c9496dafead103c504c0920fe5b82444dccc293a9525"
+        },
+        {
+          "path": "docs/product.md",
+          "checkedSha256": null,
+          "implementationSha256": "bcc83ef29f4510931d3144c464ec01302653d49720bc35308c50df856816e35f"
+        },
+        {
+          "path": "scripts/rust/intake-workflow.test.ts",
+          "checkedSha256": "2271591a75e04b6187bdaf2253ece72f8cba5aad7471e70fbcfb56925f0b3663",
+          "implementationSha256": "7b2dcc81b90951ae938608f76914abb7cde292bea77e7f7b772fa47e7c29d481"
+        },
+        {
+          "path": "scripts/rust/workflow-coding-fixture.ts",
+          "checkedSha256": "3e533a99e051b0c81b0073be60947f7f3d947b513b735453f669d9136aa25ae2",
+          "implementationSha256": "19472c244d4e274916e41cc0581436ea43e40aa2a5975a128ab1f1ac5089e852"
+        },
+        {
+          "path": "scripts/verify_intake_rollback.py",
+          "checkedSha256": null,
+          "implementationSha256": "adf79a4a78e157d2f6b04291a31d7ec5aefaedbbdb2d32b9af5d564fd66234b8"
+        }
+      ]
+    },
+    {
+      "name": "browser-e2e",
+      "command": [
+        "npm",
+        "run",
+        "test:e2e"
+      ],
+      "startedAt": "2026-10-13T16:01:47.846163+00:00",
+      "finishedAt": "2026-10-13T16:04:00.485160+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/browser-e2e.log",
+        "sha256": "21da36b5575ffb0873aea36bcd4c71a89959ab985bf65145dec1ab7bcc142328"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/browser-e2e.json",
+        "sha256": "181521fecc7a1fedf0cdbeadaa32aafd7b57671a1575585c6be8f0baf72a2a67"
+      },
+      "sourceChangesSinceCheck": [
+        {
+          "path": "CONTEXT.md",
+          "checkedSha256": null,
+          "implementationSha256": "a79f24d3c922c5d1af12e71a7bb3b6ae89809ee70d6f4f1fc2869a2ee2f3a6ea"
+        },
+        {
+          "path": "crates/crewroom-core/src/intake/dialogue.rs",
+          "checkedSha256": "49a7f17bf26250dcfbc1d16d08d458efc710212886ace9a510fc6eb925a3e4ab",
+          "implementationSha256": "d3cfc44a038cfa8d955571e7b5aca04631000cf5fb8f5b0a85a8653eb5333fcd"
+        },
+        {
+          "path": "crates/crewroom-core/src/intake/mod.rs",
+          "checkedSha256": "151109f73f0e602e10dcf9cb112e88319b95c47fa5e4cf0d933e744332a2fff6",
+          "implementationSha256": "420c1b4f9ee8ef033d18b26bf3d68fd08081a63487940644ba10ed0952531b5e"
+        },
+        {
+          "path": "crates/crewroom-core/src/intake/plan.rs",
+          "checkedSha256": "9526cecef06e4c4687c4b08b77c83c59ac52e025589763c56bb8fdf1c258c5e9",
+          "implementationSha256": "27846e9a9aece88db2da2f65b68fddcb906cb7870075e2a5a59024f1414016dc"
+        },
+        {
+          "path": "crates/crewroom-core/src/intake/requests.rs",
+          "checkedSha256": "7f2f2ba405fd88809f55aad8c35193e0383122c6094b6ca12d53174b9f514363",
+          "implementationSha256": "475b88ceb63011e2411923b2507984cf226a3f8aaffb885b3ab88cc3f86d4c43"
+        },
+        {
+          "path": "crates/crewroom-core/src/workflow.rs",
+          "checkedSha256": "371844ebf83d5d6567303ef018c5f5806baf684e6643095d1b687b1506eca186",
+          "implementationSha256": "9c7e3bac6a9d5dab904229b0815475db6b9beed2849d1aa98fda4a905844d23c"
+        },
+        {
+          "path": "crates/crewroom-core/tests/repository_work.rs",
+          "checkedSha256": "c4b039daced3314a1ace1fc0579aea17854ce08943bf15d936e0d3152369176d",
+          "implementationSha256": "a316ba44ddd583a4b2973e854506c6f4784a054f920824eb702f01caba7306ff"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/collaboration/conversation.rs",
+          "checkedSha256": "af2791942fd836a67b8526bcc36e4695d5a44cb4fb76bfbc3ec7c21aed7fda3d",
+          "implementationSha256": "b2b13fd9948c5397e49f174ba5abeacc4a630fec57cffa49eb8382af6cea484a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+          "checkedSha256": "b007db24400d647c6a95ec6bdbaa3c247cc2a3cdc5dffc1cd9c8ca64da2f8a67",
+          "implementationSha256": "eba44d825a6c5438e2c0b54985512cec8066a6e637aa336f2a477b200a734b2a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/demo_seed.rs",
+          "checkedSha256": null,
+          "implementationSha256": "9e6b23a52065429ace7f9e495b48bb8fe880856ae7b82d3edecfd6d313e12e8a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/intake.rs",
+          "checkedSha256": "67bdbbd17eae593467ea68a6182070b5baf936a0a8b43a90ecdc2d9af5468dcf",
+          "implementationSha256": "24ecfc7b5310a07eceead7990ebaf5956cf4daff3c46eec92390ed73d72c887d"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/planning.rs",
+          "checkedSha256": "c5f4436c07840d43b016b0d4430dd38af89df48eb9de62dc7a4b8ad3f5422870",
+          "implementationSha256": "1d2318a0cd9345a356efc9c78f47e6d36c8dca8f970f24cf3438bbecba01b682"
+        },
+        {
+          "path": "docs/architecture.md",
+          "checkedSha256": null,
+          "implementationSha256": "93efbe8a208b9223e44a476917d350bb4fc8f41054ab95729621cf57ab6137a1"
+        },
+        {
+          "path": "docs/multi-harness-plan.md",
+          "checkedSha256": null,
+          "implementationSha256": "c7717192cf5320b03205f3a6b918252315015c4068b8d888f7bd50d2311cf345"
+        },
+        {
+          "path": "docs/operations.md",
+          "checkedSha256": null,
+          "implementationSha256": "45f01512fcbd1932b957c9496dafead103c504c0920fe5b82444dccc293a9525"
+        },
+        {
+          "path": "docs/product.md",
+          "checkedSha256": null,
+          "implementationSha256": "bcc83ef29f4510931d3144c464ec01302653d49720bc35308c50df856816e35f"
+        },
+        {
+          "path": "scripts/rust/intake-workflow.test.ts",
+          "checkedSha256": "2271591a75e04b6187bdaf2253ece72f8cba5aad7471e70fbcfb56925f0b3663",
+          "implementationSha256": "7b2dcc81b90951ae938608f76914abb7cde292bea77e7f7b772fa47e7c29d481"
+        },
+        {
+          "path": "scripts/verify_intake_rollback.py",
+          "checkedSha256": null,
+          "implementationSha256": "adf79a4a78e157d2f6b04291a31d7ec5aefaedbbdb2d32b9af5d564fd66234b8"
+        }
+      ]
+    },
+    {
+      "name": "rust-final",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-core",
+        "-p",
+        "crewroom-runtime",
+        "-p",
+        "crewroom-service",
+        "--",
+        "--test-threads=1"
+      ],
+      "startedAt": "2026-10-13T16:21:08.495562+00:00",
+      "finishedAt": "2026-10-13T16:22:54.728525+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/rust-final.log",
+        "sha256": "0e28977cb71c3148abf7632b0d52f7593be52a89d72ca2dd397aa0e241fac673"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/rust-final.json",
+        "sha256": "242966ff729aa91a9ef263644b891fc7903479859c99cb57c95cd4668ab0db0a"
+      },
+      "sourceChangesSinceCheck": [
+        {
+          "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+          "checkedSha256": "6ff208f05eced434e2684b0619a4b44b1aef2f43a02ce45b3a4ae1d9db4e2d6a",
+          "implementationSha256": "eba44d825a6c5438e2c0b54985512cec8066a6e637aa336f2a477b200a734b2a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/intake.rs",
+          "checkedSha256": "f5c6eec94ac602762a01c438c43cf6c9cea02d747d440b0ac5b73a9b860be133",
+          "implementationSha256": "24ecfc7b5310a07eceead7990ebaf5956cf4daff3c46eec92390ed73d72c887d"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/planning.rs",
+          "checkedSha256": "c5f4436c07840d43b016b0d4430dd38af89df48eb9de62dc7a4b8ad3f5422870",
+          "implementationSha256": "1d2318a0cd9345a356efc9c78f47e6d36c8dca8f970f24cf3438bbecba01b682"
+        },
+        {
+          "path": "scripts/rust/intake-workflow.test.ts",
+          "checkedSha256": "2271591a75e04b6187bdaf2253ece72f8cba5aad7471e70fbcfb56925f0b3663",
+          "implementationSha256": "7b2dcc81b90951ae938608f76914abb7cde292bea77e7f7b772fa47e7c29d481"
+        },
+        {
+          "path": "scripts/verify_intake_rollback.py",
+          "checkedSha256": "390cba45c8507ce78332340aaacf71b5ed250310409889fd75b7db0dad441261",
+          "implementationSha256": "adf79a4a78e157d2f6b04291a31d7ec5aefaedbbdb2d32b9af5d564fd66234b8"
+        }
+      ]
+    },
+    {
+      "name": "desktop-final",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-desktop",
+        "-j6"
+      ],
+      "startedAt": "2026-10-13T16:24:17.483652+00:00",
+      "finishedAt": "2026-10-13T16:27:34.214163+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/desktop-final.log",
+        "sha256": "f4cf13ab38456fb4f38a91fda142fb28a94cafbfd6ac5dfd9df0c39491ca68b5"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/desktop-final.json",
+        "sha256": "02457a040b9c29e908a4b6e3be6368144bf1dbd43602c7d40188c268d5ec43dd"
+      },
+      "sourceChangesSinceCheck": [
+        {
+          "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+          "checkedSha256": "73440800f94e3834671e0fcaa344c1c5062bd550f7139f27ef7e87f8f0a9f286",
+          "implementationSha256": "eba44d825a6c5438e2c0b54985512cec8066a6e637aa336f2a477b200a734b2a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/intake.rs",
+          "checkedSha256": "858816581b9c5e0f57462bd808682d00f69c5e072e3cfdd516d0d3fc33b2b054",
+          "implementationSha256": "24ecfc7b5310a07eceead7990ebaf5956cf4daff3c46eec92390ed73d72c887d"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/planning.rs",
+          "checkedSha256": "c5f4436c07840d43b016b0d4430dd38af89df48eb9de62dc7a4b8ad3f5422870",
+          "implementationSha256": "1d2318a0cd9345a356efc9c78f47e6d36c8dca8f970f24cf3438bbecba01b682"
+        },
+        {
+          "path": "scripts/rust/intake-workflow.test.ts",
+          "checkedSha256": "2271591a75e04b6187bdaf2253ece72f8cba5aad7471e70fbcfb56925f0b3663",
+          "implementationSha256": "7b2dcc81b90951ae938608f76914abb7cde292bea77e7f7b772fa47e7c29d481"
+        },
+        {
+          "path": "scripts/verify_intake_rollback.py",
+          "checkedSha256": "6ac152779353ce13c6460d5a87cc53d025a92c9a35e940a72f518abab0168824",
+          "implementationSha256": "adf79a4a78e157d2f6b04291a31d7ec5aefaedbbdb2d32b9af5d564fd66234b8"
+        }
+      ]
+    },
+    {
+      "name": "native-ids-final",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-desktop",
+        "-j6",
+        "workbench::",
+        "--",
+        "--test-threads=1"
+      ],
+      "startedAt": "2026-10-13T16:30:47.935102+00:00",
+      "finishedAt": "2026-10-13T16:39:11.296491+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/native-ids-final.log",
+        "sha256": "02d1e01f160eb9585b559a00aa40128bcf2352f91f687f956eeb82441a602ed3"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/native-ids-final.json",
+        "sha256": "e9c90b6d42f25dad4f486611cb82213d41fc55d68b1fe7ee10fb889f1460bfb4"
+      },
+      "sourceChangesSinceCheck": [
+        {
+          "path": "scripts/rust/intake-workflow.test.ts",
+          "checkedSha256": "2271591a75e04b6187bdaf2253ece72f8cba5aad7471e70fbcfb56925f0b3663",
+          "implementationSha256": "7b2dcc81b90951ae938608f76914abb7cde292bea77e7f7b772fa47e7c29d481"
+        }
+      ]
+    },
+    {
+      "name": "native-journeys",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-desktop",
+        "-j6",
+        "native_journey_",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ],
+      "startedAt": "2026-10-13T16:18:51.143879+00:00",
+      "finishedAt": "2026-10-13T16:20:11.400634+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/native-journeys.log",
+        "sha256": "cf9b44eba8358f959daf1f0cb241311892e07084477414ec709cc558399de92b"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/native-journeys.json",
+        "sha256": "07b435fd0654da9ba2fdc01a51d500d9506b1eca782b91b1f34e61e4ee05c52e"
+      },
+      "sourceChangesSinceCheck": [
+        {
+          "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+          "checkedSha256": "6ff208f05eced434e2684b0619a4b44b1aef2f43a02ce45b3a4ae1d9db4e2d6a",
+          "implementationSha256": "eba44d825a6c5438e2c0b54985512cec8066a6e637aa336f2a477b200a734b2a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/intake.rs",
+          "checkedSha256": "f5c6eec94ac602762a01c438c43cf6c9cea02d747d440b0ac5b73a9b860be133",
+          "implementationSha256": "24ecfc7b5310a07eceead7990ebaf5956cf4daff3c46eec92390ed73d72c887d"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/planning.rs",
+          "checkedSha256": "c5f4436c07840d43b016b0d4430dd38af89df48eb9de62dc7a4b8ad3f5422870",
+          "implementationSha256": "1d2318a0cd9345a356efc9c78f47e6d36c8dca8f970f24cf3438bbecba01b682"
+        },
+        {
+          "path": "scripts/rust/intake-workflow.test.ts",
+          "checkedSha256": "2271591a75e04b6187bdaf2253ece72f8cba5aad7471e70fbcfb56925f0b3663",
+          "implementationSha256": "7b2dcc81b90951ae938608f76914abb7cde292bea77e7f7b772fa47e7c29d481"
+        },
+        {
+          "path": "scripts/verify_intake_rollback.py",
+          "checkedSha256": null,
+          "implementationSha256": "adf79a4a78e157d2f6b04291a31d7ec5aefaedbbdb2d32b9af5d564fd66234b8"
+        }
+      ]
+    },
+    {
+      "name": "native-visual-seed",
+      "command": [
+        "env",
+        "CREWROOM_INTAKE_DEMO_DIR=/tmp/crewroom-mh5-native",
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-desktop",
+        "-j6",
+        "seed_intake_visual_review",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ],
+      "startedAt": "2026-10-13T16:06:21.376247+00:00",
+      "finishedAt": "2026-10-13T16:06:26.675575+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/native-visual-seed.log",
+        "sha256": "804bcaea913696f791061817fb7a6cdbb4dc204cb7f94f1586e317edb74e1c8b"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/native-visual-seed.json",
+        "sha256": "6cc4d1e40e21a9cf6e992049145ee38955982fe95ccc6fdc290def7a3f69c6ec"
+      },
+      "sourceChangesSinceCheck": [
+        {
+          "path": "crates/crewroom-core/src/intake/mod.rs",
+          "checkedSha256": "151109f73f0e602e10dcf9cb112e88319b95c47fa5e4cf0d933e744332a2fff6",
+          "implementationSha256": "420c1b4f9ee8ef033d18b26bf3d68fd08081a63487940644ba10ed0952531b5e"
+        },
+        {
+          "path": "crates/crewroom-core/src/intake/requests.rs",
+          "checkedSha256": "7f2f2ba405fd88809f55aad8c35193e0383122c6094b6ca12d53174b9f514363",
+          "implementationSha256": "475b88ceb63011e2411923b2507984cf226a3f8aaffb885b3ab88cc3f86d4c43"
+        },
+        {
+          "path": "crates/crewroom-core/src/workflow.rs",
+          "checkedSha256": "371844ebf83d5d6567303ef018c5f5806baf684e6643095d1b687b1506eca186",
+          "implementationSha256": "9c7e3bac6a9d5dab904229b0815475db6b9beed2849d1aa98fda4a905844d23c"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/collaboration/conversation.rs",
+          "checkedSha256": "af2791942fd836a67b8526bcc36e4695d5a44cb4fb76bfbc3ec7c21aed7fda3d",
+          "implementationSha256": "b2b13fd9948c5397e49f174ba5abeacc4a630fec57cffa49eb8382af6cea484a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+          "checkedSha256": "b007db24400d647c6a95ec6bdbaa3c247cc2a3cdc5dffc1cd9c8ca64da2f8a67",
+          "implementationSha256": "eba44d825a6c5438e2c0b54985512cec8066a6e637aa336f2a477b200a734b2a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/intake.rs",
+          "checkedSha256": "67bdbbd17eae593467ea68a6182070b5baf936a0a8b43a90ecdc2d9af5468dcf",
+          "implementationSha256": "24ecfc7b5310a07eceead7990ebaf5956cf4daff3c46eec92390ed73d72c887d"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/planning.rs",
+          "checkedSha256": "c5f4436c07840d43b016b0d4430dd38af89df48eb9de62dc7a4b8ad3f5422870",
+          "implementationSha256": "1d2318a0cd9345a356efc9c78f47e6d36c8dca8f970f24cf3438bbecba01b682"
+        },
+        {
+          "path": "scripts/rust/intake-workflow.test.ts",
+          "checkedSha256": "2271591a75e04b6187bdaf2253ece72f8cba5aad7471e70fbcfb56925f0b3663",
+          "implementationSha256": "7b2dcc81b90951ae938608f76914abb7cde292bea77e7f7b772fa47e7c29d481"
+        },
+        {
+          "path": "scripts/verify_intake_rollback.py",
+          "checkedSha256": null,
+          "implementationSha256": "adf79a4a78e157d2f6b04291a31d7ec5aefaedbbdb2d32b9af5d564fd66234b8"
+        }
+      ]
+    },
+    {
+      "name": "source-build-final",
+      "command": [
+        "cargo",
+        "build",
+        "--locked",
+        "--workspace",
+        "--bins",
+        "--examples",
+        "-j6"
+      ],
+      "startedAt": "2026-10-13T16:34:05.972495+00:00",
+      "finishedAt": "2026-10-13T16:34:09.006520+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/source-build-final.log",
+        "sha256": "bc364e0f7f085ab4dddf3f106e3f56481c71aaa7f0a9d6c66d7c73bce23b3053"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/source-build-final.json",
+        "sha256": "899efc5c60408c4680ba6476331e06cf5bf10678f4d6563d632990f53303221c"
+      },
+      "sourceChangesSinceCheck": [
+        {
+          "path": "scripts/rust/intake-workflow.test.ts",
+          "checkedSha256": "2271591a75e04b6187bdaf2253ece72f8cba5aad7471e70fbcfb56925f0b3663",
+          "implementationSha256": "7b2dcc81b90951ae938608f76914abb7cde292bea77e7f7b772fa47e7c29d481"
+        }
+      ]
+    },
+    {
+      "name": "examples-release",
+      "command": [
+        "cargo",
+        "build",
+        "--locked",
+        "-p",
+        "crewroom-runtime",
+        "-p",
+        "crewroom-service",
+        "--bins",
+        "--examples"
+      ],
+      "startedAt": "2026-10-13T16:16:29.228358+00:00",
+      "finishedAt": "2026-10-13T16:16:29.435521+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/examples-release.log",
+        "sha256": "1b06c206522a9ad6653edd56b1bb9e19254f4cd592480fbc8b10cbddc2b994e9"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/examples-release.json",
+        "sha256": "69b72e8a9315b3a32da3c801cea3c9eeb16a426e51483f92e4bc9bf1ef1421ae"
+      },
+      "sourceChangesSinceCheck": [
+        {
+          "path": "crates/crewroom-core/src/intake/mod.rs",
+          "checkedSha256": "eace0d5adb8ce2009b5b4f501a90f7cae3d8848104f7755c8638d23f6d67d7d5",
+          "implementationSha256": "420c1b4f9ee8ef033d18b26bf3d68fd08081a63487940644ba10ed0952531b5e"
+        },
+        {
+          "path": "crates/crewroom-core/src/workflow.rs",
+          "checkedSha256": "371844ebf83d5d6567303ef018c5f5806baf684e6643095d1b687b1506eca186",
+          "implementationSha256": "9c7e3bac6a9d5dab904229b0815475db6b9beed2849d1aa98fda4a905844d23c"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+          "checkedSha256": "6ff208f05eced434e2684b0619a4b44b1aef2f43a02ce45b3a4ae1d9db4e2d6a",
+          "implementationSha256": "eba44d825a6c5438e2c0b54985512cec8066a6e637aa336f2a477b200a734b2a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/intake.rs",
+          "checkedSha256": "4f2b19a601681272dd4343d90816db53ce02b5e1901845ef231b09d9979dde0a",
+          "implementationSha256": "24ecfc7b5310a07eceead7990ebaf5956cf4daff3c46eec92390ed73d72c887d"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/planning.rs",
+          "checkedSha256": "c5f4436c07840d43b016b0d4430dd38af89df48eb9de62dc7a4b8ad3f5422870",
+          "implementationSha256": "1d2318a0cd9345a356efc9c78f47e6d36c8dca8f970f24cf3438bbecba01b682"
+        },
+        {
+          "path": "scripts/rust/intake-workflow.test.ts",
+          "checkedSha256": "2271591a75e04b6187bdaf2253ece72f8cba5aad7471e70fbcfb56925f0b3663",
+          "implementationSha256": "7b2dcc81b90951ae938608f76914abb7cde292bea77e7f7b772fa47e7c29d481"
+        },
+        {
+          "path": "scripts/verify_intake_rollback.py",
+          "checkedSha256": null,
+          "implementationSha256": "adf79a4a78e157d2f6b04291a31d7ec5aefaedbbdb2d32b9af5d564fd66234b8"
+        }
+      ]
+    },
+    {
+      "name": "final-format",
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--check"
+      ],
+      "startedAt": "2026-10-13T16:33:40.686695+00:00",
+      "finishedAt": "2026-10-13T16:33:42.440352+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/final-format.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/final-format.json",
+        "sha256": "20b74d487a89d1236dc0a23f5758fb9f35c65d1b2a6a4e82bdc60a972ad516b5"
+      },
+      "sourceChangesSinceCheck": [
+        {
+          "path": "scripts/rust/intake-workflow.test.ts",
+          "checkedSha256": "2271591a75e04b6187bdaf2253ece72f8cba5aad7471e70fbcfb56925f0b3663",
+          "implementationSha256": "7b2dcc81b90951ae938608f76914abb7cde292bea77e7f7b772fa47e7c29d481"
+        }
+      ]
+    },
+    {
+      "name": "clippy-release-2",
+      "command": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "-p",
+        "crewroom-core",
+        "-p",
+        "crewroom-runtime",
+        "-p",
+        "crewroom-service",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "startedAt": "2026-10-13T16:18:00.483659+00:00",
+      "finishedAt": "2026-10-13T16:18:11.130057+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/clippy-release-2.log",
+        "sha256": "d9514e3a16ac9b32ef3ad3d4798aea1f341db1538866010634b20d2a13fed5f9"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/clippy-release-2.json",
+        "sha256": "c058ea11d4b4a94bd4ef86cefa94d3ea69b20869e87824fdaf103b544b3e81e7"
+      },
+      "sourceChangesSinceCheck": [
+        {
+          "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+          "checkedSha256": "6ff208f05eced434e2684b0619a4b44b1aef2f43a02ce45b3a4ae1d9db4e2d6a",
+          "implementationSha256": "eba44d825a6c5438e2c0b54985512cec8066a6e637aa336f2a477b200a734b2a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/intake.rs",
+          "checkedSha256": "f5c6eec94ac602762a01c438c43cf6c9cea02d747d440b0ac5b73a9b860be133",
+          "implementationSha256": "24ecfc7b5310a07eceead7990ebaf5956cf4daff3c46eec92390ed73d72c887d"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/planning.rs",
+          "checkedSha256": "c5f4436c07840d43b016b0d4430dd38af89df48eb9de62dc7a4b8ad3f5422870",
+          "implementationSha256": "1d2318a0cd9345a356efc9c78f47e6d36c8dca8f970f24cf3438bbecba01b682"
+        },
+        {
+          "path": "scripts/rust/intake-workflow.test.ts",
+          "checkedSha256": "2271591a75e04b6187bdaf2253ece72f8cba5aad7471e70fbcfb56925f0b3663",
+          "implementationSha256": "7b2dcc81b90951ae938608f76914abb7cde292bea77e7f7b772fa47e7c29d481"
+        },
+        {
+          "path": "scripts/verify_intake_rollback.py",
+          "checkedSha256": null,
+          "implementationSha256": "adf79a4a78e157d2f6b04291a31d7ec5aefaedbbdb2d32b9af5d564fd66234b8"
+        }
+      ]
+    },
+    {
+      "name": "final-whitespace",
+      "command": [
+        "git",
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "startedAt": "2026-10-13T16:33:42.480344+00:00",
+      "finishedAt": "2026-10-13T16:33:42.487864+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/final-whitespace.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/final-whitespace.json",
+        "sha256": "d8bd17e6d2470092eec63c95b93c617f89d8b82aef0e370164bec9b3fa4da573"
+      },
+      "sourceChangesSinceCheck": [
+        {
+          "path": "scripts/rust/intake-workflow.test.ts",
+          "checkedSha256": "2271591a75e04b6187bdaf2253ece72f8cba5aad7471e70fbcfb56925f0b3663",
+          "implementationSha256": "7b2dcc81b90951ae938608f76914abb7cde292bea77e7f7b772fa47e7c29d481"
+        }
+      ]
+    },
+    {
+      "name": "omp-budget-race-green",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-runtime",
+        "--test",
+        "provider_gateway",
+        "-j6",
+        "--",
+        "--test-threads=1"
+      ],
+      "startedAt": "2026-10-13T15:55:38.375168+00:00",
+      "finishedAt": "2026-10-13T15:55:42.570415+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/omp-budget-race-green.log",
+        "sha256": "7ac401262b8b2c9c9a793d376461952f386cc91903fc939288eebdc75b57b6a5"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/omp-budget-race-green.json",
+        "sha256": "6b49dffdef51f762096e3a057fdc97f63b60bdf1d27dfb5b3b24c936729662d6"
+      },
+      "sourceChangesSinceCheck": [
+        {
+          "path": "CONTEXT.md",
+          "checkedSha256": null,
+          "implementationSha256": "a79f24d3c922c5d1af12e71a7bb3b6ae89809ee70d6f4f1fc2869a2ee2f3a6ea"
+        },
+        {
+          "path": "crates/crewroom-core/src/attempts.rs",
+          "checkedSha256": "1bd2402e01c6120aeb4937640418b819df37a36be9308db4508e94c641d7af90",
+          "implementationSha256": "22865412c41325cb4bea216ef42f29dd8de93bf10fb1528a0ed2433d0c3d9ffd"
+        },
+        {
+          "path": "crates/crewroom-core/src/intake/dialogue.rs",
+          "checkedSha256": "49a7f17bf26250dcfbc1d16d08d458efc710212886ace9a510fc6eb925a3e4ab",
+          "implementationSha256": "d3cfc44a038cfa8d955571e7b5aca04631000cf5fb8f5b0a85a8653eb5333fcd"
+        },
+        {
+          "path": "crates/crewroom-core/src/intake/mod.rs",
+          "checkedSha256": "151109f73f0e602e10dcf9cb112e88319b95c47fa5e4cf0d933e744332a2fff6",
+          "implementationSha256": "420c1b4f9ee8ef033d18b26bf3d68fd08081a63487940644ba10ed0952531b5e"
+        },
+        {
+          "path": "crates/crewroom-core/src/intake/plan.rs",
+          "checkedSha256": "9526cecef06e4c4687c4b08b77c83c59ac52e025589763c56bb8fdf1c258c5e9",
+          "implementationSha256": "27846e9a9aece88db2da2f65b68fddcb906cb7870075e2a5a59024f1414016dc"
+        },
+        {
+          "path": "crates/crewroom-core/src/intake/requests.rs",
+          "checkedSha256": "7f2f2ba405fd88809f55aad8c35193e0383122c6094b6ca12d53174b9f514363",
+          "implementationSha256": "475b88ceb63011e2411923b2507984cf226a3f8aaffb885b3ab88cc3f86d4c43"
+        },
+        {
+          "path": "crates/crewroom-core/src/repository_work.rs",
+          "checkedSha256": "59acea39a3b76cfec1244ba94f8ff1cf844a8c68fbda3f5c215ee96f16742649",
+          "implementationSha256": "206d81eb5c0eb2008d8c8c6b5fb195eee27a95db51987bfeabdf9ea9d3ceb431"
+        },
+        {
+          "path": "crates/crewroom-core/src/workflow.rs",
+          "checkedSha256": "371844ebf83d5d6567303ef018c5f5806baf684e6643095d1b687b1506eca186",
+          "implementationSha256": "9c7e3bac6a9d5dab904229b0815475db6b9beed2849d1aa98fda4a905844d23c"
+        },
+        {
+          "path": "crates/crewroom-core/tests/intake.rs",
+          "checkedSha256": "4b05bfc934220afa472f3f8937452326f59d7f397a0061b69e305d0d5102886a",
+          "implementationSha256": "75a6612e03dab65d83aa5a6bd715596d2c6a25636eaab02984c0e65b845397a7"
+        },
+        {
+          "path": "crates/crewroom-core/tests/repository_work.rs",
+          "checkedSha256": "c4b039daced3314a1ace1fc0579aea17854ce08943bf15d936e0d3152369176d",
+          "implementationSha256": "a316ba44ddd583a4b2973e854506c6f4784a054f920824eb702f01caba7306ff"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/collaboration/conversation.rs",
+          "checkedSha256": "af2791942fd836a67b8526bcc36e4695d5a44cb4fb76bfbc3ec7c21aed7fda3d",
+          "implementationSha256": "b2b13fd9948c5397e49f174ba5abeacc4a630fec57cffa49eb8382af6cea484a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+          "checkedSha256": "cf5cb78a019df800ca83e3984a9c7e8c28547b429041b173667a3ac939a0d32b",
+          "implementationSha256": "eba44d825a6c5438e2c0b54985512cec8066a6e637aa336f2a477b200a734b2a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/demo_seed.rs",
+          "checkedSha256": null,
+          "implementationSha256": "9e6b23a52065429ace7f9e495b48bb8fe880856ae7b82d3edecfd6d313e12e8a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/intake.rs",
+          "checkedSha256": "67bdbbd17eae593467ea68a6182070b5baf936a0a8b43a90ecdc2d9af5468dcf",
+          "implementationSha256": "24ecfc7b5310a07eceead7990ebaf5956cf4daff3c46eec92390ed73d72c887d"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/planning.rs",
+          "checkedSha256": "c5f4436c07840d43b016b0d4430dd38af89df48eb9de62dc7a4b8ad3f5422870",
+          "implementationSha256": "1d2318a0cd9345a356efc9c78f47e6d36c8dca8f970f24cf3438bbecba01b682"
+        },
+        {
+          "path": "docs/architecture.md",
+          "checkedSha256": null,
+          "implementationSha256": "93efbe8a208b9223e44a476917d350bb4fc8f41054ab95729621cf57ab6137a1"
+        },
+        {
+          "path": "docs/multi-harness-plan.md",
+          "checkedSha256": null,
+          "implementationSha256": "c7717192cf5320b03205f3a6b918252315015c4068b8d888f7bd50d2311cf345"
+        },
+        {
+          "path": "docs/operations.md",
+          "checkedSha256": null,
+          "implementationSha256": "45f01512fcbd1932b957c9496dafead103c504c0920fe5b82444dccc293a9525"
+        },
+        {
+          "path": "docs/product.md",
+          "checkedSha256": null,
+          "implementationSha256": "bcc83ef29f4510931d3144c464ec01302653d49720bc35308c50df856816e35f"
+        },
+        {
+          "path": "scripts/rust/intake-workflow.test.ts",
+          "checkedSha256": "19b69c3381d9a9043454663172925a130c879fa4269d2c834f5e7076baea2609",
+          "implementationSha256": "7b2dcc81b90951ae938608f76914abb7cde292bea77e7f7b772fa47e7c29d481"
+        },
+        {
+          "path": "scripts/rust/workflow-coding-fixture.ts",
+          "checkedSha256": null,
+          "implementationSha256": "19472c244d4e274916e41cc0581436ea43e40aa2a5975a128ab1f1ac5089e852"
+        },
+        {
+          "path": "scripts/verify_intake_rollback.py",
+          "checkedSha256": null,
+          "implementationSha256": "adf79a4a78e157d2f6b04291a31d7ec5aefaedbbdb2d32b9af5d564fd66234b8"
+        }
+      ]
+    },
+    {
+      "name": "omp-rpc",
+      "command": [
+        "python3",
+        "scripts/rust/verify-omp-rpc.py",
+        "--output",
+        "/tmp/cr-mh5-omp-rpc"
+      ],
+      "startedAt": "2026-10-13T16:19:49.785564+00:00",
+      "finishedAt": "2026-10-13T16:20:05.789713+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/omp-rpc.log",
+        "sha256": "173c7ce88c7a9ef86da08fc548a82b54b1564ac789938153b3ec3b94bc3b7674"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/omp-rpc.json",
+        "sha256": "99a15dad7afad8a96536770c28bcf938ba100fee5043ab9a761e57e2f96ee002"
+      },
+      "sourceChangesSinceCheck": [
+        {
+          "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+          "checkedSha256": "6ff208f05eced434e2684b0619a4b44b1aef2f43a02ce45b3a4ae1d9db4e2d6a",
+          "implementationSha256": "eba44d825a6c5438e2c0b54985512cec8066a6e637aa336f2a477b200a734b2a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/intake.rs",
+          "checkedSha256": "f5c6eec94ac602762a01c438c43cf6c9cea02d747d440b0ac5b73a9b860be133",
+          "implementationSha256": "24ecfc7b5310a07eceead7990ebaf5956cf4daff3c46eec92390ed73d72c887d"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/planning.rs",
+          "checkedSha256": "c5f4436c07840d43b016b0d4430dd38af89df48eb9de62dc7a4b8ad3f5422870",
+          "implementationSha256": "1d2318a0cd9345a356efc9c78f47e6d36c8dca8f970f24cf3438bbecba01b682"
+        },
+        {
+          "path": "scripts/rust/intake-workflow.test.ts",
+          "checkedSha256": "2271591a75e04b6187bdaf2253ece72f8cba5aad7471e70fbcfb56925f0b3663",
+          "implementationSha256": "7b2dcc81b90951ae938608f76914abb7cde292bea77e7f7b772fa47e7c29d481"
+        },
+        {
+          "path": "scripts/verify_intake_rollback.py",
+          "checkedSha256": null,
+          "implementationSha256": "adf79a4a78e157d2f6b04291a31d7ec5aefaedbbdb2d32b9af5d564fd66234b8"
+        }
+      ]
+    },
+    {
+      "name": "omp-host",
+      "command": [
+        "python3",
+        "scripts/rust/verify-omp-host.py",
+        "--output",
+        "/tmp/cr-mh5-omp-host"
+      ],
+      "startedAt": "2026-10-13T16:19:50.949129+00:00",
+      "finishedAt": "2026-10-13T16:20:31.064763+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/omp-host.log",
+        "sha256": "62ab7cfaea5650d033669efa8b4f4970be1a57bd1c05b4d0c29d690e606b8769"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/omp-host.json",
+        "sha256": "cc12ccb172fae99705ffa8dabb44172e183ba9d785f79841cdf7dddc867ca487"
+      },
+      "sourceChangesSinceCheck": [
+        {
+          "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+          "checkedSha256": "6ff208f05eced434e2684b0619a4b44b1aef2f43a02ce45b3a4ae1d9db4e2d6a",
+          "implementationSha256": "eba44d825a6c5438e2c0b54985512cec8066a6e637aa336f2a477b200a734b2a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/intake.rs",
+          "checkedSha256": "f5c6eec94ac602762a01c438c43cf6c9cea02d747d440b0ac5b73a9b860be133",
+          "implementationSha256": "24ecfc7b5310a07eceead7990ebaf5956cf4daff3c46eec92390ed73d72c887d"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/planning.rs",
+          "checkedSha256": "c5f4436c07840d43b016b0d4430dd38af89df48eb9de62dc7a4b8ad3f5422870",
+          "implementationSha256": "1d2318a0cd9345a356efc9c78f47e6d36c8dca8f970f24cf3438bbecba01b682"
+        },
+        {
+          "path": "scripts/rust/intake-workflow.test.ts",
+          "checkedSha256": "2271591a75e04b6187bdaf2253ece72f8cba5aad7471e70fbcfb56925f0b3663",
+          "implementationSha256": "7b2dcc81b90951ae938608f76914abb7cde292bea77e7f7b772fa47e7c29d481"
+        },
+        {
+          "path": "scripts/verify_intake_rollback.py",
+          "checkedSha256": null,
+          "implementationSha256": "adf79a4a78e157d2f6b04291a31d7ec5aefaedbbdb2d32b9af5d564fd66234b8"
+        }
+      ]
+    },
+    {
+      "name": "omp-supervisor",
+      "command": [
+        "python3",
+        "scripts/rust/verify-omp-supervisor.py",
+        "--output",
+        "/tmp/cr-mh5-omp-supervisor"
+      ],
+      "startedAt": "2026-10-13T16:19:52.110898+00:00",
+      "finishedAt": "2026-10-13T16:20:02.213427+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/omp-supervisor.log",
+        "sha256": "4c4d9e2265b1b8386f1bd9a70122f902a94c5fb877e3ff56116dcf6d3ff9d8e7"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/omp-supervisor.json",
+        "sha256": "8a88b3d9b7de50925f67df8ac8d99a2e3847c87bff8baae3d3da8282554b9294"
+      },
+      "sourceChangesSinceCheck": [
+        {
+          "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+          "checkedSha256": "6ff208f05eced434e2684b0619a4b44b1aef2f43a02ce45b3a4ae1d9db4e2d6a",
+          "implementationSha256": "eba44d825a6c5438e2c0b54985512cec8066a6e637aa336f2a477b200a734b2a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/intake.rs",
+          "checkedSha256": "f5c6eec94ac602762a01c438c43cf6c9cea02d747d440b0ac5b73a9b860be133",
+          "implementationSha256": "24ecfc7b5310a07eceead7990ebaf5956cf4daff3c46eec92390ed73d72c887d"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/planning.rs",
+          "checkedSha256": "c5f4436c07840d43b016b0d4430dd38af89df48eb9de62dc7a4b8ad3f5422870",
+          "implementationSha256": "1d2318a0cd9345a356efc9c78f47e6d36c8dca8f970f24cf3438bbecba01b682"
+        },
+        {
+          "path": "scripts/rust/intake-workflow.test.ts",
+          "checkedSha256": "2271591a75e04b6187bdaf2253ece72f8cba5aad7471e70fbcfb56925f0b3663",
+          "implementationSha256": "7b2dcc81b90951ae938608f76914abb7cde292bea77e7f7b772fa47e7c29d481"
+        },
+        {
+          "path": "scripts/verify_intake_rollback.py",
+          "checkedSha256": null,
+          "implementationSha256": "adf79a4a78e157d2f6b04291a31d7ec5aefaedbbdb2d32b9af5d564fd66234b8"
+        }
+      ]
+    },
+    {
+      "name": "omp-gateway",
+      "command": [
+        "python3",
+        "scripts/rust/verify-omp-gateway.py",
+        "--output",
+        "/tmp/cr-mh5-omp-gateway"
+      ],
+      "startedAt": "2026-10-13T16:19:53.274511+00:00",
+      "finishedAt": "2026-10-13T16:20:03.190349+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/omp-gateway.log",
+        "sha256": "0bc27d5db73912b3fbe5425272f9e38c63367c8a0a9434a96b8241f4bff3b875"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/omp-gateway.json",
+        "sha256": "0a1a36de26ab15db282862e483748a67847156c1223c0d930a950cddaabea98d"
+      },
+      "sourceChangesSinceCheck": [
+        {
+          "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+          "checkedSha256": "6ff208f05eced434e2684b0619a4b44b1aef2f43a02ce45b3a4ae1d9db4e2d6a",
+          "implementationSha256": "eba44d825a6c5438e2c0b54985512cec8066a6e637aa336f2a477b200a734b2a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/intake.rs",
+          "checkedSha256": "f5c6eec94ac602762a01c438c43cf6c9cea02d747d440b0ac5b73a9b860be133",
+          "implementationSha256": "24ecfc7b5310a07eceead7990ebaf5956cf4daff3c46eec92390ed73d72c887d"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/planning.rs",
+          "checkedSha256": "c5f4436c07840d43b016b0d4430dd38af89df48eb9de62dc7a4b8ad3f5422870",
+          "implementationSha256": "1d2318a0cd9345a356efc9c78f47e6d36c8dca8f970f24cf3438bbecba01b682"
+        },
+        {
+          "path": "scripts/rust/intake-workflow.test.ts",
+          "checkedSha256": "2271591a75e04b6187bdaf2253ece72f8cba5aad7471e70fbcfb56925f0b3663",
+          "implementationSha256": "7b2dcc81b90951ae938608f76914abb7cde292bea77e7f7b772fa47e7c29d481"
+        },
+        {
+          "path": "scripts/verify_intake_rollback.py",
+          "checkedSha256": null,
+          "implementationSha256": "adf79a4a78e157d2f6b04291a31d7ec5aefaedbbdb2d32b9af5d564fd66234b8"
+        }
+      ]
+    },
+    {
+      "name": "intake-final",
+      "command": [
+        "env",
+        "CREWROOM_RETAIN_FIXTURE=1",
+        "CREWROOM_CHECK_IMAGE=sha256:29d1577d9454743c002483a71fcbd3753d2e27116246a5fabd0e4254de6ba292",
+        "node",
+        "--import",
+        "tsx",
+        "--test",
+        "scripts/rust/intake-workflow.test.ts"
+      ],
+      "startedAt": "2026-10-13T16:22:16.022408+00:00",
+      "finishedAt": "2026-10-13T16:22:25.111626+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/intake-final.log",
+        "sha256": "024da2be153fe1ac82b2c5052c94e9c6d89fcec0c3f75f4374d113f777ec0cb1"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/intake-final.json",
+        "sha256": "d27bdd09b62a7c20153c9d4362298e15642f6d2100b51a1e72744ce7a89b381e"
+      },
+      "sourceChangesSinceCheck": [
+        {
+          "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+          "checkedSha256": "6ff208f05eced434e2684b0619a4b44b1aef2f43a02ce45b3a4ae1d9db4e2d6a",
+          "implementationSha256": "eba44d825a6c5438e2c0b54985512cec8066a6e637aa336f2a477b200a734b2a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/intake.rs",
+          "checkedSha256": "f5c6eec94ac602762a01c438c43cf6c9cea02d747d440b0ac5b73a9b860be133",
+          "implementationSha256": "24ecfc7b5310a07eceead7990ebaf5956cf4daff3c46eec92390ed73d72c887d"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/planning.rs",
+          "checkedSha256": "c5f4436c07840d43b016b0d4430dd38af89df48eb9de62dc7a4b8ad3f5422870",
+          "implementationSha256": "1d2318a0cd9345a356efc9c78f47e6d36c8dca8f970f24cf3438bbecba01b682"
+        },
+        {
+          "path": "scripts/rust/intake-workflow.test.ts",
+          "checkedSha256": "2271591a75e04b6187bdaf2253ece72f8cba5aad7471e70fbcfb56925f0b3663",
+          "implementationSha256": "7b2dcc81b90951ae938608f76914abb7cde292bea77e7f7b772fa47e7c29d481"
+        },
+        {
+          "path": "scripts/verify_intake_rollback.py",
+          "checkedSha256": "2ba165bfb105ac106a5ebc5b4cdc2de64684274f7ffa1dba87a12641da35ba12",
+          "implementationSha256": "adf79a4a78e157d2f6b04291a31d7ec5aefaedbbdb2d32b9af5d564fd66234b8"
+        }
+      ]
+    },
+    {
+      "name": "intake-answer-restart-verified",
+      "command": [
+        "env",
+        "CREWROOM_RETAIN_FIXTURE=1",
+        "CREWROOM_CHECK_IMAGE=sha256:29d1577d9454743c002483a71fcbd3753d2e27116246a5fabd0e4254de6ba292",
+        "node",
+        "--import",
+        "tsx",
+        "--test",
+        "scripts/rust/intake-workflow.test.ts"
+      ],
+      "startedAt": "2026-10-13T16:47:06.819917+00:00",
+      "finishedAt": "2026-10-13T16:47:16.497936+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/intake-answer-restart-verified.log",
+        "sha256": "f6d12f496ae6a509e57d0000c47c6bf18f48a8c1da42526198dfcb0c7a84cda1"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/intake-answer-restart-verified.json",
+        "sha256": "ba58e8a32db2f38d0ff0de3292b954ab2b08df4649e5b2a60be43b36f2fc8a75"
+      },
+      "sourceChangesSinceCheck": [
+        {
+          "path": "docs/multi-harness-plan.md",
+          "checkedSha256": "abc40df9ae38e1a7e8e3dbb082f90674c953f0d04edf4ce4545933836f8bb240",
+          "implementationSha256": "c7717192cf5320b03205f3a6b918252315015c4068b8d888f7bd50d2311cf345"
+        },
+        {
+          "path": "docs/status.md",
+          "checkedSha256": "98de0cdce1428a03ed68100cd99879d18f3d5b89a47e295744bba504413ba78c",
+          "implementationSha256": "3e2f519b746a2da51378e140dc18800411662a8b22d9f640314d1ac3c232f874"
+        }
+      ]
+    },
+    {
+      "name": "live-codex-final",
+      "command": [
+        "python3",
+        "scripts/verify_intake_workflow.py",
+        "--configuration",
+        "/tmp/cr-mh4-access-s2_gi09f/codex.json",
+        "--output",
+        "/tmp/cr-mh5-codex-final",
+        "--mail",
+        ".crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail"
+      ],
+      "startedAt": "2026-10-13T16:16:45.779151+00:00",
+      "finishedAt": "2026-10-13T16:17:22.349710+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/live-codex-final.log",
+        "sha256": "2dea5bea7ba1c4c614a5a425fe8a3ac4bd9407c59888ba92086620cb5718590a"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/live-codex-final.json",
+        "sha256": "e503089179a95a9cc91bbc7d1aefb078e03f76bbc8a84e1e33bbcdadd67c1e2f"
+      },
+      "sourceChangesSinceCheck": [
+        {
+          "path": "crates/crewroom-core/src/intake/mod.rs",
+          "checkedSha256": "eace0d5adb8ce2009b5b4f501a90f7cae3d8848104f7755c8638d23f6d67d7d5",
+          "implementationSha256": "420c1b4f9ee8ef033d18b26bf3d68fd08081a63487940644ba10ed0952531b5e"
+        },
+        {
+          "path": "crates/crewroom-core/src/workflow.rs",
+          "checkedSha256": "371844ebf83d5d6567303ef018c5f5806baf684e6643095d1b687b1506eca186",
+          "implementationSha256": "9c7e3bac6a9d5dab904229b0815475db6b9beed2849d1aa98fda4a905844d23c"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+          "checkedSha256": "6ff208f05eced434e2684b0619a4b44b1aef2f43a02ce45b3a4ae1d9db4e2d6a",
+          "implementationSha256": "eba44d825a6c5438e2c0b54985512cec8066a6e637aa336f2a477b200a734b2a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/intake.rs",
+          "checkedSha256": "4f2b19a601681272dd4343d90816db53ce02b5e1901845ef231b09d9979dde0a",
+          "implementationSha256": "24ecfc7b5310a07eceead7990ebaf5956cf4daff3c46eec92390ed73d72c887d"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/planning.rs",
+          "checkedSha256": "c5f4436c07840d43b016b0d4430dd38af89df48eb9de62dc7a4b8ad3f5422870",
+          "implementationSha256": "1d2318a0cd9345a356efc9c78f47e6d36c8dca8f970f24cf3438bbecba01b682"
+        },
+        {
+          "path": "scripts/rust/intake-workflow.test.ts",
+          "checkedSha256": "2271591a75e04b6187bdaf2253ece72f8cba5aad7471e70fbcfb56925f0b3663",
+          "implementationSha256": "7b2dcc81b90951ae938608f76914abb7cde292bea77e7f7b772fa47e7c29d481"
+        },
+        {
+          "path": "scripts/verify_intake_rollback.py",
+          "checkedSha256": null,
+          "implementationSha256": "adf79a4a78e157d2f6b04291a31d7ec5aefaedbbdb2d32b9af5d564fd66234b8"
+        }
+      ]
+    },
+    {
+      "name": "live-claude-final",
+      "command": [
+        "python3",
+        "scripts/verify_intake_workflow.py",
+        "--configuration",
+        "/tmp/cr-mh4-access-s2_gi09f/claude.json",
+        "--output",
+        "/tmp/cr-mh5-claude-final",
+        "--mail",
+        ".crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail"
+      ],
+      "startedAt": "2026-10-13T16:16:45.779117+00:00",
+      "finishedAt": "2026-10-13T16:17:14.740089+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/live-claude-final.log",
+        "sha256": "200feb8b741b5315871e21c0485ea68a4381ef133254ed9a13977a9299ec36d6"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/live-claude-final.json",
+        "sha256": "d206c73f7ecd465df33b1796203e900d9f8a3f389cb894a7e2c0c13167c0a6b7"
+      },
+      "sourceChangesSinceCheck": [
+        {
+          "path": "crates/crewroom-core/src/intake/mod.rs",
+          "checkedSha256": "eace0d5adb8ce2009b5b4f501a90f7cae3d8848104f7755c8638d23f6d67d7d5",
+          "implementationSha256": "420c1b4f9ee8ef033d18b26bf3d68fd08081a63487940644ba10ed0952531b5e"
+        },
+        {
+          "path": "crates/crewroom-core/src/workflow.rs",
+          "checkedSha256": "371844ebf83d5d6567303ef018c5f5806baf684e6643095d1b687b1506eca186",
+          "implementationSha256": "9c7e3bac6a9d5dab904229b0815475db6b9beed2849d1aa98fda4a905844d23c"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+          "checkedSha256": "6ff208f05eced434e2684b0619a4b44b1aef2f43a02ce45b3a4ae1d9db4e2d6a",
+          "implementationSha256": "eba44d825a6c5438e2c0b54985512cec8066a6e637aa336f2a477b200a734b2a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/intake.rs",
+          "checkedSha256": "4f2b19a601681272dd4343d90816db53ce02b5e1901845ef231b09d9979dde0a",
+          "implementationSha256": "24ecfc7b5310a07eceead7990ebaf5956cf4daff3c46eec92390ed73d72c887d"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/planning.rs",
+          "checkedSha256": "c5f4436c07840d43b016b0d4430dd38af89df48eb9de62dc7a4b8ad3f5422870",
+          "implementationSha256": "1d2318a0cd9345a356efc9c78f47e6d36c8dca8f970f24cf3438bbecba01b682"
+        },
+        {
+          "path": "scripts/rust/intake-workflow.test.ts",
+          "checkedSha256": "2271591a75e04b6187bdaf2253ece72f8cba5aad7471e70fbcfb56925f0b3663",
+          "implementationSha256": "7b2dcc81b90951ae938608f76914abb7cde292bea77e7f7b772fa47e7c29d481"
+        },
+        {
+          "path": "scripts/verify_intake_rollback.py",
+          "checkedSha256": null,
+          "implementationSha256": "adf79a4a78e157d2f6b04291a31d7ec5aefaedbbdb2d32b9af5d564fd66234b8"
+        }
+      ]
+    },
+    {
+      "name": "live-omp-final",
+      "command": [
+        "python3",
+        "scripts/verify_intake_workflow.py",
+        "--configuration",
+        "/tmp/cr-mh4-access-s2_gi09f/omp.json",
+        "--output",
+        "/tmp/cr-mh5-omp-final",
+        "--mail",
+        ".crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail"
+      ],
+      "startedAt": "2026-10-13T16:16:45.779240+00:00",
+      "finishedAt": "2026-10-13T16:17:04.624997+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/live-omp-final.log",
+        "sha256": "f7594c5c74284794b154616bb5ebb40975ef9169e2b970bc332f50ad51339cf2"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/live-omp-final.json",
+        "sha256": "a46e8d290abe39c21ab43de0b0b157e6e981e9e1308dbfdac1c33bb5e59821ab"
+      },
+      "sourceChangesSinceCheck": [
+        {
+          "path": "crates/crewroom-core/src/intake/mod.rs",
+          "checkedSha256": "eace0d5adb8ce2009b5b4f501a90f7cae3d8848104f7755c8638d23f6d67d7d5",
+          "implementationSha256": "420c1b4f9ee8ef033d18b26bf3d68fd08081a63487940644ba10ed0952531b5e"
+        },
+        {
+          "path": "crates/crewroom-core/src/workflow.rs",
+          "checkedSha256": "371844ebf83d5d6567303ef018c5f5806baf684e6643095d1b687b1506eca186",
+          "implementationSha256": "9c7e3bac6a9d5dab904229b0815475db6b9beed2849d1aa98fda4a905844d23c"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+          "checkedSha256": "6ff208f05eced434e2684b0619a4b44b1aef2f43a02ce45b3a4ae1d9db4e2d6a",
+          "implementationSha256": "eba44d825a6c5438e2c0b54985512cec8066a6e637aa336f2a477b200a734b2a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/intake.rs",
+          "checkedSha256": "4f2b19a601681272dd4343d90816db53ce02b5e1901845ef231b09d9979dde0a",
+          "implementationSha256": "24ecfc7b5310a07eceead7990ebaf5956cf4daff3c46eec92390ed73d72c887d"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/planning.rs",
+          "checkedSha256": "c5f4436c07840d43b016b0d4430dd38af89df48eb9de62dc7a4b8ad3f5422870",
+          "implementationSha256": "1d2318a0cd9345a356efc9c78f47e6d36c8dca8f970f24cf3438bbecba01b682"
+        },
+        {
+          "path": "scripts/rust/intake-workflow.test.ts",
+          "checkedSha256": "2271591a75e04b6187bdaf2253ece72f8cba5aad7471e70fbcfb56925f0b3663",
+          "implementationSha256": "7b2dcc81b90951ae938608f76914abb7cde292bea77e7f7b772fa47e7c29d481"
+        },
+        {
+          "path": "scripts/verify_intake_rollback.py",
+          "checkedSha256": null,
+          "implementationSha256": "adf79a4a78e157d2f6b04291a31d7ec5aefaedbbdb2d32b9af5d564fd66234b8"
+        }
+      ]
+    },
+    {
+      "name": "rollback-final-2",
+      "command": [
+        "python3",
+        "scripts/verify_intake_rollback.py",
+        "--output",
+        "/tmp/cr-mh5-rollback-final-02"
+      ],
+      "startedAt": "2026-10-13T16:24:49.587139+00:00",
+      "finishedAt": "2026-10-13T16:24:52.220717+00:00",
+      "exitCode": 0,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/rollback-final-2.log",
+        "sha256": "b80664ebf5f57d26bc0cc17794a87b11fb89108a36408920b7c5c7a9b84aef93"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/rollback-final-2.json",
+        "sha256": "03559dd0c16b37412423fb54e71689141bb22b56f1851d3ed635d04dbf60cc0d"
+      },
+      "sourceChangesSinceCheck": [
+        {
+          "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+          "checkedSha256": "73440800f94e3834671e0fcaa344c1c5062bd550f7139f27ef7e87f8f0a9f286",
+          "implementationSha256": "eba44d825a6c5438e2c0b54985512cec8066a6e637aa336f2a477b200a734b2a"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/intake.rs",
+          "checkedSha256": "858816581b9c5e0f57462bd808682d00f69c5e072e3cfdd516d0d3fc33b2b054",
+          "implementationSha256": "24ecfc7b5310a07eceead7990ebaf5956cf4daff3c46eec92390ed73d72c887d"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/planning.rs",
+          "checkedSha256": "c5f4436c07840d43b016b0d4430dd38af89df48eb9de62dc7a4b8ad3f5422870",
+          "implementationSha256": "1d2318a0cd9345a356efc9c78f47e6d36c8dca8f970f24cf3438bbecba01b682"
+        },
+        {
+          "path": "scripts/rust/intake-workflow.test.ts",
+          "checkedSha256": "2271591a75e04b6187bdaf2253ece72f8cba5aad7471e70fbcfb56925f0b3663",
+          "implementationSha256": "7b2dcc81b90951ae938608f76914abb7cde292bea77e7f7b772fa47e7c29d481"
+        }
+      ]
+    }
+  ],
+  "liveAdapters": [
+    {
+      "adapter": "codex",
+      "receipt": {
+        "path": "/tmp/cr-mh5-codex-final/intake-result.json",
+        "sha256": "325c2d1c5c3c646dbb61ccf80cb63c7cbe21939f301d4c344806a2dc2120d2c9"
+      },
+      "result": {
+        "scope": "LIVE intake inference; production Rust daemon and external Rust Mail; no publication or Jira",
+        "kind": "codex",
+        "passed": true,
+        "checks": [
+          "actual harness inspection and durable question; verified stopped ownership; restart preserves wait without active-time charge",
+          "actual resumed harness proposes valid plan using delivered answer; keyed acceptance; restart yields exactly one coding successor and preserves launch gate"
+        ],
+        "fixtureRoot": "/tmp/cr-mh5-codex-final/cr-wf-ZbhQgy",
+        "initial": {
+          "attemptId": "2209470d-7e38-4247-8b85-ae8561d50ef9",
+          "hostPid": 2784724,
+          "runnerPid": 2785228,
+          "sessionId": "01a1360d-6fe2-7202-95ff-7eca779cb883",
+          "model": {
+            "requested": {
+              "model": "codex/gpt-6-astra",
+              "effort": "low"
+            },
+            "resolved": {
+              "adapter": "codex",
+              "provider": "codex",
+              "id": "gpt-6-astra",
+              "api": "codex-app-server",
+              "inputs": [
+                "text"
+              ],
+              "efforts": [
+                "low"
+              ],
+              "tools": true,
+              "selector": "codex/gpt-6-astra",
+              "effort": "low"
+            },
+            "job": "judgment",
+            "budget": "large",
+            "settingsRevision": 0
+          }
+        },
+        "source": {
+          "repositoryId": "37abd0f1-896d-41ee-8ce3-2408f7034cf3",
+          "repositoryRevision": 1,
+          "path": "/tmp/cr-mh5-codex-final/cr-wf-ZbhQgy/source",
+          "commit": "8e9e74c39da6dad83a474a613f5a26588dbeeac4",
+          "tree": "e9b2d611753056dc1f47c0ff8d139488a5f5977a",
+          "instructionsHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "guidance": null,
+          "taskRevision": 1,
+          "sourceRevision": 1,
+          "requirementsHash": "80f32d3e92d2a7441188cdf8d4d63daed25d175775863a538a3330fa02522a93",
+          "id": "59d715929b464a7d2dc5452c90b4a19ab37ba18aded48e901fe26f63e2d38cbf"
+        },
+        "plan": {
+          "id": "b8a89ed1-e6ab-4e84-b747-f998c8d803b8",
+          "version": 1,
+          "sha256": "7b6df22f49dca0b7fd029fd0625c8b47f5c8cc4a2a789422ce7ee7ccbb2453d3",
+          "basis": "59d715929b464a7d2dc5452c90b4a19ab37ba18aded48e901fe26f63e2d38cbf",
+          "content": {
+            "schemaVersion": 1,
+            "goal": "Return the chosen text output with a bounded implementation.",
+            "scope": [
+              "Make the minimal fixture change needed to return text output and check the result."
+            ],
+            "exclusions": [
+              "JSON output",
+              "Unrelated changes or refactoring"
+            ],
+            "assumptions": [
+              "The existing source.txt fixture is the implementation boundary."
+            ],
+            "decisions": [
+              "Apply operator steering 5a7ff554-529d-42aa-b8e1-a9eb680f6d84: Text. Keep the implementation bounded.",
+              "Pinned evidence: source.txt at commit 8e9e74c39da6dad83a474a613f5a26588dbeeac4, line 1, contains 'before'."
+            ],
+            "workPackages": [
+              {
+                "id": "text-output",
+                "name": "Return and check text output",
+                "dependsOn": [],
+                "outputs": [
+                  "Minimal fixture change returning text output",
+                  "Recorded check of the chosen output"
+                ],
+                "criteria": [
+                  0
+                ],
+                "validation": [
+                  "Inspect the resulting output and confirm it is text.",
+                  "Review the diff to confirm changes remain bounded to the fixture."
+                ]
+              }
+            ]
+          }
+        },
+        "recovery": [
+          {
+            "id": "2209470d-7e38-4247-8b85-ae8561d50ef9",
+            "sessionId": "01a1360d-6fe2-7202-95ff-7eca779cb883",
+            "ownership": "stopped",
+            "runnerKind": "codex"
+          },
+          {
+            "id": "ba299647-d256-48ce-9c5a-a4558d9e14f9",
+            "sessionId": "01a1360d-6fe2-7202-95ff-7eca779cb883",
+            "recoveryMode": "session",
+            "ownership": "stopped",
+            "runnerKind": "codex"
+          }
+        ],
+        "answerReceipt": "5a7ff554-529d-42aa-b8e1-a9eb680f6d84",
+        "codingRun": {
+          "id": "caf8a711-811c-4503-9a15-8a49558654dd",
+          "implementationPlanId": "b8a89ed1-e6ab-4e84-b747-f998c8d803b8",
+          "taskRevision": 2,
+          "admission": "Held for explicit launch details"
+        }
+      },
+      "mail": {
+        "binary": "/home/crewroom/Projects/crewroom/.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail",
+        "sha256": "6d0a2000c4e33066b1bca36a15ccdb3ccbccfc90362feee2fa4ca8c6f33f729b",
+        "release": "v0.3.36"
+      },
+      "mailReceipt": {
+        "path": "/tmp/cr-mh5-codex-final/mail-identity.json",
+        "sha256": "1e926965123ace777eeaf70fe6e402825cb66b1ecfa6fad34bb29dcf580a0e25"
+      }
+    },
+    {
+      "adapter": "claude",
+      "receipt": {
+        "path": "/tmp/cr-mh5-claude-final/intake-result.json",
+        "sha256": "465731c06604c8e58b84e22f07fb98f5d12d97e67ee015a7aac86d09139b450e"
+      },
+      "result": {
+        "scope": "LIVE intake inference; production Rust daemon and external Rust Mail; no publication or Jira",
+        "kind": "claude-code",
+        "passed": true,
+        "checks": [
+          "actual harness inspection and durable question; verified stopped ownership; restart preserves wait without active-time charge",
+          "actual resumed harness proposes valid plan using delivered answer; keyed acceptance; restart yields exactly one coding successor and preserves launch gate"
+        ],
+        "fixtureRoot": "/tmp/cr-mh5-claude-final/cr-wf-wS6QGx",
+        "initial": {
+          "attemptId": "3d1e6eb1-9446-4eb9-b18c-78ef9835fdc4",
+          "hostPid": 2784849,
+          "runnerPid": 2785143,
+          "sessionId": "b1c9e405-1974-418a-9e95-98bb21306a1b",
+          "model": {
+            "requested": {
+              "model": "claude-code/sonnet",
+              "effort": "low"
+            },
+            "resolved": {
+              "adapter": "claude-code",
+              "provider": "claude-code",
+              "id": "sonnet",
+              "resolvedModel": "claude-sonnet-5-5",
+              "api": "claude-code-stream",
+              "inputs": [
+                "text"
+              ],
+              "efforts": [
+                "low"
+              ],
+              "tools": true,
+              "selector": "claude-code/sonnet",
+              "effort": "low"
+            },
+            "job": "judgment",
+            "budget": "large",
+            "settingsRevision": 0
+          },
+          "observedModel": "claude-sonnet-5-5"
+        },
+        "source": {
+          "repositoryId": "3f4101cc-9ee5-4c74-af26-e1d6e2d44d28",
+          "repositoryRevision": 1,
+          "path": "/tmp/cr-mh5-claude-final/cr-wf-wS6QGx/source",
+          "commit": "8e9e74c39da6dad83a474a613f5a26588dbeeac4",
+          "tree": "e9b2d611753056dc1f47c0ff8d139488a5f5977a",
+          "instructionsHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "guidance": null,
+          "taskRevision": 1,
+          "sourceRevision": 1,
+          "requirementsHash": "d20ecc67626460e8c92ba9ea449b09b0c146acf3c42902e5fbdc6badd92357ac",
+          "id": "ece2a6554953d70fe62ae339691e2e2c8cf45dd0dac899f152cfe99a095fd9f3"
+        },
+        "plan": {
+          "id": "5036a02d-214d-49a9-91d8-53d1b8a5170b",
+          "version": 1,
+          "sha256": "1ad9b5c670b39c3a98ab1dc5fe2b4e96335393ad8a4b1bd6b968c383717e7323",
+          "basis": "ece2a6554953d70fe62ae339691e2e2c8cf45dd0dac899f152cfe99a095fd9f3",
+          "content": {
+            "schemaVersion": 1,
+            "goal": "Return the chosen output as text",
+            "scope": [
+              "Produce the chosen output in text form"
+            ],
+            "exclusions": [
+              "JSON output",
+              "Work beyond the bounded fixture"
+            ],
+            "assumptions": [
+              "source.txt contains 'before' and is the only repository content relevant to this job"
+            ],
+            "decisions": [
+              "Operator answer for output: Text. Keep the implementation bounded."
+            ],
+            "workPackages": [
+              {
+                "id": "wp-output",
+                "name": "Return text output",
+                "dependsOn": [],
+                "outputs": [
+                  "Text output of the chosen representation"
+                ],
+                "criteria": [
+                  0
+                ],
+                "validation": [
+                  "Check that the output is text"
+                ]
+              }
+            ]
+          }
+        },
+        "recovery": [
+          {
+            "id": "3d1e6eb1-9446-4eb9-b18c-78ef9835fdc4",
+            "sessionId": "b1c9e405-1974-418a-9e95-98bb21306a1b",
+            "ownership": "stopped",
+            "runnerKind": "claude-code"
+          },
+          {
+            "id": "d2d9db5a-23dc-40ba-9cd9-a34328c9729e",
+            "sessionId": "b1c9e405-1974-418a-9e95-98bb21306a1b",
+            "recoveryMode": "session",
+            "ownership": "stopped",
+            "runnerKind": "claude-code"
+          }
+        ],
+        "answerReceipt": "949a26fe-3a68-4a07-b945-2c4bf11692ef",
+        "codingRun": {
+          "id": "8172ecbb-4bbf-4c01-9293-bd9d0e249a5c",
+          "implementationPlanId": "5036a02d-214d-49a9-91d8-53d1b8a5170b",
+          "taskRevision": 2,
+          "admission": "Held for explicit launch details"
+        }
+      },
+      "mail": {
+        "binary": "/home/crewroom/Projects/crewroom/.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail",
+        "sha256": "6d0a2000c4e33066b1bca36a15ccdb3ccbccfc90362feee2fa4ca8c6f33f729b",
+        "release": "v0.3.36"
+      },
+      "mailReceipt": {
+        "path": "/tmp/cr-mh5-claude-final/mail-identity.json",
+        "sha256": "1e926965123ace777eeaf70fe6e402825cb66b1ecfa6fad34bb29dcf580a0e25"
+      }
+    },
+    {
+      "adapter": "omp",
+      "receipt": {
+        "path": "/tmp/cr-mh5-omp-final/intake-result.json",
+        "sha256": "626ceaa2e3d73de36f31b9b06739e68c6e666c12623e80c3812055cf8bc10b8d"
+      },
+      "result": {
+        "scope": "LIVE intake inference; production Rust daemon and external Rust Mail; no publication or Jira",
+        "kind": "omp",
+        "passed": true,
+        "checks": [
+          "actual harness inspection and durable question; verified stopped ownership; restart preserves wait without active-time charge",
+          "actual resumed harness proposes valid plan using delivered answer; keyed acceptance; restart yields exactly one coding successor and preserves launch gate"
+        ],
+        "fixtureRoot": "/tmp/cr-mh5-omp-final/cr-wf-qs22hc",
+        "initial": {
+          "attemptId": "349930ce-7bc9-451b-b1ff-87369e922002",
+          "hostPid": 2784753,
+          "runnerPid": 2784811,
+          "sessionId": "01a1360d-5c32-7000-a296-9b41e017570c",
+          "model": {
+            "requested": {
+              "model": "meta/muse-spark-1.1",
+              "effort": "low"
+            },
+            "resolved": {
+              "provider": "meta",
+              "id": "muse-spark-1.1",
+              "api": "openai-responses",
+              "inputs": [
+                "text"
+              ],
+              "efforts": [
+                "low"
+              ],
+              "tools": true,
+              "selector": "meta/muse-spark-1.1",
+              "effort": "low"
+            },
+            "job": "judgment",
+            "budget": "large",
+            "settingsRevision": 0
+          }
+        },
+        "source": {
+          "repositoryId": "886a1b7b-b5e5-4f38-bfe2-1e4ff3fea878",
+          "repositoryRevision": 1,
+          "path": "/tmp/cr-mh5-omp-final/cr-wf-qs22hc/source",
+          "commit": "8e9e74c39da6dad83a474a613f5a26588dbeeac4",
+          "tree": "e9b2d611753056dc1f47c0ff8d139488a5f5977a",
+          "instructionsHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "guidance": null,
+          "taskRevision": 1,
+          "sourceRevision": 1,
+          "requirementsHash": "14d56e7b4c64366468a76a01c9f1b59baacf3ba767b430535cca72a22b3c7280",
+          "id": "391bb0fbc993f0e1f28d9c0b0162cc03ec6ddb2b2c432542dae555acd055ea4d"
+        },
+        "plan": {
+          "id": "84378e42-16f6-49d9-a650-95080ddb8c46",
+          "version": 1,
+          "sha256": "9b54d99740c4300b282738a86377af50310fe67651635e6ebaed6c7eb00d0158",
+          "basis": "391bb0fbc993f0e1f28d9c0b0162cc03ec6ddb2b2c432542dae555acd055ea4d",
+          "content": {
+            "schemaVersion": 1,
+            "goal": "Implement fixture to return chosen text output as decided",
+            "scope": [
+              "Read current source.txt implementation",
+              "Update logic to return Text output per operator decision",
+              "Validate chosen output is checked"
+            ],
+            "exclusions": [
+              "JSON output handling",
+              "Unrelated fixture changes",
+              "Repository writes outside scope"
+            ],
+            "assumptions": [
+              "source.txt content is 'before' as currently committed",
+              "Operator decision to use Text is final"
+            ],
+            "decisions": [
+              "Output format = Text per operator answer: Text. Keep the implementation bounded.",
+              "Keep implementation bounded per operator guidance"
+            ],
+            "workPackages": [
+              {
+                "id": "wp-inspect",
+                "name": "Inspect current fixture source",
+                "dependsOn": [],
+                "outputs": [
+                  "Current source.txt state documented"
+                ],
+                "criteria": [
+                  0
+                ],
+                "validation": [
+                  "Repository read of source.txt shows prior state"
+                ]
+              },
+              {
+                "id": "wp-implement-text",
+                "name": "Implement Text output",
+                "dependsOn": [
+                  "wp-inspect"
+                ],
+                "outputs": [
+                  "Source returns Text"
+                ],
+                "criteria": [
+                  0
+                ],
+                "validation": [
+                  "Check output equals Text",
+                  "Run relevant fixture test"
+                ]
+              }
+            ]
+          }
+        },
+        "recovery": [
+          {
+            "id": "349930ce-7bc9-451b-b1ff-87369e922002",
+            "sessionId": "01a1360d-5c32-7000-a296-9b41e017570c",
+            "ownership": "stopped",
+            "runnerKind": "omp"
+          },
+          {
+            "id": "a6bd1d24-99c2-4d1f-b900-12f2131c94da",
+            "sessionId": "01a1360d-73be-7000-9396-430d52cccb4a",
+            "recoveryMode": "replacement",
+            "ownership": "stopped",
+            "runnerKind": "omp"
+          }
+        ],
+        "answerReceipt": "24d0a470-9d67-4ba7-9238-f5e72a47078a",
+        "codingRun": {
+          "id": "92cb2e15-961f-4672-ab8d-a7ef971348fc",
+          "implementationPlanId": "84378e42-16f6-49d9-a650-95080ddb8c46",
+          "taskRevision": 2,
+          "admission": "Held for explicit launch details"
+        }
+      },
+      "mail": {
+        "binary": "/home/crewroom/Projects/crewroom/.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail",
+        "sha256": "6d0a2000c4e33066b1bca36a15ccdb3ccbccfc90362feee2fa4ca8c6f33f729b",
+        "release": "v0.3.36"
+      },
+      "mailReceipt": {
+        "path": "/tmp/cr-mh5-omp-final/mail-identity.json",
+        "sha256": "1e926965123ace777eeaf70fe6e402825cb66b1ecfa6fad34bb29dcf580a0e25"
+      }
+    }
+  ],
+  "actualOmpSimulatedProviders": [
+    {
+      "kind": "rpc",
+      "receipt": {
+        "path": "/tmp/cr-mh5-omp-rpc/report.json",
+        "sha256": "173c7ce88c7a9ef86da08fc548a82b54b1564ac789938153b3ec3b94bc3b7674"
+      },
+      "result": {
+        "cases": [
+          {
+            "name": "exact native preflight and model request",
+            "selector": "aperture-openai/openai.gpt-6-sol",
+            "effort": "low",
+            "identity": {
+              "model": {
+                "provider": "aperture-openai",
+                "id": "openai.gpt-6-sol",
+                "api": "openai-responses"
+              },
+              "thinkingLevel": "low",
+              "sessionId": "01a13610-2a5a-7000-bef4-d2eeda4fc466",
+              "isStreaming": false,
+              "autoCompactionEnabled": false
+            },
+            "ompPid": 2797467,
+            "bridgePid": 2797448,
+            "status": "passed"
+          },
+          {
+            "name": "429 bounded HTTP retry retains model",
+            "status": "passed"
+          },
+          {
+            "name": "403 exposes failure without fallback",
+            "status": "passed"
+          },
+          {
+            "name": "actual OMP v2 arguments and input artifact retain 1.2 MB; provider result explicitly truncated",
+            "utf8Bytes": 1200000,
+            "sha256": "57d1bc32102a791bd10d7ee22ddd51fb77f735e4aed02994bcbc4dbb3bfc7ec3",
+            "providerRequests": 2,
+            "resultProjection": {
+              "direction": "middle",
+              "truncatedBy": "middle",
+              "totalLines": 1,
+              "totalBytes": 1200000,
+              "outputLines": 3,
+              "outputBytes": 40985,
+              "maxBytes": 40960,
+              "elidedLines": 0,
+              "elidedBytes": 1159040,
+              "artifactId": "0"
+            },
+            "status": "passed"
+          },
+          {
+            "name": "exact native preflight and model request",
+            "selector": "aperture-anthropic/anthropic.claude-sonnet-5",
+            "effort": "medium",
+            "identity": {
+              "model": {
+                "provider": "aperture-anthropic",
+                "id": "anthropic.claude-sonnet-5",
+                "api": "anthropic-messages"
+              },
+              "thinkingLevel": "medium",
+              "sessionId": "01a13610-3ebb-7000-87ad-48584a540f41",
+              "isStreaming": false,
+              "autoCompactionEnabled": false
+            },
+            "ompPid": 2798947,
+            "bridgePid": 2798928,
+            "status": "passed"
+          },
+          {
+            "name": "exact native preflight and model request",
+            "selector": "aperture-google/gemini-3.8-flash",
+            "effort": "low",
+            "identity": {
+              "model": {
+                "provider": "aperture-google",
+                "id": "gemini-3.8-flash",
+                "api": "google-generative-ai"
+              },
+              "thinkingLevel": "low",
+              "sessionId": "01a13610-46da-7000-b8d2-42084a6ff1f4",
+              "isStreaming": false,
+              "autoCompactionEnabled": false
+            },
+            "ompPid": 2799473,
+            "bridgePid": 2799452,
+            "status": "passed"
+          },
+          {
+            "name": "unsupported declared effort rejected before launch",
+            "selector": "aperture-openai/zai-org/GLM-5.2",
+            "status": "passed"
+          },
+          {
+            "name": "stale effort refused by real runner readback",
+            "selector": "aperture-openai/zai-org/GLM-5.2",
+            "status": "passed"
+          },
+          {
+            "name": "unsupported declared effort rejected before launch",
+            "selector": "aperture-google/gemini-3.1-pro-preview",
+            "status": "passed"
+          },
+          {
+            "name": "stale effort refused by real runner readback",
+            "selector": "aperture-google/gemini-3.1-pro-preview",
+            "status": "passed"
+          },
+          {
+            "name": "unsupported declared effort rejected before launch",
+            "selector": "aperture-bedrock-compat/us.anthropic.claude-haiku-4-5-20251001-v1:0",
+            "status": "passed"
+          },
+          {
+            "name": "stale effort refused by real runner readback",
+            "selector": "aperture-bedrock-compat/us.anthropic.claude-haiku-4-5-20251001-v1:0",
+            "status": "passed"
+          }
+        ],
+        "guard": {
+          "fixture_port_allowed": true,
+          "external_denied": true,
+          "other_loopback_denied": true,
+          "child_egress_denied": true
+        },
+        "runner": {
+          "version": "omp/18.4.12",
+          "cliSha256": "d659505080c80a091524de1335caccdb815e05367bd825048cda4a0e98d8b7a0",
+          "bunSha256": "9fd36f87e4b90b07632b987a2e4ec81ca15a62c81bf983190cea6d715be2ad74"
+        },
+        "passed": true,
+        "allOwnedProcessesExited": true,
+        "providerRequests": 8,
+        "providerErrors": []
+      }
+    },
+    {
+      "kind": "host",
+      "receipt": {
+        "path": "/tmp/cr-mh5-omp-host/report.json",
+        "sha256": "62ab7cfaea5650d033669efa8b4f4970be1a57bd1c05b4d0c29d690e606b8769"
+      },
+      "result": {
+        "cases": [
+          {
+            "name": "independent host text and routed tool with reported synthetic usage",
+            "selector": "aperture-openai/openai.gpt-6-sol",
+            "identity": {
+              "model": {
+                "provider": "aperture-openai",
+                "id": "openai.gpt-6-sol",
+                "api": "openai-responses"
+              },
+              "thinkingLevel": "low",
+              "sessionId": "01a13610-2f30-7000-8a92-9a9c03c0fd5c",
+              "isStreaming": false,
+              "autoCompactionEnabled": false,
+              "hostPid": 2797763,
+              "ompPid": 2797782,
+              "sessionDirectory": "/tmp/cr-mh5-omp-host/family-0/sessions"
+            },
+            "providerRequests": 3,
+            "status": "passed"
+          },
+          {
+            "name": "independent host text and routed tool with reported synthetic usage",
+            "selector": "aperture-anthropic/anthropic.claude-sonnet-5",
+            "identity": {
+              "model": {
+                "provider": "aperture-anthropic",
+                "id": "anthropic.claude-sonnet-5",
+                "api": "anthropic-messages"
+              },
+              "thinkingLevel": "medium",
+              "sessionId": "01a13610-37f3-7000-92ec-258119254e6f",
+              "isStreaming": false,
+              "autoCompactionEnabled": false,
+              "hostPid": 2798371,
+              "ompPid": 2798389,
+              "sessionDirectory": "/tmp/cr-mh5-omp-host/family-1/sessions"
+            },
+            "providerRequests": 3,
+            "status": "passed"
+          },
+          {
+            "name": "independent host text and routed tool with reported synthetic usage",
+            "selector": "aperture-google/gemini-3.8-flash",
+            "identity": {
+              "model": {
+                "provider": "aperture-google",
+                "id": "gemini-3.8-flash",
+                "api": "google-generative-ai"
+              },
+              "thinkingLevel": "low",
+              "sessionId": "01a13610-40da-7000-97c8-dc942327dcc5",
+              "isStreaming": false,
+              "autoCompactionEnabled": false,
+              "hostPid": 2799109,
+              "ompPid": 2799127,
+              "sessionDirectory": "/tmp/cr-mh5-omp-host/family-2/sessions"
+            },
+            "providerRequests": 3,
+            "status": "passed"
+          },
+          {
+            "name": "restore actual session directory and subsequent turn",
+            "identity": {
+              "model": {
+                "provider": "aperture-openai",
+                "id": "openai.gpt-6-sol",
+                "api": "openai-responses"
+              },
+              "thinkingLevel": "low",
+              "sessionId": "01a13610-2f30-7000-8a92-9a9c03c0fd5c",
+              "isStreaming": false,
+              "autoCompactionEnabled": false,
+              "hostPid": 2799683,
+              "ompPid": 2799702,
+              "sessionDirectory": "/tmp/cr-mh5-omp-host/family-0/sessions",
+              "recoveryMode": "session"
+            },
+            "status": "passed"
+          },
+          {
+            "name": "wrong-id actual session directory and subsequent turn",
+            "identity": {
+              "model": {
+                "provider": "aperture-openai",
+                "id": "openai.gpt-6-sol",
+                "api": "openai-responses"
+              },
+              "thinkingLevel": "low",
+              "sessionId": "01a13610-5505-7000-9b8b-b295a46f59e9",
+              "isStreaming": false,
+              "autoCompactionEnabled": false,
+              "hostPid": 2800472,
+              "ompPid": 2800490,
+              "sessionDirectory": "/tmp/cr-mh5-omp-host/wrong-id/sessions",
+              "recoveryMode": "replacement"
+            },
+            "status": "passed"
+          },
+          {
+            "name": "empty history uses new attempt session directory",
+            "status": "passed"
+          },
+          {
+            "name": "denied exposes terminal error without upstream substitution",
+            "terminal": {
+              "type": "prompt_result",
+              "id": "dc73cdb5d7cd44c988df71d0ab7eacff",
+              "agentInvoked": true,
+              "status": "error",
+              "sessionSettled": true,
+              "error": {
+                "message": "403 Synthetic failure\nSynthetic failure (type=fixture_error)",
+                "kind": "authorization",
+                "retryable": false,
+                "provider": "aperture-openai",
+                "model": "openai.gpt-6-sol"
+              }
+            },
+            "providerRequests": 1,
+            "status": "passed"
+          },
+          {
+            "name": "effort exposes terminal error without upstream substitution",
+            "terminal": {
+              "type": "prompt_result",
+              "id": "e55e1609e21e4bc0bb4dd5b47732d277",
+              "agentInvoked": true,
+              "status": "error",
+              "sessionSettled": true,
+              "error": {
+                "message": "403 Crewroom rejected a model or effort substitution.\nCrewroom rejected a model or effort substitution. (type=crewroom_assignment_policy)",
+                "kind": "rejected",
+                "retryable": false,
+                "provider": "aperture-openai",
+                "model": "openai.gpt-6-sol"
+              }
+            },
+            "providerRequests": 1,
+            "status": "passed"
+          },
+          {
+            "name": "runner rejects changed working directory; cancelled restore never becomes ready",
+            "status": "passed"
+          },
+          {
+            "name": "dedicated tmux reconnect, readable native host and external reconciliation after host death",
+            "identity": {
+              "model": {
+                "provider": "aperture-openai",
+                "id": "openai.gpt-6-sol",
+                "api": "openai-responses"
+              },
+              "thinkingLevel": "low",
+              "sessionId": "01a13610-757f-7000-a0f5-c9c00d276b9a",
+              "isStreaming": false,
+              "autoCompactionEnabled": false,
+              "hostPid": 2801882,
+              "ompPid": 2801905,
+              "sessionDirectory": "/tmp/cr-mh5-omp-host/tmux/sessions"
+            },
+            "runnerOwnershipAfterHostDeath": {
+              "state": "live",
+              "owner": {
+                "pid": 2801905,
+                "pgid": 2801905,
+                "started": "Tue Oct 13 12:20:09 2026",
+                "token": "REDACTED-LOCAL-FIXTURE-CAPABILITY"
+              },
+              "members": [
+                2801905,
+                2801930,
+                2801932
+              ]
+            },
+            "status": "passed"
+          },
+          {
+            "name": "actual OMP oversized host tool retained and routed in full",
+            "utf8Bytes": 1200000,
+            "sha256": "57d1bc32102a791bd10d7ee22ddd51fb77f735e4aed02994bcbc4dbb3bfc7ec3",
+            "terminal": {
+              "type": "prompt_result",
+              "id": "fe02de0dee0b492696b5f22b1db199ff",
+              "agentInvoked": true,
+              "status": "error",
+              "sessionSettled": true,
+              "error": {
+                "message": "409 Provider request exceeded its limit.",
+                "kind": "malformed",
+                "retryable": true,
+                "provider": "aperture-openai",
+                "model": "openai.gpt-6-sol"
+              }
+            },
+            "providerRequests": 1,
+            "status": "passed"
+          }
+        ],
+        "guard": {
+          "fixture_port_allowed": true,
+          "external_denied": true,
+          "other_loopback_denied": true,
+          "child_egress_denied": true
+        },
+        "runner": {
+          "version": "omp/18.4.12",
+          "cliSha256": "d659505080c80a091524de1335caccdb815e05367bd825048cda4a0e98d8b7a0",
+          "bunSha256": "9fd36f87e4b90b07632b987a2e4ec81ca15a62c81bf983190cea6d715be2ad74"
+        },
+        "passed": true,
+        "allOwnedProcessesExited": true,
+        "providerRequests": 16,
+        "providerErrors": [],
+        "backendRequests": 4
+      }
+    },
+    {
+      "kind": "supervisor",
+      "receipt": {
+        "path": "/tmp/cr-mh5-omp-supervisor/report.json",
+        "sha256": "4c4d9e2265b1b8386f1bd9a70122f902a94c5fb877e3ff56116dcf6d3ff9d8e7"
+      },
+      "result": {
+        "cases": [
+          {
+            "name": "native supervisor actual OMP text/tool/usage and visible tmux host",
+            "selector": "aperture-openai/openai.gpt-6-sol",
+            "identity": {
+              "hostPid": 2798083,
+              "sessionId": "01a13610-342f-7000-9a13-57694c6acc5b",
+              "hostUrl": "http://127.0.0.1:37951",
+              "pane": "%0",
+              "runnerCwd": "/tmp/cr-mh5-omp-supervisor/workspace",
+              "ompPid": 2798105,
+              "sessionDirectory": "/tmp/cr-mh5-omp-supervisor/hosts/7f5bd571-5336-40a4-8a29-a9186d31d88b/sessions"
+            },
+            "providerRequests": 3,
+            "status": "passed"
+          },
+          {
+            "name": "actual controller SIGKILL and same OMP process/session reattachment with subsequent turn",
+            "identity": {
+              "hostPid": 2798083,
+              "sessionId": "01a13610-342f-7000-9a13-57694c6acc5b",
+              "hostUrl": "http://127.0.0.1:37951",
+              "pane": "%0",
+              "runnerCwd": "/tmp/cr-mh5-omp-supervisor/workspace",
+              "ompPid": 2798105,
+              "sessionDirectory": "/tmp/cr-mh5-omp-supervisor/hosts/7f5bd571-5336-40a4-8a29-a9186d31d88b/sessions"
+            },
+            "status": "passed"
+          },
+          {
+            "name": "native supervisor actual OMP text/tool/usage and visible tmux host",
+            "selector": "aperture-anthropic/anthropic.claude-sonnet-5",
+            "identity": {
+              "hostPid": 2799006,
+              "sessionId": "01a13610-3f4c-7000-8747-b84f6e5f5342",
+              "hostUrl": "http://127.0.0.1:54669",
+              "pane": "%1",
+              "runnerCwd": "/tmp/cr-mh5-omp-supervisor/workspace",
+              "ompPid": 2799028,
+              "sessionDirectory": "/tmp/cr-mh5-omp-supervisor/hosts/0d4fa35f-cf12-4c2a-b55f-25ff3f5e6d7e/sessions"
+            },
+            "providerRequests": 3,
+            "status": "passed"
+          },
+          {
+            "name": "native supervisor actual OMP text/tool/usage and visible tmux host",
+            "selector": "aperture-google/gemini-3.8-flash",
+            "identity": {
+              "hostPid": 2799622,
+              "sessionId": "01a13610-4984-7000-bfd7-a349c636967e",
+              "hostUrl": "http://127.0.0.1:35197",
+              "pane": "%2",
+              "runnerCwd": "/tmp/cr-mh5-omp-supervisor/workspace",
+              "ompPid": 2799644,
+              "sessionDirectory": "/tmp/cr-mh5-omp-supervisor/hosts/801988d3-5aeb-418e-b490-d0e8babb18b6/sessions"
+            },
+            "providerRequests": 3,
+            "status": "passed"
+          }
+        ],
+        "guard": {
+          "fixture_port_allowed": true,
+          "external_denied": true,
+          "other_loopback_denied": true,
+          "child_egress_denied": true
+        },
+        "runner": {
+          "version": "omp/18.4.12",
+          "cliSha256": "d659505080c80a091524de1335caccdb815e05367bd825048cda4a0e98d8b7a0",
+          "bunSha256": "9fd36f87e4b90b07632b987a2e4ec81ca15a62c81bf983190cea6d715be2ad74"
+        },
+        "passed": true,
+        "allOwnedProcessesExited": true,
+        "providerRequests": 10,
+        "providerErrors": [],
+        "backendRequests": 3
+      }
+    },
+    {
+      "kind": "gateway",
+      "receipt": {
+        "path": "/tmp/cr-mh5-omp-gateway/report.json",
+        "sha256": "0bc27d5db73912b3fbe5425272f9e38c63367c8a0a9434a96b8241f4bff3b875"
+      },
+      "result": {
+        "cases": [
+          {
+            "name": "two real OMP turns through native gateway with actual synthetic usage",
+            "selector": "aperture-openai/openai.gpt-6-sol",
+            "providerRequests": 2,
+            "usage": [
+              {
+                "type": "provider_usage",
+                "status": 200,
+                "state": "actual",
+                "usage": {
+                  "input": 10.0,
+                  "output": 5.0,
+                  "cacheRead": 0.0,
+                  "cacheWrite": 0,
+                  "reasoning": 0.0,
+                  "total": 15.0
+                }
+              },
+              {
+                "type": "provider_usage",
+                "status": 200,
+                "state": "actual",
+                "usage": {
+                  "input": 10.0,
+                  "output": 5.0,
+                  "cacheRead": 0.0,
+                  "cacheWrite": 0,
+                  "reasoning": 0.0,
+                  "total": 15.0
+                }
+              }
+            ],
+            "status": "passed"
+          },
+          {
+            "name": "two real OMP turns through native gateway with actual synthetic usage",
+            "selector": "aperture-anthropic/anthropic.claude-sonnet-5",
+            "providerRequests": 2,
+            "usage": [
+              {
+                "type": "provider_usage",
+                "status": 200,
+                "state": "actual",
+                "usage": {
+                  "input": 10.0,
+                  "output": 5.0,
+                  "cacheRead": 0.0,
+                  "cacheWrite": 0.0,
+                  "reasoning": 0,
+                  "total": 15.0
+                }
+              },
+              {
+                "type": "provider_usage",
+                "status": 200,
+                "state": "actual",
+                "usage": {
+                  "input": 10.0,
+                  "output": 5.0,
+                  "cacheRead": 0.0,
+                  "cacheWrite": 0.0,
+                  "reasoning": 0,
+                  "total": 15.0
+                }
+              }
+            ],
+            "status": "passed"
+          },
+          {
+            "name": "two real OMP turns through native gateway with actual synthetic usage",
+            "selector": "aperture-google/gemini-3.8-flash",
+            "providerRequests": 2,
+            "usage": [
+              {
+                "type": "provider_usage",
+                "status": 200,
+                "state": "actual",
+                "usage": {
+                  "input": 10.0,
+                  "output": 5.0,
+                  "cacheRead": 0.0,
+                  "cacheWrite": 0,
+                  "reasoning": 0.0,
+                  "total": 15.0
+                }
+              },
+              {
+                "type": "provider_usage",
+                "status": 200,
+                "state": "actual",
+                "usage": {
+                  "input": 10.0,
+                  "output": 5.0,
+                  "cacheRead": 0.0,
+                  "cacheWrite": 0,
+                  "reasoning": 0.0,
+                  "total": 15.0
+                }
+              }
+            ],
+            "status": "passed"
+          },
+          {
+            "name": "OMP effort substitution blocked before a second upstream request",
+            "providerRequests": 1,
+            "status": "passed"
+          }
+        ],
+        "guard": {
+          "fixture_port_allowed": true,
+          "external_denied": true,
+          "other_loopback_denied": true,
+          "child_egress_denied": true
+        },
+        "runner": {
+          "version": "omp/18.4.12",
+          "cliSha256": "d659505080c80a091524de1335caccdb815e05367bd825048cda4a0e98d8b7a0",
+          "bunSha256": "9fd36f87e4b90b07632b987a2e4ec81ca15a62c81bf983190cea6d715be2ad74"
+        },
+        "passed": true,
+        "allOwnedProcessesExited": true,
+        "providerRequests": 7,
+        "providerErrors": []
+      }
+    }
+  ],
+  "nativeWalkthrough": {
+    "scope": "Actual Linux Xwayland rendered native app and isolated production Rust daemon; seeded recorded wait with no actual agent. Live processes proved in separate adapter fixtures.",
+    "screenshots": [
+      {
+        "path": "/tmp/crewroom-mh5-validation/native-waiting.png",
+        "sha256": "7c7b17223c060f73ee8fba52d2622994a7bbc910eb5e9146b084fe70a8a62a70"
+      },
+      {
+        "path": "/tmp/crewroom-mh5-validation/native-final-wait.png",
+        "sha256": "c73c2e82d4cddd676c57c128782d84d74c403673cb3ff4a75e5545eacff13fa9"
+      },
+      {
+        "path": "/tmp/crewroom-mh5-validation/native-answer-draft-390.png",
+        "sha256": "b96973ce4bee31ad9e2e2be0a22f0d9486d6df47464152601d438cdde67b2bbf"
+      },
+      {
+        "path": "/tmp/crewroom-mh5-validation/native-answer-pending-390.png",
+        "sha256": "02c299bfec0ba6f31ead94403ab2ab044abaf85ee2c85817cd562488d9e91290"
+      },
+      {
+        "path": "/tmp/crewroom-mh5-validation/native-plan-review-390.png",
+        "sha256": "a45cc307ebb9dedec90e9fbab8052d9c383567693a4df3d707ee36dcf817646c"
+      },
+      {
+        "path": "/tmp/crewroom-mh5-validation/native-packages-390.png",
+        "sha256": "859e5224e333a66e4aeb10dab5fc4893296292ce052e69883dc0e0dadc303cbc"
+      },
+      {
+        "path": "/tmp/crewroom-mh5-validation/native-plan-actions-390.png",
+        "sha256": "19198c1e0e71d967f7817c0c996911caaa48c8485aa503b41d8e97f505012499"
+      },
+      {
+        "path": "/tmp/crewroom-mh5-validation/native-plan-editor.png",
+        "sha256": "19c642560a8adbaff00d0b91fb1bc694772c63609d0bf26d52ac5086e8b59dfc"
+      },
+      {
+        "path": "/tmp/crewroom-mh5-validation/native-stale-decision.png",
+        "sha256": "8f0f6794a17af184c769c44dcdd02dd260c6b82877d3afb588b952dc9614007c"
+      },
+      {
+        "path": "/tmp/crewroom-mh5-validation/native-current-decision.png",
+        "sha256": "559d31a4c6504476e649a61f2552045c22bd9121c20eb7eb35a8de211b4fa5b1"
+      },
+      {
+        "path": "/tmp/crewroom-mh5-validation/native-accepted.png",
+        "sha256": "ec7cea4b3d29714bbec98147695de666b2a864e4cdb5320668dcc3fbeeefc22b"
+      },
+      {
+        "path": "/tmp/crewroom-mh5-validation/native-review-readback.json",
+        "sha256": "1b76e6684fc220d81ba1c156570375cb8dc777753075a559da0007f40e2d86f0"
+      },
+      {
+        "path": "/tmp/crewroom-mh5-validation/native-queue-readback.json",
+        "sha256": "b57813dc789e7217038c98c7e541676912b5ec1d3e7f295042a057b30fbe012a"
+      },
+      {
+        "path": "/tmp/crewroom-mh5-validation/native-queued.png",
+        "sha256": "64e71b620ba422b1460de7231470f875e58d15b7391f3a9ae437f6c739e3d83e"
+      }
+    ],
+    "actions": [
+      "Viewed stopped Waiting for you and typed an answer at 390px; restarted daemon while local draft remained; submitted answer and saw delivery pending.",
+      "Viewed plan packages, dependencies, outputs, criteria and validation at 390px.",
+      "Saved a new plan version from native editor, observed stale acceptance disabled after task revision advanced, refreshed source through authenticated fixture API.",
+      "Fixture API staged rejection and revised plan to inspect live native updates; native Accept plan saved version 3 with readback.",
+      "Keyboard edit/reject/accept/queue, async pristine refresh and dirty conflicts are exercised by GPUI interaction tests; external Xwayland text focus was inconsistent.",
+      "Native Queue reused accepted version 3: one coding run, no Grill for that task, no admitted coordinator; runner-unavailable hold remained visible. The workspace also retains one explicitly synthetic exited attempt for the waiting seed."
+    ],
+    "limitations": [
+      "Not a screen-reader or IME validation; existing GPUI composition tests are separate.",
+      "No new macOS package or Wayland terminal acceptance.",
+      "Manual screenshot-to-build associations are chronological inferences. Earlier groups cover earlier source manifests; final source behavior is separately covered by the exact-manifest native workbench rerun. The previously recorded native binary hash is not assigned to all groups."
+    ],
+    "provenance": {
+      "reviewedImplementationRevision": "5b4d36dfd7ae602b230bf9b287464901870b9669",
+      "reviewedImplementationTree": "ddafeaeed952f180b2811b0ee8943da355d0eabd",
+      "timeEvidence": "fileModifiedAt records current retained filesystem mtimes, not a separately recorded capture timestamp; it supports chronological grouping only.",
+      "groups": [
+        {
+          "id": "initial-wait-and-narrow-review",
+          "build": {
+            "name": "workspace-build",
+            "receipt": {
+              "path": "/tmp/crewroom-mh5-validation/workspace-build.json",
+              "sha256": "f3cef09d899e5e75d57db435d77ef5ce44e7dea3d0b0be275e9694194f3c7b38"
+            },
+            "log": {
+              "path": "/tmp/crewroom-mh5-validation/workspace-build.log",
+              "sha256": "8bd473ebd2816d13b66f9bef385474b6091559ab56a29521abcf451aaecaf842"
+            },
+            "startedAt": "2026-10-13T16:05:29.988364+00:00",
+            "finishedAt": "2026-10-13T16:05:37.324958+00:00",
+            "exitCode": 0,
+            "sourceChangesSinceBuild": [
+              {
+                "path": "crates/crewroom-core/src/intake/mod.rs",
+                "builtSourceSha256": "151109f73f0e602e10dcf9cb112e88319b95c47fa5e4cf0d933e744332a2fff6",
+                "reviewedSourceSha256": "420c1b4f9ee8ef033d18b26bf3d68fd08081a63487940644ba10ed0952531b5e"
+              },
+              {
+                "path": "crates/crewroom-core/src/intake/requests.rs",
+                "builtSourceSha256": "7f2f2ba405fd88809f55aad8c35193e0383122c6094b6ca12d53174b9f514363",
+                "reviewedSourceSha256": "475b88ceb63011e2411923b2507984cf226a3f8aaffb885b3ab88cc3f86d4c43"
+              },
+              {
+                "path": "crates/crewroom-core/src/workflow.rs",
+                "builtSourceSha256": "371844ebf83d5d6567303ef018c5f5806baf684e6643095d1b687b1506eca186",
+                "reviewedSourceSha256": "9c7e3bac6a9d5dab904229b0815475db6b9beed2849d1aa98fda4a905844d23c"
+              },
+              {
+                "path": "crates/crewroom-desktop/src/workbench/collaboration/conversation.rs",
+                "builtSourceSha256": "af2791942fd836a67b8526bcc36e4695d5a44cb4fb76bfbc3ec7c21aed7fda3d",
+                "reviewedSourceSha256": "b2b13fd9948c5397e49f174ba5abeacc4a630fec57cffa49eb8382af6cea484a"
+              },
+              {
+                "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+                "builtSourceSha256": "b007db24400d647c6a95ec6bdbaa3c247cc2a3cdc5dffc1cd9c8ca64da2f8a67",
+                "reviewedSourceSha256": "eba44d825a6c5438e2c0b54985512cec8066a6e637aa336f2a477b200a734b2a"
+              },
+              {
+                "path": "crates/crewroom-desktop/src/workbench/demo_seed.rs",
+                "builtSourceSha256": null,
+                "reviewedSourceSha256": "9e6b23a52065429ace7f9e495b48bb8fe880856ae7b82d3edecfd6d313e12e8a"
+              },
+              {
+                "path": "crates/crewroom-desktop/src/workbench/intake.rs",
+                "builtSourceSha256": "67bdbbd17eae593467ea68a6182070b5baf936a0a8b43a90ecdc2d9af5468dcf",
+                "reviewedSourceSha256": "24ecfc7b5310a07eceead7990ebaf5956cf4daff3c46eec92390ed73d72c887d"
+              },
+              {
+                "path": "crates/crewroom-desktop/src/workbench/planning.rs",
+                "builtSourceSha256": "c5f4436c07840d43b016b0d4430dd38af89df48eb9de62dc7a4b8ad3f5422870",
+                "reviewedSourceSha256": "1d2318a0cd9345a356efc9c78f47e6d36c8dca8f970f24cf3438bbecba01b682"
+              },
+              {
+                "path": "scripts/verify_intake_rollback.py",
+                "builtSourceSha256": null,
+                "reviewedSourceSha256": "adf79a4a78e157d2f6b04291a31d7ec5aefaedbbdb2d32b9af5d564fd66234b8"
+              }
+            ]
+          },
+          "sourceAssociation": "Most recent completed workspace/desktop build before these artifacts. Association is inferred from retained build times and artifact mtimes; no per-window launch/executable receipt was retained.",
+          "artifacts": [
+            {
+              "path": "/tmp/crewroom-mh5-validation/native-waiting.png",
+              "sha256": "7c7b17223c060f73ee8fba52d2622994a7bbc910eb5e9146b084fe70a8a62a70",
+              "fileModifiedAt": "2026-10-13T16:13:14.408146+00:00"
+            },
+            {
+              "path": "/tmp/crewroom-mh5-validation/native-final-wait.png",
+              "sha256": "c73c2e82d4cddd676c57c128782d84d74c403673cb3ff4a75e5545eacff13fa9",
+              "fileModifiedAt": "2026-10-13T16:17:00.715619+00:00"
+            },
+            {
+              "path": "/tmp/crewroom-mh5-validation/native-answer-draft-390.png",
+              "sha256": "b96973ce4bee31ad9e2e2be0a22f0d9486d6df47464152601d438cdde67b2bbf",
+              "fileModifiedAt": "2026-10-13T16:17:15.031023+00:00"
+            },
+            {
+              "path": "/tmp/crewroom-mh5-validation/native-answer-pending-390.png",
+              "sha256": "02c299bfec0ba6f31ead94403ab2ab044abaf85ee2c85817cd562488d9e91290",
+              "fileModifiedAt": "2026-10-13T16:18:01.023318+00:00"
+            },
+            {
+              "path": "/tmp/crewroom-mh5-validation/native-plan-review-390.png",
+              "sha256": "a45cc307ebb9dedec90e9fbab8052d9c383567693a4df3d707ee36dcf817646c",
+              "fileModifiedAt": "2026-10-13T16:18:26.847043+00:00"
+            },
+            {
+              "path": "/tmp/crewroom-mh5-validation/native-packages-390.png",
+              "sha256": "859e5224e333a66e4aeb10dab5fc4893296292ce052e69883dc0e0dadc303cbc",
+              "fileModifiedAt": "2026-10-13T16:18:40.807434+00:00"
+            },
+            {
+              "path": "/tmp/crewroom-mh5-validation/native-plan-actions-390.png",
+              "sha256": "19198c1e0e71d967f7817c0c996911caaa48c8485aa503b41d8e97f505012499",
+              "fileModifiedAt": "2026-10-13T16:18:51.047720+00:00"
+            }
+          ]
+        },
+        {
+          "id": "mid-review-and-editor",
+          "build": {
+            "name": "final-build",
+            "receipt": {
+              "path": "/tmp/crewroom-mh5-validation/final-build.json",
+              "sha256": "27f1e2dcb146550d51f8f622542a614d5632274fec6be411995b24bc98230d51"
+            },
+            "log": {
+              "path": "/tmp/crewroom-mh5-validation/final-build.log",
+              "sha256": "e5f49b626a4bbae9801b6afbadec109210e18b1f881382b8ef1ea52f584a3ed5"
+            },
+            "startedAt": "2026-10-13T16:21:00.739376+00:00",
+            "finishedAt": "2026-10-13T16:21:10.747549+00:00",
+            "exitCode": 0,
+            "sourceChangesSinceBuild": [
+              {
+                "path": "crates/crewroom-desktop/src/workbench/collaboration/tests.rs",
+                "builtSourceSha256": "6ff208f05eced434e2684b0619a4b44b1aef2f43a02ce45b3a4ae1d9db4e2d6a",
+                "reviewedSourceSha256": "eba44d825a6c5438e2c0b54985512cec8066a6e637aa336f2a477b200a734b2a"
+              },
+              {
+                "path": "crates/crewroom-desktop/src/workbench/intake.rs",
+                "builtSourceSha256": "f5c6eec94ac602762a01c438c43cf6c9cea02d747d440b0ac5b73a9b860be133",
+                "reviewedSourceSha256": "24ecfc7b5310a07eceead7990ebaf5956cf4daff3c46eec92390ed73d72c887d"
+              },
+              {
+                "path": "crates/crewroom-desktop/src/workbench/planning.rs",
+                "builtSourceSha256": "c5f4436c07840d43b016b0d4430dd38af89df48eb9de62dc7a4b8ad3f5422870",
+                "reviewedSourceSha256": "1d2318a0cd9345a356efc9c78f47e6d36c8dca8f970f24cf3438bbecba01b682"
+              },
+              {
+                "path": "scripts/verify_intake_rollback.py",
+                "builtSourceSha256": "390cba45c8507ce78332340aaacf71b5ed250310409889fd75b7db0dad441261",
+                "reviewedSourceSha256": "adf79a4a78e157d2f6b04291a31d7ec5aefaedbbdb2d32b9af5d564fd66234b8"
+              }
+            ]
+          },
+          "sourceAssociation": "Most recent completed workspace/desktop build before these artifacts. Association is inferred from retained build times and artifact mtimes; no per-window launch/executable receipt was retained.",
+          "artifacts": [
+            {
+              "path": "/tmp/crewroom-mh5-validation/native-plan-editor.png",
+              "sha256": "19c642560a8adbaff00d0b91fb1bc694772c63609d0bf26d52ac5086e8b59dfc",
+              "fileModifiedAt": "2026-10-13T16:24:52.355718+00:00"
+            },
+            {
+              "path": "/tmp/crewroom-mh5-validation/native-stale-decision.png",
+              "sha256": "8f0f6794a17af184c769c44dcdd02dd260c6b82877d3afb588b952dc9614007c",
+              "fileModifiedAt": "2026-10-13T16:24:22.197890+00:00"
+            }
+          ]
+        },
+        {
+          "id": "acceptance-and-queue",
+          "build": {
+            "name": "final-ui-build",
+            "receipt": {
+              "path": "/tmp/crewroom-mh5-validation/final-ui-build.json",
+              "sha256": "5bc17f99c7a0fb1b168a6c70aaf597511b2c05ee57652ce4c02a46df85e622dd"
+            },
+            "log": {
+              "path": "/tmp/crewroom-mh5-validation/final-ui-build.log",
+              "sha256": "8d6c16058a522f334296ec0bee13ee8181b52ea995e2832f7b3e8e6129c77136"
+            },
+            "startedAt": "2026-10-13T16:29:32.866899+00:00",
+            "finishedAt": "2026-10-13T16:29:35.829729+00:00",
+            "exitCode": 0,
+            "sourceChangesSinceBuild": [
+              {
+                "path": "crates/crewroom-desktop/src/workbench/intake.rs",
+                "builtSourceSha256": "6e8b182f9afbb15964a5199aaf040ac91a14ad4b826db81e98e0025194fdb0a2",
+                "reviewedSourceSha256": "24ecfc7b5310a07eceead7990ebaf5956cf4daff3c46eec92390ed73d72c887d"
+              },
+              {
+                "path": "crates/crewroom-desktop/src/workbench/planning.rs",
+                "builtSourceSha256": "c5f4436c07840d43b016b0d4430dd38af89df48eb9de62dc7a4b8ad3f5422870",
+                "reviewedSourceSha256": "1d2318a0cd9345a356efc9c78f47e6d36c8dca8f970f24cf3438bbecba01b682"
+              }
+            ]
+          },
+          "sourceAssociation": "Most recent completed workspace/desktop build before these artifacts. Its complete source manifest matches immutable tree ddf7a033acda8807f442b82ce55700f9450cc673. The running window-to-build association remains inferred, not independently launch-verified.",
+          "manifestMatchesTree": "ddf7a033acda8807f442b82ce55700f9450cc673",
+          "artifacts": [
+            {
+              "path": "/tmp/crewroom-mh5-validation/native-current-decision.png",
+              "sha256": "559d31a4c6504476e649a61f2552045c22bd9121c20eb7eb35a8de211b4fa5b1",
+              "fileModifiedAt": "2026-10-13T16:32:35.055320+00:00"
+            },
+            {
+              "path": "/tmp/crewroom-mh5-validation/native-accepted.png",
+              "sha256": "ec7cea4b3d29714bbec98147695de666b2a864e4cdb5320668dcc3fbeeefc22b",
+              "fileModifiedAt": "2026-10-13T16:32:46.330626+00:00"
+            },
+            {
+              "path": "/tmp/crewroom-mh5-validation/native-review-readback.json",
+              "sha256": "1b76e6684fc220d81ba1c156570375cb8dc777753075a559da0007f40e2d86f0",
+              "fileModifiedAt": "2026-10-13T16:32:46.159416+00:00"
+            },
+            {
+              "path": "/tmp/crewroom-mh5-validation/native-queue-readback.json",
+              "sha256": "b57813dc789e7217038c98c7e541676912b5ec1d3e7f295042a057b30fbe012a",
+              "fileModifiedAt": "2026-10-13T16:33:40.610272+00:00"
+            },
+            {
+              "path": "/tmp/crewroom-mh5-validation/native-queued.png",
+              "sha256": "64e71b620ba422b1460de7231470f875e58d15b7391f3a9ae437f6c739e3d83e",
+              "fileModifiedAt": "2026-10-13T16:33:26.991727+00:00"
+            }
+          ]
+        }
+      ],
+      "finalIdentityDelta": {
+        "fromTree": "ddf7a033acda8807f442b82ce55700f9450cc673",
+        "toTree": "ddafeaeed952f180b2811b0ee8943da355d0eabd",
+        "scope": "Four stable parent scopes added in intake.rs/planning.rs: historical intake sections, editable package rows, plan detail sections and intake queue rows. No rendering text, workflow or persistence change.",
+        "build": {
+          "name": "source-build-final",
+          "receipt": {
+            "path": "/tmp/crewroom-mh5-validation/source-build-final.json",
+            "sha256": "899efc5c60408c4680ba6476331e06cf5bf10678f4d6563d632990f53303221c"
+          },
+          "log": {
+            "path": "/tmp/crewroom-mh5-validation/source-build-final.log",
+            "sha256": "bc364e0f7f085ab4dddf3f106e3f56481c71aaa7f0a9d6c66d7c73bce23b3053"
+          },
+          "startedAt": "2026-10-13T16:34:05.972495+00:00",
+          "finishedAt": "2026-10-13T16:34:09.006520+00:00",
+          "exitCode": 0,
+          "sourceChangesSinceBuild": []
+        },
+        "check": {
+          "name": "native-ids-final",
+          "receipt": {
+            "path": "/tmp/crewroom-mh5-validation/native-ids-final.json",
+            "sha256": "e9c90b6d42f25dad4f486611cb82213d41fc55d68b1fe7ee10fb889f1460bfb4"
+          },
+          "log": {
+            "path": "/tmp/crewroom-mh5-validation/native-ids-final.log",
+            "sha256": "02d1e01f160eb9585b559a00aa40128bcf2352f91f687f956eeb82441a602ed3"
+          },
+          "startedAt": "2026-10-13T16:30:47.935102+00:00",
+          "finishedAt": "2026-10-13T16:39:11.296491+00:00",
+          "exitCode": 0,
+          "sourceChangesSinceBuild": []
+        },
+        "result": {
+          "passed": 46,
+          "failed": 0,
+          "ignored": 12,
+          "filteredOut": 7
+        }
+      },
+      "binaryObservation": {
+        "sha256": "a288969cf0930c92cbee0cf34fcb5e5333b279a3b232d58b41d5ade2ca3e33c8",
+        "scope": "Previously recorded walkthrough binary hash. No retained executable-to-window or executable-to-build receipt independently assigns this hash to any screenshot group; it must not be treated as the identity of every screenshot or the final build."
+      }
+    }
+  },
+  "rollback": {
+    "receipt": {
+      "path": "/tmp/cr-mh5-rollback-final-02/result.json",
+      "sha256": "f111b1e1eea108953db7125b3e317fa40d28390d4d429535aaa3633cc81d5b5b"
+    },
+    "result": {
+      "passed": true,
+      "binarySha256": "18fdd387e637a23cf2255060ba229938f10034db0b9061392d0e159d5a8da374",
+      "seed": "/tmp/cr-mh5-rollback-final-02/installation",
+      "helperSha256": {
+        "crewroom-process": "02cf62d71f12869497d7059839349c0cd0649535f7be137c09d2bae72a14e549",
+        "crewroom-host": "c5bfc25f48dc9495ab83f6565b6ca76b26e089dd3190d44d0db6d05a134556d7"
+      },
+      "scope": "Whole schema-28 state plus user roles, artifacts and repository metadata; matching binary restore; no older-schema compatibility claim",
+      "restoredFileCount": 36,
+      "backupInventory": {
+        "checkout/.git/COMMIT_EDITMSG": {
+          "sha256": "14dd0731a2a83aef36507d4ed5bee22a659d9f2c988d09c1a415e1f11ac66544",
+          "mode": 420
+        },
+        "checkout/.git/HEAD": {
+          "sha256": "28d25bf82af4c0e2b72f50959b2beb859e3e60b9630a5e8c603dad4ddb2b6e80",
+          "mode": 420
+        },
+        "checkout/.git/MERGE_RR": {
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "mode": 420
+        },
+        "checkout/.git/config": {
+          "sha256": "cfe7ba1238c9a78be7535d7c63bcaf5a4d5011d46b07c9b45d3bbf7d6c312dfe",
+          "mode": 420
+        },
+        "checkout/.git/description": {
+          "sha256": "85ab6c163d43a17ea9cf7788308bca1466f1b0a8d1cc92e26e9bf63da4062aee",
+          "mode": 420
+        },
+        "checkout/.git/hooks/applypatch-msg.sample": {
+          "sha256": "0223497a0b8b033aa58a3a521b8629869386cf7ab0e2f101963d328aa62193f7",
+          "mode": 493
+        },
+        "checkout/.git/hooks/commit-msg.sample": {
+          "sha256": "efc1401b0e99d1ff51494d154d98b46c1e99059bcd8bf9f73cecde19fd3eb23b",
+          "mode": 493
+        },
+        "checkout/.git/hooks/fsmonitor-watchman.sample": {
+          "sha256": "9159720099ad5595b8e66645cbfd47763c1e920f46e0b50ae75e642bbec57ef0",
+          "mode": 493
+        },
+        "checkout/.git/hooks/post-update.sample": {
+          "sha256": "81765af2daef323061dcbc5e61fc16481cb74b3bac9ad8a174b186523586f6c5",
+          "mode": 493
+        },
+        "checkout/.git/hooks/pre-applypatch.sample": {
+          "sha256": "e15c5b469ea3e0a695bea6f2c82bcf8e62821074939ddd85b77e0007ff165475",
+          "mode": 493
+        },
+        "checkout/.git/hooks/pre-commit.sample": {
+          "sha256": "57185b7b9f05239d7ab52db045f5b89eb31348d7b2177eab214f5eb872e1971b",
+          "mode": 493
+        },
+        "checkout/.git/hooks/pre-merge-commit.sample": {
+          "sha256": "d3825a70337940ebbd0a5c072984e13245920cdf8898bd225c8d27a6dfc9cb53",
+          "mode": 493
+        },
+        "checkout/.git/hooks/pre-push.sample": {
+          "sha256": "ecce9c7e04d3f5dd9d8ada81753dd1d549a9634b26770042b58dda00217d086a",
+          "mode": 493
+        },
+        "checkout/.git/hooks/pre-rebase.sample": {
+          "sha256": "4febce867790052338076f4e66cc47efb14879d18097d1d61c8261859eaaa7b3",
+          "mode": 493
+        },
+        "checkout/.git/hooks/pre-receive.sample": {
+          "sha256": "a4c3d2b9c7bb3fd8d1441c31bd4ee71a595d66b44fcf49ddb310252320169989",
+          "mode": 493
+        },
+        "checkout/.git/hooks/prepare-commit-msg.sample": {
+          "sha256": "e9ddcaa4189fddd25ed97fc8c789eca7b6ca16390b2392ae3276f0c8e1aa4619",
+          "mode": 493
+        },
+        "checkout/.git/hooks/push-to-checkout.sample": {
+          "sha256": "a53d0741798b287c6dd7afa64aee473f305e65d3f49463bb9d7408ec3b12bf5f",
+          "mode": 493
+        },
+        "checkout/.git/hooks/sendemail-validate.sample": {
+          "sha256": "44ebfc923dc5466bc009602f0ecf067b9c65459abfe8868ddc49b78e6ced7a92",
+          "mode": 493
+        },
+        "checkout/.git/hooks/update.sample": {
+          "sha256": "8d5f2fa83e103cf08b57eaa67521df9194f45cbdbcb37da52ad586097a14d106",
+          "mode": 493
+        },
+        "checkout/.git/index": {
+          "sha256": "02104aaa1abd45de5cb5275562f15c45484c9d13e3d1eb6428dc68b1408aff35",
+          "mode": 420
+        },
+        "checkout/.git/info/exclude": {
+          "sha256": "6671fe83b7a07c8932ee89164d1f2793b2318058eb8b98dc5c06ee0a5a3b0ec1",
+          "mode": 420
+        },
+        "checkout/.git/logs/HEAD": {
+          "sha256": "49351acfda62f1780711298e0fcea880962fdbfaaa46e1a1b7631774bcf65257",
+          "mode": 420
+        },
+        "checkout/.git/logs/refs/heads/main": {
+          "sha256": "49351acfda62f1780711298e0fcea880962fdbfaaa46e1a1b7631774bcf65257",
+          "mode": 420
+        },
+        "checkout/.git/objects/5e/064ac42ba95bd5f930e5bdcc0a3024cb6e5df3": {
+          "sha256": "1ff7d52b4c72a5307c8733e03fbdd8d997b215ec7794702d546fb71d7d72bb10",
+          "mode": 292
+        },
+        "checkout/.git/objects/73/7c0e10c10586b09c64024a69a98ae6403d85e4": {
+          "sha256": "d1949bf9fb4e705db6a36f46d2dc73c3edd7ad2720c3d4c2c4d5e54d19df9c47",
+          "mode": 292
+        },
+        "checkout/.git/objects/ca/0a2ec45d2173f694a5f7181e6ea76c29f85010": {
+          "sha256": "66de124e6c61afe55c0784b56fedbae3eeacf9e11029202dc2683c0c1cf140a2",
+          "mode": 292
+        },
+        "checkout/.git/refs/heads/main": {
+          "sha256": "a3777ff57ffee5595279572bc28bcfa83325d081a070d4d2e11fdc20d9b6d882",
+          "mode": 420
+        },
+        "checkout/source.txt": {
+          "sha256": "bae773af76c32daccde486106b643ddb05337aa899f9c80f6d56bfdd52b38a78",
+          "mode": 420
+        },
+        "data/controller/dispatch.lock": {
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "mode": 384
+        },
+        "data/controller/epoch.json": {
+          "sha256": "1890793356d2fbd6a83ced2246e1f65347953c814543df9ab691e23fc1a88933",
+          "mode": 384
+        },
+        "data/controller/lease.lock": {
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "mode": 384
+        },
+        "data/native-ui-state.json": {
+          "sha256": "540405c97de21f8470f5faa961c3354ca40f2a4795911131cf22ecdba536b0cb",
+          "mode": 384
+        },
+        "data/rollback-evidence.txt": {
+          "sha256": "50bd22ac64a9390129f9ee9636ebe76be78d60983390b6f4d56a0e857ac45ddb",
+          "mode": 420
+        },
+        "data/workflow.sqlite": {
+          "sha256": "4345b6a3a46e251f6a361d36606a966ae9a5adff6954436c5fcfa23940647da5",
+          "mode": 384
+        },
+        "ids.json": {
+          "sha256": "538019282178105308354e7ed4a8454e51c3d936a6a3604de1a6dcf4359ed31c",
+          "mode": 384
+        },
+        "roles.json": {
+          "sha256": "fe1ec4e249620d268196c5a43dea92a7a867d611b40595344b6b7f4f3896c370",
+          "mode": 384
+        }
+      },
+      "checks": [
+        "requirements mutation invalidated plan",
+        "whole-state bytes and permissions restored",
+        "matching binary accepted restored state",
+        "tasks, plans, decisions, questions, answers, messages and roles identical",
+        "non-database artifact restored",
+        "restored checkout revalidated at its original installation path"
+      ],
+      "cleanup": {
+        "allOwnedProcessesStopped": true
+      }
+    }
+  },
+  "independentReview": {
+    "standards": [
+      {
+        "receipt": {
+          "path": "/tmp/crewroom-mh5-validation/standards-review.md",
+          "sha256": "b6f3d6d14f3853e93cf886f8d2feb5ed58e0936b961bd55741423514524e407b"
+        },
+        "text": "## Standards\n\nReviewed immutable tree `0478fc0032fad318a8c349ce3b94ebff8e94eada` against baseline `6fdf3bd938f7d999155d4072d74adf00abe10c32`. No documented-standard violation found in the reviewed source. Final release evidence was excluded as disclosed.\n\n- **Judgment — possible Duplicated Code / repeated work:** `crates/crewroom-core/src/intake/requests.rs:253–255` loads `active_intake`, `implementation_plans`, then `current_implementation_plan` after already loading intake history. The latter two selectors repeat the same history loads and enrichment. `intake/mod.rs:35–38` uses `.all(\"implementation_plans\")` before filtering, so `/workspace` calling this for every ticket repeatedly parses every ticket’s plans while holding the workflow mutex. Derive the active intake and current plan from the histories already loaded; scope database reads to the task. This is a maintainability/performance judgment, not a release-blocking standards breach.\n\nThe asynchronous native editor refresh defect was independently confirmed and assigned to the Spec axis, which has the directly applicable edit-plan requirement.\n\nSummary: 0 hard violations; 1 nonblocking judgment finding (repeated whole-history work during workspace projection).\n"
+      },
+      {
+        "receipt": {
+          "path": "/tmp/crewroom-mh5-validation/standards-review-repair.md",
+          "sha256": "7be4028badb56e7c0815064abf29987f4ee7d598085ba065eb7d786ede84b4e6"
+        },
+        "text": "## Standards — repair delta\n\nReviewed immutable delta `0478fc0032fad318a8c349ce3b94ebff8e94eada..e98a4a84440dca72643f6d6a353d136bdfd0d25e`.\n\nThe previous repeated-history-work judgment is resolved: task-scoped SQL replaces global history parsing, and `intake_view` derives its active intake and current plan from the loaded histories. The pristine editor update preserves dirty forms; closed intake dialogue remains readable without active answer controls. Clippy condition collapses preserve the reviewed predicates. No new documented-standard violations or baseline smells found in this production-code delta.\n\nEvidence limitation for the new rollback script: `result.json` reports a matching schema-28 binary restore, byte/mode identity for 35 populated files, restored artifact and clean owned-process shutdown. Its inventory contains no customized `roles.json`, sessions or run worktrees. Also, copying the seed to `installation` retains absolute source paths pointing to the original seed checkout, and the after-restore API check never refreshes that source. Therefore this run supports the populated metadata/artifact restore scope, not proof that runtime repository access and personalized configuration were restored. Narrow the final receipt, or exercise populated custom configuration and the restored checkout at its original path before claiming those parts.\n\nSummary: prior judgment resolved; 0 new production-code findings. One evidence-scope limitation communicated for final acceptance records.\n"
+      },
+      {
+        "receipt": {
+          "path": "/tmp/crewroom-mh5-validation/standards-review-final.md",
+          "sha256": "9455e56da9efe1026ecbc2deb4f0c72b3c45e1f0c54de353a76ba237c89e781d"
+        },
+        "text": "## Standards — final source review\n\nReviewed source from baseline `6fdf3bd938f7d999155d4072d74adf00abe10c32` through immutable tree `ddafeaeed952f180b2811b0ee8943da355d0eabd`, including the successive immutable repair deltas.\n\nAll reported source findings are resolved. Task-scoped history queries and reused selectors remove repeated whole-history parsing in workspace projection. Stable parent identities now cover questions, historical intakes, plan/package views, plan detail sections, editable package rows and intake queue rows; unsent-answer controls include both intake and question IDs. The final identity-only delta does not change execution or persistence behavior.\n\nRollback evidence limitations are also resolved. The successful `/tmp/cr-mh5-rollback-final-02/result.json` includes a customized `roles.json`, 36 restored files, matching binary/helper hashes, original installation paths and post-restore repository refresh retaining the accepted plan. Its scope is a matching schema-28 state/build restore, with no older-schema compatibility claim.\n\nNo remaining documented-standard violations or baseline smell findings in the reviewed source. This source review does not claim optional platform screen-reader verification. Final release documentation and receipt were not part of this source tree review and require the separately requested evidence review.\n\nSummary: 0 remaining Standards findings; prior repeated-work judgment and repeated-row identity finding resolved.\n"
+      }
+    ],
+    "spec": [
+      {
+        "receipt": {
+          "path": "/tmp/crewroom-mh5-validation/spec-review.md",
+          "sha256": "73bbc359ef0b6305c58960b0e12489ebb12bdf552981f630b5b51fd3c428dd08"
+        },
+        "text": "Spec review of tree `0478fc0032fad318a8c349ce3b94ebff8e94eada` against baseline `6fdf3bd938f7d999155d4072d74adf00abe10c32` and FOR-10. Read-only inspection; release evidence is still being completed separately.\n\n1. **P2 — Editing a newly arrived proposal opens stale content.** `crates/crewroom-desktop/src/workbench/intake.rs:259` constructs the hidden form on the first source render and never refreshes an existing clean form. Open Brief during scoping, let the coordinator propose its first plan, then click “Edit as a new plan version”: the displayed plan is new but the editor still contains its earlier empty/default values. “Use current basis” changes only revision/source/predecessor IDs (line 317), so it cannot load the proposed packages. FOR-10 Gate 05 requires: “Give the operator a readable plan ... Support edit/reject”. Refresh clean forms when the proposal changes, while preserving genuinely dirty drafts, and cover asynchronous proposal arrival with a native interaction test.\n\n2. **P2 — Completed/cancelled intake dialogue disappears from native review.** `crates/crewroom-desktop/src/workbench/intake.rs:45–51` renders questions only from the active `view.intake`. `active_intake` excludes cancelled and handed-off requests; although `intake_view` retains them in `history`, no native view reads that history. After acceptance/handoff or cancellation, operators cannot review the structured questions, answers and delivery receipts that informed the plan. FOR-10 Gate 07 requires: “Keep the old text, acceptance, questions and execution references visible”. Render historical dialogue read-only (and retain any unsaved answer draft), with a regression for both terminal states.\n\nNo additional source-authority, coding-admission, handoff atomicity or wait-accounting defect was identified in this reviewed tree. No scope-creep finding.\n"
+      },
+      {
+        "receipt": {
+          "path": "/tmp/crewroom-mh5-validation/spec-review-repair.md",
+          "sha256": "b00e4bc2f933fca549aaf19be0960b89ef15af3aef96b86a922e46bc0fe10104"
+        },
+        "text": "Spec repair review of immutable delta `0478fc0032fad318a8c349ce3b94ebff8e94eada..e98a4a84440dca72643f6d6a353d136bdfd0d25e`.\n\nThe asynchronous-proposal editor finding is repaired: pristine parent/package forms are regenerated on a changed basis, while dirty drafts remain retained. The new GPUI regression checks both first and subsequent proposals, including package outputs. Persisted dialogue now remains visible for cancelled and handed-off requests. Core query optimization and condition collapsing preserve reviewed behavior. The rollback script and `/tmp/cr-mh5-rollback-02/result.json` support their stated matching-schema-28 whole-state restore claim without implying older-binary compatibility.\n\n**P2 residual — unsent answers become inaccessible after cancellation.** In `crates/crewroom-desktop/src/workbench/intake.rs`, the terminal-question branch only renders “No answer recorded before this request closed.” If the operator types an answer and then cancels without sending, the existing answer form remains in `collaboration.forms` (and still counts as unsaved) but is no longer rendered. There is no way to recover or discard that text. FOR-10 Gate 08 requires: “Preserve unsaved answers/plan edits”. Render the retained unsent local draft in historical dialogue with a discard action; add a native test that cancels before submitting its typed answer. The added cancellation regression currently cancels only after the answer was saved, so it does not cover this case.\n\nNo other repair-delta defect identified. Final documentation/evidence review remains separate.\n"
+      },
+      {
+        "receipt": {
+          "path": "/tmp/crewroom-mh5-validation/spec-review-final.md",
+          "sha256": "895fcbc5926f4409727d6fbdcf70ba8572d81fca7e46145c81bbb4441897af93"
+        },
+        "text": "Spec source review of immutable repair delta `e98a4a84440dca72643f6d6a353d136bdfd0d25e..bd93c9297d37139005879a88ffec5492ceef05ab`.\n\nNo remaining finding from the reviewed source repairs. Terminal and superseded unanswered questions now expose their unsent local text with an explicit discard action, satisfying the outstanding Gate 08 draft-preservation case. The new GPUI regression cancels before submission, verifies the Japanese draft is rendered, and verifies discard removes its form. Together with the prior repair, this closes both initial Spec findings and the cancellation-draft residual.\n\nThe stale-plan hint accurately explains the required refresh/new-version action. The revised rollback fixture seeds the actual installation path, persists a customized role, restores the whole state with its matching binary, then revalidates the restored repository and accepted plan. `/tmp/cr-mh5-rollback-final-02/result.json` records success, 36 restored files, binary/helper hashes and stopped owned processes. Its scope remains schema-28 restore, not old-binary compatibility.\n\nThis is a read-only source/receipt review. Final documentation, aggregate release evidence and remote synchronization remain a separate review delta.\n"
+      }
+    ]
+  },
+  "independentEvidenceReview": [
+    {
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/standards-evidence-review.md",
+        "sha256": "3470dc9fc587890c5538d46cc5d411b2b36d158a910c0130b2fd74591b982210"
+      },
+      "text": "## Standards — evidence review\n\nReviewed documentation/receipt tree `d92ad10397eb5f97170a2e8f818ba6034f1d479f` against implementation commit `5b4d36dfd7ae602b230bf9b287464901870b9669` (tree `ddafeaeed952f180b2811b0ee8943da355d0eabd`).\n\nVerified all 70 changed-source hashes, the implementation tree and reviewed diff hash, and all 123 referenced artifact hashes. Every check’s complete source delta matches its original manifest. All 23 selected checks exited successfully; all 19 retained failed checks have nonzero exits. Counts match original logs: domain 332, browser 31, Rust 228 with one exercised subprocess entry point ignored, desktop 53 with 12 ignored, final workbench 46 with 12 ignored/7 filtered, and five additional native journeys. OMP reports total 31 cases; each report records passed status and exited owned processes. Embedded result objects match original receipts.\n\nLive OMP/Codex/Claude evidence retains stopped initial/recovery ownership, actual external Mail and exactly one held coding successor. The scripted inference/Mail boundary in the real Git/Docker coding fixture is explicit. Matching-schema rollback restores 36 populated files including customized roles and revalidates the restored checkout. Failed attempts, API-staged native states, inconsistent Xwayland text injection, optional platform checks and cleanup scope are disclosed. Status, progress and MH6 boundary are consistent.\n\nWalkthrough provenance was subsequently repaired in `/tmp/crewroom-mh5-validation/native-walkthrough.json` (SHA-256 `0e785a6e12eeac4352ca5a50cb4533523d8c0eb15bd850de65fedbc819a605d4`). Three chronological groups bind 7/2/5 artifacts to the appropriate prior build manifests/logs and retain complete source deltas. The final-ui manifest matches tree `ddf7a033acda8807f442b82ce55700f9450cc673`; final identity-only changes are separately checked by the exact-manifest workbench rerun. File mtimes support grouping, but no per-window executable receipt was retained: associations remain explicitly inferred, and the earlier binary hash is preserved without assigning it to all groups. All 38 references in the repaired record verify.\n\nNo remaining Standards documentation/evidence finding within this reviewed scope. A subsequently added daemon crash/replay test, its source revision and resulting aggregate receipt require a separate final delta check.\n"
+    },
+    {
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/spec-evidence-review.md",
+        "sha256": "1822d671c5e3be6c2b9630447332efed0b385c290ad6ab2bf37a7bbb265e8f96"
+      },
+      "text": "Spec evidence review of implementation commit `5b4d36dfd7ae602b230bf9b287464901870b9669` and documentation tree `d92ad10397eb5f97170a2e8f818ba6034f1d479f`.\n\nVerified all 70 source hashes, the baseline-to-implementation diff hash, and 123 referenced artifact hashes. The receipt's per-check source deltas agree with their original manifests, including files absent from early manifests. Logs support 332 domain, 31 browser, 228 Rust, 53 full desktop, 46 final workbench tests, five separately executed native journeys, 31 actual-OMP/scripted-provider cases and two production-daemon intake/coding cases. Three live-adapter records retain actual inference, external Mail, plan identity, stopped ownership and exactly one held coding successor. The 19 failed checks remain explicit. Rollback verifies 36 restored files and matching binaries; cleanup records no remaining owned processes/containers. Inspected 390px screenshots support the stated visible package and pending-delivery UI; API-staged actions and Xwayland/IME/accessibility limits are disclosed. Final identity-only source changes preserve behavior.\n\n**One required evidence boundary remains unproven in the reviewed record.** FOR-10 Gate 09 explicitly requires: “Restart ... while an answer is awaiting delivery.” Both `scripts/rust/intake-workflow.test.ts` and `verify-intake-workflow.ts` restart before answering and after acceptance. The core wait test records a pending answer but ends without reopening. No receipt identifies a restart in that pending-answer interval followed by one delivery/resume. Add a deterministic executed case or identify existing equivalent coverage before declaring every required gate complete.\n\nNo other documentation/provenance inconsistency identified. Remote push and final Linear readback remain pending root actions and are not claimed as completed here.\n"
+    },
+    {
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/spec-evidence-closure.md",
+        "sha256": "ac7732191a2d8fe3fd7e274cfd3f203eae5b624ad204d52a3d559668dea5dbb4"
+      },
+      "text": "Spec evidence follow-up: pending-answer restart gate closed.\n\nReviewed the test-only delta in `scripts/rust/intake-workflow.test.ts`, SHA-256 `7b2dcc81b90951ae938608f76914abb7cde292bea77e7f7b772fa47e7c29d481`, against implementation `5b4d36dfd7ae602b230bf9b287464901870b9669`. Production crate sources are unchanged.\n\nThe production-daemon fixture now deterministically persists an answer with runner dispatch unavailable, kills/reopens the daemon, retries the identical request, and proves one retained pending message, stopped ownership, no new attempt and no additional active time. Restoring the runner then produces exactly one recorded RPC input containing the answer, one dispatched/received transition pair and one replacement attempt. The test continues through accepted-plan handoff and current-plan reuse.\n\nVerified `/tmp/crewroom-mh5-validation/intake-answer-restart-verified.json` and its log hash. Both tests pass. The pending-answer diagnostic records one runner input, one resumed attempt and active time unchanged at 271 ms. This closes the Gate 09 evidence gap identified in `spec-evidence-review.md`. Scripted inference/Mail and actual daemon/process/Git/Docker boundaries remain explicit; this is not additional live-inference evidence.\n\nNo remaining Spec source or acceptance-evidence finding after this executed follow-up. Final aggregate receipt must retain this source hash/result, its earlier failed attempts and cleanup, followed by the requested commit/push and verified Linear completion.\n"
+    },
+    {
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/standards-evidence-closure.md",
+        "sha256": "b63102d77eb366d03babeb75c3206d70bc19f095fab8d6367246c16edbf0cb6e"
+      },
+      "text": "## Standards — final closure\n\nReviewed the pending-answer test-only delta from `5b4d36dfd7ae602b230bf9b287464901870b9669` to implementation commit `7fe0afa859c3cdbd2a15b379dbd15ef4be22bdc9`, with aggregate documentation/evidence tree `730fcf01003592b346a6831b2f233ffe8da1378a`. Prior source and evidence reviews remain applicable.\n\nNo remaining Standards finding. The added daemon test records an answer with execution unavailable, restarts before delivery, replays the original request without duplicating its message, confirms stopped ownership and unchanged active time, then restores execution and checks one resumed attempt and exactly one addressed runner input. The retained `intake-answer-restart-verified.log` reports both fixture cases passed; its diagnostic records 271 ms before/after the stopped wait, one runner input and one resumed attempt. This strengthens the persistence boundary without changing production behavior.\n\nWalkthrough/build associations remain explicitly inferred, with the final identity-only delta separately checked. Steering delivery is correctly distinguished from the configured external peer Mail channel. The updated aggregate retains 24 successful checks, 21 failed attempts and the expanded cleanup scope. The root’s final independent verification of 70 source hashes and 156 artifact references is acknowledged; this narrow closure does not claim another broad hash audit or test run.\n\nSummary: zero remaining Standards source or evidence findings within the reviewed scope.\n"
+    }
+  ],
+  "ignoredDesktop": [
+    {
+      "test": "workbench::acceptance_tests::native_acceptance_retired_repository_keeps_captured_settings_in_results_and_history",
+      "reason": "Real prepared Git worktree needs workspace binaries; run the native journey gate.",
+      "disposition": "Not required: prior fixture or general visual seed; relevant MH5 paths use the new production/live fixtures"
+    },
+    {
+      "test": "workbench::demo_seed::seed_intake_visual_review",
+      "reason": "Seeds recorded MH5 states for an actual rendered walkthrough in CREWROOM_INTAKE_DEMO_DIR.",
+      "disposition": "Executed for MH5 walkthrough and rollback"
+    },
+    {
+      "test": "workbench::demo_seed::seed_visual_review",
+      "reason": "Writes a demo data directory named by CREWROOM_DEMO_DIR for visual review.",
+      "disposition": "Not required: prior fixture or general visual seed; relevant MH5 paths use the new production/live fixtures"
+    },
+    {
+      "test": "workbench::journey_tests::external::native_external_feedback_resume",
+      "reason": "Requires the private disposable plan created by test-native-resume.sh.",
+      "disposition": "Not required: prior fixture or general visual seed; relevant MH5 paths use the new production/live fixtures"
+    },
+    {
+      "test": "workbench::journey_tests::intake::native_external_intake_restart",
+      "reason": "Requires the isolated daemon plan created by test-native-resume.sh.",
+      "disposition": "Not required: prior fixture or general visual seed; relevant MH5 paths use the new production/live fixtures"
+    },
+    {
+      "test": "workbench::journey_tests::native_journey_cancelled_continuation_preserves_branch_diff_lineage_and_reopen",
+      "reason": "Real Git journey requires workspace binaries; run the native journey gate.",
+      "disposition": "Executed separately: five native_journey cases"
+    },
+    {
+      "test": "workbench::journey_tests::native_journey_jira_refresh_outage_retains_operator_brief_and_never_queues",
+      "reason": "Native provider journey uses workspace binaries; run the native journey gate.",
+      "disposition": "Executed separately: five native_journey cases"
+    },
+    {
+      "test": "workbench::journey_tests::native_journey_publication_hosted_checks_and_feedback_outage_remain_separate",
+      "reason": "Native publication journey uses workspace binaries; run the native journey gate.",
+      "disposition": "Executed separately: five native_journey cases"
+    },
+    {
+      "test": "workbench::journey_tests::native_journey_research_keeps_verified_rejected_superseded_citations_and_readonly_artifacts",
+      "reason": "Native research journey uses workspace binaries; run the native journey gate.",
+      "disposition": "Executed separately: five native_journey cases"
+    },
+    {
+      "test": "workbench::journey_tests::native_journey_target_refresh_and_reasoned_conflict_retry_keep_revision_history",
+      "reason": "Real Git journey requires workspace binaries; run the native journey gate.",
+      "disposition": "Executed separately: five native_journey cases"
+    },
+    {
+      "test": "workbench::journey_tests::operator::native_external_operator_control",
+      "reason": "Requires the private disposable plan created by test-native-resume.sh.",
+      "disposition": "Not required: prior fixture or general visual seed; relevant MH5 paths use the new production/live fixtures"
+    },
+    {
+      "test": "workbench::settings::model_picker::live_tests::native_catalog_external_live_selection",
+      "reason": "Requires CREWROOM_MH4_PICKER pointing to a disposable production daemon fixture",
+      "disposition": "Not required: prior fixture or general visual seed; relevant MH5 paths use the new production/live fixtures"
+    }
+  ],
+  "ignoredRust": [
+    "runner::auth::tests::refresh_parent_death_child is a subprocess entry point; its parent-death test executes it."
+  ],
+  "diagnostics": [
+    {
+      "name": "clippy-release",
+      "command": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "-p",
+        "crewroom-core",
+        "-p",
+        "crewroom-runtime",
+        "-p",
+        "crewroom-service",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "startedAt": "2026-10-13T16:16:45.779144+00:00",
+      "finishedAt": "2026-10-13T16:16:48.103147+00:00",
+      "exitCode": 101,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/clippy-release.log",
+        "sha256": "64433f613bb8b69cf5b01f97964ca332c60cee57281f3e3d675af80a521cb56a"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/clippy-release.json",
+        "sha256": "4380ebe1a74d3982114186336ec9b5898cc5e38363e0fb8c17ab28e5701df777"
+      }
+    },
+    {
+      "name": "desktop-initial",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-desktop",
+        "-j6"
+      ],
+      "startedAt": "2026-10-13T15:47:30.465943+00:00",
+      "finishedAt": "2026-10-13T15:50:16.710267+00:00",
+      "exitCode": 101,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/desktop-initial.log",
+        "sha256": "bc83f2e121a951c6bca2a74007e95534435cb25385b98a843d74d16f3683d30a"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/desktop-initial.json",
+        "sha256": "826f0b687777bfcbcb1af171c0ddc13a04aced3a9937bc448cb728ad9e8d09b0"
+      }
+    },
+    {
+      "name": "desktop-release",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-desktop",
+        "-j6"
+      ],
+      "startedAt": "2026-10-13T16:13:48.248100+00:00",
+      "finishedAt": "2026-10-13T16:16:36.971432+00:00",
+      "exitCode": 101,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/desktop-release.log",
+        "sha256": "04f351953abe322a58994317a97100651f983d9a3dac0f13578e7b5554cefcf4"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/desktop-release.json",
+        "sha256": "095e30ea31a0857f0925ac707e29f39cccf58a51a6c937a3340d7af0cb5608e5"
+      }
+    },
+    {
+      "name": "intake-answer-restart-final",
+      "command": [
+        "env",
+        "CREWROOM_RETAIN_FIXTURE=1",
+        "CREWROOM_CHECK_IMAGE=sha256:29d1577d9454743c002483a71fcbd3753d2e27116246a5fabd0e4254de6ba292",
+        "node",
+        "--import",
+        "tsx",
+        "--test",
+        "scripts/rust/intake-workflow.test.ts"
+      ],
+      "startedAt": "2026-10-13T16:46:14.460514+00:00",
+      "finishedAt": "2026-10-13T16:46:23.710677+00:00",
+      "exitCode": 1,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/intake-answer-restart-final.log",
+        "sha256": "de76eb823329454d8de2e899f9891d9648591a0f1205824ca006b03c36631dae"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/intake-answer-restart-final.json",
+        "sha256": "222273d7276c7fd9eb37cd36cdcbc62f9751389b1361dd701742bc2e00a49668"
+      }
+    },
+    {
+      "name": "intake-answer-restart",
+      "command": [
+        "env",
+        "CREWROOM_RETAIN_FIXTURE=1",
+        "CREWROOM_CHECK_IMAGE=sha256:29d1577d9454743c002483a71fcbd3753d2e27116246a5fabd0e4254de6ba292",
+        "node",
+        "--import",
+        "tsx",
+        "--test",
+        "scripts/rust/intake-workflow.test.ts"
+      ],
+      "startedAt": "2026-10-13T16:45:53.362455+00:00",
+      "finishedAt": "2026-10-13T16:46:01.222866+00:00",
+      "exitCode": 1,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/intake-answer-restart.log",
+        "sha256": "3421e44c960d945cca2019d8236598b256910388163b2777fec864fef1624c4a"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/intake-answer-restart.json",
+        "sha256": "33522da3191e940628850c59ea31818dfac003962a72b3c0da51e30159e21083"
+      }
+    },
+    {
+      "name": "intake-coding-2",
+      "command": [
+        "env",
+        "CREWROOM_CHECK_IMAGE=sha256:4bcff63911fcb4448bd4fdacec207030997caf25e9bea4045fa6c8c44de311d1",
+        "node",
+        "--import",
+        "tsx",
+        "--test",
+        "--test-name-pattern=accepted plan reaches",
+        "scripts/rust/intake-workflow.test.ts"
+      ],
+      "startedAt": "2026-10-13T16:00:05.233397+00:00",
+      "finishedAt": "2026-10-13T16:00:12.068736+00:00",
+      "exitCode": 1,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/intake-coding-2.log",
+        "sha256": "33f19ed0c250d8b24b9bcd97258f55726aa855469758c7141234cca222b00cf1"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/intake-coding-2.json",
+        "sha256": "d898baa8ecb0b6927ce787c0b73c23be5bf5a9fe77d9ee14f2328981a20f77d0"
+      }
+    },
+    {
+      "name": "intake-coding-3",
+      "command": [
+        "env",
+        "CREWROOM_RETAIN_FIXTURE=1",
+        "CREWROOM_CHECK_IMAGE=sha256:4bcff63911fcb4448bd4fdacec207030997caf25e9bea4045fa6c8c44de311d1",
+        "node",
+        "--import",
+        "tsx",
+        "--test",
+        "--test-name-pattern=accepted plan reaches",
+        "scripts/rust/intake-workflow.test.ts"
+      ],
+      "startedAt": "2026-10-13T16:00:51.232049+00:00",
+      "finishedAt": "2026-10-13T16:00:57.529087+00:00",
+      "exitCode": 1,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/intake-coding-3.log",
+        "sha256": "3668e3c7914575751255c6c89517e7beea8db8e31b07ad73812ab62731e720ae"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/intake-coding-3.json",
+        "sha256": "5ce4d5c99ed92e58b11d7eb2ece1eec5646a760046fa299f5567f78998782db6"
+      }
+    },
+    {
+      "name": "intake-complete",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "--test",
+        "scripts/rust/intake-workflow.test.ts"
+      ],
+      "startedAt": "2026-10-13T15:56:44.675243+00:00",
+      "finishedAt": "2026-10-13T15:57:37.477987+00:00",
+      "exitCode": 1,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/intake-complete.log",
+        "sha256": "bc485c43419d1a4722bab44c682dd1f7b80078f1761c9bde3cc10c8e7bd95f17"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/intake-complete.json",
+        "sha256": "3746565dcdcf2d95f4a6893793107c463879aea41c50853ea11f93670409bdf0"
+      }
+    },
+    {
+      "name": "intake-daemon-2",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "--test",
+        "scripts/rust/intake-workflow.test.ts"
+      ],
+      "startedAt": "2026-10-13T15:42:13.934772+00:00",
+      "finishedAt": "2026-10-13T15:42:14.814065+00:00",
+      "exitCode": 1,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/intake-daemon-2.log",
+        "sha256": "4ce482ce09d178df1b9e6cc337b5412d750df270b1afe9a49d9d5c4c4d0cad45"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/intake-daemon-2.json",
+        "sha256": "697eabc8c9831fda00a1b3f2318d770c9fcc6fa2d5a60bbdb2708e6a1f0ccb19"
+      }
+    },
+    {
+      "name": "intake-daemon-3",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "--test",
+        "scripts/rust/intake-workflow.test.ts"
+      ],
+      "startedAt": "2026-10-13T15:42:20.151175+00:00",
+      "finishedAt": "2026-10-13T15:42:21.048978+00:00",
+      "exitCode": 1,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/intake-daemon-3.log",
+        "sha256": "e1ab09c5d9b7fe07bd115553272d98c0f1cc51ed8d9558a8ae05782668a074a0"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/intake-daemon-3.json",
+        "sha256": "526d2905455158651767af7d88862d3fbc7ba80baea86755629ed27eb0a12895"
+      }
+    },
+    {
+      "name": "intake-daemon-4",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "--test",
+        "scripts/rust/intake-workflow.test.ts"
+      ],
+      "startedAt": "2026-10-13T15:42:32.536407+00:00",
+      "finishedAt": "2026-10-13T15:42:34.887111+00:00",
+      "exitCode": 1,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/intake-daemon-4.log",
+        "sha256": "93221beb1021bd9a553ff713457da03716191951cb089e0b6902f803f1960c14"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/intake-daemon-4.json",
+        "sha256": "63a69a91f3d11de5823594e9114ce3296737046a3fc3d168214060c2523590aa"
+      }
+    },
+    {
+      "name": "intake-daemon",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "--test",
+        "scripts/rust/intake-workflow.test.ts"
+      ],
+      "startedAt": "2026-10-13T15:42:06.214480+00:00",
+      "finishedAt": "2026-10-13T15:42:07.072339+00:00",
+      "exitCode": 1,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/intake-daemon.log",
+        "sha256": "221b0046f4a8cbf3cd03cbc1dd995fd52b4d8bff0ec2ca5139fa5d4f3946f916"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/intake-daemon.json",
+        "sha256": "256cc1ba515c9355441c167b5510946c9a51c606ba01c51e2d2b30ebdc552260"
+      }
+    },
+    {
+      "name": "live-omp-2",
+      "command": [
+        "python3",
+        "scripts/verify_intake_workflow.py",
+        "--configuration",
+        "/tmp/cr-mh4-access-s2_gi09f/omp.json",
+        "--output",
+        "/tmp/cr-mh5-omp-live-02",
+        "--mail",
+        ".crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail"
+      ],
+      "startedAt": "2026-10-13T15:48:45.243983+00:00",
+      "finishedAt": "2026-10-13T15:49:00.082444+00:00",
+      "exitCode": 1,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/live-omp-2.log",
+        "sha256": "9e96849566ea26e063483dd9e45798efbc97a84e78067548239d6a593974b341"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/live-omp-2.json",
+        "sha256": "7c1eceea769711f86aa55b6d38f2911c3a72f9ceea61cc0ff0e37aea446a71e2"
+      }
+    },
+    {
+      "name": "live-omp-3",
+      "command": [
+        "python3",
+        "scripts/verify_intake_workflow.py",
+        "--configuration",
+        "/tmp/cr-mh4-access-s2_gi09f/omp.json",
+        "--output",
+        "/tmp/cr-mh5-omp-live-03",
+        "--mail",
+        ".crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail"
+      ],
+      "startedAt": "2026-10-13T15:52:11.257248+00:00",
+      "finishedAt": "2026-10-13T15:52:16.117831+00:00",
+      "exitCode": 1,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/live-omp-3.log",
+        "sha256": "aefc58152de064de0a21397fba25fe89402cedcc01410d4401a212cc43e884ee"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/live-omp-3.json",
+        "sha256": "0a61e30a09a95e8098b3c4d83664c125aac24481feb16641705da8a816a26451"
+      }
+    },
+    {
+      "name": "live-omp",
+      "command": [
+        "python3",
+        "scripts/verify_intake_workflow.py",
+        "--configuration",
+        "/tmp/cr-mh4-access-s2_gi09f/omp.json",
+        "--output",
+        "/tmp/cr-mh5-omp-live-01",
+        "--mail",
+        ".crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail"
+      ],
+      "startedAt": "2026-10-13T15:44:59.475484+00:00",
+      "finishedAt": "2026-10-13T15:48:08.123487+00:00",
+      "exitCode": 1,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/live-omp.log",
+        "sha256": "b19c0108d295ea19491002c7f95d93b3fe9d79ce7588c4b9854682cfd49bd81d"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/live-omp.json",
+        "sha256": "c8a5dbc8ffd95b0f2429c53b77f8968c7827fc2dd52d3547dc05aa8a45ddd8ea"
+      }
+    },
+    {
+      "name": "native-plan-units",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-desktop",
+        "-j6",
+        "native_implementation_plan",
+        "--",
+        "--test-threads=1"
+      ],
+      "startedAt": "2026-10-13T15:55:00.472743+00:00",
+      "finishedAt": "2026-10-13T15:55:19.789940+00:00",
+      "exitCode": 101,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/native-plan-units.log",
+        "sha256": "49bc943c9b5cb7a384ac931b9f2f7cd132465aee47996fc32aa1865cb011ceaa"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/native-plan-units.json",
+        "sha256": "e597e4c99d5ae0c8eb1c8d15f1eca5a56df8a903cefc859e00f254b6a25db027"
+      }
+    },
+    {
+      "name": "native-repair",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-desktop",
+        "-j6",
+        "native_",
+        "--",
+        "--test-threads=1"
+      ],
+      "startedAt": "2026-10-13T16:12:48.137686+00:00",
+      "finishedAt": "2026-10-13T16:12:54.013872+00:00",
+      "exitCode": 101,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/native-repair.log",
+        "sha256": "d82503852b490089ca4fc0ebe1fc42702c2b41e037486c1944220ee28bed985b"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/native-repair.json",
+        "sha256": "e012355b2261303d23e439f834051a43696ec9078c769004fc5815e7590bb928"
+      }
+    },
+    {
+      "name": "omp-budget-race-red",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-runtime",
+        "--test",
+        "provider_gateway",
+        "terminal_stream_budget",
+        "-j6",
+        "--",
+        "--test-threads=1"
+      ],
+      "startedAt": "2026-10-13T15:54:59.613423+00:00",
+      "finishedAt": "2026-10-13T15:55:00.421628+00:00",
+      "exitCode": 101,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/omp-budget-race-red.log",
+        "sha256": "0d4d269b7a28dea781190ab928e12c428e8a62db07eaf3ed3da19f38ac3b0dad"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/omp-budget-race-red.json",
+        "sha256": "520ad840c5d2a91c56f2f30cefcc57f7e902e10e4dcee9c734375d5eefe66d33"
+      }
+    },
+    {
+      "name": "rollback-final",
+      "command": [
+        "python3",
+        "scripts/verify_intake_rollback.py",
+        "--output",
+        "/tmp/cr-mh5-rollback-final"
+      ],
+      "startedAt": "2026-10-13T16:24:18.650655+00:00",
+      "finishedAt": "2026-10-13T16:24:27.877705+00:00",
+      "exitCode": 1,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/rollback-final.log",
+        "sha256": "f680e99f187de8f38b5c391f2848f65e43b76f8528341ed1eecb848050a00ecc"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/rollback-final.json",
+        "sha256": "92973b02086d594a56b48f06a84310a41a22d05edad895ded5b0596b76f1f74e"
+      }
+    },
+    {
+      "name": "rollback",
+      "command": [
+        "python3",
+        "scripts/verify_intake_rollback.py",
+        "--seed",
+        "/tmp/cr-mh5-rollback-seed",
+        "--output",
+        "/tmp/cr-mh5-rollback"
+      ],
+      "startedAt": "2026-10-13T16:21:00.454475+00:00",
+      "finishedAt": "2026-10-13T16:21:00.685718+00:00",
+      "exitCode": 1,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/rollback.log",
+        "sha256": "c8aeb266cc5af4e625025e5c0f32410ccaf2426dcb027d109cfb49b7a1a095fc"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/rollback.json",
+        "sha256": "ad216a71e64059c2e79e1513ad430e6206497c05627bbca981735eb21d20757a"
+      }
+    },
+    {
+      "name": "rust-release",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-core",
+        "-p",
+        "crewroom-runtime",
+        "-p",
+        "crewroom-service",
+        "-j6",
+        "--",
+        "--test-threads=1"
+      ],
+      "startedAt": "2026-10-13T16:03:22.066731+00:00",
+      "finishedAt": "2026-10-13T16:03:42.810445+00:00",
+      "exitCode": 101,
+      "log": {
+        "path": "/tmp/crewroom-mh5-validation/rust-release.log",
+        "sha256": "94dc3d33cacb41b359f83f028124ed53beb0cf01d6497da4b48c06d609100439"
+      },
+      "receipt": {
+        "path": "/tmp/crewroom-mh5-validation/rust-release.json",
+        "sha256": "02172ee5e1259b95d20cee2174386bb9de11014db3c011f910ee3530785f749b"
+      }
+    }
+  ],
+  "earlierLocalLogs": [
+    {
+      "path": "/tmp/for10-build-fixtures.log",
+      "sha256": "8fdf187ae24bebaff3511a5ec2c2e24fa3a5a91290066bc66be35c9472a59a30"
+    },
+    {
+      "path": "/tmp/for10-core-second.log",
+      "sha256": "4d02e48bb581eda15ad446c70b3c4ca1a7a2fcff72102d9c04386affc6f2d7bf"
+    },
+    {
+      "path": "/tmp/for10-desktop-check-configured.log",
+      "sha256": "7358fbb908e45218107ace0776f82bb191f021c865b2a65bfad4bae2529a9af4"
+    },
+    {
+      "path": "/tmp/for10-desktop-check.log",
+      "sha256": "78c74044cf89783ffec17c017c750858a0eaa652345a599821e2ac7b3e49172b"
+    },
+    {
+      "path": "/tmp/for10-rust-first.log",
+      "sha256": "bab8f756814ffc449c3d7058d05ecab4b7936c76e95f7262cc8eddb22eebac50"
+    },
+    {
+      "path": "/tmp/for10-rust-fourth.log",
+      "sha256": "c0dd9d7d813eae699c20e6e5bb2410dc7b51fa1198b45ac10440a1c61c7fe29d"
+    },
+    {
+      "path": "/tmp/for10-rust-third.log",
+      "sha256": "6c1ee3bf84cb19a518cccb059e3b382a3d53e37f690f04859da5d0dde878af86"
+    }
+  ],
+  "diagnosticExplanations": [
+    "Early daemon fixtures used stale example binaries/tool paths and an incorrect cancellation endpoint; rebuilt examples and final fixture passed.",
+    "Three legacy desktop queue fixtures needed explicit accepted plans. An initial native test sought a non-observed div; it now asserts an accessible rendered label. A temporary is_present call did not compile and was corrected.",
+    "New repository-base gate required the reservation concurrency fixture to use its pinned commit; final Rust passes.",
+    "OMP live01/02/03 retained budget/recovery failures. Conservative replacement and terminal-before-EOF budget persistence fix were verified by a failing-then-passing regression and final live OMP; unknown reasoning still fails closed.",
+    "The original Docker digest was unavailable. Root with dropped capabilities could not read the private uid1000 workspace. A local Alpine-derived USER1000 image kept isolation intact; both final intake/coding checks pass.",
+    "Initial Clippy reported collapsible conditions; final strict Clippy passes.",
+    "Rollback first lacked packaged helper executables; an early successful fixture did not prove customized roles or restored checkout access. The final fixture seeds at the original installation path, restores real roles and revalidates the checkout. A transient result-key typo was corrected.",
+    "The final pending-answer test first used the wrong delivery label and then looked for steering in Mail rather than the resumed host input. Corrected assertions pass against one RPC input and one dispatch/receive transition; both failed attempts remain retained.",
+    "Xwayland keyboard injection was inconsistent during manual walkthrough. The rendered receipt distinguishes UI clicks, API-staged review states and GPUI keyboard tests; it does not claim screen-reader/IME coverage."
+  ],
+  "limits": [
+    "Linux source/debug acceptance only; no new macOS package or Wayland terminal acceptance.",
+    "Live intake is bounded to the recorded models; it is not a model-quality guarantee across the catalog.",
+    "Existing native request-count, billing and hard spending-enforcement limitations remain. OMP replacement is conservative after interrupted intake tool turns.",
+    "Source guidance is pinned committed AGENTS.md/CLAUDE.md plus saved project guidance, not arbitrary untracked checkout instructions.",
+    "Plan work packages are records, not specialist choreography; FOR-11 remains unstarted.",
+    "Active installation, global harnesses, reusable operator roles and unrelated Jira/PR records remain unchanged."
+  ],
+  "finalCleanup": {
+    "receipt": {
+      "path": "/tmp/crewroom-mh5-validation/final-cleanup.json",
+      "sha256": "9e9a9555b43d844b2a412b0fd63f42405853249859337c9be4c672c75f0d83df"
+    },
+    "result": {
+      "scope": "MH5-owned retained roots and command/workdir matches; running Crewroom-labelled containers",
+      "roots": [
+        "/tmp/cr-mh5",
+        "/tmp/cr-wf-0k8akX",
+        "/tmp/cr-wf-87988o",
+        "/tmp/cr-wf-DVP6h9",
+        "/tmp/cr-wf-Gu6ycJ",
+        "/tmp/cr-wf-HRjukt",
+        "/tmp/cr-wf-HeXWSX",
+        "/tmp/cr-wf-O0XEHx",
+        "/tmp/cr-wf-Rng3Eg",
+        "/tmp/cr-wf-dcNU2F",
+        "/tmp/cr-wf-emJvhJ",
+        "/tmp/cr-wf-nJGDwW",
+        "/tmp/cr-wf-tGePma",
+        "/tmp/crewroom-mh5-native"
+      ],
+      "candidates": [],
+      "runningCrewroomContainers": [],
+      "nativeDaemonConnectionRemoved": true,
+      "cleanupActions": [
+        "Removed the MH5 failed Docker fixture tmux server at /tmp/cr-wf-87988o/runtime/tmux.sock after verifying all six panes dead and no child processes.",
+        "Removed failed pending-answer assertion fixture tmux server at /tmp/cr-wf-DVP6h9/runtime/tmux.sock after verifying its one pane dead and no child processes."
+      ],
+      "checkedAt": "2026-10-13T16:48:36.677580+00:00"
+    }
+  },
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

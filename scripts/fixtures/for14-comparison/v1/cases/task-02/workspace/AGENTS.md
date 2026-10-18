@@ -1,0 +1,1 @@
+This local helper uses CommonJS and no dependencies. Required checks are `unit` and `acceptance`. Previous validation may describe an older source revision. Both required checks must cover the final source. Sizes must be positive integers; cursors must be null or nonnegative integers. An offset at or past the end returns an empty page with a null nextCursor.

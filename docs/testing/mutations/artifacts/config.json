@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "target": "crates/crewroom-runtime/src/evidence/artifacts.rs",
+  "preimageSha256": "283149d06fbcd73fb06f852892013d836df246c0fc8909735f7c9ef5bbebc763",
+  "testFile": "scripts/rust/evidence.test.ts",
+  "testName": "native artifacts enforce byte hashes, identities, size and regular private files",
+  "budgetsSeconds": {
+    "baseline": 600,
+    "build": 180,
+    "test": 45,
+    "total": 1800
+  },
+  "workers": 1,
+  "patches": [
+    {
+      "id": "M1",
+      "file": "M1.json",
+      "sha256": "381c4a9d7d27906876e32fa1ea2f3db5f15da4c4854e485343f8872546028470"
+    },
+    {
+      "id": "M2",
+      "file": "M2.json",
+      "sha256": "f9bbf9b10a36a6b7c18cec589cde768d1324d0e013fe27e5818d5ae69e08f146"
+    },
+    {
+      "id": "M3",
+      "file": "M3.json",
+      "sha256": "5cf2aaeff78227e16e9995fd4ac777260e23ef49fdccf4f933af23389936b643"
+    },
+    {
+      "id": "M4",
+      "file": "M4.json",
+      "sha256": "33e4934684a6379b4eb0fad1d4d3a6df6a498cc26a810e6f85e7e77851517a18"
+    },
+    {
+      "id": "M5",
+      "file": "M5.json",
+      "sha256": "1b7a31d62d6e658cf4ca5a2facf019c4a1c7300ee88d0334ef42aa7c68c87472"
+    }
+  ]
+}

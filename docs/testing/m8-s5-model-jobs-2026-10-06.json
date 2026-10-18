@@ -1,0 +1,104 @@
+{
+  "date": "2026-10-06",
+  "implementationRevision": "54f8c3cbccd85a800498b9bf8ea5da0e8ff6b68f",
+  "sourceFiles": {
+    "crates/crewroom-core/src/default-roles.json": "5d87a2868b3c8f5314e8547d354bff02d0f159eb8c1e7f9eed1c6662969f6304",
+    "crates/crewroom-core/src/lib.rs": "3365e919f1e04fb3cb145671bea0747ae7ae874f72f10cbaa55d14aa12ca9932",
+    "crates/crewroom-core/src/model_jobs.rs": "d4d039769f2cc1c5ebeead6a1427affb3c974b90fd7463664a2fe3e2a027b5b6",
+    "crates/crewroom-core/src/roles.rs": "bc7173ba6729b7d0b547c079624f520412300d0775dba030e47ae9683bbc5329",
+    "crates/crewroom-desktop/src/workbench.rs": "902238eacfdd191c9b6d37dd8c0b1b3f60909e090759762715229b1f9fd6d11f",
+    "crates/crewroom-desktop/src/workbench/settings.rs": "a7fab1880cbc93fd17ef4ed11ca61d9290af25e09847361d11620c9a6e10f073",
+    "crates/crewroom-desktop/src/workbench/settings/models.rs": "81132585fc395f1d96d6aeb99896ae7eec0d74bfd37d85c0eaafa3758031ed4f",
+    "crates/crewroom-desktop/src/workbench/settings/roles.rs": "dc01fc7c543a2990d8ab7520932a5a3768d3fe99c81696fa22523757ee1578ad",
+    "crates/crewroom-desktop/src/workbench/settings/tests.rs": "39f236ce7a1b872062c59e1eefa7aa7aba075b9234ec2c38c7f51659290da4f4",
+    "crates/crewroom-desktop/src/workbench/shell.rs": "f90aeefeaecf1ea0fa41b123fd1cf322fb28386ac9cbcda6f1510ff13aff0a08",
+    "crates/crewroom-desktop/src/workbench/test_support.rs": "d83a51a5779b42fc6511a5cf91a52860baaf936c9ac4ecb4fd710bb323e09352",
+    "crates/crewroom-runtime/src/model_policy.rs": "243190cf6b92b5e56a4f9fc1fd82ceba4a69f241bd1f77b5839cd8d907990fdb",
+    "crates/crewroom-runtime/src/supervisor/workflow/configuration.rs": "c8b6c46c4a40df080bfc124d10d13bf26cff6bfa5e47d6e9db35969f121732a2",
+    "crates/crewroom-runtime/src/supervisor/workflow/mod.rs": "8237cc8bb1d7163fdbe0cdb01f439cd8924c879f7625806f276a90fbf280ff03",
+    "crates/crewroom-runtime/tests/model_jobs.rs": "e353afd4fe80335a3542265f229f2bbb30f0a474c473c3103b67bc27d5591c58",
+    "crates/crewroom-service/src/lib.rs": "082dfe2c9b24d05c674fde7e9bc63116f0a86734e7564e64bd3d90a788b40016",
+    "crates/crewroom-service/src/role_catalog.rs": "59009afad3b73b79ea639b6b9acb731dfa327f221c29b01b5bcb3d2e7603d817",
+    "docs/operations.md": "c084851053279b384b75e4ebdf564853d11ac11f8bf543a53e2af21688c199b4",
+    "scripts/rust/release-profiles-live.ts": "7eba24484c7a054e4be0194fee7cf92400f87c59a57276ab16fbc06a5c448f7c",
+    "scripts/rust/verify-release-profiles.py": "5267a5b1a5bb1869e34db46da265b3edf5a8037d4430c576829fc253ef9dee18"
+  },
+  "checks": {
+    "nativeCoreRuntimeService": {
+      "passed": 155
+    },
+    "desktop": {
+      "fullPassed": 42,
+      "fullFailed": 1,
+      "ignored": 10,
+      "finalAffectedPassed": 5,
+      "note": "New test initially missed the models navigation helper case. Helper repaired; all five settings tests pass. 43 distinct desktop cases covered; no single 43/43 invocation claimed."
+    },
+    "retainedDomain": {
+      "passed": 332
+    },
+    "browser": {
+      "fullPassed": 30,
+      "fullFailed": 1,
+      "focusedPassed": 1,
+      "note": "Known 30-second feedback timeout passed unchanged on focused rerun; retained ghostty-web diagnostics remain."
+    },
+    "policyCompatibility": {
+      "passed": 621
+    },
+    "nativeBuild": "passed",
+    "browserBuild": "passed",
+    "clippy": "passed",
+    "format": "passed"
+  },
+  "package": "target/debug/native-package.xISM1w/Crewroom.app",
+  "guiSha256": "be9a3f7460ea34ec8236d93ea20ed8021d7fa1a6da2c2ba2cfe0027700f03c90",
+  "guiChecks": [
+    "Inspected Models & budget at 1280px",
+    "Changed to Small; all four effort labels updated",
+    "Saved fixture/code through native UI; persistent success message verified",
+    "Final five settings tests include 390px bounds, role override persistence, stale configuration refusal and retained draft/reload"
+  ],
+  "guiSourceNote": "Inspected wWnHqJ package. Final package has unchanged desktop production sources; later core/runtime follow-ups normalize blank effort, clarify missing job model errors and preserve configured coordinator selection. Final focused UI/domain checks cover those changes.",
+  "liveRunner": {
+    "passed": true,
+    "boundary": "Actual native daemon/OMP/tmux/Rust Mail; synthetic provider replies only.",
+    "runner": {
+      "version": "omp/18.6.3",
+      "sha256": "ab52491643e21b270682691b1319f1161fe2a2658ae4e9a4e3958b1aeb12dcf4"
+    },
+    "allOwnedProcessesExited": true,
+    "externalMailMatches": true,
+    "observedEveryIdentity": true,
+    "binaryHashesUnchanged": true
+  },
+  "modelJobsRunner": {
+    "inheritedJobs": true,
+    "liveBudgetEditPreservedAssignments": true
+  },
+  "liveReport": {
+    "path": "/tmp/crewroom-m8-s5-final-jobs-20261006/report.json",
+    "sha256": "165fe0f01cfad2942f630370ecd96e7bc68eb1be78680d23358a34d689420034",
+    "driverSha256": "cd36494cc6fce504671eb025bf21275e28850b7d59b52757a23c75424106340a"
+  },
+  "logs": {
+    "/tmp/crewroom-m8-s5-final-domain.log": "6d26ab2b9f950a5b27afbccfdd48ed029056b672567b62d995e857020b78602f",
+    "/tmp/crewroom-m8-s5-retained.log": "cec078bf824045c1ccb98b8832dce46cfdd308801c5b10de5f825df6e41c09e5",
+    "/tmp/crewroom-m8-s5-desktop.log": "3025ba00c451ccbc7785a3be807833afccb24452d1a0189c39f299fb43bbd467",
+    "/tmp/crewroom-m8-s5-final-ui.log": "6970d52341dacc46dfd077a57daa3ac7a6faa1c8613726a6203fd9cff2a1441a",
+    "/tmp/crewroom-m8-s5-browser.log": "2abe32b1ee55f1827084d2fcdf559c7e4102f201caa1552d5472684de3744afb",
+    "/tmp/crewroom-m8-s5-browser-feedback.log": "45fa30da6841b5d570ef66df46e9c4efa4a569d94d93cd2509fa3db7602ccef9",
+    "/tmp/crewroom-m8-s5-browser-build.log": "7eedc6e83fb77fcba4a461096cfb530ef11567942b3091f9dca9a7f4858e46f5",
+    "/tmp/crewroom-m8-s5-accepted-build.log": "3359938a78c3a0b3dd7ef85bc64d2cf21905a2b6dfbe6aae9c3e3b908c77fa8c",
+    "/tmp/crewroom-m8-s5-final-clippy.log": "b9d5f640badd192f60ca6e4510054c66677b660528461168bba196577e993ab5",
+    "/tmp/crewroom-m8-s5-final-runner.log": "c627f2023666186fe3d47492d078599864a7e431235b05c2bf518e83921150d9",
+    "/tmp/crewroom-m8-s5-policy.log": "0094550f1283a1e1e8080d66709739e405f67b9884586b3d0081004e39441ff7"
+  },
+  "limitations": [
+    "Actual OMP/tmux/Rust Mail; scripted provider replies only. No new live model or Jira/PR delivery.",
+    "Linux/Wayland remains explicit follow-up under the operator decision.",
+    "Legacy runtime defaults stay effective until jobs are explicitly saved; native UI explains migration.",
+    "Use native editing for extended role fields; legacy browser rollback does not implement model jobs.",
+    "S5 disposable GUI and its exact daemon stopped. Active installation, real user configuration and retained pilot unchanged."
+  ]
+}

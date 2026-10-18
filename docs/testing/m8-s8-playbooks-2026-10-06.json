@@ -1,0 +1,145 @@
+{
+  "date": "2026-10-06",
+  "baseRevision": "3915cceb3de801718f374609008e0b24779b22a4",
+  "implementationRevision": "c92fe4d6722a996596253d4a510be2357bb0f066",
+  "sourceFiles": {
+    "crates/crewroom-core/src/lib.rs": "c30b1c80961374500e5899be4c576c087ccd778d5b8a49014ce556530ba71ddc",
+    "crates/crewroom-core/src/store.rs": "49fd8ee93e0b5f9d5726960f70cf80dbde1bffce6554b973660ed99f07cb2ad3",
+    "crates/crewroom-desktop/src/workbench.rs": "b1e4e5c42e3df3e0dfa7affa7ed12baa51228db8dca577c26dff9491f2e7c0d5",
+    "crates/crewroom-desktop/src/workbench/planning.rs": "29c13b1854a27b7571870457425621a3478ef912d167d040c554c422420184c7",
+    "crates/crewroom-desktop/src/workbench/planning/tests.rs": "624f5af9a4ba406f58a73260329977ec906469198a4b8ac7faff7e2dbc160dc5",
+    "crates/crewroom-desktop/src/workbench/settings.rs": "1857cd3550aead9d3e983ef6babba43e0664d2ef4fc3439d62d9cedc3258175f",
+    "crates/crewroom-desktop/src/workbench/settings/tests.rs": "171bba23ccea556d40bebcdc59904a2d8ddf03c5df2240b75b4af93c1612f25d",
+    "crates/crewroom-desktop/src/workbench/shell.rs": "b77780b58eb9c3b82eedba2f9666e7e08f7831f994b39e3c136b8975f6720ea0",
+    "crates/crewroom-desktop/src/workbench/test_support.rs": "93d929bd4616f31e4633cb551da336e20341acc8f67cf93d75dc1f73b217a743",
+    "crates/crewroom-runtime/src/host-tools.json": "5d2133f657ab157c89cc0db87915c136b6e36d1b7085d0dd108beed3d18d78de",
+    "crates/crewroom-runtime/src/host_protocol.rs": "de8fd582c48a6a0c13fe056543716673daf2840ee4b30b0b6086f8f4579826e2",
+    "crates/crewroom-runtime/src/supervisor/workflow/configuration.rs": "a28f75959d7784719d5ce0b090ffb37d1fa7651ceb69d1d81fb88de7d96a9158",
+    "crates/crewroom-runtime/src/supervisor/workflow/tools.rs": "8015a7e4739e2ad2b6aa544af653cc4ec7808d68eb85af030444d991feebfeec",
+    "crates/crewroom-runtime/tests/host_protocol.rs": "ca33d53932b426642875dd974ff3b75719f2639e37966f3b7146e6c84af3624d",
+    "crates/crewroom-service/src/lib.rs": "7770ac7b0e396f13183e5c275f773c59a1d8af7385974ef621376b9d1a912f63",
+    "docs/operations.md": "39256a9fd99e36f1364a923e6196386c6207d3d556f0abec65c118d33c5db4ed",
+    "scripts/rust/release-profiles-live.ts": "635c8c55641689abfc21a8f88faa48ba8636505bc8fadaf2106b639cf4b593c8",
+    "scripts/rust/verify-release-profiles.py": "2bbe61c4f72763d2fa6f8f394a157c737cb8487a03b24f2729444df068a90e99",
+    "crates/crewroom-core/src/playbooks.rs": "ec770be47605c66442699ffd07f8801809737590913deebd4d7f8ec8335a70ca",
+    "crates/crewroom-core/tests/playbooks.rs": "c085ff6a522cced67a1554c6ac933a0bbae36a177a05b4bdd52739bbc01397f3",
+    "crates/crewroom-desktop/src/workbench/playbooks.rs": "49ad2de87bbb494e0e41f2eb60b24045b1ba9f71d935c938ca637c3b81e41e48",
+    "crates/crewroom-desktop/src/workbench/settings/playbooks.rs": "ed537437e4d73e84de214dc77461b098d8b35ca3cbb03fe09e1c1165ed7fda55"
+  },
+  "checks": {
+    "nativeCoreRuntimeService": {
+      "passed": 167,
+      "finalPlaybooksPassed": 4,
+      "note": "Full domain run predates the final queue replay identity guard; all four playbook tests pass afterward, including lost-receipt, unkeyed mismatch and changed-selection recovery."
+    },
+    "desktop": {
+      "fullPassed": 46,
+      "fullFailed": 1,
+      "ignored": 10,
+      "finalAffectedPassed": 1,
+      "note": "The new narrow-layout test searched the session header while the Brief drawer intentionally occupied the narrow view. Closing that drawer before resize fixes the test. The final focused run also covers the bounded checklist header. No single 47/47 invocation is claimed."
+    },
+    "retainedDomain": {
+      "passed": 332,
+      "durationMs": 709088.796625
+    },
+    "browser": {
+      "passed": 31
+    },
+    "nativeBuild": "passed",
+    "browserBuild": "passed",
+    "clippy": "passed with warnings denied",
+    "format": "passed",
+    "diffCheck": "passed"
+  },
+  "package": "target/debug/native-package.Fm0Mss/Crewroom.app",
+  "guiSha256": "2a94642807381e5c7f31303e2fc9989f39058cd1b5b3e22f5de4abcdf3356adf",
+  "visualPackage": "target/debug/native-package.egWV08/Crewroom.app",
+  "visualGuiSha256": "36218017b4e0564ae4f9821c8f881ce9b19a28f6a3a8283f586b87eccbe2716d",
+  "packageSourceNote": "Final package ran the real OMP contract. Visible macOS proof predates only the queue replay identity guard; final core tests, Clippy and build cover that guard. No single final-package GUI invocation is claimed.",
+  "guiChecks": [
+    "Created a three-step playbook through Settings, saved revision 1 and inspected it in the catalog.",
+    "Selected the playbook on a disposable paused session and entered a reason. The header showed copied revision/selection, pending steps and pending steering; readiness remained Not ready.",
+    "Inspected the 1280px layout. Native interaction tests cover editing conflicts, draft retention, prequeue selection, header changes and 390px controls."
+  ],
+  "liveRunner": {
+    "passed": true,
+    "boundary": "Actual native daemon/OMP/tmux/Rust Mail; synthetic provider replies only.",
+    "runner": {
+      "version": "omp/18.6.3",
+      "sha256": "ab52491643e21b270682691b1319f1161fe2a2658ae4e9a4e3958b1aeb12dcf4"
+    },
+    "allOwnedProcessesExited": true,
+    "externalMailMatches": true,
+    "observedEveryIdentity": true,
+    "binaryHashesUnchanged": true
+  },
+  "runnerBinaries": {
+    "crewroomd": {
+      "path": "/Users/crewroom/Projects/Git/crewroom/target/debug/native-package.Fm0Mss/Crewroom.app/Contents/MacOS/crewroomd",
+      "sha256": "64928918c59fc56c5f2a68d687a20f1e49104080e869645582859be599985604"
+    },
+    "crewroom-process": {
+      "path": "/Users/crewroom/Projects/Git/crewroom/target/debug/native-package.Fm0Mss/Crewroom.app/Contents/MacOS/crewroom-process",
+      "sha256": "e8b17e73915ddc3cf9c6a547737e7b855b9e6764a3f793c3376fda15860a6f9f"
+    },
+    "crewroom-host": {
+      "path": "/Users/crewroom/Projects/Git/crewroom/target/debug/native-package.Fm0Mss/Crewroom.app/Contents/MacOS/crewroom-host",
+      "sha256": "d1148ebe3fea68e12bf21437bbaffcb23a63fc5d87cddc6745bbf25ecfab28ab"
+    }
+  },
+  "playbooksRunner": {
+    "coordinatorProposed": true,
+    "operatorSteeringDelivered": true,
+    "skipReasonEnforced": true,
+    "catalogEditRetainedCopy": true,
+    "restartRetainedChecklist": true
+  },
+  "reattachedSameEightProcesses": true,
+  "liveReport": {
+    "path": "/tmp/crewroom-m8-s8-reviewed-playbooks-20261006/report.json",
+    "sha256": "50f2cce2705748dcbe5fe071ebe4d7104b2fc86d97c3a27d6b3d3b16001e4f05",
+    "driverSha256": "481de61a1f99802d83ecd627042f28827d838a320c2786bbf50f2bd0981e2512"
+  },
+  "logs": {
+    "/tmp/crewroom-m8-s8-browser-build.log": "1c05d59151c1da28bbe86ced552e0ea22431ac0c5c7c905dd869ba39fecde030",
+    "/tmp/crewroom-m8-s8-browser.log": "e1a9a90ec7abee37a12742c34943a254ae570669efdcea1695f1eea264dfa43b",
+    "/tmp/crewroom-m8-s8-build.log": "0de121f428a09b3dde9503f11d59648f6921e249cb4cc84e45e2e810498bcb85",
+    "/tmp/crewroom-m8-s8-check.log": "278f32a12a2b5bdf2b1c47b0ce7b5446014c87d25c781274fb82c3ab0ada4469",
+    "/tmp/crewroom-m8-s8-clippy.log": "f50ee8ffb81a86b6ee7552066963198cfc9aa115b7425769df2d1d947e8dd234",
+    "/tmp/crewroom-m8-s8-desktop.log": "17a71736ee226dd206864adc495e156767626c30b235118cbb721ab7ac6f43d3",
+    "/tmp/crewroom-m8-s8-domain.log": "e06afdb48dd5ecabbd39c9473fbc5c4ae931685dc080d1c20049459cd5461d4a",
+    "/tmp/crewroom-m8-s8-final-build.log": "c600625d11e709b118771c1934e8e4b81723e94e4b55bf8b215bc0ab5f684a8e",
+    "/tmp/crewroom-m8-s8-final-clippy.log": "e8b1a1c48426a6512f681c40c09e45457993206016e6425720b2e27ce24988d4",
+    "/tmp/crewroom-m8-s8-final-core.log": "da158883f08ce2967b2868a651d9513b3201e2332ef476a91d2654471a95bcf1",
+    "/tmp/crewroom-m8-s8-final-gui.log": "1edad7bc0a82f9f6e40fbdfb677138cebcf4e52bba6acf4ab890096a56becb23",
+    "/tmp/crewroom-m8-s8-final-ui.log": "6a48e78d8f90c6c084b7ae9aabde8b94bcf4c91f36551d1e238e6576b3cb1a6a",
+    "/tmp/crewroom-m8-s8-focused.log": "99a2a243137ada698f0f901e259ffe3e5e21b576d7bfec1ccee7603f2a75b0df",
+    "/tmp/crewroom-m8-s8-gui.log": "0c6a227ab0e954c49eb39a7bf2971c0fbde45590e3c4d83238de458d36fd3457",
+    "/tmp/crewroom-m8-s8-playbook-ui.log": "f1f58ef79ca13777e28d3b6a0eed6ef2690e74aec765c804a8634dea97f83efa",
+    "/tmp/crewroom-m8-s8-retained.log": "31f2925f0a69684c2d1822ec6da315cd179597e0a9b43be6a9fd0c81589a94b3",
+    "/tmp/crewroom-m8-s8-reviewed-build.log": "3b134b8e8025cdc691461fab7cfda58a193b51f42aeae332699c79fd95f0b8de",
+    "/tmp/crewroom-m8-s8-reviewed-runner.log": "d0ac5668aa99d3c74dab8226912b3a501763e940b7ded33417cba6e23c49b64b",
+    "/tmp/crewroom-m8-s8-runner.log": "701b08c7156d263fb0adfad6aacc258c50acaac8d329dcbad5cc45a270abd049",
+    "/tmp/crewroom-m8-s8-seed.log": "0ac120dd2ba143ee80daeb879921e4250dd772ded11f3c0b8056e45d74d0da67",
+    "/tmp/crewroom-m8-s8-ui-check.log": "2e348dfe3e94a452d3f2349bfb6450392021fa22d3a49037fde45a53b8acb7b9"
+  },
+  "initialFailures": [
+    "Core fixture omitted a configured repository; corrected before the passing full native suite.",
+    "Host-tool fixture omitted the existing recipients field; corrected before the passing full native suite.",
+    "UI fixture compilation needed an entity clone; fixed before the full desktop run.",
+    "New narrow-layout test initially searched behind the open Brief drawer; fixed and passed in the final focused run."
+  ],
+  "cleanup": {
+    "ownedRunnerProcessesStopped": 8,
+    "retainedTestCandidates": 0,
+    "browserTestCandidates": 0,
+    "disposableGuiAndExactDaemonStopped": true
+  },
+  "limitations": [
+    "Actual native daemon, OMP, tmux and external Rust Mail; scripted provider replies. No new live model or Jira/PR delivery.",
+    "Linux/Wayland terminal validation remains an explicit follow-up under the operator continuation decision.",
+    "No active installation, real configuration or retained pilot changes. S8 stores run metadata without a new schema version; schema 27 remains."
+  ],
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

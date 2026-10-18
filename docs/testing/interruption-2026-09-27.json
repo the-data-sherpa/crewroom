@@ -1,0 +1,129 @@
+{
+  "date": "2026-09-27",
+  "passed": true,
+  "domainTests": 30,
+  "browserJourneys": 2,
+  "build": "passed",
+  "versions": {
+    "omp": "18.3.1",
+    "tmux": "3.7c",
+    "rustMail": "0.3.36",
+    "dockerEngine": "29.4.1",
+    "dockerDesktop": "4.71.0",
+    "cgroup": "2"
+  },
+  "cases": [
+    {
+      "fault": "pause",
+      "passed": true,
+      "providerRequests": 1,
+      "attempts": 1,
+      "ownership": [
+        "stopped"
+      ],
+      "evidence": ".crewroom/test-results/m2-contained-pause-1"
+    },
+    {
+      "fault": "host",
+      "passed": true,
+      "providerRequests": 1,
+      "attempts": 1,
+      "ownership": [
+        "stopped"
+      ],
+      "evidence": ".crewroom/test-results/m2-contained-host-1"
+    },
+    {
+      "fault": "tmux",
+      "passed": true,
+      "providerRequests": 1,
+      "attempts": 1,
+      "ownership": [
+        "stopped"
+      ],
+      "evidence": ".crewroom/test-results/m2-contained-tmux-1"
+    },
+    {
+      "fault": "supervisor",
+      "passed": true,
+      "providerRequests": 1,
+      "attempts": 1,
+      "ownership": [
+        "stopped"
+      ],
+      "evidence": ".crewroom/test-results/m2-contained-supervisor-1"
+    },
+    {
+      "fault": "detached",
+      "passed": true,
+      "providerRequests": 1,
+      "attempts": 1,
+      "ownership": [
+        "stopped"
+      ],
+      "evidence": ".crewroom/test-results/m2-contained-detached-1"
+    },
+    {
+      "fault": "supervisor-host",
+      "passed": true,
+      "providerRequests": 1,
+      "attempts": 1,
+      "ownership": [
+        "stopped"
+      ],
+      "evidence": ".crewroom/test-results/m2-contained-supervisor-host-1"
+    },
+    {
+      "fault": "supervisor-host",
+      "passed": true,
+      "providerRequests": 1,
+      "attempts": 1,
+      "ownership": [
+        "stopped"
+      ],
+      "evidence": ".crewroom/test-results/m2-contained-final"
+    }
+  ],
+  "containerBoundary": [
+    "detached child with empty environment and closed inherited descriptors terminated",
+    "engine unavailable keeps ownership uncertain; duplicate command admission rejected"
+  ],
+  "nativeOwnership": [
+    "inherited lock prevents replacement while a child survives",
+    "stale PID identity is not signalled",
+    "second backend cannot acquire the same controller lock"
+  ],
+  "messagingRegression": ".crewroom/test-results/m2-runtime-ownership-regression/report.json",
+  "finalCleanup": {
+    "passed": true,
+    "fault": "supervisor-host",
+    "guard": {
+      "fixture_port_allowed": true,
+      "external_denied": true,
+      "other_loopback_denied": true,
+      "child_egress_denied": true
+    },
+    "providerRequests": 1,
+    "providerErrors": [],
+    "unexpectedSurvivingProcesses": [],
+    "removedContainers": 1
+  },
+  "failedApproach": "A native detached child with close_fds=True escaped its original process group and inherited lock. That boundary was rejected for commands and replaced by container containment.",
+  "sourceSha256": {
+    "scripts/interruption-driver.ts": "3ccf2a93cc522c4d97e98a4cb9b7e6aec746eeea20e769288aaeee29c14722b9",
+    "scripts/test-application-interruption.py": "1d6821c128cb9c0df16d3b0d414e70f2d839f2d5f545ee2937a36d6d2767b89b",
+    "server/app.ts": "402ee56685f8431a3bf5711567e212bf091e4dbf8984429962957b1cbdcc008f",
+    "server/runtime/container-command.ts": "843fe8dd2f4ff274f30dce4fe49d3276f31826391a03ce5af1d45ccd926aec8a",
+    "server/runtime/host.ts": "9f997a668229d3051f8e7431256c15c781d7e0a20518f76ae1590159e3020f59",
+    "server/runtime/messaging.ts": "e596b407103beeaac0ea5cca55ff3908891e5fab8b29717d20d0e7b01f3684d9",
+    "server/runtime/model-policy.ts": "5c4357be49555633a9fbe4fb3d5c482f8952cf137bd5f0147d0c639b82570f61",
+    "server/runtime/process-lease.py": "b44125cc2bd8d565264a21361c7defd66e68067c25325bfd538730108c2fb36b",
+    "server/runtime/processes.ts": "a688db15c0f78441af9191481685d7bd6102b509a45d5899f94e7e87c6580c53",
+    "server/runtime/rpc.ts": "a228657cb510a00688ef28a4a344fd52faabae86ec49d3bd8f1c80780fa7e570",
+    "server/runtime/supervisor.ts": "424f584032b1183a43298c5a7497c397e7e089fcd686f18a366e91ecee63a028",
+    "server/runtime/types.ts": "e2c9ab6a70ee19309cad2953a700d1a508e5ac7e723c8d29fbc3317b123d2c8d",
+    "server/workbench.ts": "5ed51985c071a68d979dab084be41892a38f4c06a3824de7dc668b47ada01f8b",
+    "tests/container.integration.ts": "2a0db81b8c7b44beb6b02e690d8ee8e489f57eeb78a4b92e4a3f8917a94fa2c7",
+    "tests/processes.test.ts": "e01fe5c7146fc60d1fa823986e80c6d91f854e5fb486669d7065e68e57b35939"
+  }
+}

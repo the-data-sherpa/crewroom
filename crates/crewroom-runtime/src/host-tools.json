@@ -1,0 +1,1633 @@
+{
+  "definitions": {
+    "send_message": {
+      "name": "send_message",
+      "label": "Send external message",
+      "loadMode": "essential",
+      "description": "Send a scoped message through Rust Agent Mail. A storage receipt does not mean completed work.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "string",
+            "enum": []
+          },
+          "body": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "to",
+          "body"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "list_roles": {
+      "name": "list_roles",
+      "label": "Inspect available roles",
+      "loadMode": "essential",
+      "description": "Read the current user role catalog. Select roles by their purpose; configured models are validated by Crewroom.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    "propose_team": {
+      "name": "propose_team",
+      "label": "Propose specialists",
+      "loadMode": "essential",
+      "description": "Propose only the specialists this work needs. Give each a structured brief: the accepted criteria it owns (zero-based index), its obligation for each and the configured check IDs that verify it, plus the teammates whose results it depends on. Crewroom validates capacity, models and briefs, then applies the team at a safe stopping point. Retire finished specialists to free active slots; retain their evidence and history. A pending proposal has no executing agents.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "specialists": {
+            "type": "array",
+            "minItems": 0,
+            "maxItems": 3,
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "roleId": {
+                  "type": "string"
+                },
+                "input": {
+                  "type": "string"
+                },
+                "criteria": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "index": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "obligation": {
+                        "type": "string"
+                      },
+                      "checkIds": {
+                        "type": "array",
+                        "maxItems": 100,
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "index",
+                      "obligation"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "dependsOn": {
+                  "type": "array",
+                  "maxItems": 10,
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "name",
+                "roleId",
+                "input"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "retire": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "reason"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "specialists"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "steering_receipt": {
+      "name": "steering_receipt",
+      "label": "Reconcile steering",
+      "loadMode": "essential",
+      "description": "Report that an operator instruction was applied to the work plan or rejected with a reason. This is not proof of completed code.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "messageId": {
+            "type": "string"
+          },
+          "disposition": {
+            "type": "string",
+            "enum": [
+              "applied",
+              "rejected"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "messageId",
+          "disposition",
+          "reason"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "propose_learning": {
+      "name": "propose_learning",
+      "label": "Propose a learning update",
+      "loadMode": "essential",
+      "description": "Propose replacement instructions for a reusable role, or replacement project guidance for this repository, citing recorded run evidence (check, review, steering or check_policy IDs). The operator approves or rejects it; approval creates a new version for future assignments only. It cannot change models, checks or readiness policy.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "role",
+                  "project"
+                ]
+              },
+              "roleId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "additionalProperties": false
+          },
+          "change": {
+            "type": "string"
+          },
+          "rationale": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "check",
+                    "review",
+                    "steering",
+                    "check_policy"
+                  ]
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "target",
+          "change",
+          "rationale",
+          "evidence"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "steering_receipt-2": {
+      "name": "steering_receipt",
+      "label": "Reconcile steering",
+      "loadMode": "essential",
+      "description": "Report an operator message as applied or rejected with a reason.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "messageId": {
+            "type": "string"
+          },
+          "disposition": {
+            "type": "string",
+            "enum": [
+              "applied",
+              "rejected"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "messageId",
+          "disposition",
+          "reason"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "propose_refinement": {
+      "name": "propose_refinement",
+      "label": "Propose requirements",
+      "loadMode": "essential",
+      "description": "Propose a brief and testable criteria, recording decisions and unresolved questions separately. The operator accepts or discards; proposing never launches coding work.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "brief": {
+            "type": "string"
+          },
+          "criteria": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": {
+              "type": "string"
+            }
+          },
+          "decisions": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "string"
+            }
+          },
+          "unresolvedQuestions": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "brief",
+          "criteria",
+          "decisions",
+          "unresolvedQuestions"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "run_command": {
+      "name": "run_command",
+      "label": "Run admitted command",
+      "loadMode": "essential",
+      "description": "Run one configured command under process ownership.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "commandId": {
+            "type": "string",
+            "enum": [
+              "configured"
+            ]
+          }
+        },
+        "required": [
+          "commandId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "publication_status": {
+      "name": "publication_status",
+      "label": "Inspect PR delivery",
+      "loadMode": "essential",
+      "description": "Read durable push/PR receipts and exact revision validation. Created PR and ready for human review are separate facts. A pending or uncertain action is not confirmed delivery.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    "coding_status": {
+      "name": "coding_status",
+      "label": "Inspect coding evidence",
+      "description": "Inspect the current candidate, actual checks, independent review, blockers and writer ownership.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "loadMode": "essential"
+    },
+    "check_output": {
+      "name": "check_output",
+      "label": "Read check output",
+      "description": "Read the last 16,000 characters of a retained check log by its evidence ID from coding_status. The result identifies the exact candidate/revision and whether the output is truncated. Historical output does not establish readiness for a newer revision.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "checkEvidenceId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "checkEvidenceId"
+        ],
+        "additionalProperties": false
+      },
+      "loadMode": "essential"
+    },
+    "repository_read": {
+      "name": "repository_read",
+      "label": "Read owned repository",
+      "description": "List recorded files or read one source file and its hash. During an active target conflict, these reads show the isolated conflict workspace; edits still require the current writer claim.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "loadMode": "essential"
+    },
+    "repository_search": {
+      "name": "repository_search",
+      "label": "Search owned repository",
+      "description": "Search tracked and non-ignored files (literal text unless regex is true). An assigned reviewer searches its exact candidate. Returns at most 100 matching lines of 300 characters.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          },
+          "regex": {
+            "type": "boolean"
+          },
+          "ignoreCase": {
+            "type": "boolean"
+          },
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "loadMode": "essential"
+    },
+    "write_file": {
+      "name": "write_file",
+      "label": "Edit owned source",
+      "description": "Write a scoped source file only as the current writer. Supply the hash from repository_read, or null for a new file. The operation is retained before writing.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "expectedHash": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "path",
+          "content",
+          "expectedHash"
+        ],
+        "additionalProperties": false
+      },
+      "loadMode": "essential"
+    },
+    "edit_file": {
+      "name": "edit_file",
+      "label": "Patch owned source",
+      "description": "Replace exact text spans in one existing file as the current writer. Each oldText must match exactly one span of the file read at expectedHash (from repository_read); replacements apply in order. Prefer this to write_file for small changes.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "expectedHash": {
+            "type": "string"
+          },
+          "replacements": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "properties": {
+                "oldText": {
+                  "type": "string"
+                },
+                "newText": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "oldText",
+                "newText"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "path",
+          "expectedHash",
+          "replacements"
+        ],
+        "additionalProperties": false
+      },
+      "loadMode": "essential"
+    },
+    "continue_target_conflict": {
+      "name": "continue_target_conflict",
+      "label": "Continue isolated target rebase",
+      "description": "Only the current conflict writer may use this after resolving every listed marker. It stages only recorded conflict paths, advances the run-owned isolated rebase, and returns conflicted, ready or operator_required. Repeat while conflicted; call finish_implementation only when state is ready. This never promotes or publishes.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "requestId"
+        ],
+        "additionalProperties": false
+      },
+      "loadMode": "essential"
+    },
+    "finish_implementation": {
+      "name": "finish_implementation",
+      "label": "Submit implementation",
+      "description": "Close editing and request completion. Crewroom waits for a safe stop, creates the candidate commit and continues coordination. This does not establish validation or readiness.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "summary"
+        ],
+        "additionalProperties": false
+      },
+      "loadMode": "essential"
+    },
+    "submit_review": {
+      "name": "submit_review",
+      "label": "Submit independent review",
+      "description": "Record a revision-bound review after inspecting the candidate and actual check evidence. An implementation assignment cannot review its own work. Cover every zero-based criterion index for a pass.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "candidateId": {
+            "type": "string"
+          },
+          "verdict": {
+            "enum": [
+              "pass",
+              "changes_requested"
+            ],
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "line": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "blocker",
+                    "major",
+                    "minor"
+                  ]
+                },
+                "body": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "severity",
+                "body"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "coverage": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "criterion": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "assessment": {
+                  "type": "string"
+                },
+                "checkIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "criterion",
+                "assessment",
+                "checkIds"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "candidateId",
+          "verdict",
+          "summary",
+          "findings",
+          "coverage"
+        ],
+        "additionalProperties": false
+      },
+      "loadMode": "essential"
+    },
+    "submit_research_artifact": {
+      "name": "submit_research_artifact",
+      "label": "Submit research artifact",
+      "loadMode": "essential",
+      "description": "Save Markdown with limitations, accepted criterion IDs (zero-based indices), exact Markdown heading names and pinned source citations. Missing limitations or coverage is recorded as a rejected artifact with reasons; resubmit the same title and kind to supersede.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "research",
+              "design",
+              "documentation-draft"
+            ]
+          },
+          "body": {
+            "type": "string"
+          },
+          "citations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "commit": {
+                  "type": "string"
+                },
+                "startLine": {
+                  "type": "integer"
+                },
+                "endLine": {
+                  "type": "integer"
+                },
+                "excerpt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "path",
+                "commit",
+                "startLine",
+                "endLine",
+                "excerpt"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "limitations": {
+            "type": "string"
+          },
+          "coverage": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "criterionId": {
+                  "type": "integer"
+                },
+                "section": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "criterionId",
+                "section"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "title",
+          "kind",
+          "body",
+          "citations"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "run_check": {
+      "name": "run_check",
+      "label": "Run actual repository check",
+      "description": "Execute one configured check in a contained source snapshot of the current candidate. Crewroom verifies the command, actual exit, output and unchanged source; agent claims cannot replace this result.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "checkId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "checkId"
+        ],
+        "additionalProperties": false
+      },
+      "loadMode": "essential"
+    },
+    "run_shell": {
+      "name": "run_shell",
+      "label": "Run contained command",
+      "description": "Run an ad-hoc shell command (for example ls, grep or a focused test) in a network-less container with the owned worktree mounted read-only at /workspace and a writable /tmp. Output is returned to you only; it is not check evidence and cannot change source. Edit through write_file or edit_file.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string"
+          },
+          "timeoutMs": {
+            "type": "integer",
+            "minimum": 1000,
+            "maximum": 600000
+          }
+        },
+        "required": [
+          "command"
+        ],
+        "additionalProperties": false
+      },
+      "loadMode": "essential"
+    },
+    "repository_read-2": {
+      "name": "repository_read",
+      "label": "Read pinned source",
+      "loadMode": "essential",
+      "description": "Read one source blob from the pinned research commit. No checkout or repository write access.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "repository_search-2": {
+      "name": "repository_search",
+      "label": "Search pinned source",
+      "loadMode": "essential",
+      "description": "Search the admitted commit; result lines are bounded. Cite exact file, commit, line range and excerpt in an artifact.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          },
+          "regex": {
+            "type": "boolean"
+          },
+          "ignoreCase": {
+            "type": "boolean"
+          },
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "publish_change": {
+      "name": "publish_change",
+      "label": "Request PR publication",
+      "loadMode": "essential",
+      "description": "Coordinator only. Persist a request to publish the locally validated current candidate. Crewroom pushes its owned branch, creates or reconciles one PR and observes hosted checks. The summary becomes the PR description a human reviewer reads first: what changed and why, the files touched, how it was verified (including the regression that fails before and passes after), risks, and anything left out. Write it for a reviewer, not as internal notes; Crewroom appends its evidence section. Calling again for the same candidate with a revised summary updates the PR description. Returns a queued receipt; inspect publication_status for outcomes. Human merge remains outside automatic execution.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "candidateId": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string",
+            "description": "Markdown PR description for the human reviewer (40 to 20,000 characters)."
+          }
+        },
+        "required": [
+          "candidateId",
+          "summary"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "claim_implementation": {
+      "name": "claim_implementation",
+      "label": "Assign implementation",
+      "description": "Grant one specialist writer ownership for the accepted brief or a recorded failure. With an active target conflict, assign one specialist only for the recorded paths and accepted scope. Send that specialist its instruction through send_message. Automatic repair shares the two-cycle budget.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "assignee": {
+            "type": "string"
+          },
+          "instruction": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "assignee",
+          "instruction"
+        ],
+        "additionalProperties": false
+      },
+      "loadMode": "essential"
+    },
+    "assign_review": {
+      "name": "assign_review",
+      "label": "Assign independent review",
+      "description": "Assign an admitted specialist to an exact completed candidate. Required checks and independent review remain separate gates. Notify the specialist through send_message.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "assignee": {
+            "type": "string"
+          },
+          "candidateId": {
+            "type": "string"
+          },
+          "instruction": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "assignee",
+          "candidateId",
+          "instruction"
+        ],
+        "additionalProperties": false
+      },
+      "loadMode": "essential"
+    },
+    "request_research_completion": {
+      "name": "request_research_completion",
+      "label": "Complete verified research",
+      "loadMode": "essential",
+      "description": "Request completion only after every accepted criterion has a verified current artifact. The server stops agents, confirms ownership and marks a non-coding outcome; no coding gate or PR is created.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    "jira_updates": {
+      "name": "jira_updates",
+      "label": "Inspect Jira delivery",
+      "loadMode": "essential",
+      "description": "Read durable Jira update receipts for this run. Pending or uncertain is not delivered. Jira status and workflow progress are separate facts.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    "jira_report": {
+      "name": "jira_report",
+      "label": "Queue Jira update",
+      "loadMode": "essential",
+      "description": "Delivery reporter only. Queue an allowed Jira update. Use a stable eventKey for the same milestone across retries and replacement sessions; inspect jira_updates first. in_progress requires eventKey execution-started. milestone/blocker require body. evidence/pr_link require the current verified candidateId; pr_link also requires a confirmed PR receipt and is composed by Crewroom. Do not rewrite requirements or claim delivery from a pending receipt.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "milestone",
+              "blocker",
+              "in_progress",
+              "evidence",
+              "pr_link"
+            ]
+          },
+          "eventKey": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "candidateId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "eventKey"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "jira_report-2": {
+      "name": "jira_report",
+      "label": "Queue Jira update",
+      "loadMode": "essential",
+      "description": "Research reporter only. After verified completion is requested, queue research_outcome with eventKey research-outcome-<accepted revision>. Milestone/blocker comments remain available; no Jira transitions, PR or coding evidence.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "milestone",
+              "blocker",
+              "research_outcome"
+            ]
+          },
+          "eventKey": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "eventKey"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "jira_report-3": {
+      "name": "jira_report",
+      "label": "Queue Jira update",
+      "loadMode": "essential",
+      "description": "Research coordinator fallback only when no delivery reporter is assigned. After requesting verified completion, queue research_outcome with eventKey research-outcome-<accepted revision>; never a Jira transition.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "research_outcome"
+            ]
+          },
+          "eventKey": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "eventKey"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "playbook_status": {
+      "name": "playbook_status",
+      "label": "Playbook Status",
+      "description": "Read available playbooks and the run\u2019s copied checklist and pending proposal. Checklists are advisory and never establish readiness.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "loadMode": "essential"
+    },
+    "propose_playbook": {
+      "name": "propose_playbook",
+      "label": "Propose Playbook",
+      "description": "At run start, propose an appropriate catalog playbook with a rationale. This records a proposal only; the operator chooses the checklist.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "playbookId": {
+            "type": "string"
+          },
+          "rationale": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "playbookId",
+          "rationale"
+        ],
+        "additionalProperties": false
+      },
+      "loadMode": "essential"
+    },
+    "record_playbook_step": {
+      "name": "record_playbook_step",
+      "label": "Record Playbook Step",
+      "description": "Record advisory progress in the selected checklist. Use its current selectionVersion. Skipped steps require a reason. This does not create check, review or readiness evidence.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "stepId": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "active",
+              "done",
+              "skipped"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "version",
+          "stepId",
+          "state"
+        ],
+        "additionalProperties": false
+      },
+      "loadMode": "essential"
+    },
+    "ask_intake_questions": {
+      "name": "ask_intake_questions",
+      "label": "Ask missing intake decisions",
+      "loadMode": "essential",
+      "description": "Ask missing intake decisions. Inspect the pinned repository first, then persist one to three questions. Crewroom stops scoping while the operator answers; do not continue work after this tool.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "sourceId": {
+            "type": "string"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "prompt": {
+                  "type": "string"
+                },
+                "rationale": {
+                  "type": "string"
+                },
+                "choices": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 5
+                }
+              },
+              "required": [
+                "id",
+                "prompt",
+                "rationale",
+                "choices"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1,
+            "maxItems": 3
+          }
+        },
+        "required": [
+          "sourceId",
+          "questions"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "propose_implementation_plan": {
+      "name": "propose_implementation_plan",
+      "label": "Propose an implementation plan for operator acceptance",
+      "loadMode": "essential",
+      "description": "Propose an implementation plan for operator acceptance. Inspect the pinned repository first. Cover every zero-based criterion in named work packages; dependency IDs must form an acyclic graph. This stops scoping for review and does not start coding.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "sourceId": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object",
+            "properties": {
+              "schemaVersion": {
+                "type": "integer",
+                "enum": [
+                  1
+                ]
+              },
+              "goal": {
+                "type": "string"
+              },
+              "scope": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "exclusions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "assumptions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "decisions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "workPackages": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "dependsOn": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "outputs": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "criteria": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 0
+                      }
+                    },
+                    "validation": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "dependsOn",
+                    "outputs",
+                    "criteria",
+                    "validation"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1,
+                "maxItems": 50
+              }
+            },
+            "required": [
+              "schemaVersion",
+              "goal",
+              "scope",
+              "exclusions",
+              "assumptions",
+              "decisions",
+              "workPackages"
+            ],
+            "additionalProperties": false
+          },
+          "requirements": {
+            "type": "object",
+            "properties": {
+              "brief": {
+                "type": "string"
+              },
+              "criteria": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "brief",
+              "criteria"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "sourceId",
+          "content"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "choreography_status": {
+      "name": "choreography_status",
+      "label": "Choreography status",
+      "loadMode": "essential",
+      "description": "Read staged assignments, package states, reports, exchanges and closure blockers. No state implies a running process.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      }
+    },
+    "propose_choreography": {
+      "name": "propose_choreography",
+      "label": "Propose choreography",
+      "loadMode": "essential",
+      "description": "Coordinator: bind every accepted work package to a staged writer/navigator pair, documentation, applicable UI/diagnosis and later independent reviewer. No agents start. Use revision 0 initially; schedule before propose_team.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "schedule": {
+            "type": "object",
+            "properties": {
+              "uiRequired": {
+                "type": "boolean"
+              },
+              "diagnosisReason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "assignments": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "roleId": {
+                      "type": "string"
+                    },
+                    "responsibility": {
+                      "type": "string",
+                      "enum": [
+                        "writer",
+                        "navigator",
+                        "ui",
+                        "diagnosis",
+                        "documentation",
+                        "reviewer",
+                        "reporter",
+                        "consultant"
+                      ]
+                    },
+                    "stage": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "packages": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "writes": {
+                      "type": "boolean"
+                    },
+                    "rationale": {
+                      "type": "string"
+                    },
+                    "input": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "roleId",
+                    "responsibility",
+                    "stage",
+                    "packages",
+                    "writes",
+                    "rationale",
+                    "input"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "uiRequired",
+              "diagnosisReason",
+              "assignments"
+            ],
+            "additionalProperties": false
+          },
+          "reopenPackages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For a successor schedule after all current specialists retire: affected completed package IDs. Use fresh assignment names. Writing and package reopen still require an authorized rework claim."
+          }
+        },
+        "required": [
+          "revision",
+          "schedule"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "record_package": {
+      "name": "record_package",
+      "label": "Record package",
+      "loadMode": "essential",
+      "description": "Record a source-bound contribution report or coordinator lifecycle decision. Start after both pair assignments are admitted. Reports contain repository artifact paths and SHA-256 from repository_read. Documentation reports need changed or no_change with reason. Complete only after all reports and delivered pair resolution. Reopen requires an authorized rework writer.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "packageId": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "start",
+              "block",
+              "resolve",
+              "report",
+              "complete",
+              "reopen"
+            ]
+          },
+          "summary": {
+            "type": "string"
+          },
+          "artifacts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "sha256": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "path",
+                "sha256"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "documentation": {
+            "type": "object",
+            "properties": {
+              "disposition": {
+                "type": "string",
+                "enum": [
+                  "changed",
+                  "no_change"
+                ]
+              },
+              "reason": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "disposition",
+              "reason"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "revision",
+          "packageId",
+          "kind",
+          "summary",
+          "artifacts"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "pair_exchange": {
+      "name": "pair_exchange",
+      "label": "Pair exchange",
+      "loadMode": "essential",
+      "description": "Queue a structured exchange for external Mail: writer approach to navigator, navigator challenge to writer, writer response to navigator, coordinator resolution to navigator. The returned receipt confirms durable intent only; inspect choreography_status for external and runner delivery. Read current revision; reference delivered challenge/response IDs. Cite concrete source/artifact, counterexample and proposed change or reasoned resolution. A pending or stored message is not a received/resolved concern.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "packageId": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "approach",
+              "challenge",
+              "response",
+              "resolution"
+            ]
+          },
+          "to": {
+            "type": "string"
+          },
+          "challengeId": {
+            "type": "string"
+          },
+          "responseId": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "artifact": {
+            "type": "string"
+          },
+          "proposedChange": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "revision",
+          "packageId",
+          "kind",
+          "to",
+          "body",
+          "artifact",
+          "proposedChange"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "checkpoint_implementation": {
+      "name": "checkpoint_implementation",
+      "label": "Checkpoint implementation",
+      "loadMode": "essential",
+      "description": "Current writer: request a stopped Git checkpoint and ownership handoff to the named scheduled writing successor. This creates no candidate. Send reports and resolve pair exchanges first. Stop issuing tools and end your turn after success; Crewroom stops/reconciles every process before committing and releasing writes.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "string"
+          },
+          "successor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "summary",
+          "successor"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "groups": {
+    "common": [
+      "send_message"
+    ],
+    "team": [
+      "list_roles",
+      "propose_team",
+      "steering_receipt"
+    ],
+    "learning": [
+      "propose_learning"
+    ],
+    "refinement": [
+      "steering_receipt-2",
+      "propose_refinement"
+    ],
+    "command": [
+      "run_command"
+    ],
+    "publication-0": [
+      "publication_status"
+    ],
+    "coding-0-0": [
+      "coding_status",
+      "check_output",
+      "repository_read",
+      "repository_search",
+      "write_file",
+      "edit_file",
+      "continue_target_conflict",
+      "finish_implementation",
+      "submit_review"
+    ],
+    "research-0-0": [
+      "submit_research_artifact"
+    ],
+    "coding-0-1": [
+      "coding_status",
+      "check_output",
+      "repository_read",
+      "repository_search",
+      "write_file",
+      "edit_file",
+      "continue_target_conflict",
+      "finish_implementation",
+      "submit_review",
+      "run_check",
+      "run_shell"
+    ],
+    "research-0-1": [
+      "repository_read-2",
+      "repository_search-2",
+      "submit_research_artifact"
+    ],
+    "publication-1": [
+      "publication_status",
+      "publish_change"
+    ],
+    "coding-1-0": [
+      "coding_status",
+      "check_output",
+      "repository_read",
+      "repository_search",
+      "claim_implementation",
+      "assign_review"
+    ],
+    "research-1-0": [
+      "submit_research_artifact",
+      "request_research_completion"
+    ],
+    "coding-1-1": [
+      "coding_status",
+      "check_output",
+      "repository_read",
+      "repository_search",
+      "claim_implementation",
+      "assign_review",
+      "run_check"
+    ],
+    "research-1-1": [
+      "repository_read-2",
+      "repository_search-2",
+      "submit_research_artifact",
+      "request_research_completion"
+    ],
+    "jira-0-0-0": [
+      "jira_updates"
+    ],
+    "jira-0-0-1": [
+      "jira_updates"
+    ],
+    "jira-0-1-0": [
+      "jira_updates"
+    ],
+    "jira-0-1-1": [
+      "jira_updates"
+    ],
+    "jira-1-0-0": [
+      "jira_updates",
+      "jira_report"
+    ],
+    "jira-1-0-1": [
+      "jira_updates",
+      "jira_report"
+    ],
+    "jira-1-1-0": [
+      "jira_updates",
+      "jira_report-2"
+    ],
+    "jira-1-1-1": [
+      "jira_updates",
+      "jira_report-3"
+    ],
+    "playbook": [
+      "playbook_status",
+      "propose_playbook",
+      "record_playbook_step"
+    ],
+    "intake": [
+      "repository_read-2",
+      "repository_search-2",
+      "ask_intake_questions",
+      "propose_implementation_plan"
+    ],
+    "choreography-1": [
+      "choreography_status",
+      "propose_choreography",
+      "record_package",
+      "pair_exchange"
+    ],
+    "choreography-0": [
+      "choreography_status",
+      "record_package",
+      "pair_exchange",
+      "checkpoint_implementation"
+    ]
+  }
+}

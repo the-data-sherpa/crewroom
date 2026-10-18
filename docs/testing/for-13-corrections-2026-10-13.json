@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "issue": "FOR-13",
+  "date": "2026-10-13",
+  "status": "accepted_with_recorded_limits",
+  "implementationCommit": "32177822bd3bd930546ae7101ca87d65b5789513",
+  "testedProductionRevision": "a80ade02b821c228a96c006021ef1dcda192e222",
+  "record": {
+    "path": "docs/testing/corrections/replay-before-revalidation.json",
+    "sha256": "d73f46f52384703b01e78cd50d7602cf94fc1697a8b3faf667a9d37e8896b373"
+  },
+  "claimSha256": "a6be6ea4c92f5a0c5d03083b2f8913b88e0ecb676cf3bcfdd75d60aaeb6caf6d",
+  "validation": {
+    "outcome": "verified",
+    "for13Gate": true,
+    "recurrenceAssessment": {
+      "distinctResolvedOccurrences": 2,
+      "classification": "recurring",
+      "review": "bound"
+    },
+    "enforcementProof": {
+      "classification": "resolved",
+      "review": "bound"
+    },
+    "receipt": {
+      "path": ".crewroom/test-results/for13/validation-01.json",
+      "sha256": "9ee53d4da51708e66d076cdae85d31f35e41e75a1b02431990e691fe0d72f6c6"
+    }
+  },
+  "historicalProof": {
+    "path": "docs/testing/for13-historical-replay-2026-10-13.json",
+    "sha256": "221d9cf4941faeda3985bff67aeafda99fb4eb5bddfbc76cb71f70fbe4716c55"
+  },
+  "mutationTrial": {
+    "path": "docs/testing/mutations/artifacts/receipt-2026-10-13.json",
+    "sha256": "468339dda605632b7a33554eff45e096e55f25560891790bdcb0d77b315605d4"
+  },
+  "checks": [
+    {
+      "command": "PATH=\"$HOME/.local/share/mise/installs/node/26/bin:$PATH\" node --import tsx --test --test-reporter=tap --test-name-pattern \"^R8: replaying a proposal tool call returns the saved proposal even after the target changed$\" tests/learning.test.ts",
+      "exitCode": 0,
+      "selectedTests": 1,
+      "passed": 1,
+      "log": "r8-replay.tap",
+      "logSha256": "bf9a9c979dbafe7b0139e9a754be6936ed21b1a68d76d78f8866a7c68816a64d"
+    },
+    {
+      "command": "PATH=\"$HOME/.local/share/mise/installs/node/26/bin:$PATH\" npm run build",
+      "exitCode": 0,
+      "log": "build.log",
+      "logSha256": "89d6ad0d5b787369488570a02955ba64c90df90b4109cc0e46cb927d5c5f8eec",
+      "limitation": "Repository tsc excludes scripts/rust/**/*.ts; native fixtures require separate execution."
+    },
+    {
+      "command": "python3 -m unittest discover -s scripts -p test_verify_corrections.py",
+      "exitCode": 0,
+      "passed": 9,
+      "log": "validator-tests.log",
+      "logSha256": "74b70a1fb9137dcf7261f6d8ef6ebf921a0408e8ba348b781b0b6b1da8ff881d"
+    },
+    {
+      "command": "python3 -m unittest discover -s scripts -p test_mutation_trial.py",
+      "exitCode": 0,
+      "passed": 8,
+      "log": "mutation-tests.log",
+      "logSha256": "b7e0c314cbca2f34600a3c6fe80915a9491c2aeaf663b83e66aa1f106f4d5d60"
+    }
+  ],
+  "integrationReceipt": {
+    "path": ".crewroom/test-results/for13/integration/checks.json",
+    "sha256": "dc9e825c1f31a169dd725a052ff75be3193c2ab1aaaf299cd5720621d8d290f8"
+  },
+  "helperSources": {
+    "scripts/verify-corrections.py": "9474db7267e28c57e9567fc20de83abf94dbf2eda79239ab1c46d1b56464fa18",
+    "scripts/test_verify_corrections.py": "ce1bbcd475a10bcd59d14302e72ac764a38bf79a16d82c10711a6fcdf2cf0fd6",
+    "scripts/mutation-trial.py": "63f092c71b3e15a1b2658e6f28a1b723b0eac43fff7d9810317823e8b0a09ca9",
+    "scripts/test_mutation_trial.py": "6cc63dc6aa56a1aba9f541d164458a54fe4abc8522488dd22b677b8e22ef0de9"
+  },
+  "runtimeFixtures": {
+    "scripts/rust/evidence.test.ts": "fe7559e06af3ccedc7a7740f857fb05989a72a914fe4b55dd9bc7957d53baf50",
+    "scripts/rust/correction-replay.test.ts": "177b4c5a2ab0f4617503da1698c15e26c622a922dbf2b241ba873e2e23470728"
+  },
+  "independentReview": {
+    "report": {
+      "path": ".crewroom/test-results/for13/integration/independent-review.md",
+      "sha256": "4e8d96aa82b364c1531a636626d449dc7b1a1b820aa548c2d40c4a9595e2b7d6"
+    },
+    "claimReview": {
+      "path": ".crewroom/test-results/for13/evidence/review-01.json",
+      "sha256": "c4dc25cf67a464f30eddb361aae900de1ef1d55189974233fa84fe0508be99f1"
+    },
+    "reviewer": {
+      "identity": "/root/independent_review (separate reviewer; no FOR-13 implementation authorship)",
+      "independent": true
+    },
+    "reviewedImplementation": "32177822bd3bd930546ae7101ca87d65b5789513 plus the exact corrected symbol/authentication claim wording",
+    "outstandingFindings": 0,
+    "correctedFindings": [
+      "Name actual Workflow::choreography_tool coding/package symbol.",
+      "Attribute coordinator authentication to surrounding request path, not Learning.propose."
+    ]
+  },
+  "authority": {
+    "unchangedProductionGitObjects": {
+      "crates": "4813cbe355dfb3c7cf800e4efae11fd28b3ba4f0",
+      "server": "08812fa4a3e838d5c5cf9169be63c55b311a661e",
+      "src": "8273b89ae375fa9bbced374f1807515e3039b06c",
+      "Cargo.toml": "f2f3d1876346ff31e3404e05749365a3cf0635fb",
+      "Cargo.lock": "5ffed0a2b04fc975a84d2508b27411788238d746",
+      "package.json": "42c9d722ded82d4df3a1dc16d7db3802a048984a",
+      "package-lock.json": "f4ad6e6190aa092908b3cc79fc33b5ab3261d113"
+    },
+    "inspection": "The validator executes fixed read-only Git plumbing and creates only an explicitly requested new receipt. Mutation patches execute only in disposable checkouts. No S7 proposal/adoption, role/guidance/configuration change, assignment mutation, queue admission or new readiness authority.",
+    "newProductChecksNeeded": false
+  },
+  "mutationSummary": {
+    "initial": {
+      "M1": "killed",
+      "M2": "survived",
+      "M3": "killed",
+      "M4": "killed",
+      "M5": "survived"
+    },
+    "survivors": "Both are independent-review-confirmed selected-test gaps, not equivalent changes.",
+    "improvements": [
+      "Reject false recorded byte count while content/hash remain valid.",
+      "Accept and roundtrip exactly 4 MiB."
+    ],
+    "recheck": {
+      "original": "passed",
+      "M2": "killed",
+      "M5": "killed"
+    },
+    "selectedExecutions": 9,
+    "cumulativeWallSeconds": 146.916,
+    "unresolvedOwnedChildren": 0
+  },
+  "limits": [
+    "R8 occurrence authenticity is limited to the pinned checked-in independent-review summary; original transcript and bad executable were not recovered, and exact observation time/affected revision remain unknown.",
+    "Review independently inspected existing fresh execution artifacts and source bindings; it did not rerun the expensive historical builds or daemon proof.",
+    "Historical/current proof is local scripted inference/Mail with real daemon/process/Git behavior; it does not establish live provider delivery, all authorization/idempotency paths, native UI behavior or platform certification.",
+    "The legitimate and payload-conflict cases are assertions in one selected successful execution, not two executions.",
+    "The validator binds retained review evidence but cannot authenticate reviewer identity; no fabricated S7 proposal, operator adoption or new production enforcement is claimed.",
+    "No production-domain or user-flow changes: full domain/browser/GPUI acceptance was not repeated. Runtime TypeScript fixture files are excluded from tsc and were executed directly.",
+    "Mutation results are exactly five reviewed source patches and two justified assertion improvements, not a project-wide score or a newly found product defect.",
+    "Two historical evidence-copy setup failures were retained and corrected with verified inventories; no extra application executions were substituted.",
+    "Raw binaries, process/state receipts and logs are private retained evidence; missing private sources make the validator incomplete on another machine."
+  ],
+  "nextIssue": "FOR-14"
+}

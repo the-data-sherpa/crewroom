@@ -1,0 +1,41 @@
+{
+  "issue": "FOR-18",
+  "observedAt": "2026-10-14T22:04:14.415003+00:00",
+  "scope": "Operational recovery of an empty Linux installation using the existing packaged release; no production changes, interactive workflow or terminal acceptance.",
+  "packageSourceRevision": "fdb68d2f0ba5fd9bfe8e9edc79f803bd9412a48b",
+  "checkoutRevisionAtValidation": "a811e494afe4ab73e1f255ffa0a5a8e58bf92d54",
+  "binarySha256": {
+    "crewroom": "b9d86da62819cb7ea95d7b75f10114ac9ff243708c1a8112c4ef1c2516a835cf",
+    "crewroom-host": "bb2c3a45daa1de4507cc834de081578743d5418724be34a378ca3024d69f0d51",
+    "crewroom-launcher": "87191c6f960f017f162ee5049f2a23e1abceac3bd7984437fe8488bc9883b3b2",
+    "crewroom-process": "deca3ed3adb106cc2e4370eb4640a4d817279e48db22248518f947fd147656a8",
+    "crewroomd": "f7f2b24e24bcf0e0394ca1a16091d4b159db894b1e4b28cb9d346ed8ddbfb276"
+  },
+  "reproduction": {
+    "occupiedPort": 4318,
+    "repeatedFailures": 2,
+    "error": "Address already in use (os error 98)",
+    "isolatedAvailablePort": 4319,
+    "authenticatedReadinessPassed": true,
+    "disposableChildReaped": true,
+    "disposableDescriptorRemoved": true
+  },
+  "recovery": {
+    "loopbackPort": 4319,
+    "authenticatedHealth": true,
+    "workspaceCounts": {
+      "tasks": 0,
+      "runs": 0
+    },
+    "headlessReopenReusedSamePid": true,
+    "desktopWindowMapped": true,
+    "desktopStderrEmpty": true,
+    "originalListenerIdentityUnchanged": true
+  },
+  "limitations": [
+    "The original port-4318 installation remains running.",
+    "The existing launcher still defaults to port 4318 on a stopped installation; retain --port 4319 for this installation.",
+    "No GUI interaction, embedded terminal, agent execution or provider delivery was exercised.",
+    "FOR-17 history preparation remains separate; original source revision identifiers refer to the package receipt."
+  ]
+}

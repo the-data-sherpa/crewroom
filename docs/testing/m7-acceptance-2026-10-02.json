@@ -1,0 +1,2583 @@
+{
+  "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+  "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+  "scope": "Local release acceptance. All model, Jira and Bitbucket responses in these jobs are scripted; the retained live pilot is separate evidence.",
+  "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+  "manifestSha256": "ffba2737484da483edced799e126915cad70ed8e5401e3e64ffbdb136f676d52",
+  "commands": {
+    "domain": {
+      "command": [
+        "npm",
+        "test"
+      ],
+      "log": "p00-b5a4.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "7f9dc76b00c3811ea0da65b5f0e8f1c4af454498b5af54ed8b6e42704696b965",
+      "status": "passed",
+      "startedAt": "2026-10-02T06:48:41.754570+00:00",
+      "exitCode": 0,
+      "finishedAt": "2026-10-02T06:59:44.465568+00:00"
+    },
+    "build": {
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "log": "p01-ee52.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "bbc99f5d37bcca9136b31190fff05db45b61b4f5085e19d11a4ffac74779f2b0",
+      "status": "passed",
+      "startedAt": "2026-10-02T06:59:44.496444+00:00",
+      "exitCode": 0,
+      "finishedAt": "2026-10-02T06:59:46.286690+00:00"
+    },
+    "browser": {
+      "command": [
+        "npm",
+        "run",
+        "test:e2e"
+      ],
+      "log": "p02-1264.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "95e87e71003541fe0c91961024bf98bcdcb548a7c10d83ffd5555f8cc028ec48",
+      "status": "passed",
+      "startedAt": "2026-10-02T06:59:46.318242+00:00",
+      "exitCode": 0,
+      "finishedAt": "2026-10-02T07:01:30.797975+00:00"
+    },
+    "small": {
+      "command": [
+        "python3",
+        "scripts/test-application-runtime.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p03-ecdb",
+        "--coding",
+        "simple",
+        "--delivery"
+      ],
+      "log": "p03-ecdb.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "3bf53bbbd031c39d571da4c2b57fcdc6b08708b4be80674f363842b8b6759fcf",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:01:30.829100+00:00",
+      "exitCode": 0,
+      "report": "p03-ecdb/report.json",
+      "finishedAt": "2026-10-02T07:02:26.127633+00:00"
+    },
+    "rework": {
+      "command": [
+        "python3",
+        "scripts/test-application-runtime.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p04-854c",
+        "--coding",
+        "rework"
+      ],
+      "log": "p04-854c.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "c530686dbe7d9ab4d83ff4d04b5d9f6647869e33ec8bb2510cc6d783ddb73f9d",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:02:26.160005+00:00",
+      "exitCode": 0,
+      "report": "p04-854c/report.json",
+      "finishedAt": "2026-10-02T07:03:12.862425+00:00"
+    },
+    "team": {
+      "command": [
+        "python3",
+        "scripts/test-application-runtime.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p05-6a3b",
+        "--team-size",
+        "3",
+        "--rotate"
+      ],
+      "log": "p05-6a3b.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "3c5c4e498b3bc04e7962ebf0e266d4a3dc1477056c536a870e5bbf76ff019f12",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:03:12.892911+00:00",
+      "exitCode": 0,
+      "report": "p05-6a3b/report.json",
+      "finishedAt": "2026-10-02T07:03:41.344670+00:00"
+    },
+    "roundtrip": {
+      "command": [
+        "python3",
+        "scripts/test-application-runtime.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p06-fa96"
+      ],
+      "log": "p06-fa96.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "2631301d6ad9b465fcb2961f2414c49eeb27930c25e22cfd3400d8d6439c4050",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:03:41.375204+00:00",
+      "exitCode": 0,
+      "report": "p06-fa96/report.json",
+      "finishedAt": "2026-10-02T07:03:57.305852+00:00"
+    },
+    "specialist": {
+      "command": [
+        "python3",
+        "scripts/test-application-runtime.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p07-a8a0",
+        "--fault",
+        "specialist"
+      ],
+      "log": "p07-a8a0.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "7691a6ad2bff3a25b872f2aca28b420ebfe91f56aae8d49bf5e61712bca425e3",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:03:57.336309+00:00",
+      "exitCode": 0,
+      "report": "p07-a8a0/report.json",
+      "finishedAt": "2026-10-02T07:04:19.380649+00:00"
+    },
+    "insert": {
+      "command": [
+        "python3",
+        "scripts/test-application-runtime.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p08-ebb4",
+        "--coding",
+        "simple",
+        "--coding-fault",
+        "insert"
+      ],
+      "log": "p08-ebb4.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "ee8bfaa34e0467f124901ea53fd0c5ca6fd8eafa8831a478291c3a282008ff4e",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:04:19.411711+00:00",
+      "exitCode": 0,
+      "report": "p08-ebb4/report.json",
+      "finishedAt": "2026-10-02T07:04:53.746346+00:00"
+    },
+    "insert-restart": {
+      "command": [
+        "python3",
+        "scripts/test-application-runtime.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p09-3c40",
+        "--team-size",
+        "1",
+        "--team-fault",
+        "after-apply",
+        "--operator-insertion"
+      ],
+      "log": "p09-3c40.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "9657c6fa9351c5ad71ae6b7441de355770502ef6cd7b24cf0e30fa9f2f061b01",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:04:53.777090+00:00",
+      "exitCode": 0,
+      "report": "p09-3c40/report.json",
+      "finishedAt": "2026-10-02T07:05:07.675741+00:00"
+    },
+    "commit-restart": {
+      "command": [
+        "python3",
+        "scripts/test-application-runtime.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p10-d4dd",
+        "--coding",
+        "simple",
+        "--coding-fault",
+        "after-commit"
+      ],
+      "log": "p10-d4dd.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "e70072b227df4977ede491b7a6e25e18e8f00fc976de9597720108de170ea46a",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:05:07.705785+00:00",
+      "exitCode": 0,
+      "report": "p10-d4dd/report.json",
+      "finishedAt": "2026-10-02T07:05:32.867490+00:00"
+    },
+    "model-guard": {
+      "command": [
+        "python3",
+        "scripts/test-application-model-guard.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p11-7de9"
+      ],
+      "log": "p11-7de9.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "3277289025095b0a73180efebe20ec1ca635dc6cfe64b3952561475d661fd093",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:05:32.897606+00:00",
+      "exitCode": 0,
+      "report": "p11-7de9/report.json",
+      "finishedAt": "2026-10-02T07:05:43.455340+00:00"
+    },
+    "session": {
+      "command": [
+        "python3",
+        "scripts/test-application-continuity.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p12-f0de",
+        "--scenario",
+        "session"
+      ],
+      "log": "p12-f0de.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "70d001f30b0c59559601aa293f7b5eeb3318d53ceff23023f02b72c3162a9e18",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:05:43.486363+00:00",
+      "exitCode": 0,
+      "report": "p12-f0de/report.json",
+      "finishedAt": "2026-10-02T07:05:56.420579+00:00"
+    },
+    "first-turn": {
+      "command": [
+        "python3",
+        "scripts/test-application-continuity.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p13-6b25",
+        "--scenario",
+        "first-turn"
+      ],
+      "log": "p13-6b25.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "98ce4c566382b2843097198e6ef604fc69d624637ae1e8b872c4a7b793fbd9dd",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:05:56.450903+00:00",
+      "exitCode": 0,
+      "report": "p13-6b25/report.json",
+      "finishedAt": "2026-10-02T07:06:09.104328+00:00"
+    },
+    "cycles": {
+      "command": [
+        "python3",
+        "scripts/test-application-continuity.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p14-7d0c",
+        "--scenario",
+        "cycles"
+      ],
+      "log": "p14-7d0c.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "3f3533c67c5e9bc2fc1b39bcdb0a1d710af098eebce19f979e9351a301325e1b",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:06:09.138316+00:00",
+      "exitCode": 0,
+      "report": "p14-7d0c/report.json",
+      "finishedAt": "2026-10-02T07:06:24.086895+00:00"
+    },
+    "steering": {
+      "command": [
+        "python3",
+        "scripts/test-application-continuity.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p15-34ed",
+        "--scenario",
+        "steering"
+      ],
+      "log": "p15-34ed.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "870a0a2bd050a3e8ca61dd26f1cd98340e8ddca391c229064f4811f6766fb8fb",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:06:24.118955+00:00",
+      "exitCode": 0,
+      "report": "p15-34ed/report.json",
+      "finishedAt": "2026-10-02T07:06:35.018054+00:00"
+    },
+    "lost-receipt": {
+      "command": [
+        "python3",
+        "scripts/test-application-continuity.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p16-81e5",
+        "--scenario",
+        "lost-receipt"
+      ],
+      "log": "p16-81e5.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "9a2fcb9192e72a0d1918510a17b01f86694116224bf60a29c260fca0a9137a7d",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:06:35.047874+00:00",
+      "exitCode": 0,
+      "report": "p16-81e5/report.json",
+      "finishedAt": "2026-10-02T07:06:44.974783+00:00"
+    },
+    "adoption": {
+      "command": [
+        "python3",
+        "scripts/test-application-continuity.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p17-5f8c",
+        "--scenario",
+        "adoption"
+      ],
+      "log": "p17-5f8c.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "c476b7241e7826278c461a3e239b3aa93d27fb933eef8e558793fa3fef1b37a9",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:06:45.005228+00:00",
+      "exitCode": 0,
+      "report": "p17-5f8c/report.json",
+      "finishedAt": "2026-10-02T07:06:56.849749+00:00"
+    },
+    "refinement": {
+      "command": [
+        "python3",
+        "scripts/test-application-continuity.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p18-1a2b",
+        "--scenario",
+        "refinement"
+      ],
+      "log": "p18-1a2b.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "83b8d21189c7c1c5da8c0b1b1eb9a2b34c119e73852c015b8ab991ab040f2d1c",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:06:56.880037+00:00",
+      "exitCode": 0,
+      "report": "p18-1a2b/report.json",
+      "finishedAt": "2026-10-02T07:07:11.441722+00:00"
+    },
+    "research": {
+      "command": [
+        "python3",
+        "scripts/test-application-continuity.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p19-ed13",
+        "--scenario",
+        "research"
+      ],
+      "log": "p19-ed13.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "a8cae6195298848ee10504ed94577cb5b6a83e3de60297e3ca60b7151227ece6",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:07:11.471972+00:00",
+      "exitCode": 0,
+      "report": "p19-ed13/report.json",
+      "finishedAt": "2026-10-02T07:07:29.178526+00:00"
+    },
+    "queue": {
+      "command": [
+        "python3",
+        "scripts/test-application-continuity.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p20-1b9a",
+        "--scenario",
+        "queue"
+      ],
+      "log": "p20-1b9a.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "7cf9332c9baa520b5e435ffc5230c5e5b30360bcb421ef9d884b181a7b6ca61f",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:07:29.209769+00:00",
+      "exitCode": 0,
+      "report": "p20-1b9a/report.json",
+      "finishedAt": "2026-10-02T07:07:47.865703+00:00"
+    },
+    "cancel-continuation": {
+      "command": [
+        "python3",
+        "scripts/test-application-continuity.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p21-f7cc",
+        "--scenario",
+        "cancel-continuation"
+      ],
+      "log": "p21-f7cc.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "768ebbbd919c050bc752f12b7251b59cf46847e7f506e671b81c1863f62e7244",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:07:47.897392+00:00",
+      "exitCode": 0,
+      "report": "p21-f7cc/report.json",
+      "finishedAt": "2026-10-02T07:08:01.076422+00:00"
+    },
+    "interrupt-pause": {
+      "command": [
+        "python3",
+        "scripts/test-application-interruption.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p22-b4a7",
+        "--fault",
+        "pause"
+      ],
+      "log": "p22-b4a7.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "9602ebb578d02c12ad4660bb2a229f5ce879baadc92c6d9bdfefcfe434af05a6",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:08:01.109006+00:00",
+      "exitCode": 0,
+      "report": "p22-b4a7/report.json",
+      "finishedAt": "2026-10-02T07:08:11.888092+00:00"
+    },
+    "interrupt-host": {
+      "command": [
+        "python3",
+        "scripts/test-application-interruption.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p23-0924",
+        "--fault",
+        "host"
+      ],
+      "log": "p23-0924.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "b4facd91346e4a95c996324b92f188d5bcda436f55d3b65e00bdd90ff1b8688f",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:08:11.919512+00:00",
+      "exitCode": 0,
+      "report": "p23-0924/report.json",
+      "finishedAt": "2026-10-02T07:08:21.718875+00:00"
+    },
+    "interrupt-supervisor": {
+      "command": [
+        "python3",
+        "scripts/test-application-interruption.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p24-fffc",
+        "--fault",
+        "supervisor"
+      ],
+      "log": "p24-fffc.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "f590589c3f3c569b2b7d45edbac93cdfdf5a512aee51703a6dd992d030397f69",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:08:21.751061+00:00",
+      "exitCode": 0,
+      "report": "p24-fffc/report.json",
+      "finishedAt": "2026-10-02T07:08:33.312450+00:00"
+    },
+    "interrupt-detached": {
+      "command": [
+        "python3",
+        "scripts/test-application-interruption.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p25-d693",
+        "--fault",
+        "detached"
+      ],
+      "log": "p25-d693.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "f5039cfd28354511ce7f4d9b3a7e9af1f06a47b856f94216eda4f9c8b771e088",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:08:33.342502+00:00",
+      "exitCode": 0,
+      "report": "p25-d693/report.json",
+      "finishedAt": "2026-10-02T07:08:44.131158+00:00"
+    },
+    "interrupt-budget": {
+      "command": [
+        "python3",
+        "scripts/test-application-interruption.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p26-a69b",
+        "--fault",
+        "budget"
+      ],
+      "log": "p26-a69b.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "2be8d00f61686c061f1b66b7cc78b3dcebf956a417d1c851c7abd9efa68a7ad6",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:08:44.173851+00:00",
+      "exitCode": 0,
+      "report": "p26-a69b/report.json",
+      "finishedAt": "2026-10-02T07:08:55.823244+00:00"
+    },
+    "mail": {
+      "command": [
+        "python3",
+        "scripts/test-application-mail.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p27-0a2d"
+      ],
+      "log": "p27-0a2d.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "6b685d9cea1ecb14c350f49807feb12f8f901e81ed9dbb9c1154d8c63e13a35b",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:08:55.853639+00:00",
+      "exitCode": 0,
+      "report": "p27-0a2d/report.json",
+      "finishedAt": "2026-10-02T07:09:20.703493+00:00"
+    },
+    "profiles": {
+      "command": [
+        "python3",
+        "scripts/test-omp-offline.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p28-1447"
+      ],
+      "log": "p28-1447.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "6aff6bdec27a522c3e10d4f7977732f6dec7444a4e7e159a1ded56cd1b30ca49",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:09:20.733644+00:00",
+      "exitCode": 0,
+      "report": "p28-1447/report.json",
+      "finishedAt": "2026-10-02T07:09:39.509057+00:00"
+    },
+    "harness": {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "scripts",
+        "-p",
+        "test_release_manifest.py"
+      ],
+      "log": "p29-88ef.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "668c2b2a018f5f14c1cb05bc47a734ab3b66f724a32f9fefbb9c9643dbfa7efd",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:09:39.541487+00:00",
+      "exitCode": 0,
+      "finishedAt": "2026-10-02T07:09:40.493578+00:00"
+    },
+    "reasoning": {
+      "command": [
+        "python3",
+        "scripts/test-application-runtime.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p30-2102",
+        "--coding",
+        "simple",
+        "--coding-fault",
+        "after-commit",
+        "--reasoning"
+      ],
+      "log": "p30-2102.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "3cee759bd3f86eb0d5b0eb14e03c9746ad74f82b01cd4e99f7a4db63a55e643a",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:09:40.523820+00:00",
+      "exitCode": 0,
+      "report": "p30-2102/report.json",
+      "finishedAt": "2026-10-02T07:10:05.828537+00:00"
+    },
+    "budget-resume": {
+      "command": [
+        "python3",
+        "scripts/test-application-continuity.py",
+        "--scenario",
+        "budget-resume",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p31-d8c8"
+      ],
+      "log": "p31-d8c8.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "a9e1da06e53f515e071759fb84c0a4d04c3d54abf2f409350cb00c068ce0aba7",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:10:05.860568+00:00",
+      "exitCode": 0,
+      "report": "p31-d8c8/report.json",
+      "finishedAt": "2026-10-02T07:10:20.584563+00:00"
+    },
+    "provider-matrix": {
+      "command": [
+        "python3",
+        "scripts/test-provider-matrix.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/r7g/p32-2595"
+      ],
+      "log": "p32-2595.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "7f4b6d4b8f1959f1f69433a3dc83c8571abb211dde5aa72b5588459b042d1d07",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:14:19.656059+00:00",
+      "exitCode": 0,
+      "report": "p32-2595/report.json",
+      "finishedAt": "2026-10-02T07:16:02.848228+00:00"
+    },
+    "send-crash": {
+      "command": [
+        "python3",
+        "scripts/test-application-runtime.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p33-7860",
+        "--fault",
+        "coordinator-send"
+      ],
+      "log": "p33-7860.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "ab289be81bfe8ac64e922585d7e01bc078638d483283e4309a4b336154c618a5",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:10:55.356052+00:00",
+      "exitCode": 0,
+      "report": "p33-7860/report.json",
+      "finishedAt": "2026-10-02T07:11:13.084867+00:00"
+    },
+    "complex": {
+      "command": [
+        "python3",
+        "scripts/test-application-runtime.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p34-acbf",
+        "--coding",
+        "complex"
+      ],
+      "log": "p34-acbf.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "897adbeb1e6fcb5e2a9063538887d235c7ef7733e1976d7923cb80280d3c1b21",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:11:13.117447+00:00",
+      "exitCode": 0,
+      "report": "p34-acbf/report.json",
+      "finishedAt": "2026-10-02T07:11:49.311086+00:00"
+    },
+    "target-drift": {
+      "command": [
+        "python3",
+        "scripts/test-application-runtime.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p35-2978",
+        "--coding",
+        "complex",
+        "--target-drift"
+      ],
+      "log": "p35-2978.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "7c0bb9050986a2ebc7e00744160f7ff4e66aced8f37ffddca18f288f240a8d9d",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:11:49.341552+00:00",
+      "exitCode": 0,
+      "report": "p35-2978/report.json",
+      "finishedAt": "2026-10-02T07:12:42.674124+00:00"
+    },
+    "authority": {
+      "command": [
+        "python3",
+        "scripts/test-authority.py",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p36-43af"
+      ],
+      "log": "p36-43af.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "f2c53af5c4cb35a5d192c54a16d9bca6837bcfca0ac78e09bdab1b18c89bee92",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:12:42.704484+00:00",
+      "exitCode": 0,
+      "report": "p36-43af/report.json",
+      "finishedAt": "2026-10-02T07:13:39.594760+00:00"
+    },
+    "owned-cleanup": {
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "--test",
+        "tests/container.integration.ts",
+        "tests/cleanup.integration.ts"
+      ],
+      "log": "p37-104f.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "1ac543552db0e346597344627cab1c4b2d644c0537743c7ddc9def38eb306460",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:13:39.626675+00:00",
+      "exitCode": 0,
+      "finishedAt": "2026-10-02T07:13:44.482107+00:00"
+    },
+    "interrupt-cancel": {
+      "command": [
+        "python3",
+        "scripts/test-application-interruption.py",
+        "--fault",
+        "cancel",
+        "--output",
+        "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final/p38-19af"
+      ],
+      "log": "p38-19af.log",
+      "source": "6e1913ab7484d9508cb2d5d16b2aa2a0cd9a78928d388c33f2e103712f0cef8f",
+      "head": "6b738547e5e345905da4b862c2581b7b9bc38022",
+      "candidate": "candidate-9fffc028428ba61b2f312ec5c9163781e82cb64b88b93386fab776b11ce67ce0.json",
+      "identity": "23b3a48ad69a052c99bdfd1ca5d1fa3100d4e33e10d5b190a0833205526823c8",
+      "status": "passed",
+      "startedAt": "2026-10-02T07:13:44.512585+00:00",
+      "exitCode": 0,
+      "report": "p38-19af/report.json",
+      "finishedAt": "2026-10-02T07:13:54.244144+00:00"
+    }
+  },
+  "cases": [
+    {
+      "id": "INT-01",
+      "coverage": "mapped",
+      "tests": [
+        "tests/store.test.ts",
+        "tests/jira-sync.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "INT-02",
+      "coverage": "mapped",
+      "tests": [
+        "tests/queue.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "INT-03",
+      "coverage": "mapped",
+      "tests": [
+        "tests/refinement.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "refinement",
+        "small"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "refinement": "passed",
+        "small": "passed"
+      }
+    },
+    {
+      "id": "INT-04",
+      "coverage": "mapped",
+      "tests": [
+        "tests/store.test.ts",
+        "tests/admission-adoption-review.test.ts",
+        "tests/admission-restart-review.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "INT-05",
+      "coverage": "mapped",
+      "tests": [
+        "tests/jira-sync.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "INT-06",
+      "coverage": "mapped",
+      "tests": [
+        "tests/store.test.ts",
+        "tests/repository-config.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "INT-07",
+      "coverage": "mapped",
+      "tests": [
+        "tests/research.test.ts",
+        "tests/research-no-repo.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "research"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "research": "passed"
+      }
+    },
+    {
+      "id": "INT-08",
+      "coverage": "mapped",
+      "tests": [
+        "tests/refinement.test.ts",
+        "tests/queue.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "ROL-01",
+      "coverage": "mapped",
+      "tests": [
+        "tests/assignments.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "team",
+        "small"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "team": "passed",
+        "small": "passed"
+      }
+    },
+    {
+      "id": "ROL-02",
+      "coverage": "mapped",
+      "tests": [
+        "tests/roles.test.ts",
+        "tests/insertion.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "insert-restart"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "insert-restart": "passed"
+      }
+    },
+    {
+      "id": "ROL-03",
+      "coverage": "mapped",
+      "tests": [
+        "tests/assignments.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "ROL-04",
+      "coverage": "mapped",
+      "tests": [
+        "tests/brief.test.ts",
+        "tests/assignments.test.ts",
+        "tests/release-contracts.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "team"
+      ],
+      "note": "Paired real repository instruction/check snapshots and SQLite transaction failure/corrupt journal boundaries are asserted in release-contracts.test.ts.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "team": "passed"
+      }
+    },
+    {
+      "id": "ROL-05",
+      "coverage": "mapped",
+      "tests": [
+        "tests/evidence.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "ROL-06",
+      "coverage": "mapped",
+      "tests": [
+        "tests/jira-delivery.test.ts",
+        "tests/research.test.ts",
+        "tests/repository-work.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "small"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "small": "passed"
+      }
+    },
+    {
+      "id": "ROL-07",
+      "coverage": "mapped",
+      "tests": [
+        "tests/brief.test.ts",
+        "tests/assignments.test.ts",
+        "tests/insertion.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "RTE-01",
+      "coverage": "mapped",
+      "tests": [
+        "tests/release-contracts.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "RTE-02",
+      "coverage": "mapped",
+      "tests": [
+        "tests/assignments.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "roundtrip",
+        "team",
+        "profiles"
+      ],
+      "note": "Pure application assignment coverage and current real OMP 57 profile turns; current production team/roundtrip harnesses verify heterogeneous and rotated admission. Scripted identities, not model quality.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "roundtrip": "passed",
+        "team": "passed",
+        "profiles": "passed"
+      }
+    },
+    {
+      "id": "RTE-03",
+      "coverage": "mapped",
+      "tests": [
+        "tests/release-contracts.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "roundtrip"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "roundtrip": "passed"
+      }
+    },
+    {
+      "id": "RTE-04",
+      "coverage": "mapped",
+      "tests": [
+        "tests/model-policy.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "RTE-05",
+      "coverage": "mapped",
+      "tests": [
+        "tests/model-policy.test.ts",
+        "tests/assignments.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "RTE-06",
+      "coverage": "mapped",
+      "tests": [
+        "tests/model-policy.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "model-guard"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "model-guard": "passed"
+      }
+    },
+    {
+      "id": "RTE-07",
+      "coverage": "mapped",
+      "tests": [
+        "tests/model-policy.test.ts",
+        "tests/provider-gateway.test.ts",
+        "tests/provider-gateway.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "reasoning",
+        "budget-resume"
+      ],
+      "note": "Serialized text is conservatively byte-budgeted; known opaque reasoning reserves provider-reported output from an assignment-scoped hash ledger, including replacement attempts. Unknown media/files/context references are held. OpenAI/Gemini replay is exercised in real OMP; Anthropic redacted replay is directly gateway-tested. Explicit Resume after an input-history budget rejection starts a fresh OMP session, retaining old history and steering.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "reasoning": "passed",
+        "budget-resume": "passed"
+      }
+    },
+    {
+      "id": "RTE-08",
+      "coverage": "mapped",
+      "tests": [
+        "tests/model-policy.test.ts",
+        "tests/provider-gateway.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "model-guard"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "model-guard": "passed"
+      }
+    },
+    {
+      "id": "RTE-09",
+      "coverage": "mapped",
+      "tests": [
+        "tests/runtime-fallback.test.ts",
+        "tests/model-policy.test.ts",
+        "tests/provider-gateway.test.ts",
+        "tests/provider-usage.test.ts",
+        "tests/e2e/history.spec.ts",
+        "scripts/provider-recovery-driver.ts"
+      ],
+      "jobs": [
+        "domain",
+        "browser",
+        "provider-matrix"
+      ],
+      "note": "Eleven real independent OMP failure scenarios with scripted providers: explicit compatible alternate attempts, missing/incompatible/exhausted fallback holds, authorization, throttling, timeout, disconnect, malformed and empty results. Recorded identity, fresh-session lineage, bounded cycles, revision readiness and history/usage are asserted.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "browser": "passed",
+        "provider-matrix": "passed"
+      }
+    },
+    {
+      "id": "RTE-10",
+      "coverage": "mapped",
+      "tests": [
+        "tests/release-contracts.test.ts",
+        "tests/insertion.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "RTE-11",
+      "coverage": "mapped",
+      "tests": [
+        "tests/release-contracts.test.ts",
+        "tests/provider-gateway.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "model-guard"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "model-guard": "passed"
+      }
+    },
+    {
+      "id": "RTE-12",
+      "coverage": "mapped",
+      "tests": [
+        "tests/runtime-fallback.test.ts",
+        "tests/model-policy.test.ts",
+        "tests/provider-gateway.test.ts",
+        "tests/provider-usage.test.ts",
+        "tests/e2e/history.spec.ts",
+        "scripts/provider-recovery-driver.ts"
+      ],
+      "jobs": [
+        "domain",
+        "browser",
+        "provider-matrix"
+      ],
+      "note": "Eleven real independent OMP failure scenarios with scripted providers: explicit compatible alternate attempts, missing/incompatible/exhausted fallback holds, authorization, throttling, timeout, disconnect, malformed and empty results. Recorded identity, fresh-session lineage, bounded cycles, revision readiness and history/usage are asserted.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "browser": "passed",
+        "provider-matrix": "passed"
+      }
+    },
+    {
+      "id": "MSG-01",
+      "coverage": "mapped",
+      "tests": [
+        "tests/store.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "roundtrip"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "roundtrip": "passed"
+      }
+    },
+    {
+      "id": "MSG-02",
+      "coverage": "mapped",
+      "tests": [
+        "tests/observation.test.ts",
+        "tests/live.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "roundtrip",
+        "mail"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "roundtrip": "passed",
+        "mail": "passed"
+      }
+    },
+    {
+      "id": "MSG-03",
+      "coverage": "mapped",
+      "tests": [
+        "tests/store.test.ts",
+        "tests/runtime.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "mail",
+        "lost-receipt"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "mail": "passed",
+        "lost-receipt": "passed"
+      }
+    },
+    {
+      "id": "MSG-04",
+      "coverage": "mapped",
+      "tests": [
+        "tests/store.test.ts",
+        "tests/runtime.test.ts",
+        "tests/release-contracts.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "specialist",
+        "mail"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "specialist": "passed",
+        "mail": "passed"
+      }
+    },
+    {
+      "id": "MSG-05",
+      "coverage": "mapped",
+      "tests": [
+        "tests/messaging.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "mail"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "mail": "passed"
+      }
+    },
+    {
+      "id": "MSG-06",
+      "coverage": "mapped",
+      "tests": [
+        "tests/runtime.test.ts",
+        "tests/steering.test.ts",
+        "tests/messaging.test.ts",
+        "scripts/mail-window-worker.ts"
+      ],
+      "jobs": [
+        "domain",
+        "lost-receipt",
+        "first-turn",
+        "mail"
+      ],
+      "note": "Five killed-process receive windows exercise durable acceptance, lost acknowledgement before/after transport commit and one keyed reply effect against real Rust Mail. The lost-receipt job separately verifies one real OMP prompt across controller loss and duplicate host input.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "lost-receipt": "passed",
+        "first-turn": "passed",
+        "mail": "passed"
+      }
+    },
+    {
+      "id": "MSG-07",
+      "coverage": "mapped",
+      "tests": [
+        "tests/messaging.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "mail"
+      ],
+      "note": "Real Rust Mail downtime and two restarts preserve pending intent and one logical delivery; expired unknown sends remain uncertain. HTTP read reconnect backoff is bounded in messaging.test.ts.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "mail": "passed"
+      }
+    },
+    {
+      "id": "MSG-08",
+      "coverage": "mapped",
+      "tests": [
+        "tests/store.test.ts",
+        "tests/assignments.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "roundtrip",
+        "authority"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "roundtrip": "passed",
+        "authority": "passed"
+      }
+    },
+    {
+      "id": "MSG-09",
+      "coverage": "mapped",
+      "tests": [
+        "tests/messaging.test.ts",
+        "tests/release-contracts.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "mail"
+      ],
+      "note": "Real HTTP 429 and 503 responses assert bounded request counts, exponential delays, Retry-After and no blind uncertain writes. Fake-clock idle bursts assert one observation per 1.5 seconds; pending count, oversized payload and forged fields are bounded.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "mail": "passed"
+      }
+    },
+    {
+      "id": "LIF-01",
+      "coverage": "mapped",
+      "tests": [
+        "tests/runtime.test.ts",
+        "tests/supervision-hosts.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "specialist"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "specialist": "passed"
+      }
+    },
+    {
+      "id": "LIF-02",
+      "coverage": "mapped",
+      "tests": [
+        "tests/runtime.test.ts",
+        "tests/repository-work.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "specialist",
+        "session",
+        "first-turn"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "specialist": "passed",
+        "session": "passed",
+        "first-turn": "passed"
+      }
+    },
+    {
+      "id": "LIF-03",
+      "coverage": "mapped",
+      "tests": [
+        "tests/admission-restart-review.test.ts",
+        "tests/scheduler-replay-holds.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "lost-receipt",
+        "send-crash"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "lost-receipt": "passed",
+        "send-crash": "passed"
+      }
+    },
+    {
+      "id": "LIF-04",
+      "coverage": "mapped",
+      "tests": [
+        "tests/processes.test.ts",
+        "tests/supervision-hosts.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "interrupt-supervisor"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "interrupt-supervisor": "passed"
+      }
+    },
+    {
+      "id": "LIF-05",
+      "coverage": "mapped",
+      "tests": [
+        "tests/processes.test.ts",
+        "tests/runtime.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "interrupt-pause",
+        "interrupt-detached"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "interrupt-pause": "passed",
+        "interrupt-detached": "passed"
+      }
+    },
+    {
+      "id": "LIF-06",
+      "coverage": "mapped",
+      "tests": [
+        "tests/runtime.test.ts",
+        "tests/cancel-continuation.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "cancel-continuation",
+        "interrupt-cancel"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "cancel-continuation": "passed",
+        "interrupt-cancel": "passed"
+      }
+    },
+    {
+      "id": "LIF-07",
+      "coverage": "mapped",
+      "tests": [
+        "tests/processes.test.ts",
+        "tests/http.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "interrupt-host"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "interrupt-host": "passed"
+      }
+    },
+    {
+      "id": "LIF-08",
+      "coverage": "mapped",
+      "tests": [
+        "tests/runtime.test.ts",
+        "tests/coding.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "cycles"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "cycles": "passed"
+      }
+    },
+    {
+      "id": "LIF-09",
+      "coverage": "mapped",
+      "tests": [
+        "tests/roles.test.ts",
+        "tests/processes.test.ts",
+        "tests/release-contracts.test.ts",
+        "tests/supervision-hosts.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "interrupt-host"
+      ],
+      "note": "Paired real repository instruction/check snapshots and SQLite transaction failure/corrupt journal boundaries are asserted in release-contracts.test.ts.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "interrupt-host": "passed"
+      }
+    },
+    {
+      "id": "QUE-01",
+      "coverage": "mapped",
+      "tests": [
+        "tests/runtime.test.ts",
+        "tests/assignments.test.ts",
+        "tests/coding-slot.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "team",
+        "queue"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "team": "passed",
+        "queue": "passed"
+      }
+    },
+    {
+      "id": "QUE-02",
+      "coverage": "mapped",
+      "tests": [
+        "tests/repository-work.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "QUE-03",
+      "coverage": "mapped",
+      "tests": [
+        "tests/coding-slot.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "queue"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "queue": "passed"
+      }
+    },
+    {
+      "id": "QUE-04",
+      "coverage": "mapped",
+      "tests": [
+        "tests/dependencies.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "queue"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "queue": "passed"
+      }
+    },
+    {
+      "id": "QUE-05",
+      "coverage": "mapped",
+      "tests": [
+        "tests/queue.test.ts",
+        "tests/coding-slot.test.ts",
+        "tests/queue-http.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "REP-01",
+      "coverage": "mapped",
+      "tests": [
+        "tests/repository-work.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "small"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "small": "passed"
+      }
+    },
+    {
+      "id": "REP-02",
+      "coverage": "mapped",
+      "tests": [
+        "tests/repository-work.test.ts",
+        "tests/cancel-continuation.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "REP-03",
+      "coverage": "mapped",
+      "tests": [
+        "tests/repository-work.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "commit-restart"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "commit-restart": "passed"
+      }
+    },
+    {
+      "id": "REP-04",
+      "coverage": "mapped",
+      "tests": [
+        "tests/target-refresh.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "REP-05",
+      "coverage": "mapped",
+      "tests": [
+        "tests/coding.test.ts",
+        "tests/repository-work.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "REP-06",
+      "coverage": "mapped",
+      "tests": [
+        "tests/evidence.test.ts",
+        "tests/coding.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "rework"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "rework": "passed"
+      }
+    },
+    {
+      "id": "EVD-01",
+      "coverage": "mapped",
+      "tests": [
+        "tests/evidence.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "small"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "small": "passed"
+      }
+    },
+    {
+      "id": "EVD-02",
+      "coverage": "mapped",
+      "tests": [
+        "tests/evidence.test.ts",
+        "tests/bitbucket.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "EVD-03",
+      "coverage": "mapped",
+      "tests": [
+        "tests/evidence.test.ts",
+        "tests/check-environment.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "rework"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "rework": "passed"
+      }
+    },
+    {
+      "id": "EVD-04",
+      "coverage": "mapped",
+      "tests": [
+        "tests/evidence.test.ts",
+        "tests/target-refresh.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "EVD-05",
+      "coverage": "mapped",
+      "tests": [
+        "tests/evidence.test.ts",
+        "tests/coding.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "rework"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "rework": "passed"
+      }
+    },
+    {
+      "id": "EVD-06",
+      "coverage": "mapped",
+      "tests": [
+        "tests/evidence.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "EVD-07",
+      "coverage": "mapped",
+      "tests": [
+        "tests/publication.test.ts",
+        "tests/scheduler-replay-holds.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "EVD-08",
+      "coverage": "mapped",
+      "tests": [
+        "tests/research.test.ts",
+        "tests/research-review-repair.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "research"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "research": "passed"
+      }
+    },
+    {
+      "id": "DEL-01",
+      "coverage": "mapped",
+      "tests": [
+        "tests/jira-delivery.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "small"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "small": "passed"
+      }
+    },
+    {
+      "id": "DEL-02",
+      "coverage": "mapped",
+      "tests": [
+        "tests/jira-delivery.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "DEL-03",
+      "coverage": "mapped",
+      "tests": [
+        "tests/jira-delivery.test.ts",
+        "tests/publication.test.ts",
+        "tests/publication-git.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "small"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "small": "passed"
+      }
+    },
+    {
+      "id": "DEL-04",
+      "coverage": "mapped",
+      "tests": [
+        "tests/publication.test.ts",
+        "tests/feedback-continuation.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "small"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "small": "passed"
+      }
+    },
+    {
+      "id": "DEL-05",
+      "coverage": "mapped",
+      "tests": [
+        "tests/feedback-continuation.test.ts",
+        "tests/dependencies.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "DEL-06",
+      "coverage": "mapped",
+      "tests": [
+        "tests/jira-sync.test.ts",
+        "tests/bitbucket.test.ts",
+        "tests/publication.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "DEL-07",
+      "coverage": "mapped",
+      "tests": [
+        "tests/jira-delivery.test.ts",
+        "tests/publication.test.ts",
+        "tests/publication-git.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "UI-01",
+      "coverage": "mapped",
+      "tests": [
+        "tests/e2e/workbench.spec.ts"
+      ],
+      "jobs": [
+        "browser"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "browser": "passed"
+      }
+    },
+    {
+      "id": "UI-02",
+      "coverage": "mapped",
+      "tests": [
+        "tests/e2e/steering.spec.ts"
+      ],
+      "jobs": [
+        "browser"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "browser": "passed"
+      }
+    },
+    {
+      "id": "UI-03",
+      "coverage": "mapped",
+      "tests": [
+        "tests/e2e/wall.spec.ts"
+      ],
+      "jobs": [
+        "browser"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "browser": "passed"
+      }
+    },
+    {
+      "id": "UI-04",
+      "coverage": "mapped",
+      "tests": [
+        "tests/e2e/insertion.spec.ts"
+      ],
+      "jobs": [
+        "browser"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "browser": "passed"
+      }
+    },
+    {
+      "id": "UI-05",
+      "coverage": "mapped",
+      "tests": [
+        "tests/e2e/history.spec.ts",
+        "tests/e2e/jira.spec.ts",
+        "tests/e2e/workbench.spec.ts"
+      ],
+      "jobs": [
+        "browser"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "browser": "passed"
+      }
+    },
+    {
+      "id": "UI-06",
+      "coverage": "mapped",
+      "tests": [
+        "tests/e2e/workbench.spec.ts",
+        "tests/e2e/repositories.spec.ts",
+        "tests/e2e/refinement.spec.ts",
+        "tests/e2e/cancel-continuation.spec.ts"
+      ],
+      "jobs": [
+        "browser"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "browser": "passed"
+      }
+    },
+    {
+      "id": "SEC-01",
+      "coverage": "mapped",
+      "tests": [
+        "tests/http.test.ts",
+        "tests/live.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "SEC-02",
+      "coverage": "mapped",
+      "tests": [
+        "tests/provider-gateway.test.ts",
+        "tests/repository-work.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "model-guard"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "model-guard": "passed"
+      }
+    },
+    {
+      "id": "SEC-03",
+      "coverage": "mapped",
+      "tests": [
+        "tests/store.test.ts",
+        "tests/repository-work.test.ts",
+        "tests/evidence.test.ts",
+        "scripts/test-authority.py",
+        "scripts/coding-driver.ts"
+      ],
+      "jobs": [
+        "domain",
+        "authority"
+      ],
+      "note": "Untrusted imported Jira text and a real peer message provoke denied merge, deploy, path escape and forged review tools; an existing foreign research attempt/recipient cannot be messaged using another run token.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "authority": "passed"
+      }
+    },
+    {
+      "id": "SEC-04",
+      "coverage": "mapped",
+      "tests": [
+        "tests/processes.test.ts",
+        "scripts/test-authority.py",
+        "scripts/coding-driver.ts"
+      ],
+      "jobs": [
+        "authority",
+        "roundtrip",
+        "interrupt-detached"
+      ],
+      "note": "Controller, fake providers, OMP and Mail inherit an OS network guard; denied external/unallocated-loopback probes and owned listener inventory are recorded. Container child egress is denied.",
+      "status": "passed",
+      "execution": {
+        "authority": "passed",
+        "roundtrip": "passed",
+        "interrupt-detached": "passed"
+      }
+    },
+    {
+      "id": "SEC-05",
+      "coverage": "mapped",
+      "tests": [
+        "tests/processes.test.ts",
+        "tests/container.integration.ts",
+        "tests/cleanup.integration.ts"
+      ],
+      "jobs": [
+        "domain",
+        "harness",
+        "owned-cleanup"
+      ],
+      "note": "Kill the resource-owning harness, reconstruct cleanup from durable receipts, preserve foreign processes/containers/files, refuse reused PID and root/ancestor/journal symlinks, and retain output across exact owned-container deletion and lost-delete reply.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "harness": "passed",
+        "owned-cleanup": "passed"
+      }
+    },
+    {
+      "id": "SEC-06",
+      "coverage": "mapped",
+      "tests": [
+        "tests/repository-work.test.ts",
+        "tests/jira-delivery.test.ts",
+        "scripts/coding-driver.ts"
+      ],
+      "jobs": [
+        "domain",
+        "small",
+        "authority"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "small": "passed",
+        "authority": "passed"
+      }
+    },
+    {
+      "id": "LIM-01",
+      "coverage": "mapped",
+      "tests": [
+        "tests/runtime.test.ts",
+        "tests/run-lifecycle.test.ts",
+        "tests/active-time.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "interrupt-budget"
+      ],
+      "note": "Fake-clock CI/operator waiting and restart retain usage; settled provider-confirmed CI excludes wait, actual agent/tool work and uncertain ownership charge, and budget exhaustion requests safe pause.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "interrupt-budget": "passed"
+      }
+    },
+    {
+      "id": "LIM-02",
+      "coverage": "mapped",
+      "tests": [
+        "tests/results.test.ts",
+        "tests/provider-usage.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "LIM-03",
+      "coverage": "mapped",
+      "tests": [
+        "tests/release-contracts.test.ts",
+        "tests/runtime.test.ts",
+        "tests/messaging.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "cycles"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "cycles": "passed"
+      }
+    },
+    {
+      "id": "LIM-04",
+      "coverage": "mapped",
+      "tests": [
+        "tests/release-contracts.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed"
+      }
+    }
+  ],
+  "casesCounts": {
+    "passed": 87
+  },
+  "scenarios": [
+    {
+      "id": "E2E-01",
+      "jobs": [
+        "small"
+      ],
+      "coverage": "mapped",
+      "note": "Disposable sum utility replaces the illustrative whitespace utility; real checks, independent reviewer, Jira intake and fake PR handoff.",
+      "status": "passed",
+      "execution": {
+        "small": "passed"
+      }
+    },
+    {
+      "id": "E2E-02",
+      "jobs": [
+        "complex"
+      ],
+      "coverage": "mapped",
+      "note": "Four actual OMP processes stage saved-filter UI, validation and documentation under one writer; execute unit and Chromium checks, independent review, guide plan/read/assessment and publication with verified actual model identities.",
+      "status": "passed",
+      "execution": {
+        "complex": "passed"
+      }
+    },
+    {
+      "id": "E2E-03",
+      "jobs": [
+        "rework",
+        "cycles"
+      ],
+      "coverage": "mapped",
+      "note": "Real failing patch, failed check, blocking review, corrected SHA and exhausted recovery variant.",
+      "status": "passed",
+      "execution": {
+        "rework": "passed",
+        "cycles": "passed"
+      }
+    },
+    {
+      "id": "E2E-04",
+      "jobs": [
+        "send-crash",
+        "specialist",
+        "lost-receipt",
+        "commit-restart",
+        "interrupt-supervisor",
+        "mail"
+      ],
+      "coverage": "mapped",
+      "note": "Kill coordinator after real Rust Mail commits a send but before the application records its response; restart controller and explicitly resume with one keyed external delivery and causal reply, no stale effects.",
+      "status": "passed",
+      "execution": {
+        "send-crash": "passed",
+        "specialist": "passed",
+        "lost-receipt": "passed",
+        "commit-restart": "passed",
+        "interrupt-supervisor": "passed",
+        "mail": "passed"
+      }
+    },
+    {
+      "id": "E2E-05",
+      "jobs": [
+        "steering",
+        "insert-restart",
+        "interrupt-pause",
+        "adoption",
+        "browser"
+      ],
+      "coverage": "mapped",
+      "note": "Busy/disconnected steering, keyed insertion across restart, contained child pause, explicit requirements adoption and browser controls are separate fault variants.",
+      "status": "passed",
+      "execution": {
+        "steering": "passed",
+        "insert-restart": "passed",
+        "interrupt-pause": "passed",
+        "adoption": "passed",
+        "browser": "passed"
+      }
+    },
+    {
+      "id": "E2E-06",
+      "jobs": [
+        "small",
+        "domain",
+        "mail"
+      ],
+      "coverage": "mapped",
+      "note": "Provider-lost replies through the delivery workflow plus existing/absent/unknown fault variants in publication/Jira tests.",
+      "status": "passed",
+      "execution": {
+        "small": "passed",
+        "domain": "passed",
+        "mail": "passed"
+      }
+    },
+    {
+      "id": "E2E-07",
+      "jobs": [
+        "queue",
+        "domain"
+      ],
+      "coverage": "mapped",
+      "note": "Real scheduler process scenario with dependency-provider and queue-order variants in domain tests.",
+      "status": "passed",
+      "execution": {
+        "queue": "passed",
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "E2E-08",
+      "jobs": [
+        "domain",
+        "browser",
+        "model-guard",
+        "provider-matrix"
+      ],
+      "coverage": "mapped",
+      "note": "Preflight and wrong/secondary model guards plus eleven real OMP provider-failure variants. Only explicit policy-approved compatible models become recorded replacement attempts; no candidate becomes ready from a model reply.",
+      "status": "passed",
+      "execution": {
+        "domain": "passed",
+        "browser": "passed",
+        "model-guard": "passed",
+        "provider-matrix": "passed"
+      }
+    },
+    {
+      "id": "E2E-09",
+      "jobs": [
+        "target-drift",
+        "domain",
+        "browser"
+      ],
+      "coverage": "mapped",
+      "note": "Actual OMP workflow refreshes onto an advanced target, preserves old evidence, executes new unit/browser checks and review, updates one PR, exposes current CI failure and rejects late old-revision success without starting agents.",
+      "status": "passed",
+      "execution": {
+        "target-drift": "passed",
+        "domain": "passed",
+        "browser": "passed"
+      }
+    },
+    {
+      "id": "E2E-10",
+      "jobs": [
+        "research"
+      ],
+      "coverage": "mapped",
+      "note": "Real research agents validate pinned source citations and missing/corrected artifacts with no coding evidence.",
+      "status": "passed",
+      "execution": {
+        "research": "passed"
+      }
+    },
+    {
+      "id": "E2E-11",
+      "jobs": [
+        "authority",
+        "model-guard",
+        "domain"
+      ],
+      "coverage": "mapped",
+      "note": "Adversarial imported ticket and delivered peer message encounter actual tool/API authority guards, existing cross-run identity rejection, whole-controller/provider containment and secret/output scans before valid simulated delivery.",
+      "status": "passed",
+      "execution": {
+        "authority": "passed",
+        "model-guard": "passed",
+        "domain": "passed"
+      }
+    },
+    {
+      "id": "E2E-12",
+      "jobs": [
+        "interrupt-budget",
+        "cancel-continuation",
+        "domain",
+        "owned-cleanup",
+        "interrupt-cancel"
+      ],
+      "coverage": "mapped",
+      "note": "Budget and cancel/retained-PR recovery combine with killed-harness cleanup proving exact ownership, foreign resource survival and durable container receipts. Pending hosted CI is excluded across restart using fake time; real active-tool Cancel remains terminal and retains its interrupted receipt.",
+      "status": "passed",
+      "execution": {
+        "interrupt-budget": "passed",
+        "cancel-continuation": "passed",
+        "domain": "passed",
+        "owned-cleanup": "passed",
+        "interrupt-cancel": "passed"
+      }
+    }
+  ],
+  "scenariosCounts": {
+    "passed": 12
+  },
+  "passed": true,
+  "runtime": {
+    "node": {
+      "path": "/opt/homebrew/Cellar/node/26.10.0_1/bin/node",
+      "sha256": "4ca2a42d6d55a834b04d0892c5bc646a6869fcebec57f91c849dac0aa1031610",
+      "version": "v26.10.0"
+    },
+    "npm": {
+      "path": "/opt/homebrew/lib/node_modules/npm/bin/npm-cli.js",
+      "sha256": "8e5f6f3429f8cdbe693cdc29904e9d5a7b127a494bd15c804bd54c7403bfcbe7",
+      "version": "11.19.1"
+    },
+    "python": {
+      "path": "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/bin/python3.14",
+      "sha256": "87d4df53fd91304be5bac391fb204643c36b7df2023c04a0953bcbc7d4fdf634",
+      "version": "Python 3.14.7"
+    },
+    "git": {
+      "path": "/opt/homebrew/Cellar/git/2.56.0/bin/git",
+      "sha256": "92229f2456a49561ac5d614bbed775224e2fc32a8eca22ac41aeb3ce47d7899c",
+      "version": "git version 2.56.0"
+    },
+    "tmux": {
+      "path": "/opt/homebrew/Cellar/tmux/3.7c/bin/tmux",
+      "sha256": "1d101560ca3d4fb6f86bb53e6d9946e7b98444343d1fdab4a2a6e72980e232a5",
+      "version": "tmux 3.7c"
+    },
+    "docker": {
+      "path": "/Applications/Docker.app/Contents/Resources/bin/docker",
+      "sha256": "4d2d27ffb3326eaa343a39611d0edfad629f5dc2a7ad8e655ca560e9dddf36c6",
+      "version": "29.4.1"
+    },
+    "omp": {
+      "path": "/Users/crewroom/.bun/bin/omp",
+      "sha256": "e76e02821242fb36844676a9dfb79fbe5fb069d93ef3bf62625ec339fe9d092b",
+      "version": "omp/18.4.4"
+    },
+    "rustMail": {
+      "path": "/Users/crewroom/Projects/Git/crewroom/.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail",
+      "sha256": "554d6f0a06d73b2907940350228232f2b479f96630a73ff6b85e590a12b98075",
+      "version": "mcp-agent-mail 0.3.36"
+    },
+    "ompNative": {
+      "path": "/Users/crewroom/.omp/natives/18.4.4/pi_natives.darwin-arm64.node",
+      "sha256": "9ae2c4fd5a553104fc60fd9afdd578f2470da966738dbfe50aea13a3120e3893"
+    },
+    "processInspector": {
+      "path": "/bin/ps",
+      "sha256": "3bbba882e30d91fc4ff6e6844ca7c59fef4351b9a3fea35dca55708d6d487d1c"
+    },
+    "systemProcessInspector": {
+      "path": "/bin/ps",
+      "sha256": "3bbba882e30d91fc4ff6e6844ca7c59fef4351b9a3fea35dca55708d6d487d1c"
+    }
+  },
+  "retainedRoot": "/Users/crewroom/Projects/Git/crewroom/.crewroom/r7g",
+  "originalInvocation": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-release-final",
+  "continuationNote": "The original invocation passed 38/39 jobs; seven matrix variants exceeded the macOS tmux socket path limit before any model request. The unchanged source/runtime/manifest matrix passed 11/11 at a shorter output root. Other receipts are identical. continued-from.json verifies 13,165 copied regular files; 35 stopped tmux sockets were excluded.",
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

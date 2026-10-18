@@ -1,0 +1,9 @@
+{
+  "id": "M1",
+  "name": "omit-read-hash",
+  "path": "crates/crewroom-runtime/src/evidence/artifacts.rs",
+  "preimageSha256": "283149d06fbcd73fb06f852892013d836df246c0fc8909735f7c9ef5bbebc763",
+  "old": "artifact[\"bytes\"].as_f64() != Some(bytes.len() as f64)\n            || artifact[\"sha256\"] != hash(&bytes)",
+  "new": "artifact[\"bytes\"].as_f64() != Some(bytes.len() as f64)",
+  "postimageSha256": "409708eadac2b69be549b6692c3087ca86ca378e938a5aa88c40a15e38aa97f1"
+}

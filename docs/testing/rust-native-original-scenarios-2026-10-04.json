@@ -1,0 +1,1554 @@
+{
+  "kind": "native-original-scenario-step-closure-development",
+  "recordedAt": "2026-10-04",
+  "parentCommit": "711acc5e2d4a8cecdf3040921662cd7e53a137db",
+  "sourceSha256": {
+    "scripts/rust/daemon-client.ts": "e788c839fbd8fc65dd71c3e7f7033c3af6744bda094c76b22b9096a909adfbc9",
+    "scripts/rust/native-scenario-backend.ts": "55f45d572ed632beeea2729190cf6d7ca736a037f62af84f4bb9d5a30fc11b4a",
+    "scripts/rust/native-complex-live.ts": "31cd3700fa8273f792d5397f2dae6b2810bc9e48a15777eaf56fd39b724c61b3",
+    "scripts/rust/native-rework-live.ts": "7bc1cf2036209a1c0ae3802cf1a268f311748d96ba9ef3e25968ad584d79d2f1",
+    "scripts/rust/verify-native-scenarios.py": "9de8864551df4cb95e27372e8e29970bdd16d522d73ffd724d2ede2c0aebff41",
+    "scripts/rust/prepare-browser-check-image.py": "8664238bfc718d287f2c500cb511ac9252709737c2b0052701a1e8d91149a816"
+  },
+  "sourceManifestSha256": "4a817994c12d4c16386d22c9122fd532a7034d2671223b6a23607adc73741f66",
+  "audit": {
+    "kind": "original-M7-step-audit",
+    "boundary": "The three missing runtime sequences now execute in development. Their final candidate-binary rerun remains required. Other original scenario steps use composed source-bound native receipts; OS and package gates are separate.",
+    "contracts": [
+      "docs/mvp-plan.md:150",
+      "docs/mvp-plan.md:311",
+      "docs/mvp-plan.md:337",
+      "docs/testing/scenarios.json",
+      "docs/testing/release-manifest.json"
+    ],
+    "scenarios": [
+      {
+        "id": "E2E-01",
+        "status": "composed-existing-native",
+        "finding": "Native Jira intake, real owned worktree/check/independent review, publication and hosted-readiness receipts cover the small coding contract.",
+        "pointers": "workflow-supervision; jira-delivery; publication-service; native-installation",
+        "boundary": "Original jobs also compose component variants. Existing receipt identity and scope remain authoritative; this entry is an assertion mapping, not a new monolithic scenario run."
+      },
+      {
+        "id": "E2E-02",
+        "status": "development-executed-final-binary-pending",
+        "pointers": "complex-driver.ts; complex_fixture.py; scripts/rust/workflow-support.ts",
+        "originalMissingStep": "Missing actual staged code+guide workflow with three criteria, unit AND Chromium execution, guide plan/read/assessment, one writer, independent review and publication. Three research profile runs establish model identity only.",
+        "proof": "complex-drift"
+      },
+      {
+        "id": "E2E-03",
+        "status": "development-executed-final-binary-pending",
+        "pointers": "coding-driver.ts; coding_fixture.py; scripts/rust/evidence.test.ts; workflow-recovery.test.ts",
+        "originalMissingStep": "Failed Docker checks and exhausted actual-runner repair cycles exist separately; native workflow has not executed failing patch→failed output inspection→blocking changes_requested review→corrected candidate with fresh checks/review.",
+        "proof": "rework"
+      },
+      {
+        "id": "E2E-04",
+        "status": "composed-existing-native",
+        "finding": "Actual host/controller SIGKILL and retained process/session recovery compose with durable native Mail send/inbox/ack windows, duplicate/stale receipt checks and coding commit recovery. Do not call SQLite boundary workers actual OMP kills.",
+        "pointers": "messaging-live.ts; mail-window-worker.ts; workflow-delivery.test.ts; workflow-interruption.test.ts; release-profiles-live.ts",
+        "boundary": "Original jobs also compose component variants. Existing receipt identity and scope remain authoritative; this entry is an assertion mapping, not a new monolithic scenario run."
+      },
+      {
+        "id": "E2E-05",
+        "status": "composed-existing-native",
+        "finding": "Native disconnected/received/applied steering, busy insertion and active-child Pause, restart/idempotence and requirements adoption cover runtime steps; completed/narrow UI closure belongs to root pending receipt.",
+        "pointers": "workflow-supervision; daemon-scheduling; native-controls; root final native controls",
+        "boundary": "Original jobs also compose component variants. Existing receipt identity and scope remain authoritative; this entry is an assertion mapping, not a new monolithic scenario run."
+      },
+      {
+        "id": "E2E-06",
+        "status": "composed-existing-native",
+        "finding": "Native Jira/publication lost external replies and existing/absent/unknown readbacks, exactly keyed reconciliation and retained evidence cover provider outage steps.",
+        "pointers": "jira-delivery; publication-service; publication-recovery.test.ts",
+        "boundary": "Original jobs also compose component variants. Existing receipt identity and scope remain authoritative; this entry is an assertion mapping, not a new monolithic scenario run."
+      },
+      {
+        "id": "E2E-07",
+        "status": "composed-existing-native",
+        "finding": "Queue order separate from Jira rank, paused review release/wait hold, provider readiness and merged-base dependency gate exist in native service; root reports native operator journey pass pending frozen receipt.",
+        "pointers": "daemon-scheduling; providers; root native-resume.test.ts",
+        "boundary": "Original jobs also compose component variants. Existing receipt identity and scope remain authoritative; this entry is an assertion mapping, not a new monolithic scenario run."
+      },
+      {
+        "id": "E2E-08",
+        "status": "composed-existing-native",
+        "finding": "950 exact bindings and profile identities combine with native preflight, actual OMP 429/recovery/fallback/no-fallback/wrong-model guard variants. No 950 live-call claim.",
+        "pointers": "runtime-closure; provider-gateway; omp-rpc; daemon-scheduling",
+        "boundary": "Original jobs also compose component variants. Existing receipt identity and scope remain authoritative; this entry is an assertion mapping, not a new monolithic scenario run."
+      },
+      {
+        "id": "E2E-09",
+        "status": "development-executed-final-binary-pending",
+        "pointers": "complex-driver.ts targetDrift; complex_fixture.py enqueue_drift; target-refresh; publication-service; journeys",
+        "originalMissingStep": "Native actual Git target refresh/conflict promotion and old/current hosted observations are covered. Original accepted target-drift job additionally re-executed unit AND Chromium checks with independent review after refresh and updated the same PR. Close by running existing complex fixture targetDrift variant through native service.",
+        "proof": "complex-drift"
+      },
+      {
+        "id": "E2E-10",
+        "status": "composed-existing-native",
+        "finding": "Actual native research plus pinned citation verification, rejected missing citations, corrected artifacts, readonly source and completion cover accepted research assertions.",
+        "pointers": "workflow-supervision; evidence; journeys",
+        "boundary": "Original jobs also compose component variants. Existing receipt identity and scope remain authoritative; this entry is an assertion mapping, not a new monolithic scenario run."
+      },
+      {
+        "id": "E2E-11",
+        "status": "composed-existing-native",
+        "finding": "Native authorization rejects unauthorized tools, cross-attempt identity, repository escapes and foreign origin; actual model/host egress containment and valid continuation evidence compose. Explicitly separate scripted imported/peer text from live provider delivery.",
+        "pointers": "repository; workflow-supervision; daemon-scheduling; provider-gateway; runtime-closure",
+        "boundary": "Original jobs also compose component variants. Existing receipt identity and scope remain authoritative; this entry is an assertion mapping, not a new monolithic scenario run."
+      },
+      {
+        "id": "E2E-12",
+        "status": "composed-existing-native",
+        "finding": "Native active/waiting budget and restart clocks, actual owned child Pause/Cancel, retained PR/history and continuation, foreign PID/path survival compose. Root terminal cancellation keyboard/retired history closes UI residuals separately.",
+        "pointers": "attempts; workflow-supervision; retained-work; publication-service; containers; native-controls",
+        "boundary": "Original jobs also compose component variants. Existing receipt identity and scope remain authoritative; this entry is an assertion mapping, not a new monolithic scenario run."
+      }
+    ],
+    "notRequired": "Twelve new monolithic commands or three-profile Cartesian rerun are not original requirements; original M7 acceptance also composes jobs."
+  },
+  "referenceReceipts": {
+    "docs/testing/rust-native-acceptance-map-2026-10-04.json": "11026c3168e8877e98ad42e5f6e800f3777f0aab203c7f286715b46c56de4bfc",
+    "docs/testing/rust-native-acceptance-runtime-2026-10-04.json": "48782e51a530015ba61ed80b8ef6096605edca0c19c43057706b43ed6dd1fd97",
+    "docs/testing/rust-native-controls-2026-10-04.json": "557defa3340e2797060cb3f7901202661a9b427727adf945fafefc8d83c62d1b",
+    "docs/testing/rust-native-keyboard-queue-2026-10-04.json": "14a20c4823cd9949321e951c3fd91c2d4291d5b634be55e69a9072c81081efd7"
+  },
+  "checks": {
+    "complex-drift": {
+      "passed": true,
+      "root": "/private/tmp/cr-n7-complex4",
+      "reportSha256": "157288477a8c492c3f55393185e756cfdfecdaa782c3a67788f250d5ed9d8e5d",
+      "driverLogSha256": "476b93e57e737febfc2ad5814acd42e0f3c542b3599129a48f49bf6bcb5ba2f4",
+      "proofSha256": "2977cbc37f51af64830ca739bdf1fd56898aa11e1e51e2e377bf0ae644599a78",
+      "binaries": {
+        "crewroomd": {
+          "path": "/Users/crewroom/.codex/worktrees/native-upgrades/crewroom/target/debug/crewroomd",
+          "sha256": "c65c0415506a330865c64d55803977664a42ebe2921b9c43c87d7191eb4258a1"
+        },
+        "crewroom-process": {
+          "path": "/Users/crewroom/.codex/worktrees/native-upgrades/crewroom/target/debug/crewroom-process",
+          "sha256": "4d59e1987aaf2f6e415114db5c1c58ff7290679c7aded39874a80d8d8f5e10d1"
+        },
+        "crewroom-host": {
+          "path": "/Users/crewroom/.codex/worktrees/native-upgrades/crewroom/target/debug/crewroom-host",
+          "sha256": "704412e5da467e7e8a99e834f4ad2318906ebbb548501cda9c4b57d058c88ada"
+        },
+        "provider-daemon": {
+          "path": "/Users/crewroom/.codex/worktrees/native-upgrades/crewroom/target/debug/examples/provider-daemon",
+          "sha256": "ccb6c0e3f0c9ee3ba062b2373b573da45ccad5f175ce6982c48ea947cb6aae76"
+        }
+      },
+      "fixtureInputs": {
+        "scripts/rust/verify-native-scenarios.py": "9de8864551df4cb95e27372e8e29970bdd16d522d73ffd724d2ede2c0aebff41",
+        "scripts/rust/native-complex-live.ts": "31cd3700fa8273f792d5397f2dae6b2810bc9e48a15777eaf56fd39b724c61b3",
+        "scripts/rust/native-rework-live.ts": "7bc1cf2036209a1c0ae3802cf1a268f311748d96ba9ef3e25968ad584d79d2f1",
+        "scripts/rust/native-scenario-backend.ts": "55f45d572ed632beeea2729190cf6d7ca736a037f62af84f4bb9d5a30fc11b4a",
+        "scripts/rust/daemon-client.ts": "e788c839fbd8fc65dd71c3e7f7033c3af6744bda094c76b22b9096a909adfbc9",
+        "scripts/complex_fixture.py": "6ab90f479d6cec37168dd4ca9afd5a080c93ead26c68f2e034201b928fde720e",
+        "scripts/coding_fixture.py": "cdc2542c26c1e8160ddcd61195ca82b9ecc96fa20472ca7f8aa058d1036fcd0a",
+        "scripts/omp_offline_fixture.py": "70a6871a711149533d42c67fdaec0dc50e4f946a76217e67c7e4a13afb7717f2",
+        "scripts/mailbox_contract_fixture.py": "013c517dd0bc57cc6d0a89247b32beee82d5f470ec4427a7d76fd22887559aea",
+        "scripts/runtime-observer.ts": "f9cb9d6d0c4e95b63a407899d7918126cb303dd0f61cbd5504b067d6c817ab21",
+        "scripts/delivery-provider-fixture.ts": "01c943c11140d96cfcdb05002145b66bd48dd6acc6717eb3289a4836b825bdc7",
+        "docs/testing/fixtures/saved-filter-app/GUIDE.md": "4482d065429d09f38e08a6299e5bca877a69d978c28da812730a6df885b7b4c0",
+        "docs/testing/fixtures/saved-filter-app/browser.mjs": "3ba7dc947dd2852d92ce91ad1ff7e74549b49584171e6a1c3f8b4977a09e64fe",
+        "docs/testing/fixtures/saved-filter-app/filters.mjs": "dc3813c0416174bdaf779010f7b823c4c31cd4f023806c8780e365464f32182c",
+        "docs/testing/fixtures/saved-filter-app/index.html": "6164be037aa4e04de461417837fc33423d1225dbbe78e031340ae63ce2624125",
+        "docs/testing/fixtures/saved-filter-app/unit.mjs": "025a841f2b156d17106c62cd2314d2c3fd08665927c0af2eb8a9421e0438ef05"
+      },
+      "proof": {
+        "passed": true,
+        "messages": [
+          {
+            "id": "3183f6fe-6c0c-417c-a79f-a9fb72776684",
+            "runId": "32dbcb00-c93f-4306-b6f8-726b3b1d0ea5",
+            "attemptId": "2d5196b6-974f-46d6-ba69-2cc4967c0467",
+            "toolCallId": "call_5eedc5f6c960453b977d6f25d97e56a1|fc_5eedc5f6c960453b977d6f25d97e56a1",
+            "from": "d97fd4a3-86df-4a1d-bef8-49c0216e8f1d",
+            "to": "00502b53-bc2c-49fd-8fd1-88fee2f73c53",
+            "body": "Plan the guide and empty-state contract.",
+            "createdAt": "2026-10-04T06:35:04.679Z",
+            "disposition": "received",
+            "transportId": 1,
+            "recipientAttemptId": "0114dd3f-db6b-42ff-b402-2a95008f5254"
+          },
+          {
+            "id": "76e7a706-21b4-4bef-870e-c6f22a99423e",
+            "runId": "32dbcb00-c93f-4306-b6f8-726b3b1d0ea5",
+            "attemptId": "0114dd3f-db6b-42ff-b402-2a95008f5254",
+            "toolCallId": "call_c5729484a40a4fd388728c9f96910207|fc_c5729484a40a4fd388728c9f96910207",
+            "from": "00502b53-bc2c-49fd-8fd1-88fee2f73c53",
+            "to": "d97fd4a3-86df-4a1d-bef8-49c0216e8f1d",
+            "body": "Document empty export as [] and explain required name/query fields and invalid input.",
+            "createdAt": "2026-10-04T06:35:04.904Z",
+            "disposition": "received",
+            "replyTo": "3183f6fe-6c0c-417c-a79f-a9fb72776684",
+            "transportId": 2,
+            "recipientAttemptId": "2d5196b6-974f-46d6-ba69-2cc4967c0467"
+          },
+          {
+            "id": "30bad7d9-52c7-4a7b-a5ae-2134ef2e6a06",
+            "runId": "32dbcb00-c93f-4306-b6f8-726b3b1d0ea5",
+            "attemptId": "2d5196b6-974f-46d6-ba69-2cc4967c0467",
+            "toolCallId": "call_6cd8f48afcc647e380dff0067aaeb84b|fc_6cd8f48afcc647e380dff0067aaeb84b",
+            "from": "d97fd4a3-86df-4a1d-bef8-49c0216e8f1d",
+            "to": "7e043787-3964-4953-8c2b-35bbcf475885",
+            "body": "Implement all three accepted criteria.",
+            "createdAt": "2026-10-04T06:35:05.634Z",
+            "disposition": "received",
+            "replyTo": "76e7a706-21b4-4bef-870e-c6f22a99423e",
+            "transportId": 3,
+            "recipientAttemptId": "e3c30950-ee47-4f68-9d50-cef2f7a243eb"
+          },
+          {
+            "id": "4e956025-1bd4-4afe-9ac3-4bebdcdb656f",
+            "runId": "32dbcb00-c93f-4306-b6f8-726b3b1d0ea5",
+            "attemptId": "82f8abd1-4251-4516-98f5-51e5a9cdf3b6",
+            "toolCallId": "call_038023cbcca94cf79f8226a966ea3eac|fc_038023cbcca94cf79f8226a966ea3eac",
+            "from": "d97fd4a3-86df-4a1d-bef8-49c0216e8f1d",
+            "to": "f8a8db86-ce3d-4207-b56b-2b2e29119f42",
+            "body": "Inspect the current candidate and run unit/browser checks.",
+            "createdAt": "2026-10-04T06:35:14.850Z",
+            "disposition": "received",
+            "replyTo": "76e7a706-21b4-4bef-870e-c6f22a99423e",
+            "transportId": 4,
+            "recipientAttemptId": "60e17131-8128-4920-9084-3c392dfe313b"
+          },
+          {
+            "id": "4a202466-c7bd-4680-8acf-0faf30014e29",
+            "runId": "32dbcb00-c93f-4306-b6f8-726b3b1d0ea5",
+            "attemptId": "60e17131-8128-4920-9084-3c392dfe313b",
+            "toolCallId": "send_message_1791095721955_7",
+            "from": "f8a8db86-ce3d-4207-b56b-2b2e29119f42",
+            "to": "d97fd4a3-86df-4a1d-bef8-49c0216e8f1d",
+            "body": "Both checks and independent review passed on this candidate.",
+            "createdAt": "2026-10-04T06:35:22.041Z",
+            "disposition": "received",
+            "replyTo": "4e956025-1bd4-4afe-9ac3-4bebdcdb656f",
+            "transportId": 5,
+            "recipientAttemptId": "82f8abd1-4251-4516-98f5-51e5a9cdf3b6"
+          },
+          {
+            "id": "7639b7b5-b400-4ec9-9a93-df823fac5629",
+            "runId": "32dbcb00-c93f-4306-b6f8-726b3b1d0ea5",
+            "attemptId": "82f8abd1-4251-4516-98f5-51e5a9cdf3b6",
+            "toolCallId": "call_cc8c13aec2f24b6d8d33082c3b4af396|fc_cc8c13aec2f24b6d8d33082c3b4af396",
+            "from": "d97fd4a3-86df-4a1d-bef8-49c0216e8f1d",
+            "to": "00502b53-bc2c-49fd-8fd1-88fee2f73c53",
+            "body": "Inspect the implemented GUIDE.md and confirm the accepted documentation contract.",
+            "createdAt": "2026-10-04T06:35:22.418Z",
+            "disposition": "received",
+            "replyTo": "4a202466-c7bd-4680-8acf-0faf30014e29",
+            "transportId": 6,
+            "recipientAttemptId": "e7ffa605-f5f4-42be-8dec-331d08b6396b"
+          },
+          {
+            "id": "189f273e-43f8-42bf-a20f-ac0bbe343231",
+            "runId": "32dbcb00-c93f-4306-b6f8-726b3b1d0ea5",
+            "attemptId": "e7ffa605-f5f4-42be-8dec-331d08b6396b",
+            "toolCallId": "call_31b85b0690d14cee822c0ef74f77a8ec|fc_31b85b0690d14cee822c0ef74f77a8ec",
+            "from": "00502b53-bc2c-49fd-8fd1-88fee2f73c53",
+            "to": "d97fd4a3-86df-4a1d-bef8-49c0216e8f1d",
+            "body": "The saved guide matches empty-state and input-validation behavior.",
+            "createdAt": "2026-10-04T06:35:23.186Z",
+            "disposition": "received",
+            "replyTo": "7639b7b5-b400-4ec9-9a93-df823fac5629",
+            "transportId": 7,
+            "recipientAttemptId": "82f8abd1-4251-4516-98f5-51e5a9cdf3b6"
+          },
+          {
+            "id": "fd46f106-abc6-4921-b239-9158501cc293",
+            "runId": "32dbcb00-c93f-4306-b6f8-726b3b1d0ea5",
+            "attemptId": "73cbf59c-ce44-42d4-bcc6-3a884f784f13",
+            "toolCallId": "call_c1a7b4a5aebb474ba4b77ccffd41dd83|fc_c1a7b4a5aebb474ba4b77ccffd41dd83",
+            "from": "d97fd4a3-86df-4a1d-bef8-49c0216e8f1d",
+            "to": "f8a8db86-ce3d-4207-b56b-2b2e29119f42",
+            "body": "Run fresh unit/browser checks and independent review for this rebased candidate.",
+            "createdAt": "2026-10-04T06:35:47.480Z",
+            "disposition": "received",
+            "replyTo": "189f273e-43f8-42bf-a20f-ac0bbe343231",
+            "transportId": 8,
+            "recipientAttemptId": "908b87b8-d0b2-4192-a514-b8051ce3699d"
+          },
+          {
+            "id": "169f01ec-56ca-4c38-993e-78d5e565bf24",
+            "runId": "32dbcb00-c93f-4306-b6f8-726b3b1d0ea5",
+            "attemptId": "908b87b8-d0b2-4192-a514-b8051ce3699d",
+            "toolCallId": "send_message_1791095759757_6",
+            "from": "f8a8db86-ce3d-4207-b56b-2b2e29119f42",
+            "to": "d97fd4a3-86df-4a1d-bef8-49c0216e8f1d",
+            "body": "Fresh checks and independent review passed after target refresh.",
+            "createdAt": "2026-10-04T06:35:59.811Z",
+            "disposition": "received",
+            "replyTo": "fd46f106-abc6-4921-b239-9158501cc293",
+            "transportId": 9,
+            "recipientAttemptId": "73cbf59c-ce44-42d4-bcc6-3a884f784f13"
+          }
+        ],
+        "scenario": "E2E-02 + E2E-09",
+        "browserImage": "sha256:295b78a1314778cbc83bdabccfa94aadde23f7b2cb13482e2728b814fb1a1470",
+        "runId": "32dbcb00-c93f-4306-b6f8-726b3b1d0ea5",
+        "criteria": [
+          "Export saved filters with an explicit empty state",
+          "Reject malformed input without stale output",
+          "Update the user guide with empty and invalid input behavior"
+        ],
+        "drift": {
+          "passed": true,
+          "from": {
+            "base": "ee085b826cbb2fba7213e18f4aa2fdec6d0b6347",
+            "head": "ce755eee819cb662d013622ddd5b7a709ce4ca96",
+            "tree": "2269c9316a690900a3c6e7579d280c805eb64ac1",
+            "worktreeHash": "cca6016542ebacfcfdf7239e5ca0b81bea716c7fd07f1477a137da1c719b9a39",
+            "dirty": false,
+            "requirementsHash": "45e92d84971a46a42c80b420098bcfaa49fd1091d616d06297de44ce82f3e068",
+            "instructionsHash": "829dc99abfea810aa391a4398288dbcc633751a6285b0391f70fa5dd562856b9"
+          },
+          "to": {
+            "base": "84528de646862067586b243aa04947b4491db66e",
+            "head": "8683f3b8fe21779f94b20c2b628caf0fbd957ff8",
+            "tree": "d8f2ffa3f6c66a4ddf0552fdaf7371fa1467bdbe",
+            "worktreeHash": "4faa64f1ba5d8c731b364b52950c04626961a84783f7ecc0597b468d6af07ff8",
+            "dirty": false,
+            "requirementsHash": "45e92d84971a46a42c80b420098bcfaa49fd1091d616d06297de44ce82f3e068",
+            "instructionsHash": "829dc99abfea810aa391a4398288dbcc633751a6285b0391f70fa5dd562856b9"
+          },
+          "checks": [
+            {
+              "candidateId": "624a6587-361e-46fe-86e5-76bf94ecbabd",
+              "attemptId": "908b87b8-d0b2-4192-a514-b8051ce3699d",
+              "checkId": "unit",
+              "definition": {
+                "id": "unit",
+                "image": "sha256:295b78a1314778cbc83bdabccfa94aadde23f7b2cb13482e2728b814fb1a1470",
+                "command": "/usr/local/bin/node",
+                "args": [
+                  "--test",
+                  "unit.mjs"
+                ],
+                "timeoutMs": 15000,
+                "required": true
+              },
+              "environment": {
+                "image": "sha256:295b78a1314778cbc83bdabccfa94aadde23f7b2cb13482e2728b814fb1a1470",
+                "network": "none",
+                "platform": "linux/arm64",
+                "memoryMiB": 1024,
+                "tmpExecutable": false
+              },
+              "started": true,
+              "completed": true,
+              "exitCode": 0,
+              "timedOut": false,
+              "source": {
+                "id": "15007ca2-bf91-4103-a0ee-bf20cedc9d64",
+                "sha256": "4faa64f1ba5d8c731b364b52950c04626961a84783f7ecc0597b468d6af07ff8",
+                "bytes": 764
+              },
+              "sourceIntact": true,
+              "output": {
+                "id": "3e3f46d4-aa48-4188-9d84-2ce66612d968",
+                "sha256": "0b97fdaf23fe524745e9c67997b3d3509b5b80afccec78aa33501efd6d7f51a7",
+                "bytes": 563
+              },
+              "id": "80f13596-0e9f-4642-933f-0ff2d19df5f9",
+              "completedAt": "2026-10-04T06:35:54.233Z"
+            },
+            {
+              "candidateId": "624a6587-361e-46fe-86e5-76bf94ecbabd",
+              "attemptId": "908b87b8-d0b2-4192-a514-b8051ce3699d",
+              "checkId": "browser",
+              "definition": {
+                "id": "browser",
+                "image": "sha256:295b78a1314778cbc83bdabccfa94aadde23f7b2cb13482e2728b814fb1a1470",
+                "command": "/usr/local/bin/node",
+                "args": [
+                  "browser.mjs"
+                ],
+                "timeoutMs": 30000,
+                "memoryMiB": 2048,
+                "tmpExecutable": true,
+                "required": true
+              },
+              "environment": {
+                "image": "sha256:295b78a1314778cbc83bdabccfa94aadde23f7b2cb13482e2728b814fb1a1470",
+                "network": "none",
+                "platform": "linux/arm64",
+                "memoryMiB": 2048,
+                "tmpExecutable": true
+              },
+              "started": true,
+              "completed": true,
+              "exitCode": 0,
+              "timedOut": false,
+              "source": {
+                "id": "0679cdbc-e2f5-4dda-96da-fd0c47194012",
+                "sha256": "4faa64f1ba5d8c731b364b52950c04626961a84783f7ecc0597b468d6af07ff8",
+                "bytes": 764
+              },
+              "sourceIntact": true,
+              "output": {
+                "id": "f694660a-0431-44b0-abef-f83821e90a1c",
+                "sha256": "035659f6feed52095ae249c80497aa478f1b515fe87a0f6ead3271633219dac9",
+                "bytes": 98
+              },
+              "id": "2727157b-2f8d-4776-be83-f585ced88643",
+              "completedAt": "2026-10-04T06:35:59.548Z"
+            }
+          ],
+          "oldSuccessRejected": true,
+          "currentFailureRetained": true,
+          "feedbackVisible": true,
+          "noAutomaticRestart": true
+        },
+        "identities": [
+          {
+            "name": "Coordinator",
+            "assignmentId": "d97fd4a3-86df-4a1d-bef8-49c0216e8f1d",
+            "attemptId": "82f8abd1-4251-4516-98f5-51e5a9cdf3b6",
+            "hostPid": 75498,
+            "ompPid": 75503,
+            "sessionId": "01a1059f-8091-7567-b4ee-95bc89bd4be5",
+            "planned": {
+              "requested": {
+                "model": "aperture-openai/openai.gpt-6-sol",
+                "effort": "low"
+              },
+              "resolved": {
+                "provider": "aperture-openai",
+                "id": "openai.gpt-6-sol",
+                "api": "openai-responses",
+                "inputs": [
+                  "text",
+                  "image"
+                ],
+                "efforts": [
+                  "off",
+                  "low",
+                  "medium",
+                  "high",
+                  "xhigh"
+                ],
+                "tools": true,
+                "selector": "aperture-openai/openai.gpt-6-sol",
+                "effort": "low"
+              }
+            },
+            "observed": {
+              "type": "host_ready",
+              "model": {
+                "provider": "aperture-openai",
+                "id": "openai.gpt-6-sol",
+                "api": "openai-responses"
+              },
+              "thinkingLevel": "low",
+              "sessionId": "01a1059f-8091-7567-b4ee-95bc89bd4be5",
+              "isStreaming": false,
+              "autoCompactionEnabled": false,
+              "hostPid": 75498,
+              "ompPid": 75503,
+              "sessionDirectory": "/private/tmp/cr-n7-complex4/hosts/2d5196b6-974f-46d6-ba69-2cc4967c0467/sessions",
+              "recoveryMode": "session"
+            },
+            "observation": "persisted actual OMP host_ready",
+            "eventCursor": 667
+          },
+          {
+            "name": "SpecialistOne",
+            "assignmentId": "7e043787-3964-4953-8c2b-35bbcf475885",
+            "attemptId": "5bfcc93c-dbf0-4556-ab8c-760c21362318",
+            "hostPid": 75623,
+            "ompPid": 75629,
+            "sessionId": "01a1059f-8355-716e-8dfb-f682596bd454",
+            "planned": {
+              "requested": {
+                "model": "aperture-anthropic/anthropic.claude-sonnet-5",
+                "effort": "medium"
+              },
+              "resolved": {
+                "provider": "aperture-anthropic",
+                "id": "anthropic.claude-sonnet-5",
+                "api": "anthropic-messages",
+                "inputs": [
+                  "text",
+                  "image"
+                ],
+                "efforts": [
+                  "off",
+                  "low",
+                  "medium",
+                  "high",
+                  "max"
+                ],
+                "tools": true,
+                "selector": "aperture-anthropic/anthropic.claude-sonnet-5",
+                "effort": "medium"
+              }
+            },
+            "observed": {
+              "type": "host_ready",
+              "model": {
+                "provider": "aperture-anthropic",
+                "id": "anthropic.claude-sonnet-5",
+                "api": "anthropic-messages"
+              },
+              "thinkingLevel": "medium",
+              "sessionId": "01a1059f-8355-716e-8dfb-f682596bd454",
+              "isStreaming": false,
+              "autoCompactionEnabled": false,
+              "hostPid": 75623,
+              "ompPid": 75629,
+              "sessionDirectory": "/private/tmp/cr-n7-complex4/hosts/e3c30950-ee47-4f68-9d50-cef2f7a243eb/sessions",
+              "recoveryMode": "session"
+            },
+            "observation": "persisted actual OMP host_ready",
+            "eventCursor": 673
+          },
+          {
+            "name": "SpecialistTwo",
+            "assignmentId": "f8a8db86-ce3d-4207-b56b-2b2e29119f42",
+            "attemptId": "60e17131-8128-4920-9084-3c392dfe313b",
+            "hostPid": 75716,
+            "ompPid": 75721,
+            "sessionId": "01a1059f-aedc-72b3-b581-0effa3cc9f4c",
+            "planned": {
+              "requested": {
+                "model": "aperture-google/gemini-3.8-flash",
+                "effort": "low"
+              },
+              "resolved": {
+                "provider": "aperture-google",
+                "id": "gemini-3.8-flash",
+                "api": "google-generative-ai",
+                "inputs": [
+                  "text",
+                  "image"
+                ],
+                "efforts": [
+                  "off",
+                  "low",
+                  "medium",
+                  "high"
+                ],
+                "tools": true,
+                "selector": "aperture-google/gemini-3.8-flash",
+                "effort": "low"
+              }
+            },
+            "observed": {
+              "type": "host_ready",
+              "model": {
+                "provider": "aperture-google",
+                "id": "gemini-3.8-flash",
+                "api": "google-generative-ai"
+              },
+              "thinkingLevel": "low",
+              "sessionId": "01a1059f-aedc-72b3-b581-0effa3cc9f4c",
+              "isStreaming": false,
+              "autoCompactionEnabled": false,
+              "hostPid": 75716,
+              "ompPid": 75721,
+              "sessionDirectory": "/private/tmp/cr-n7-complex4/hosts/60e17131-8128-4920-9084-3c392dfe313b/sessions",
+              "recoveryMode": "replacement"
+            },
+            "observation": "persisted actual OMP host_ready",
+            "eventCursor": 680
+          },
+          {
+            "name": "Guide",
+            "assignmentId": "00502b53-bc2c-49fd-8fd1-88fee2f73c53",
+            "attemptId": "e7ffa605-f5f4-42be-8dec-331d08b6396b",
+            "hostPid": 75839,
+            "ompPid": 75859,
+            "sessionId": "01a1059f-8a06-772a-9ee2-bb824eb211e7",
+            "planned": {
+              "requested": {
+                "model": "aperture-openai/openai.gpt-6-sol",
+                "effort": "low"
+              },
+              "resolved": {
+                "provider": "aperture-openai",
+                "id": "openai.gpt-6-sol",
+                "api": "openai-responses",
+                "inputs": [
+                  "text",
+                  "image"
+                ],
+                "efforts": [
+                  "off",
+                  "low",
+                  "medium",
+                  "high",
+                  "xhigh"
+                ],
+                "tools": true,
+                "selector": "aperture-openai/openai.gpt-6-sol",
+                "effort": "low"
+              }
+            },
+            "observed": {
+              "type": "host_ready",
+              "model": {
+                "provider": "aperture-openai",
+                "id": "openai.gpt-6-sol",
+                "api": "openai-responses"
+              },
+              "thinkingLevel": "low",
+              "sessionId": "01a1059f-8a06-772a-9ee2-bb824eb211e7",
+              "isStreaming": false,
+              "autoCompactionEnabled": false,
+              "hostPid": 75839,
+              "ompPid": 75859,
+              "sessionDirectory": "/private/tmp/cr-n7-complex4/hosts/0114dd3f-db6b-42ff-b402-2a95008f5254/sessions",
+              "recoveryMode": "session"
+            },
+            "observation": "persisted actual OMP host_ready",
+            "eventCursor": 686
+          }
+        ],
+        "checks": [
+          {
+            "candidateId": "be7bfcd5-bef2-4aa0-a272-9c7df40a2ca3",
+            "attemptId": "60e17131-8128-4920-9084-3c392dfe313b",
+            "checkId": "unit",
+            "definition": {
+              "id": "unit",
+              "image": "sha256:295b78a1314778cbc83bdabccfa94aadde23f7b2cb13482e2728b814fb1a1470",
+              "command": "/usr/local/bin/node",
+              "args": [
+                "--test",
+                "unit.mjs"
+              ],
+              "timeoutMs": 15000,
+              "required": true
+            },
+            "environment": {
+              "image": "sha256:295b78a1314778cbc83bdabccfa94aadde23f7b2cb13482e2728b814fb1a1470",
+              "network": "none",
+              "platform": "linux/arm64",
+              "memoryMiB": 1024,
+              "tmpExecutable": false
+            },
+            "started": true,
+            "completed": true,
+            "exitCode": 0,
+            "timedOut": false,
+            "source": {
+              "id": "c299bf4e-a1fb-4ca6-8ac2-d49b851d753b",
+              "sha256": "cca6016542ebacfcfdf7239e5ca0b81bea716c7fd07f1477a137da1c719b9a39",
+              "bytes": 652
+            },
+            "sourceIntact": true,
+            "output": {
+              "id": "523f414f-875f-4d54-aaac-7916dc501b81",
+              "sha256": "9a6a8e449185177444e9a05970b2ca9dfd0057cefbca89248079d04b542292f9",
+              "bytes": 562
+            },
+            "id": "9ad2208d-f6f8-4853-97e7-0a24f2c7345b",
+            "completedAt": "2026-10-04T06:35:18.529Z"
+          },
+          {
+            "candidateId": "be7bfcd5-bef2-4aa0-a272-9c7df40a2ca3",
+            "attemptId": "60e17131-8128-4920-9084-3c392dfe313b",
+            "checkId": "browser",
+            "definition": {
+              "id": "browser",
+              "image": "sha256:295b78a1314778cbc83bdabccfa94aadde23f7b2cb13482e2728b814fb1a1470",
+              "command": "/usr/local/bin/node",
+              "args": [
+                "browser.mjs"
+              ],
+              "timeoutMs": 30000,
+              "memoryMiB": 2048,
+              "tmpExecutable": true,
+              "required": true
+            },
+            "environment": {
+              "image": "sha256:295b78a1314778cbc83bdabccfa94aadde23f7b2cb13482e2728b814fb1a1470",
+              "network": "none",
+              "platform": "linux/arm64",
+              "memoryMiB": 2048,
+              "tmpExecutable": true
+            },
+            "started": true,
+            "completed": true,
+            "exitCode": 0,
+            "timedOut": false,
+            "source": {
+              "id": "a3fbe7fc-37dc-4a55-b448-2097bfcf5137",
+              "sha256": "cca6016542ebacfcfdf7239e5ca0b81bea716c7fd07f1477a137da1c719b9a39",
+              "bytes": 652
+            },
+            "sourceIntact": true,
+            "output": {
+              "id": "5b3ac87b-acaa-4c0d-b0fa-dea6aef4a78b",
+              "sha256": "035659f6feed52095ae249c80497aa478f1b515fe87a0f6ead3271633219dac9",
+              "bytes": 98
+            },
+            "id": "5dbfb582-91ba-4509-af34-e3936bf6a5da",
+            "completedAt": "2026-10-04T06:35:21.666Z"
+          }
+        ],
+        "review": {
+          "candidateId": "be7bfcd5-bef2-4aa0-a272-9c7df40a2ca3",
+          "verdict": "pass",
+          "summary": "Independently inspected export, invalid/empty behavior, and guide against both executed checks.",
+          "findings": [],
+          "coverage": [
+            {
+              "criterion": 0,
+              "assessment": "Valid exports round trip and empty export is [].",
+              "checkIds": [
+                "unit",
+                "browser"
+              ]
+            },
+            {
+              "criterion": 1,
+              "assessment": "Invalid input is rejected and stale output clears.",
+              "checkIds": [
+                "unit",
+                "browser"
+              ]
+            },
+            {
+              "criterion": 2,
+              "assessment": "The browser check reads the guide and verifies its empty/invalid contract.",
+              "checkIds": [
+                "browser"
+              ]
+            }
+          ],
+          "attemptId": "60e17131-8128-4920-9084-3c392dfe313b",
+          "assignmentId": "f8a8db86-ce3d-4207-b56b-2b2e29119f42",
+          "sessionId": "01a1059f-aedc-72b3-b581-0effa3cc9f4c",
+          "checkPolicyRevision": 0,
+          "id": "fd07bbcf-602c-4917-aaad-d3f19aa992a9",
+          "artifact": {
+            "id": "334a37aa-7946-4855-b17a-731621de6511",
+            "sha256": "a92aebd91bebb065e56c8ee3d776f63c1a741008c20dd3b5a9484b9401aeec39",
+            "bytes": 737
+          },
+          "createdAt": "2026-10-04T06:35:21.845Z"
+        },
+        "candidate": {
+          "id": "be7bfcd5-bef2-4aa0-a272-9c7df40a2ca3",
+          "runId": "32dbcb00-c93f-4306-b6f8-726b3b1d0ea5",
+          "revision": {
+            "base": "ee085b826cbb2fba7213e18f4aa2fdec6d0b6347",
+            "head": "ce755eee819cb662d013622ddd5b7a709ce4ca96",
+            "tree": "2269c9316a690900a3c6e7579d280c805eb64ac1",
+            "worktreeHash": "cca6016542ebacfcfdf7239e5ca0b81bea716c7fd07f1477a137da1c719b9a39",
+            "dirty": false,
+            "requirementsHash": "45e92d84971a46a42c80b420098bcfaa49fd1091d616d06297de44ce82f3e068",
+            "instructionsHash": "829dc99abfea810aa391a4398288dbcc633751a6285b0391f70fa5dd562856b9"
+          },
+          "implementationAttempts": [
+            "e3c30950-ee47-4f68-9d50-cef2f7a243eb"
+          ],
+          "createdAt": "2026-10-04T06:35:10.428Z"
+        },
+        "pr": {
+          "state": "confirmed",
+          "id": 9,
+          "url": "https://bitbucket.org/fixture/repository/pull-requests/9",
+          "describedSha256": "c2896d747a6c9bbd6891334847f453232f3e49dc9398e556ad4d1d28fee114ca",
+          "providerState": "OPEN"
+        },
+        "oneWriter": true,
+        "operatorUnchanged": true,
+        "threeSpecialists": true,
+        "scriptedModelBoundary": true
+      },
+      "providerRequests": 56,
+      "providerErrors": [],
+      "observedEveryIdentity": true,
+      "ownedProcessReceipts": 24,
+      "allOwnedProcessesExited": true,
+      "removedContainers": 4,
+      "allContainersRemoved": true,
+      "externalMailReceipts": 9,
+      "externalMailMatches": true,
+      "binaryHashesUnchanged": true
+    },
+    "rework": {
+      "passed": true,
+      "root": "/private/tmp/cr-n7-rework2",
+      "reportSha256": "2cbf9a23366e5f87ab30457aef3481a96d870a93adc6c24c827e6dbec4f105e2",
+      "driverLogSha256": "98697f45ced41036db47b9c27daeb2120e0354fa48666c444594e1c80061a933",
+      "proofSha256": "dfa3622c9d5f21b98f677a124f00466e0ae549159cac18e65cb39cdb5c8ede2c",
+      "binaries": {
+        "crewroomd": {
+          "path": "/Users/crewroom/.codex/worktrees/native-upgrades/crewroom/target/debug/crewroomd",
+          "sha256": "c65c0415506a330865c64d55803977664a42ebe2921b9c43c87d7191eb4258a1"
+        },
+        "crewroom-process": {
+          "path": "/Users/crewroom/.codex/worktrees/native-upgrades/crewroom/target/debug/crewroom-process",
+          "sha256": "4d59e1987aaf2f6e415114db5c1c58ff7290679c7aded39874a80d8d8f5e10d1"
+        },
+        "crewroom-host": {
+          "path": "/Users/crewroom/.codex/worktrees/native-upgrades/crewroom/target/debug/crewroom-host",
+          "sha256": "704412e5da467e7e8a99e834f4ad2318906ebbb548501cda9c4b57d058c88ada"
+        }
+      },
+      "fixtureInputs": {
+        "scripts/rust/verify-native-scenarios.py": "9de8864551df4cb95e27372e8e29970bdd16d522d73ffd724d2ede2c0aebff41",
+        "scripts/rust/native-complex-live.ts": "31cd3700fa8273f792d5397f2dae6b2810bc9e48a15777eaf56fd39b724c61b3",
+        "scripts/rust/native-rework-live.ts": "7bc1cf2036209a1c0ae3802cf1a268f311748d96ba9ef3e25968ad584d79d2f1",
+        "scripts/rust/native-scenario-backend.ts": "55f45d572ed632beeea2729190cf6d7ca736a037f62af84f4bb9d5a30fc11b4a",
+        "scripts/rust/daemon-client.ts": "e788c839fbd8fc65dd71c3e7f7033c3af6744bda094c76b22b9096a909adfbc9",
+        "scripts/complex_fixture.py": "6ab90f479d6cec37168dd4ca9afd5a080c93ead26c68f2e034201b928fde720e",
+        "scripts/coding_fixture.py": "cdc2542c26c1e8160ddcd61195ca82b9ecc96fa20472ca7f8aa058d1036fcd0a",
+        "scripts/omp_offline_fixture.py": "70a6871a711149533d42c67fdaec0dc50e4f946a76217e67c7e4a13afb7717f2",
+        "scripts/mailbox_contract_fixture.py": "013c517dd0bc57cc6d0a89247b32beee82d5f470ec4427a7d76fd22887559aea",
+        "scripts/runtime-observer.ts": "f9cb9d6d0c4e95b63a407899d7918126cb303dd0f61cbd5504b067d6c817ab21",
+        "scripts/delivery-provider-fixture.ts": "01c943c11140d96cfcdb05002145b66bd48dd6acc6717eb3289a4836b825bdc7",
+        "docs/testing/fixtures/saved-filter-app/GUIDE.md": "4482d065429d09f38e08a6299e5bca877a69d978c28da812730a6df885b7b4c0",
+        "docs/testing/fixtures/saved-filter-app/browser.mjs": "3ba7dc947dd2852d92ce91ad1ff7e74549b49584171e6a1c3f8b4977a09e64fe",
+        "docs/testing/fixtures/saved-filter-app/filters.mjs": "dc3813c0416174bdaf779010f7b823c4c31cd4f023806c8780e365464f32182c",
+        "docs/testing/fixtures/saved-filter-app/index.html": "6164be037aa4e04de461417837fc33423d1225dbbe78e031340ae63ce2624125",
+        "docs/testing/fixtures/saved-filter-app/unit.mjs": "025a841f2b156d17106c62cd2314d2c3fd08665927c0af2eb8a9421e0438ef05"
+      },
+      "proof": {
+        "passed": true,
+        "messages": [
+          {
+            "id": "2be491be-c3fc-405f-a675-863493da09f9",
+            "runId": "6219d9cd-147f-47e9-855f-65232981dca0",
+            "attemptId": "f24369b7-a72e-4fc5-80d6-c4d214e881e1",
+            "toolCallId": "call_b8974bb67b4349bb84c8d44f0b39f54a|fc_b8974bb67b4349bb84c8d44f0b39f54a",
+            "from": "3b663ad7-39b2-427c-99e9-252a5943d163",
+            "to": "4f7a39ea-b967-4363-a165-4f7763264807",
+            "body": "Implement the criteria, then call finish_implementation.",
+            "createdAt": "2026-10-04T06:35:11.267Z",
+            "disposition": "received",
+            "transportId": 1,
+            "recipientAttemptId": "82702ba5-a358-4ff1-bbba-c017a303dea3"
+          },
+          {
+            "id": "bd2ff376-1624-4eba-84fe-5acd57b26521",
+            "runId": "6219d9cd-147f-47e9-855f-65232981dca0",
+            "attemptId": "eab661d2-4669-4480-9380-e16d9f1b31fb",
+            "toolCallId": "call_a7b296b65956472dba36a596c514a873|fc_a7b296b65956472dba36a596c514a873",
+            "from": "3b663ad7-39b2-427c-99e9-252a5943d163",
+            "to": "044f9b59-65dc-4bad-8ff7-ca3897fb973e",
+            "body": "Inspect coding_status, run the unit check and independently review the current candidate. Report the outcome.",
+            "createdAt": "2026-10-04T06:35:18.001Z",
+            "disposition": "received",
+            "transportId": 2,
+            "recipientAttemptId": "fa158b67-80a8-47db-90be-8d03052c490d"
+          },
+          {
+            "id": "fa4176eb-e246-4a33-a036-c70a8da58599",
+            "runId": "6219d9cd-147f-47e9-855f-65232981dca0",
+            "attemptId": "fa158b67-80a8-47db-90be-8d03052c490d",
+            "toolCallId": "send_message_1791095721455_5",
+            "from": "044f9b59-65dc-4bad-8ff7-ca3897fb973e",
+            "to": "3b663ad7-39b2-427c-99e9-252a5943d163",
+            "body": "The actual unit check failed with 0 != 5. Repair the nonempty case.",
+            "createdAt": "2026-10-04T06:35:21.511Z",
+            "disposition": "received",
+            "replyTo": "bd2ff376-1624-4eba-84fe-5acd57b26521",
+            "transportId": 3,
+            "recipientAttemptId": "eab661d2-4669-4480-9380-e16d9f1b31fb"
+          },
+          {
+            "id": "b9634666-1f4b-419f-af74-8a37eb8d945b",
+            "runId": "6219d9cd-147f-47e9-855f-65232981dca0",
+            "attemptId": "eab661d2-4669-4480-9380-e16d9f1b31fb",
+            "toolCallId": "call_8fb3d1d0274240a197063c185f0a8264|fc_8fb3d1d0274240a197063c185f0a8264",
+            "from": "3b663ad7-39b2-427c-99e9-252a5943d163",
+            "to": "4f7a39ea-b967-4363-a165-4f7763264807",
+            "body": "Repair the latest recorded failure, then call finish_implementation.",
+            "createdAt": "2026-10-04T06:35:23.496Z",
+            "disposition": "received",
+            "replyTo": "fa4176eb-e246-4a33-a036-c70a8da58599",
+            "transportId": 4,
+            "recipientAttemptId": "d494d4fe-189d-4016-8ff0-2b308fe90735"
+          },
+          {
+            "id": "9a51e29f-042e-4cd8-8c01-77e43662de74",
+            "runId": "6219d9cd-147f-47e9-855f-65232981dca0",
+            "attemptId": "37fd8721-2076-4d8f-83fd-e424096c7716",
+            "toolCallId": "call_b514e838f58d438c80807a48c55a2376|fc_b514e838f58d438c80807a48c55a2376",
+            "from": "3b663ad7-39b2-427c-99e9-252a5943d163",
+            "to": "044f9b59-65dc-4bad-8ff7-ca3897fb973e",
+            "body": "Inspect coding_status, run the unit check and independently review the current candidate. Report the outcome.",
+            "createdAt": "2026-10-04T06:35:33.021Z",
+            "disposition": "received",
+            "replyTo": "fa4176eb-e246-4a33-a036-c70a8da58599",
+            "transportId": 5,
+            "recipientAttemptId": "96127852-7041-4f6d-984c-e143bac7cc2b"
+          },
+          {
+            "id": "a5e3c50b-960a-460d-884c-a93331a059b7",
+            "runId": "6219d9cd-147f-47e9-855f-65232981dca0",
+            "attemptId": "96127852-7041-4f6d-984c-e143bac7cc2b",
+            "toolCallId": "send_message_1791095737025_5",
+            "from": "044f9b59-65dc-4bad-8ff7-ca3897fb973e",
+            "to": "3b663ad7-39b2-427c-99e9-252a5943d163",
+            "body": "The current check and review results are recorded.",
+            "createdAt": "2026-10-04T06:35:37.075Z",
+            "disposition": "received",
+            "replyTo": "9a51e29f-042e-4cd8-8c01-77e43662de74",
+            "transportId": 6,
+            "recipientAttemptId": "37fd8721-2076-4d8f-83fd-e424096c7716"
+          },
+          {
+            "id": "3d5d6919-2d42-47d9-a98a-16f380508cf1",
+            "runId": "6219d9cd-147f-47e9-855f-65232981dca0",
+            "attemptId": "37fd8721-2076-4d8f-83fd-e424096c7716",
+            "toolCallId": "call_57406a2b44b447508d70b7714a35ba0d|fc_57406a2b44b447508d70b7714a35ba0d",
+            "from": "3b663ad7-39b2-427c-99e9-252a5943d163",
+            "to": "4f7a39ea-b967-4363-a165-4f7763264807",
+            "body": "Repair the latest recorded failure, then call finish_implementation.",
+            "createdAt": "2026-10-04T06:35:39.392Z",
+            "disposition": "received",
+            "replyTo": "a5e3c50b-960a-460d-884c-a93331a059b7",
+            "transportId": 7,
+            "recipientAttemptId": "e62ab5e6-981f-4897-9e64-b1d999557b42"
+          },
+          {
+            "id": "b5816bbd-02f2-4658-9cc5-0357711a14c5",
+            "runId": "6219d9cd-147f-47e9-855f-65232981dca0",
+            "attemptId": "89fe424c-34fb-4dab-a933-d43461fe8867",
+            "toolCallId": "call_41aaec7e916f4c0987ba3df03731cd9d|fc_41aaec7e916f4c0987ba3df03731cd9d",
+            "from": "3b663ad7-39b2-427c-99e9-252a5943d163",
+            "to": "044f9b59-65dc-4bad-8ff7-ca3897fb973e",
+            "body": "Inspect coding_status, run the unit check and independently review the current candidate. Report the outcome.",
+            "createdAt": "2026-10-04T06:35:55.167Z",
+            "disposition": "received",
+            "replyTo": "a5e3c50b-960a-460d-884c-a93331a059b7",
+            "transportId": 8,
+            "recipientAttemptId": "277c6557-585e-42e3-b198-48119d9dbff5"
+          },
+          {
+            "id": "fbb1d539-dcac-4c30-999b-baf22a177d91",
+            "runId": "6219d9cd-147f-47e9-855f-65232981dca0",
+            "attemptId": "277c6557-585e-42e3-b198-48119d9dbff5",
+            "toolCallId": "send_message_1791095763552_5",
+            "from": "044f9b59-65dc-4bad-8ff7-ca3897fb973e",
+            "to": "3b663ad7-39b2-427c-99e9-252a5943d163",
+            "body": "The current check and review results are recorded.",
+            "createdAt": "2026-10-04T06:36:03.607Z",
+            "disposition": "received",
+            "replyTo": "b5816bbd-02f2-4658-9cc5-0357711a14c5",
+            "transportId": 9,
+            "recipientAttemptId": "89fe424c-34fb-4dab-a933-d43461fe8867"
+          }
+        ],
+        "scenario": "E2E-03",
+        "criteria": [
+          "Empty input returns zero",
+          "Nonempty input returns its sum",
+          "Document the empty-list contract"
+        ],
+        "runId": "6219d9cd-147f-47e9-855f-65232981dca0",
+        "identities": [
+          {
+            "name": "Coordinator",
+            "assignmentId": "3b663ad7-39b2-427c-99e9-252a5943d163",
+            "attemptId": "89fe424c-34fb-4dab-a933-d43461fe8867",
+            "hostPid": 81602,
+            "ompPid": 81628,
+            "sessionId": "01a1059f-9c31-7198-bcb9-01d096c21aa4",
+            "planned": {
+              "requested": {
+                "model": "aperture-openai/openai.gpt-6-sol",
+                "effort": "low"
+              },
+              "resolved": {
+                "provider": "aperture-openai",
+                "id": "openai.gpt-6-sol",
+                "api": "openai-responses",
+                "inputs": [
+                  "text",
+                  "image"
+                ],
+                "efforts": [
+                  "off",
+                  "low",
+                  "medium",
+                  "high",
+                  "xhigh"
+                ],
+                "tools": true,
+                "selector": "aperture-openai/openai.gpt-6-sol",
+                "effort": "low"
+              }
+            },
+            "observed": {
+              "type": "host_ready",
+              "model": {
+                "provider": "aperture-openai",
+                "id": "openai.gpt-6-sol",
+                "api": "openai-responses"
+              },
+              "thinkingLevel": "low",
+              "sessionId": "01a1059f-9c31-7198-bcb9-01d096c21aa4",
+              "isStreaming": false,
+              "autoCompactionEnabled": false,
+              "hostPid": 81602,
+              "ompPid": 81628,
+              "sessionDirectory": "/private/tmp/cr-n7-rework2/hosts/f24369b7-a72e-4fc5-80d6-c4d214e881e1/sessions",
+              "recoveryMode": "session"
+            },
+            "observation": "persisted actual OMP host_ready",
+            "eventCursor": 2778
+          },
+          {
+            "name": "SpecialistOne",
+            "assignmentId": "4f7a39ea-b967-4363-a165-4f7763264807",
+            "attemptId": "3f4a4051-f786-4dbc-b55a-932e58b0999f",
+            "hostPid": 81832,
+            "ompPid": 81842,
+            "sessionId": "01a1059f-9f10-76e3-bb28-59cf462f9c2e",
+            "planned": {
+              "requested": {
+                "model": "aperture-anthropic/anthropic.claude-sonnet-5",
+                "effort": "medium"
+              },
+              "resolved": {
+                "provider": "aperture-anthropic",
+                "id": "anthropic.claude-sonnet-5",
+                "api": "anthropic-messages",
+                "inputs": [
+                  "text",
+                  "image"
+                ],
+                "efforts": [
+                  "off",
+                  "low",
+                  "medium",
+                  "high",
+                  "max"
+                ],
+                "tools": true,
+                "selector": "aperture-anthropic/anthropic.claude-sonnet-5",
+                "effort": "medium"
+              }
+            },
+            "observed": {
+              "type": "host_ready",
+              "model": {
+                "provider": "aperture-anthropic",
+                "id": "anthropic.claude-sonnet-5",
+                "api": "anthropic-messages"
+              },
+              "thinkingLevel": "medium",
+              "sessionId": "01a1059f-9f10-76e3-bb28-59cf462f9c2e",
+              "isStreaming": false,
+              "autoCompactionEnabled": false,
+              "hostPid": 81832,
+              "ompPid": 81842,
+              "sessionDirectory": "/private/tmp/cr-n7-rework2/hosts/82702ba5-a358-4ff1-bbba-c017a303dea3/sessions",
+              "recoveryMode": "session"
+            },
+            "observation": "persisted actual OMP host_ready",
+            "eventCursor": 2784
+          },
+          {
+            "name": "SpecialistTwo",
+            "assignmentId": "044f9b59-65dc-4bad-8ff7-ca3897fb973e",
+            "attemptId": "277c6557-585e-42e3-b198-48119d9dbff5",
+            "hostPid": 81969,
+            "ompPid": 81982,
+            "sessionId": "01a1059f-beab-72f9-95a9-d79c8c03ebd2",
+            "planned": {
+              "requested": {
+                "model": "aperture-google/gemini-3.8-flash",
+                "effort": "low"
+              },
+              "resolved": {
+                "provider": "aperture-google",
+                "id": "gemini-3.8-flash",
+                "api": "google-generative-ai",
+                "inputs": [
+                  "text",
+                  "image"
+                ],
+                "efforts": [
+                  "off",
+                  "low",
+                  "medium",
+                  "high"
+                ],
+                "tools": true,
+                "selector": "aperture-google/gemini-3.8-flash",
+                "effort": "low"
+              }
+            },
+            "observed": {
+              "type": "host_ready",
+              "model": {
+                "provider": "aperture-google",
+                "id": "gemini-3.8-flash",
+                "api": "google-generative-ai"
+              },
+              "thinkingLevel": "low",
+              "sessionId": "01a1059f-beab-72f9-95a9-d79c8c03ebd2",
+              "isStreaming": false,
+              "autoCompactionEnabled": false,
+              "hostPid": 81969,
+              "ompPid": 81982,
+              "sessionDirectory": "/private/tmp/cr-n7-rework2/hosts/fa158b67-80a8-47db-90be-8d03052c490d/sessions",
+              "recoveryMode": "session"
+            },
+            "observation": "persisted actual OMP host_ready",
+            "eventCursor": 2790
+          }
+        ],
+        "candidates": [
+          {
+            "id": "4f39baa6-563e-4a22-be50-828b819f6a05",
+            "runId": "6219d9cd-147f-47e9-855f-65232981dca0",
+            "revision": {
+              "base": "5d907db910dba3220fa6f14c2590357d982d50f5",
+              "head": "9282525bcc248189b76ab82a96cd8d2bd2f991b1",
+              "tree": "7977961907323da128cbc21b138425401dcc0576",
+              "worktreeHash": "e55d7beb95c692d992c820eb38342dfa303af9f7938c1fe256568c260fabeb0f",
+              "dirty": false,
+              "requirementsHash": "f30c20af24780614888703c301e0e975a8789ff7685434b9b82d7e8d354ac9ec",
+              "instructionsHash": "5c4018ffd2d499a3f571dcafaf6ad6690c157d98222fd19d3fb23477a4e4d9f9"
+            },
+            "implementationAttempts": [
+              "82702ba5-a358-4ff1-bbba-c017a303dea3"
+            ],
+            "createdAt": "2026-10-04T06:35:14.327Z"
+          },
+          {
+            "id": "8fcb9800-5fd9-44f5-8306-bd9c8361a2fc",
+            "runId": "6219d9cd-147f-47e9-855f-65232981dca0",
+            "revision": {
+              "base": "5d907db910dba3220fa6f14c2590357d982d50f5",
+              "head": "70896f03abfb9f851605bf935a5184bf9254257f",
+              "tree": "fd553b4d113d8b5139ad14f7c4fce4469454b39a",
+              "worktreeHash": "5dfc3a3aa304c68128f968c935dcf921829693811a0546eae38c1403a4345c15",
+              "dirty": false,
+              "requirementsHash": "f30c20af24780614888703c301e0e975a8789ff7685434b9b82d7e8d354ac9ec",
+              "instructionsHash": "5c4018ffd2d499a3f571dcafaf6ad6690c157d98222fd19d3fb23477a4e4d9f9"
+            },
+            "implementationAttempts": [
+              "82702ba5-a358-4ff1-bbba-c017a303dea3",
+              "d494d4fe-189d-4016-8ff0-2b308fe90735"
+            ],
+            "createdAt": "2026-10-04T06:35:28.664Z"
+          },
+          {
+            "id": "9c177527-c6a2-460b-80bf-547fba295351",
+            "runId": "6219d9cd-147f-47e9-855f-65232981dca0",
+            "revision": {
+              "base": "5d907db910dba3220fa6f14c2590357d982d50f5",
+              "head": "46bcd054c206ca54c832d6615686f67f097e39f4",
+              "tree": "60d6cd9e531cdfa7dbe9ca6510653fbe9e3282d7",
+              "worktreeHash": "8f69a4111b272feee600494083e923057d389fa2ecc9b3feb2ed500714678f5e",
+              "dirty": false,
+              "requirementsHash": "f30c20af24780614888703c301e0e975a8789ff7685434b9b82d7e8d354ac9ec",
+              "instructionsHash": "5c4018ffd2d499a3f571dcafaf6ad6690c157d98222fd19d3fb23477a4e4d9f9"
+            },
+            "implementationAttempts": [
+              "82702ba5-a358-4ff1-bbba-c017a303dea3",
+              "d494d4fe-189d-4016-8ff0-2b308fe90735",
+              "e62ab5e6-981f-4897-9e64-b1d999557b42"
+            ],
+            "createdAt": "2026-10-04T06:35:47.314Z"
+          }
+        ],
+        "checks": [
+          {
+            "candidateId": "4f39baa6-563e-4a22-be50-828b819f6a05",
+            "attemptId": "fa158b67-80a8-47db-90be-8d03052c490d",
+            "checkId": "unit",
+            "definition": {
+              "id": "unit",
+              "image": "sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285",
+              "command": "/usr/local/bin/python3",
+              "args": [
+                "-B",
+                "-m",
+                "unittest",
+                "-v"
+              ],
+              "timeoutMs": 5000,
+              "required": true
+            },
+            "environment": {
+              "image": "sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285",
+              "network": "none",
+              "platform": "linux/arm64",
+              "memoryMiB": 1024,
+              "tmpExecutable": false
+            },
+            "started": true,
+            "completed": true,
+            "exitCode": 1,
+            "timedOut": false,
+            "source": {
+              "id": "dbc5c14b-6d98-469e-ac51-61b2257c5437",
+              "sha256": "e55d7beb95c692d992c820eb38342dfa303af9f7938c1fe256568c260fabeb0f",
+              "bytes": 324
+            },
+            "sourceIntact": true,
+            "output": {
+              "id": "65f89871-3054-445b-adf4-6ad3b5e4e8e1",
+              "sha256": "e66490519b382c24c5b64ece2375b216ec219ed2087c3845f6eb82a23ce226da",
+              "bytes": 669
+            },
+            "id": "e9bdaebc-2d13-4aa0-b8dd-fca944988f93",
+            "completedAt": "2026-10-04T06:35:21.325Z"
+          },
+          {
+            "candidateId": "8fcb9800-5fd9-44f5-8306-bd9c8361a2fc",
+            "attemptId": "96127852-7041-4f6d-984c-e143bac7cc2b",
+            "checkId": "unit",
+            "definition": {
+              "id": "unit",
+              "image": "sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285",
+              "command": "/usr/local/bin/python3",
+              "args": [
+                "-B",
+                "-m",
+                "unittest",
+                "-v"
+              ],
+              "timeoutMs": 5000,
+              "required": true
+            },
+            "environment": {
+              "image": "sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285",
+              "network": "none",
+              "platform": "linux/arm64",
+              "memoryMiB": 1024,
+              "tmpExecutable": false
+            },
+            "started": true,
+            "completed": true,
+            "exitCode": 0,
+            "timedOut": false,
+            "source": {
+              "id": "e1d62274-2dc5-4235-8bde-b9f964ff14ec",
+              "sha256": "5dfc3a3aa304c68128f968c935dcf921829693811a0546eae38c1403a4345c15",
+              "bytes": 324
+            },
+            "sourceIntact": true,
+            "output": {
+              "id": "e0c5e84e-f842-4b07-b456-425386869ea8",
+              "sha256": "f1208a804a3b6ecb0174b241226164731f98e066b5491be98bdc90186cf1f67a",
+              "bytes": 200
+            },
+            "id": "719bdef2-1abb-42ee-a9ff-f175ea2dd315",
+            "completedAt": "2026-10-04T06:35:36.871Z"
+          },
+          {
+            "candidateId": "9c177527-c6a2-460b-80bf-547fba295351",
+            "attemptId": "277c6557-585e-42e3-b198-48119d9dbff5",
+            "checkId": "unit",
+            "definition": {
+              "id": "unit",
+              "image": "sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285",
+              "command": "/usr/local/bin/python3",
+              "args": [
+                "-B",
+                "-m",
+                "unittest",
+                "-v"
+              ],
+              "timeoutMs": 5000,
+              "required": true
+            },
+            "environment": {
+              "image": "sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285",
+              "network": "none",
+              "platform": "linux/arm64",
+              "memoryMiB": 1024,
+              "tmpExecutable": false
+            },
+            "started": true,
+            "completed": true,
+            "exitCode": 0,
+            "timedOut": false,
+            "source": {
+              "id": "61db9c8b-1c72-4838-817c-03f6c9b9a7fa",
+              "sha256": "8f69a4111b272feee600494083e923057d389fa2ecc9b3feb2ed500714678f5e",
+              "bytes": 324
+            },
+            "sourceIntact": true,
+            "output": {
+              "id": "d4c1c6e8-d26b-4111-89a0-b0d59573a57e",
+              "sha256": "f1208a804a3b6ecb0174b241226164731f98e066b5491be98bdc90186cf1f67a",
+              "bytes": 200
+            },
+            "id": "a2dc28a5-9e8c-4bc4-bba7-a15d79174028",
+            "completedAt": "2026-10-04T06:36:03.367Z"
+          }
+        ],
+        "reviews": [
+          {
+            "candidateId": "8fcb9800-5fd9-44f5-8306-bd9c8361a2fc",
+            "verdict": "changes_requested",
+            "summary": "Current code and unit evidence inspected.",
+            "findings": [
+              {
+                "severity": "major",
+                "body": "Document the empty-list contract."
+              }
+            ],
+            "coverage": [],
+            "attemptId": "96127852-7041-4f6d-984c-e143bac7cc2b",
+            "assignmentId": "044f9b59-65dc-4bad-8ff7-ca3897fb973e",
+            "sessionId": "01a1059f-beab-72f9-95a9-d79c8c03ebd2",
+            "checkPolicyRevision": 0,
+            "id": "8a24bc4f-3f5d-492a-b98d-976aefaf18ff",
+            "artifact": {
+              "id": "349f448d-6948-4bfc-9bbc-64283b0e0e0e",
+              "sha256": "2e3092442cc46aed38316a6460835d164f109d9b46d6cef667a8c2ee782a5558",
+              "bytes": 409
+            },
+            "createdAt": "2026-10-04T06:35:36.981Z"
+          },
+          {
+            "candidateId": "9c177527-c6a2-460b-80bf-547fba295351",
+            "verdict": "pass",
+            "summary": "Current code and unit evidence inspected.",
+            "findings": [],
+            "coverage": [
+              {
+                "criterion": 0,
+                "assessment": "Unit test covers empty input.",
+                "checkIds": [
+                  "unit"
+                ]
+              },
+              {
+                "criterion": 1,
+                "assessment": "Unit test covers nonempty input.",
+                "checkIds": [
+                  "unit"
+                ]
+              },
+              {
+                "criterion": 2,
+                "assessment": "Function docstring explains the empty-list result.",
+                "checkIds": []
+              }
+            ],
+            "attemptId": "277c6557-585e-42e3-b198-48119d9dbff5",
+            "assignmentId": "044f9b59-65dc-4bad-8ff7-ca3897fb973e",
+            "sessionId": "01a1059f-beab-72f9-95a9-d79c8c03ebd2",
+            "checkPolicyRevision": 0,
+            "id": "cb803994-518c-48b7-b5b0-8569f936982e",
+            "artifact": {
+              "id": "59856fbd-fa02-4175-abab-7f7bb912898d",
+              "sha256": "e6c5c722ff5d0270717a955667742d8a64272a88f92dcab9f0911a139f08579b",
+              "bytes": 593
+            },
+            "createdAt": "2026-10-04T06:36:03.509Z"
+          }
+        ],
+        "failedCheckOutputInspected": true,
+        "blockingReviewRepaired": true,
+        "automaticRepairCycles": 2,
+        "operatorUnchanged": true,
+        "pausedAllStopped": true,
+        "attempts": [
+          {
+            "id": "f24369b7-a72e-4fc5-80d6-c4d214e881e1",
+            "ownership": "stopped",
+            "hostPid": 75143,
+            "ompPid": 75150
+          },
+          {
+            "id": "82702ba5-a358-4ff1-bbba-c017a303dea3",
+            "ownership": "stopped",
+            "hostPid": 75253,
+            "ompPid": 75258
+          },
+          {
+            "id": "53284fc5-4671-447a-aa8b-d981bef76519",
+            "ownership": "stopped",
+            "hostPid": 75324,
+            "ompPid": 75329
+          },
+          {
+            "id": "eab661d2-4669-4480-9380-e16d9f1b31fb",
+            "ownership": "stopped",
+            "hostPid": 76043,
+            "ompPid": 76051
+          },
+          {
+            "id": "d494d4fe-189d-4016-8ff0-2b308fe90735",
+            "ownership": "stopped",
+            "hostPid": 76202,
+            "ompPid": 76215
+          },
+          {
+            "id": "fa158b67-80a8-47db-90be-8d03052c490d",
+            "ownership": "stopped",
+            "hostPid": 76365,
+            "ompPid": 76375
+          },
+          {
+            "id": "37fd8721-2076-4d8f-83fd-e424096c7716",
+            "ownership": "stopped",
+            "hostPid": 78385,
+            "ompPid": 78393
+          },
+          {
+            "id": "e62ab5e6-981f-4897-9e64-b1d999557b42",
+            "ownership": "stopped",
+            "hostPid": 78505,
+            "ompPid": 78519
+          },
+          {
+            "id": "96127852-7041-4f6d-984c-e143bac7cc2b",
+            "ownership": "stopped",
+            "hostPid": 78655,
+            "ompPid": 78674
+          },
+          {
+            "id": "89fe424c-34fb-4dab-a933-d43461fe8867",
+            "ownership": "stopped",
+            "hostPid": 81602,
+            "ompPid": 81628
+          },
+          {
+            "id": "3f4a4051-f786-4dbc-b55a-932e58b0999f",
+            "ownership": "stopped",
+            "hostPid": 81832,
+            "ompPid": 81842
+          },
+          {
+            "id": "277c6557-585e-42e3-b198-48119d9dbff5",
+            "ownership": "stopped",
+            "hostPid": 81969,
+            "ompPid": 81982
+          }
+        ],
+        "boundary": "Actual native daemon, OMP, Rust Mail, Git and Docker; scripted model boundary. Third repair refusal is composed with existing native recovery-budget gate."
+      },
+      "providerRequests": 52,
+      "providerErrors": [],
+      "observedEveryIdentity": true,
+      "ownedProcessReceipts": 24,
+      "allOwnedProcessesExited": true,
+      "removedContainers": 3,
+      "allContainersRemoved": true,
+      "externalMailReceipts": 9,
+      "externalMailMatches": true,
+      "binaryHashesUnchanged": true
+    },
+    "build": {
+      "passed": true,
+      "command": "npm run build",
+      "log": ".crewroom/test-results/native-scenarios-build.log",
+      "sha256": "3d79051b715bc98bd49e774f7816f59755c8d4091928fd3e84fd6f8adde0683d",
+      "warning": "Existing bundle-size warning retained."
+    },
+    "fixtureValidation": {
+      "passed": true,
+      "checks": [
+        "strict TypeScript check of three native drivers and imported fixtures",
+        "Python compile/help",
+        "git diff --check",
+        "every executed fixture input hash equals final working source"
+      ]
+    }
+  },
+  "browserImage": {
+    "sourceImage": "sha256:425dd73955b5b99e61a37954480a0de825d203b55f8fda4d4377f4e29fdb8ea7",
+    "sourceRootFilesystem": {
+      "Type": "layers",
+      "Layers": [
+        "sha256:100031c9cce7b091dd637c1afa21331c3448979cc0953828264b5868ec3f225e",
+        "sha256:a3efbcb3db7d92abe518aa7ccb3a846fb3f70d7dffa41c3e1ee1de91c5cdd388",
+        "sha256:d1c22d933c0d3740f43639d8461a08f14f2757eab0316822cf6ed8b8709b907f",
+        "sha256:0271fcc14e700fffa1e8e080b3ec3c9aa57d327c26ee3de9d765ebac9e3c775b",
+        "sha256:5b041408237d4cfdfecd20984ac38a962bcb3dd71880a3997d13aed16d8cba8b",
+        "sha256:123c99e3320fb060431be2928b1aef2e094fbdfd9b6cef6c936ff351cd6fd587",
+        "sha256:9d84dee099f7d5e6e50308d2edd11d3458c75f11e43ae2925de4615ee2cadebb",
+        "sha256:5bc0309ff8a09ce0661dc71fc7849bcb5a38985ada95b65227e3f399639b0b22",
+        "sha256:fc42716be66f4df9bdbfafcb318010d07cb344191dc7b155a63ed0090c875f26",
+        "sha256:f632d9ad26bf13aa852a67a87a3254f866c0a1dcf59f6fa328fdfb8094b3c831",
+        "sha256:a7f8910c465f45b369e1beedbe0fc7eb47f6c9298291fbbbf23bf20faefa6f28",
+        "sha256:66345d42beeb8640b53e8f834a85118849081df8dd679f364ee9d246c6b7f514",
+        "sha256:1ad8f66beda2217137d4b1e882e3388c94fb96e7b27f6138e9d171d991661a90",
+        "sha256:1355a59a48c4c90fdfd3475daed5d126c484383f74f07fe07e03e375ab703a45",
+        "sha256:cce30a92aded6b6b5f2224583a349f3cd339b844d9df3c77b4edb9179b1da72c",
+        "sha256:aec6b5d82f678540ac717a39c4f6cd5efff5d396771ba07e8afed2014b9128fa",
+        "sha256:4218fa37108f67222c03d70a76ab80ea1d90ad5d378c6c15115543873f87e336",
+        "sha256:1cbe28fd00209e6ac33c583070f0cb39022fb686e6d59b14ce0d659fdb6df619",
+        "sha256:5d6a52b279710f5078403fc55cbf37ecde0f8f1a32ed630c88d48df5a7254440",
+        "sha256:3f12be229ba68fb97bbe21c7cc1bb60359869f97187203bb14d9f31e64a2fff4",
+        "sha256:3e9b9370ae538fbfc785be9d6741c30c6071de3bac92f2c9aa770bab4110d868",
+        "sha256:a586f6de515d4a50d920fa9894a9c36d4a03e6b2ad07d90becd4f115973c4d88",
+        "sha256:592411bea570800eef0ebc14c5509da00deda86e42c34ccb38fd587ffc6ea8e2",
+        "sha256:61280a75bd7c4421d092e2d8e7e88f0a90357911c085b2a063072f5d8289a83f",
+        "sha256:af314100eaa1ae251823c7fd0b6fbd384e303da3220a8762d4458885ac7a388c"
+      ]
+    },
+    "sourceConfigSha256": "dad00d5412bad6fa58ec901838160ec76a7a14980804043ffb81c749386a6902",
+    "image": "sha256:295b78a1314778cbc83bdabccfa94aadde23f7b2cb13482e2728b814fb1a1470",
+    "tag": "crewroom-native-browser-check:09aa01a93565e47eabacbe26e1f8c2aa650aeb65f851203e002e857e23451678",
+    "imageConfigSha256": "09aa01a93565e47eabacbe26e1f8c2aa650aeb65f851203e002e857e23451678",
+    "rootFilesystem": {
+      "Type": "layers",
+      "Layers": [
+        "sha256:100031c9cce7b091dd637c1afa21331c3448979cc0953828264b5868ec3f225e",
+        "sha256:a3efbcb3db7d92abe518aa7ccb3a846fb3f70d7dffa41c3e1ee1de91c5cdd388",
+        "sha256:d1c22d933c0d3740f43639d8461a08f14f2757eab0316822cf6ed8b8709b907f",
+        "sha256:0271fcc14e700fffa1e8e080b3ec3c9aa57d327c26ee3de9d765ebac9e3c775b",
+        "sha256:5b041408237d4cfdfecd20984ac38a962bcb3dd71880a3997d13aed16d8cba8b",
+        "sha256:123c99e3320fb060431be2928b1aef2e094fbdfd9b6cef6c936ff351cd6fd587",
+        "sha256:9d84dee099f7d5e6e50308d2edd11d3458c75f11e43ae2925de4615ee2cadebb",
+        "sha256:5bc0309ff8a09ce0661dc71fc7849bcb5a38985ada95b65227e3f399639b0b22",
+        "sha256:fc42716be66f4df9bdbfafcb318010d07cb344191dc7b155a63ed0090c875f26",
+        "sha256:f632d9ad26bf13aa852a67a87a3254f866c0a1dcf59f6fa328fdfb8094b3c831",
+        "sha256:a7f8910c465f45b369e1beedbe0fc7eb47f6c9298291fbbbf23bf20faefa6f28",
+        "sha256:66345d42beeb8640b53e8f834a85118849081df8dd679f364ee9d246c6b7f514",
+        "sha256:1ad8f66beda2217137d4b1e882e3388c94fb96e7b27f6138e9d171d991661a90",
+        "sha256:1355a59a48c4c90fdfd3475daed5d126c484383f74f07fe07e03e375ab703a45",
+        "sha256:cce30a92aded6b6b5f2224583a349f3cd339b844d9df3c77b4edb9179b1da72c",
+        "sha256:aec6b5d82f678540ac717a39c4f6cd5efff5d396771ba07e8afed2014b9128fa",
+        "sha256:4218fa37108f67222c03d70a76ab80ea1d90ad5d378c6c15115543873f87e336",
+        "sha256:1cbe28fd00209e6ac33c583070f0cb39022fb686e6d59b14ce0d659fdb6df619",
+        "sha256:5d6a52b279710f5078403fc55cbf37ecde0f8f1a32ed630c88d48df5a7254440",
+        "sha256:3f12be229ba68fb97bbe21c7cc1bb60359869f97187203bb14d9f31e64a2fff4",
+        "sha256:3e9b9370ae538fbfc785be9d6741c30c6071de3bac92f2c9aa770bab4110d868",
+        "sha256:a586f6de515d4a50d920fa9894a9c36d4a03e6b2ad07d90becd4f115973c4d88",
+        "sha256:592411bea570800eef0ebc14c5509da00deda86e42c34ccb38fd587ffc6ea8e2",
+        "sha256:61280a75bd7c4421d092e2d8e7e88f0a90357911c085b2a063072f5d8289a83f",
+        "sha256:af314100eaa1ae251823c7fd0b6fbd384e303da3220a8762d4458885ac7a388c"
+      ]
+    },
+    "removedVolumes": {
+      "/var/lib/postgresql/data": {}
+    },
+    "rootFilesystemByteIdentical": true,
+    "otherImageConfigIdentical": true,
+    "preparationScriptSha256": "8664238bfc718d287f2c500cb511ac9252709737c2b0052701a1e8d91149a816",
+    "boundary": "Only the accepted fixture image config.Volumes was removed. Every original filesystem layer is unchanged; no application/container ownership check is relaxed, and no live service image is changed."
+  },
+  "retainedFailures": [
+    {
+      "root": "/private/tmp/cr-n7-complex1",
+      "result": "failed",
+      "reason": "Accepted Chromium image inherited PostgreSQL VOLUME. Docker added an anonymous mount; exact native container ownership checks refused both check receipts. Derived fixture image changes only config.Volumes; no production guard relaxed.",
+      "cleanupReceiptSha256": "d30cd769bec06d57da0a6252377ba8dc9ffa20567efc66aa8826bbe51cba99e5"
+    },
+    {
+      "root": "/private/tmp/cr-n7-complex2",
+      "result": "failed",
+      "reason": "Initial actual unit/browser/review/publication completed, then fixture queried a host identity endpoint after automatic publication pause had stopped it. Use persisted actual OMP host_ready identity with independent wire checks."
+    }
+  ],
+  "boundaries": [
+    "No production Rust, startup default or retained TypeScript oracle source changed. Existing native provider-daemon example injects synthetic loopback Bitbucket credentials/endpoints into production Service/runtime; it is not the shipping daemon executable. Rework launches crewroomd.",
+    "Development runtime binaries are recorded by SHA256; no claim these are the final combined candidate. Final run must select the packaged adjacent runtime binaries and provider-daemon built from the exact candidate source/profile. Fixture and binary source identities remain separate.",
+    "Actual OMP18.4.12, Rust Mail0.3.36, Git, Docker, unit tests and Chromium. Model responses and Bitbucket replies are scripted, not live model/provider delivery. Every provider request matches planned model; persisted actual host_ready verifies provider/model/API/effort/PIDs/session.",
+    "Original12 scenario obligations are audited at step level. Three representative research profiles alone do not certify complex coding, target refresh or rework. Other component/fault evidence is composed explicitly.",
+    "No active primary state, retained pilot, real provider credentials or OS settings touched. Final packaged GUI/load/resources and OS VoiceOver/IME remain parent-owned gates."
+  ],
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

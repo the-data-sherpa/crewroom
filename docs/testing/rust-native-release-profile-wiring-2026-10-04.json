@@ -1,0 +1,100 @@
+{
+  "passed": true,
+  "sourceHashes": {
+    "scripts/rust/daemon-client.ts": "a9683138ab183b85c5bdb47b081c4a6cfd661e0f5928632a7f7307668e883b65",
+    "scripts/rust/process-adapter.ts": "14edc6e79ae9613787412676555780893587538f882c471a61a952de29b116a0",
+    "scripts/rust/release-profiles-live.ts": "d9b862faf1c52f956bf136a3706ac9afabfa3367a9ce1ae28ef0d9a90a0f616f",
+    "scripts/rust/verify-release-profiles.py": "72de41a01f3d044533aab80ae49c6a27a9db9f9651833500a216217fd868d7cf",
+    "scripts/validate-native-release.sh": "2afc04acd0220b4dec0c96cbeb9bdba3fb30f9adb3b9c231d57e77727dc7b156",
+    "docs/native-release-validation.md": "77d0ff8d39a873e9ffed5ae5fa6fce7802c3137c357e93273271e8df2bba17e7"
+  },
+  "checks": [
+    {
+      "command": [
+        "bash",
+        "-n",
+        "scripts/validate-native-release.sh"
+      ],
+      "exitCode": 0,
+      "seconds": 0.038,
+      "log": ".crewroom/test-results/native-release-profile-wiring/0.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "scripts/rust/verify-release-profiles.py"
+      ],
+      "exitCode": 0,
+      "seconds": 0.065,
+      "log": ".crewroom/test-results/native-release-profile-wiring/1.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/rust/verify-release-profiles.py",
+        "--help"
+      ],
+      "exitCode": 0,
+      "seconds": 0.113,
+      "log": ".crewroom/test-results/native-release-profile-wiring/2.log",
+      "sha256": "c06075a085059a2de545d5f24b7f693fbfaddf7c32f61d43b8e8b128ee1ae537"
+    },
+    {
+      "command": [
+        "node_modules/.bin/tsc",
+        "--ignoreConfig",
+        "--noEmit",
+        "--target",
+        "ES2023",
+        "--module",
+        "ESNext",
+        "--moduleResolution",
+        "Bundler",
+        "--strict",
+        "--esModuleInterop",
+        "--skipLibCheck",
+        "--types",
+        "node",
+        "scripts/rust/release-profiles-live.ts"
+      ],
+      "exitCode": 0,
+      "seconds": 0.363,
+      "log": ".crewroom/test-results/native-release-profile-wiring/3.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/validate-native-release.sh",
+        "--plan",
+        "006c970b6bc9692e16d96a70a25eff73cae3c86d",
+        "/private/tmp/cr-final-plan",
+        "/absolute/verified/mcp-agent-mail"
+      ],
+      "exitCode": 0,
+      "seconds": 0.035,
+      "log": ".crewroom/test-results/native-release-profile-wiring/4.log",
+      "sha256": "90bf767a7ca4dc2e90d5297f912d1742d9108c57cd9a4f61f663402314a3fcde"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "seconds": 0.015,
+      "log": ".crewroom/test-results/native-release-profile-wiring/5.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "boundary": "Fixture wiring only; no release build or actual profile/runtime rerun in this iteration. Null runtime is typechecked; its actual no-runner daemon exercise remains root-owned. Existing rollback snapshot unchanged.",
+  "embeddedReceiptPythonSyntax": {
+    "passed": true,
+    "sha256": "b835ac17cb9d26efc4cfc0ddc57f03306e731adbca1adecd4effb2a4a9094cb7"
+  }
+}

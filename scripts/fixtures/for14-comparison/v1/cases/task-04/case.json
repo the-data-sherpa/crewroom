@@ -1,0 +1,16 @@
+{
+  "id": "task-04",
+  "version": 1,
+  "checks": [
+    {
+      "id": "unit",
+      "script": "people-unit.cjs",
+      "surface": "logic"
+    },
+    {
+      "id": "browser",
+      "script": "people-browser.cjs",
+      "surface": "browser"
+    }
+  ]
+}

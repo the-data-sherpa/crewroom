@@ -1,0 +1,136 @@
+{
+  "iteration": "N7.1c — bundled launcher and final validation preparation",
+  "date": "2026-10-04",
+  "baseRevision": "61fa1d6050a2d57adf62b37e31ea1b1e59b9a38e",
+  "sourceInputs": {
+    "scripts/launch-native.sh": "eef0c15e3936fad9ac7f1a64550f9c45b6e89f8737a7f56763d32a6c1fa8142c",
+    "scripts/run-native.sh": "9c88a07aa32b88006b4ff2fd4bbc29a50e96c5275aa1f105e7712f87380c16ec",
+    "scripts/package-native.py": "88662d320fceeaf52b8525bc0f329e22d43f6198df76b701b3bd6010d81fd2dc",
+    "scripts/test-native-launcher.py": "3283617696e1ad159804619d261e5755ee1b9a85e901332c58b8f8f59b48e188",
+    "scripts/test-native-package.py": "753837ffa9b7b62874a2e6c56ec2a56a5bbf8d74adc7f649c0a25bbb3540e4f0",
+    "scripts/validate-native-release.sh": "0e6c92fcd203a7fd086891e211c0baef3ac2424ca0afbe119a871bc1a7c045f7",
+    "scripts/measure-native-footprint.py": "d465f6cc6f0d1107ce7b4373d8bcce7ce2f57da6addc0a521ba00515ec4b3641",
+    "docs/native-installation.md": "9229ba2075ce94d2e9e20fa3b4ff8a12806e921f7b9472e9a6f5ee1d3cd34ad1",
+    "docs/native-release-validation.md": "c62a5182ffb37654e7402bec21bf6eba938858366fb8f520f6d8736b908d1c15"
+  },
+  "sourceManifestSha256": "565ae6a7d91e2256811553d26ee479972bb3ed00b6823f48765b574659c2bf9a",
+  "launcher": {
+    "passed": true,
+    "error": null,
+    "sourceBundle": "/private/tmp/cr-n7-package/Crewroom.app",
+    "launcherSha256": "eef0c15e3936fad9ac7f1a64550f9c45b6e89f8737a7f56763d32a6c1fa8142c",
+    "sourceRevision": "61fa1d6050a2d57adf62b37e31ea1b1e59b9a38e",
+    "sourceExecutableSha256": {
+      "crewroom": "18c65a0d67b7aa38848994c0de2eb2bc991df93e5ff36a2567076e89ed8dfc12",
+      "crewroomd": "eab5f94f43eef25b4078c76476575bbd21e819f31317c5c07a931de26b13435a",
+      "crewroom-host": "c547482933dc5a96be45644f492fd5e99a65aeb823b7fd5240b9d8142c84118b",
+      "crewroom-process": "3f6f7e8a1366290b39e23c9a46670d3ef6cdf23c7c4e3d007f62287e943fe7ff"
+    },
+    "launches": [
+      {
+        "elapsedSeconds": 1.0204200419830158,
+        "code": 2,
+        "stdout": "",
+        "stderr": "Crewroom launcher: Data and role paths must be explicit absolute paths.\n"
+      },
+      {
+        "elapsedSeconds": 0.042791749991010875,
+        "code": 2,
+        "stdout": "",
+        "stderr": "Crewroom launcher: Private directories must have no group or other permissions.\n"
+      },
+      {
+        "elapsedSeconds": 0.7456292919814587,
+        "code": 0,
+        "stdout": "Started the bundled service. Closing this launcher or the app leaves it running.\nRust workflow service connected at http://127.0.0.1:63317 (PID 6679).\n",
+        "stderr": ""
+      },
+      {
+        "elapsedSeconds": 0.11262362502748147,
+        "code": 0,
+        "stdout": "Reusing the authenticated service. Its existing role, port and runtime configuration remain in effect.\nRust workflow service connected at http://127.0.0.1:63317 (PID 6679).\n",
+        "stderr": ""
+      },
+      {
+        "elapsedSeconds": 0.4133669590228237,
+        "code": 0,
+        "stdout": "Started the bundled service. Closing this launcher or the app leaves it running.\nRust workflow service connected at http://127.0.0.1:63317 (PID 6738).\n",
+        "stderr": ""
+      }
+    ],
+    "ownedDaemonCount": 2,
+    "survivingOwnedDaemons": [],
+    "scope": "Headless launcher: no GUI/Finder or configured execution claim; minimal system PATH, absolute private paths with spaces, authenticated reopen, same-service reuse and stopped restart preserve a task."
+  },
+  "packageRegression": {
+    "passed": true,
+    "finalBinaryHashesMatch": 4,
+    "outerSignatureChangeReproduced": true,
+    "deepSignatureVerified": true,
+    "existingOutputRefused": true,
+    "scope": "Synthetic Mach-O packaging regression; no Crewroom workflow, GUI or release acceptance claim."
+  },
+  "previousPackageCorrection": {
+    "previousReceiptScope": "61fa1d6 package metadata was computed before outer bundle signing.",
+    "recordedPreBundleExecutableBytes": 200833360,
+    "actualFinalExecutableBytes": 200833360,
+    "differences": {
+      "crewroom": {
+        "recorded": "b5f08ae64ccf1e86e3441660eca2a3cbdf422eb92f984e2b30232d3d2c20a9f9",
+        "actual": "18c65a0d67b7aa38848994c0de2eb2bc991df93e5ff36a2567076e89ed8dfc12"
+      }
+    }
+  },
+  "logs": {
+    "source-inputs.json": {
+      "path": "/Users/crewroom/.codex/worktrees/native-upgrades/crewroom/.crewroom/test-results/native-release-prep/source-inputs.json",
+      "sha256": "565ae6a7d91e2256811553d26ee479972bb3ed00b6823f48765b574659c2bf9a"
+    },
+    "launcher-verified.log": {
+      "path": "/Users/crewroom/.codex/worktrees/native-upgrades/crewroom/.crewroom/test-results/native-release-prep/launcher-verified.log",
+      "sha256": "56e78cffbe0721f070263be18d501286918865f2b034fcab36df9201d21dd79b"
+    },
+    "package-regression.log": {
+      "path": "/Users/crewroom/.codex/worktrees/native-upgrades/crewroom/.crewroom/test-results/native-release-prep/package-regression.log",
+      "sha256": "cc948e27b0238b84ecc619cb05258827be6a349537105db74775438810890201"
+    },
+    "footprint-smoke.json": {
+      "path": "/Users/crewroom/.codex/worktrees/native-upgrades/crewroom/.crewroom/test-results/native-release-prep/footprint-smoke.json",
+      "sha256": "da3895b8cdfbec1333817d725e5fe9a95f75b579bffae6fce1db438730840987"
+    },
+    "dry-plan.log": {
+      "path": "/Users/crewroom/.codex/worktrees/native-upgrades/crewroom/.crewroom/test-results/native-release-prep/dry-plan.log",
+      "sha256": "1c74890619e1c1cd06280b150fa70fa47607ee18a8aa5aab8b09edc36b576df4"
+    },
+    "incomplete-candidate.json": {
+      "path": "/Users/crewroom/.codex/worktrees/native-upgrades/crewroom/.crewroom/test-results/native-release-prep/incomplete-candidate.json",
+      "sha256": "5e45f443251e1daba645501c9c03b6d9caa88469c2e926aaf14495e5d7987fb4"
+    },
+    "prior-package-correction.json": {
+      "path": "/Users/crewroom/.codex/worktrees/native-upgrades/crewroom/.crewroom/test-results/native-release-prep/prior-package-correction.json",
+      "sha256": "a5e41451df362844ecc97e6b957824dfb04f139a2cc0156ee80c50939f5fa448"
+    }
+  },
+  "checks": {
+    "shellSyntax": true,
+    "pythonCompilation": true,
+    "diffCheck": true,
+    "readOnlyReleasePlan": true,
+    "incompleteCandidateRefusedBeforeCheckout": true,
+    "footprintCollectorSmoke": true
+  },
+  "scope": [
+    "Native daemon launcher tested with frozen83a8389 component binaries; final combined package not built.",
+    "Tiny synthetic Mach-O fixture proves package hash/signature accounting; not application acceptance.",
+    "Footprint tool smoke uses sleep; no Crewroom RSS/CPU/latency claim.",
+    "No runtime default, retained pilot or real credentials/configuration changed."
+  ],
+  "remaining": [
+    "Final combined accessibility-inclusive revision",
+    "Fresh release build/test/package/install/restore",
+    "Native release GUI and resource measurements",
+    "Coverage/failure and rollback accounting",
+    "Root-owned cutover/release note"
+  ],
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

@@ -1,0 +1,9 @@
+{
+  "id": "M3",
+  "name": "read-or-to-and",
+  "path": "crates/crewroom-runtime/src/evidence/artifacts.rs",
+  "preimageSha256": "283149d06fbcd73fb06f852892013d836df246c0fc8909735f7c9ef5bbebc763",
+  "old": "|| artifact[\"sha256\"] != hash(&bytes)",
+  "new": "&& artifact[\"sha256\"] != hash(&bytes)",
+  "postimageSha256": "c79db527875aa6084c6e80c4637ba4f6f4baac119ee12a86b9cffad86095119b"
+}

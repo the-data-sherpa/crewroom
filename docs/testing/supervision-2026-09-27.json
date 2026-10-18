@@ -1,0 +1,45 @@
+{
+  "passed": true,
+  "guard": {
+    "fixture_port_allowed": true,
+    "external_denied": true,
+    "other_loopback_denied": true,
+    "child_egress_denied": true
+  },
+  "providerRequests": 11,
+  "providerErrors": [],
+  "unexpectedSurvivingProcesses": [],
+  "date": "2026-09-27",
+  "milestone": "M2.5",
+  "domainTests": 35,
+  "build": "passed",
+  "baselineBrowserJourneys": 2,
+  "guardedRuntimeBrowserJourneys": 1,
+  "evidence": ".crewroom/test-results/m2-ui-repeat/report.json",
+  "screenshots": [
+    ".crewroom/test-results/m2-ui-repeat/paused.png",
+    ".crewroom/test-results/m2-ui-repeat/mobile.png"
+  ],
+  "checks": [
+    "heterogeneous agent/model/process/session observation",
+    "coordinator replies and peer receipts",
+    "read-only observation makes no API mutations and preserves mail receipts",
+    "browser disconnect/reconnect retains steering draft",
+    "pause stores pending steering",
+    "resume creates new attempts and receives steering",
+    "cancel retains history and blocks execution",
+    "start a subsequent coordinator through the browser",
+    "narrow viewport without horizontal overflow"
+  ],
+  "diagnosis": "The second run exposed observer/recovery racing with initial launch. Starting runs now exclude observation/recovery and concurrent launches until verified admission completes.",
+  "scope": "Real application, browser, OMP processes and Rust Mail; guarded scripted provider responses, no live model/Jira/Bitbucket requests.",
+  "sourceSha256": {
+    "src/main.tsx": "50c2ca0687fb5c165f3217ea0bd792a2b709633640d737d17ba9023a7b57bcd0",
+    "src/supervision.tsx": "7b7adcd9216efdc79b26ee699fb83362c632892aaa3923f714c1a151135b7e49",
+    "src/style.css": "bb8a021d8560e19f82a87777ad17a1639d0c8de1820e971be45d1dbb107aa6ae",
+    "server/runtime/supervisor.ts": "ca199b6b8a3bf532080dd8024d51954dd57a5f11ea9cba265efdd265b66ec00a",
+    "scripts/supervision-driver.ts": "dc7b645f88d74fe757f532e6e205d0dbf8cf00e48843fe7cddb59e0c9cda58cf",
+    "scripts/test-application-runtime.py": "5b078ece7801e38028fbb83334ed4852d95c2ae1f00c22764d34039b1205d888",
+    "tests/e2e/workbench.spec.ts": "061fc25ec1edfed8ead1e79ab9645f88eb1c5df8fa1132b869a9655c75941eeb"
+  }
+}

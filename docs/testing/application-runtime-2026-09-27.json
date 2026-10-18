@@ -1,0 +1,52 @@
+{
+  "passed": true,
+  "guard": {
+    "fixture_port_allowed": true,
+    "external_denied": true,
+    "other_loopback_denied": true,
+    "child_egress_denied": true
+  },
+  "providerRequests": 9,
+  "providerErrors": [],
+  "unexpectedSurvivingProcesses": [],
+  "date": "2026-09-27",
+  "versions": {
+    "omp": "18.3.1",
+    "tmux": "3.7c",
+    "rustMail": "0.3.36"
+  },
+  "checks": [
+    "three distinct OMP processes and host PIDs with verified tmux parentage",
+    "three distinct sessions and configured provider/API/effort selections",
+    "four received messages with durable transport IDs and causal replies",
+    "visible structured pane events",
+    "forged host credentials rejected",
+    "no mailbox token in browser workspace",
+    "all test-owned hosts and OMP processes exited",
+    "passive observer cursor survives reopening",
+    "same logical send adopts stored transport ID after reopening",
+    "lost response after retry-key expiry reconciles existing mail",
+    "expired unknown send is not blindly retried"
+  ],
+  "mailEvidence": ".crewroom/test-results/m2-application-mail-expiry/",
+  "runtimeEvidence": ".crewroom/test-results/m2-runtime-final/",
+  "limits": [
+    "Only scripted loopback providers; no live Jira or Bitbucket changes.",
+    "Child-tool interruption and crash ownership reconciliation are the next gate (M2.3).",
+    "Automatic recovery, budgets, and full operator supervision are M2.4-M2.5."
+  ],
+  "sourceSha256": {
+    "scripts/messaging-driver.ts": "65a4465e30f4a6ee0a65180d50e7ecf8a45d8528466b6ae237922fcddbe7f7b0",
+    "scripts/runtime-driver.ts": "28302217b6d54765cfdfe9bb7b1d7b84da0b725dccbbddba85bc8ee1febd3dba",
+    "scripts/test-application-mail.py": "73ab9b3456c57fe993183d2f4c689ce54eed5847f4c0974cf480d5808617e81b",
+    "scripts/test-application-runtime.py": "74041703117de4921905df9679e96d1b388d1ff201e18eb609400f063f08fd0e",
+    "server/app.ts": "bde019e22f6733ffe89c8ebd16b8112733d0a678f3d2290b4800f07c530de4ff",
+    "server/runtime/host.ts": "b5a2595e470d297a621854be232a90c005013306cbaee7d6ce8c9544b9ad0872",
+    "server/runtime/messaging.ts": "e596b407103beeaac0ea5cca55ff3908891e5fab8b29717d20d0e7b01f3684d9",
+    "server/runtime/model-policy.ts": "5c4357be49555633a9fbe4fb3d5c482f8952cf137bd5f0147d0c639b82570f61",
+    "server/runtime/rpc.ts": "861d72601f6d14dc1d3adf2648d906d2bf88f7dae3177d08541f990dcc927b81",
+    "server/runtime/supervisor.ts": "da886b83b31df2485f62381476010fa27283b753c304942e1a3eb6ac67314e68",
+    "server/runtime/types.ts": "5dce2919b25645aca80ba016b2348b4de8621c2a6d3cae132cbc146701a96e04",
+    "server/workbench.ts": "f9e12bb4cdd2c66c7897a12e1bd86d1540529069d8b95c828189ca87da1d4fb7"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "task-03",
+  "version": 1,
+  "checks": [
+    {
+      "id": "unit",
+      "script": "empty-unit.cjs",
+      "surface": "logic"
+    },
+    {
+      "id": "acceptance",
+      "script": "empty-acceptance.cjs",
+      "surface": "logic"
+    }
+  ]
+}

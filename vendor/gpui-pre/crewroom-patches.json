@@ -1,0 +1,25 @@
+{
+  "package": "gpui-pre",
+  "version": "0.3.7",
+  "archiveSha256": "0e87a42bb37c7cb4e76dd1ac0ce88851e46e976e0373a47ab3e0757abffee54d",
+  "omitted": [
+    "Cargo.lock"
+  ],
+  "modified": [
+    {
+      "path": "src/tab_stop.rs",
+      "upstreamSha256": "7f742d6d6b7e5cd6fc634f2764fc3937e1cdebcf086d4b7c166379724edd1881",
+      "crewroomSha256": "206a0047c0bf3bf5a3ad76e1fdae344d6981ca7102260948509d394c6057ef38"
+    },
+    {
+      "path": "src/window.rs",
+      "upstreamSha256": "f8b04c37c6c18cc78b3ddd80844e5aa225e7ebafa689df5d04d1493fd45e61dc",
+      "crewroomSha256": "873db2dda6ae6d93cff24fa573b82cefeba6924433b14143aa2af0428f1659f2"
+    },
+    {
+      "path": "src/elements/div.rs",
+      "upstreamSha256": "10f334243fae305666e48d4939ed63495ce01b13534db22a751062a6f76fa59b",
+      "crewroomSha256": "171f36d44f34a2096482bf1e02f817914fa46bbad52ab7b4b998d425df6ad62a"
+    }
+  ]
+}

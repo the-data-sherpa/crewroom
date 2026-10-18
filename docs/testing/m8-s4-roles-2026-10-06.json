@@ -1,0 +1,75 @@
+{
+  "date": "2026-10-06",
+  "implementationRevision": "7516f606dce48667cc53f4c7322c20dffccdbdce",
+  "sourceFiles": {
+    "crates/crewroom-core/src/roles.rs": "610e423905dd6bfcddf01b88c9544d1b16b4d95daa22e0d60676449a8b070679",
+    "crates/crewroom-desktop/src/workbench.rs": "0800683ffc06e0a832f7e732d368184c42bca3a68f63cbc80ca21df770187bf7",
+    "crates/crewroom-desktop/src/workbench/settings.rs": "93cdd3fcb1c6b622a6b57e091de332ba5f7de0dc5bcc3c47267538d94ce10399",
+    "crates/crewroom-desktop/src/workbench/settings/roles.rs": "14c642368799d6265158718439d90a60be3e58de782783c0101fe934deef50b2",
+    "crates/crewroom-desktop/src/workbench/settings/tests.rs": "c0a0716aca1676069f254a29d1a4649a3e13b65f31ba02331789ebb5d1756956",
+    "crates/crewroom-runtime/src/supervisor/workflow/configuration.rs": "48bb61830b5d9e58656f9834ec076e2815ee8994d97ec3d21a5ef68f68c0decb",
+    "crates/crewroom-runtime/src/supervisor/workflow/mod.rs": "a67ed21a8c70352f06eddca078f0478cf7ed356674f43077dde82b2a8c1d7069",
+    "crates/crewroom-service/src/lib.rs": "4dda6b35b8aab04a6016c12969dfe0ca0cde1fa68448112c75cb9e37404407dc",
+    "crates/crewroom-service/src/role_catalog.rs": "02410c982e3a858de926c5e375c87e36ec53b07900c18261c495eac6b528135b",
+    "crates/crewroom-service/tests/http.rs": "4907d0cdd85acfc9a00e54e9510d42f751d6e1d2c78d1a0ba63ac271ed95bd23"
+  },
+  "checks": {
+    "native": {
+      "passed": 194,
+      "ignored": 10,
+      "note": "Full workspace run plus final affected desktop 1/1 and service 1/1 reruns after layout, duplicate draft protection and preview-name fixes."
+    },
+    "domain": {
+      "passed": 332
+    },
+    "browser": {
+      "passed": 31
+    },
+    "nativeBuild": "passed",
+    "browserBuild": "passed",
+    "clippy": "passed",
+    "format": "passed"
+  },
+  "package": "target/debug/native-package.uqHu6L/Crewroom.app",
+  "guiSha256": "da8093756f82342647444476f01dd368411393f6fc7adbcdea2fd8852825e724",
+  "packageSourceNote": "Final package predates only a semantics-preserving Clippy if-collapse and test-only assertion correction; focused service check and Clippy pass afterward.",
+  "liveRunner": {
+    "passed": true,
+    "boundary": "Actual native daemon/OMP/tmux/Rust Mail; synthetic provider replies only.",
+    "runner": {
+      "version": "omp/18.6.3",
+      "sha256": "ab52491643e21b270682691b1319f1161fe2a2658ae4e9a4e3958b1aeb12dcf4"
+    },
+    "allOwnedProcessesExited": true,
+    "externalMailMatches": true,
+    "observedEveryIdentity": true,
+    "binaryHashesUnchanged": true
+  },
+  "liveReport": {
+    "path": "/tmp/crewroom-m8-s4-runner-20261006/report.json",
+    "sha256": "f475b2df8bda9a2b64422c48762359af88857ba48ae4feea843b6d7b190c61f7"
+  },
+  "guiChecks": [
+    "Grouped catalog with recorded usage, core lock reason and unavailable model state",
+    "Editor sheet retains drafts; final ticket choices fit at 1280px",
+    "Read-only assembled preview inspected on initial S4 package; final affected interaction regression verifies stale preview, duplicate/save and 390px bounds"
+  ],
+  "logs": {
+    "/tmp/crewroom-m8-s4-native.log": "a0c5aa6167acf1679f53730ef7dace271bc8fecdbe57a0a2fcd28062432950b1",
+    "/tmp/crewroom-m8-s4-domain.log": "e942859939880d457030b72e337fd129f547eb2d44aa9f1d08209b45d5209606",
+    "/tmp/crewroom-m8-s4-browser.log": "7c89f27cffccf84f0755b3284ce11f9457d258bab3cc26a47e9bebcd1edd68be",
+    "/tmp/crewroom-m8-s4-browser-build.log": "f5cef142fa0268c8823a8f321473c2e950368c014515cf67ee0f52d9943e217e",
+    "/tmp/crewroom-m8-s4-final-build.log": "ded129b67b32ac77ae35a213d5923a9f2ca3706be1d7bf8e39a0a02dacc29627",
+    "/tmp/crewroom-m8-s4-final-layout.log": "d3664c14bb039c60008aae50db69d5222c96c3ab082521e2e0393f1643d30dc6",
+    "/tmp/crewroom-m8-s4-final-service.log": "0de261a7a997584dc210ac057a4b8dc14781cbff6773b7f9e97718ec9ecc51e4",
+    "/tmp/crewroom-m8-s4-clippy.log": "27f0fcc015f19cebf532b7657df78ae015ee3951b14179315d02254404a50b35",
+    "/tmp/crewroom-m8-s4-runner.log": "cb096c20a63343896705a5b18a0799654aa78e151480faf89c6bd9805482b030"
+  },
+  "limitations": [
+    "Actual OMP/tmux/Mail with scripted provider replies; no live model or Jira/PR delivery.",
+    "Linux/Wayland remains an explicit follow-up per operator decision.",
+    "Full workspace run preceded final small fixes; final affected checks are separately recorded.",
+    "Initial final-test invocation omitted ZIG; a test assertion used a nonexistent method. Both invocation/assertion mistakes corrected. Initial Clippy if-collapse warning repaired.",
+    "Disposable demo window left open after operator navigated it; active installation and retained pilot untouched."
+  ]
+}

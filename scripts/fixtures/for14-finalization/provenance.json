@@ -1,0 +1,14 @@
+{
+  "scope": "Reduced deterministic fixtures from retained production observations; no inference, execution or matrix acceptance is supplied by these fixture tests. Only the tracked final cell is retained.",
+  "comparisonId": "f6290dc9-63cf-417d-bcde-58fa1a0232c2",
+  "heldPath": ".crewroom/test-results/for14/matrix-codex-03/comparison-held.json",
+  "heldSha256": "912cd7f378a7cb9296f6823a1994c699c1770ce464c0be39c3cb8d2bd581bcd9",
+  "databasePath": ".crewroom/test-results/for14/matrix-codex-03/data/workflow.sqlite",
+  "databaseSha256": "4b3c1209de1057ebcd07f7fc0df0c8931050d201d787f1b2a1a691e7f0911b0c",
+  "cellOrdinal": 15,
+  "cellResultHash": "2d00065b3d255da677ea8d8c34696866f66e42d616fddd27ca1be7d1acfd21d4",
+  "originalWrapperPassed": false,
+  "projection": "Only observer fields are retained; summary text is replaced consistently by its SHA-256. The opt-in no-actor test also reads full original held snapshot and actual stopped database result. Reduced settled resultHash binds only the reduced result; cellResultHash remains the original full durable result hash.",
+  "handoffSummarySha256": "8ec4013f8264e74d98da9430b95c5feec791ae4a238b9b32d5a44a7c1ed924e2",
+  "reducedFixtureResultHash": "589c388b2a7b9a165027922649aeca21d2cb6ebd3a35e34354a01f084bcefa04"
+}

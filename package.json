@@ -1,0 +1,49 @@
+{
+  "name": "crewroom",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "dev": "./scripts/run-native.sh",
+    "build": "tsc --noEmit && vite build",
+    "start": "./scripts/run-native.sh --release",
+    "test": "tsx --test tests/*.test.ts",
+    "test:e2e": "playwright test",
+    "test:processes": "python3 scripts/test_processes.py list",
+    "test:cleanup": "python3 scripts/test_processes.py stop",
+    "test:run": "python3 scripts/test_processes.py run",
+    "test:cleanup-tool": "python3 -m unittest discover -s scripts -p 'test_test_processes.py'",
+    "check": "npm test && npm run build",
+    "dev:legacy": "tsx watch server/index.ts",
+    "start:legacy": "tsx server/index.ts --production"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "ghostty-web": "^0.4.0",
+    "lucide-react": "^1.48.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "ws": "^8.22.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/ws": "^8.18.1",
+    "@vitejs/plugin-react": "^6.1.1",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "fsevents@2.3.3": true
+  }
+}

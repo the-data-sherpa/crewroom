@@ -1,0 +1,342 @@
+{
+  "schemaVersion": 1,
+  "fixtureOnly": true,
+  "status": "specified-not-implemented",
+  "ticketSource": "Synthetic SIM-* issues only; no real Jira read/write.",
+  "repository": "Disposable seeded local Git repositories; no Conductor checkout or remote writes.",
+  "scenarios": [
+    {
+      "id": "E2E-01",
+      "title": "Small coding ticket",
+      "ticket": "SIM-101",
+      "profile": "baseline",
+      "specialists": [
+        "triage",
+        "implementer",
+        "reviewer",
+        "test-architect",
+        "delivery-reporter"
+      ],
+      "coordinator": "separate process in every execution scenario",
+      "cases": [
+        "INT-03",
+        "RTE-02",
+        "REP-01",
+        "REP-06",
+        "EVD-01",
+        "DEL-04"
+      ],
+      "brief": "Fix a whitespace normalization bug in a disposable TypeScript utility. Accept empty input and preserve internal spaces.",
+      "steps": [
+        "Import synthetic Jira issue and explicitly choose the fixture repository.",
+        "Use scripted triage, apply a known patch in a worktree, run real local tests and independent scripted review.",
+        "Create a fake-provider PR, record synthetic hosted success and Jira progress."
+      ],
+      "expected": "One owned worktree, one fake PR, matching head/base evidence, criteria covered, readiness true and no merge write."
+    },
+    {
+      "id": "E2E-02",
+      "title": "Complex feature with selected specialists",
+      "ticket": "SIM-102",
+      "profile": "heterogeneous",
+      "specialists": [
+        "triage",
+        "product-strategist",
+        "ux-principal",
+        "principal-architect",
+        "security-engineer",
+        "implementer",
+        "test-architect",
+        "reviewer",
+        "tech-writer",
+        "delivery-reporter"
+      ],
+      "coordinator": "separate process in every execution scenario",
+      "cases": [
+        "ROL-01",
+        "ROL-04",
+        "ROL-06",
+        "QUE-01",
+        "QUE-02",
+        "EVD-01"
+      ],
+      "brief": "Add saved-filter export to a synthetic app, with empty-state behavior, input validation and an updated user guide.",
+      "steps": [
+        "Accept three explicit criteria after optional Grill.",
+        "Schedule the selected specialists, apply staged code/docs patches under one writer lease, and run real unit/browser checks once the fixture app exists.",
+        "Reconcile each criterion with check/review evidence before fake PR readiness."
+      ],
+      "expected": "Up to three compatible specialists, one writer, all criteria linked to current artifacts; distinct configured models observed throughout."
+    },
+    {
+      "id": "E2E-03",
+      "title": "Failed checks and review cause bounded rework",
+      "ticket": "SIM-103",
+      "profile": "rotated",
+      "specialists": [
+        "implementer",
+        "qa-breaker",
+        "reviewer",
+        "test-architect"
+      ],
+      "coordinator": "separate process in every execution scenario",
+      "cases": [
+        "ROL-05",
+        "REP-06",
+        "EVD-03",
+        "EVD-05",
+        "LIF-08"
+      ],
+      "brief": "Fix pagination with an initially wrong boundary condition supplied by the scripted implementer.",
+      "steps": [
+        "Apply the failing patch; execute real failing tests and return a scripted blocking review finding.",
+        "Supply a corrected patch and require fresh tests/review for the new SHA.",
+        "Run a variant with a third automatic repair request after two unsuccessful cycles."
+      ],
+      "expected": "Failure never reaches readiness; corrected current evidence can pass; exhausted recovery requires attention."
+    },
+    {
+      "id": "E2E-04",
+      "title": "Specialist and controller interruption",
+      "ticket": "SIM-104",
+      "profile": "heterogeneous",
+      "specialists": [
+        "implementer",
+        "reviewer"
+      ],
+      "coordinator": "separate process in every execution scenario",
+      "cases": [
+        "MSG-03",
+        "MSG-05",
+        "MSG-06",
+        "LIF-01",
+        "LIF-02",
+        "LIF-03",
+        "LIF-04"
+      ],
+      "brief": "Continue the small bug ticket after process failure while messages and local work are in flight.",
+      "steps": [
+        "Kill specialist 2 after inbox persistence and before acknowledgement; independently restart or replace it.",
+        "In a separate variant, kill the coordinator after the external send committed but before its reply was recorded.",
+        "Reopen durable state and replay pending delivery with duplicate and stale-attempt messages."
+      ],
+      "expected": "Other processes remain observable; existing edits and receipts survive; one logical effect per action; uncertain outcomes stop rather than repeat blindly."
+    },
+    {
+      "id": "E2E-05",
+      "title": "Operator steering, insertion and pause",
+      "ticket": "SIM-105",
+      "profile": "heterogeneous",
+      "specialists": [
+        "implementer",
+        "reviewer",
+        "security-engineer"
+      ],
+      "coordinator": "separate process in every execution scenario",
+      "cases": [
+        "ROL-02",
+        "LIF-05",
+        "LIF-06",
+        "UI-02",
+        "UI-03",
+        "UI-04"
+      ],
+      "brief": "While implementing input parsing, require a stricter accepted character set and insert a security specialist.",
+      "steps": [
+        "Store operator steering while the coordinator is disconnected; then reconnect and record receipt/disposition.",
+        "Insert the specialist at a safe point; pause while a bounded child tool runs.",
+        "Reload and resume with the revised accepted brief."
+      ],
+      "expected": "Stored/received/applied are distinct; pausing lasts until child work stops; old-scope evidence is stale; new assignment and all history survive reload."
+    },
+    {
+      "id": "E2E-06",
+      "title": "Uncertain Jira and PR publication",
+      "ticket": "SIM-106",
+      "profile": "baseline",
+      "specialists": [
+        "implementer",
+        "reviewer",
+        "delivery-reporter"
+      ],
+      "coordinator": "separate process in every execution scenario",
+      "cases": [
+        "MSG-05",
+        "DEL-02",
+        "DEL-03",
+        "DEL-04",
+        "DEL-07"
+      ],
+      "brief": "Publish the small ticket while fake Jira and Bitbucket lose responses.",
+      "steps": [
+        "Make the fake provider commit one comment and one PR, then drop each response.",
+        "Restart Crewroom and return existing, reliably absent and inconclusive readback in separate variants.",
+        "Restore service and reconcile pending actions."
+      ],
+      "expected": "Exactly one PR/comment per logical action; uncertainty stays visible and blocks blind retry; accepted code work is preserved."
+    },
+    {
+      "id": "E2E-07",
+      "title": "Queue and merge dependencies",
+      "ticket": "SIM-107",
+      "profile": "baseline",
+      "specialists": [
+        "triage",
+        "implementer",
+        "reviewer"
+      ],
+      "coordinator": "separate process in every execution scenario",
+      "cases": [
+        "INT-02",
+        "INT-08",
+        "QUE-01",
+        "QUE-03",
+        "QUE-04",
+        "QUE-05",
+        "DEL-05"
+      ],
+      "brief": "Queue an independent fix and a dependent follow-up behind the first ticket.",
+      "steps": [
+        "Change Jira rank and local queue order independently.",
+        "Hold the first fake PR in CI pending, then ready; verify release of independent work only.",
+        "Simulate closed-unmerged and later verified human merge for the dependency."
+      ],
+      "expected": "No overlap of coding tickets; no automatic backlog work; dependency only proceeds after observed merge; no merge API request."
+    },
+    {
+      "id": "E2E-08",
+      "title": "Routing failure, fallback and wrong model",
+      "ticket": "SIM-108",
+      "profile": "rotated",
+      "specialists": [
+        "triage",
+        "implementer",
+        "reviewer",
+        "delivery-reporter"
+      ],
+      "coordinator": "separate process in every execution scenario",
+      "cases": [
+        "RTE-04",
+        "RTE-06",
+        "RTE-08",
+        "RTE-09",
+        "RTE-11",
+        "RTE-12"
+      ],
+      "brief": "Process the same fixture ticket with failures at model preflight and provider response boundaries.",
+      "steps": [
+        "Reject unsupported effort and missing pinned selectors before launch.",
+        "Inject 429 then recover; separately exercise a policy-approved alternate-model attempt and an unavailable fallback.",
+        "Make a runner report/send the wrong model and exercise an unexpected secondary model request."
+      ],
+      "expected": "Every actual scripted dispatch matches a recorded identity; retries are bounded; wrong/hidden models cannot produce accepted effects; fallback lineage is explicit."
+    },
+    {
+      "id": "E2E-09",
+      "title": "Target drift and late CI",
+      "ticket": "SIM-109",
+      "profile": "heterogeneous",
+      "specialists": [
+        "implementer",
+        "reviewer",
+        "test-architect"
+      ],
+      "coordinator": "separate process in every execution scenario",
+      "cases": [
+        "REP-04",
+        "EVD-04",
+        "EVD-07",
+        "DEL-06"
+      ],
+      "brief": "Advance the fixture repository target branch after the PR was ready.",
+      "steps": [
+        "Mark evidence stale and refresh the owned branch using fixture rebase policy.",
+        "Re-run checks/review at the new head/base; deliver old-head success and current-head failure out of order.",
+        "Show feedback without automatically restarting work."
+      ],
+      "expected": "Only current matching evidence restores readiness; new failure revokes it immediately; no unowned checkout changes."
+    },
+    {
+      "id": "E2E-10",
+      "title": "Standalone research and documentation",
+      "ticket": "SIM-110",
+      "profile": "rotated",
+      "specialists": [
+        "customer-advocate",
+        "principal-architect",
+        "premortem-skeptic",
+        "tech-writer"
+      ],
+      "coordinator": "separate process in every execution scenario",
+      "cases": [
+        "INT-07",
+        "ROL-04",
+        "EVD-08",
+        "UI-05"
+      ],
+      "brief": "Compare two fictional queue designs using checked-in source excerpts and requested decision criteria.",
+      "steps": [
+        "Generate scripted analysis with one missing citation/artifact, then a corrected handoff.",
+        "Validate actual saved artifacts and source-fixture references.",
+        "Complete the research outcome without manufacturing implementation or PR evidence."
+      ],
+      "expected": "Outcome is a reviewable artifact with limitations and provenance; no code commit, model quality claim or fake coding gate."
+    },
+    {
+      "id": "E2E-11",
+      "title": "Untrusted content and authority boundary",
+      "ticket": "SIM-111",
+      "profile": "baseline",
+      "specialists": [
+        "triage",
+        "implementer",
+        "reviewer",
+        "delivery-reporter"
+      ],
+      "coordinator": "separate process in every execution scenario",
+      "cases": [
+        "MSG-08",
+        "REP-05",
+        "SEC-01",
+        "SEC-02",
+        "SEC-03",
+        "SEC-04",
+        "SEC-06"
+      ],
+      "brief": "Import a synthetic ticket and peer message containing instructions to bypass review, exfiltrate a sentinel, deploy and merge.",
+      "steps": [
+        "Script corresponding unauthorized tool requests, a forged cross-run message and a path escape.",
+        "Attempt foreign-origin mutation and non-loopback egress under the test guard.",
+        "Continue only the accepted in-scope repository task."
+      ],
+      "expected": "No forbidden side effect or secret leak; rejected requests are attributable; valid same-origin in-scope work still functions. This tests enforcement, not model resistance to persuasion."
+    },
+    {
+      "id": "E2E-12",
+      "title": "Budget, cancellation and later continuation",
+      "ticket": "SIM-112",
+      "profile": "baseline",
+      "specialists": [
+        "implementer",
+        "reviewer"
+      ],
+      "coordinator": "separate process in every execution scenario",
+      "cases": [
+        "LIF-06",
+        "LIF-07",
+        "LIF-08",
+        "LIM-01",
+        "LIM-02",
+        "LIM-03",
+        "SEC-05"
+      ],
+      "brief": "Run a ticket across active work, human wait, CI wait, service restart and cancellation.",
+      "steps": [
+        "Advance a fake clock without real delays; exclude waiting intervals from active time.",
+        "Reach the execution limit and verify safe pause; cancel a separate variant with edits and fake PR already present.",
+        "Reopen history and attempt cleanup with an unrelated PID/path sentinel."
+      ],
+      "expected": "Budget persists, cancellation prevents new effects, artifacts remain, accounting is honest and cleanup leaves unrelated resources untouched."
+    }
+  ]
+}

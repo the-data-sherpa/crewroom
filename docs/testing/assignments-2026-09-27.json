@@ -1,0 +1,172 @@
+{
+  "date": "2026-09-27",
+  "milestone": "M3.1",
+  "passed": true,
+  "domainTests": 38,
+  "build": "passed",
+  "browserJourneys": 3,
+  "scenarios": {
+    "minimal": {
+      "passed": true,
+      "guard": {
+        "fixture_port_allowed": true,
+        "external_denied": true,
+        "other_loopback_denied": true,
+        "child_egress_denied": true
+      },
+      "providerRequests": 7,
+      "providerErrors": [],
+      "unexpectedSurvivingProcesses": [],
+      "runtime": {
+        "passed": true,
+        "teamSize": 1,
+        "assignments": [
+          {
+            "name": "Coordinator",
+            "roleId": "triage",
+            "model": "aperture-openai/openai.gpt-6-sol"
+          },
+          {
+            "name": "SpecialistOne",
+            "roleId": "implementer",
+            "model": "aperture-anthropic/anthropic.claude-sonnet-5"
+          }
+        ],
+        "proposalStatus": "applied"
+      }
+    },
+    "complex": {
+      "passed": true,
+      "guard": {
+        "fixture_port_allowed": true,
+        "external_denied": true,
+        "other_loopback_denied": true,
+        "child_egress_denied": true
+      },
+      "providerRequests": 13,
+      "providerErrors": [],
+      "unexpectedSurvivingProcesses": [],
+      "runtime": {
+        "passed": true,
+        "teamSize": 3,
+        "assignments": [
+          {
+            "name": "Coordinator",
+            "roleId": "triage",
+            "model": "aperture-openai/openai.gpt-6-sol"
+          },
+          {
+            "name": "SpecialistOne",
+            "roleId": "implementer",
+            "model": "aperture-anthropic/anthropic.claude-sonnet-5"
+          },
+          {
+            "name": "SpecialistTwo",
+            "roleId": "custom-reviewer",
+            "model": "aperture-google/gemini-3.8-flash"
+          },
+          {
+            "name": "Reporter",
+            "roleId": "delivery-reporter",
+            "model": "aperture-openai/openai.gpt-6-sol"
+          }
+        ],
+        "proposalStatus": "applied"
+      }
+    },
+    "policy_and_snapshots": {
+      "passed": true,
+      "guard": {
+        "fixture_port_allowed": true,
+        "external_denied": true,
+        "other_loopback_denied": true,
+        "child_egress_denied": true
+      },
+      "providerRequests": 10,
+      "providerErrors": [],
+      "unexpectedSurvivingProcesses": [],
+      "runtime": {
+        "passed": true,
+        "teamSize": 2,
+        "assignments": [
+          {
+            "name": "Coordinator",
+            "roleId": "triage",
+            "model": "aperture-openai/openai.gpt-6-sol"
+          },
+          {
+            "name": "SpecialistOne",
+            "roleId": "implementer",
+            "model": "aperture-anthropic/anthropic.claude-sonnet-5"
+          },
+          {
+            "name": "SpecialistTwo",
+            "roleId": "custom-reviewer",
+            "model": "aperture-google/gemini-3.8-flash"
+          }
+        ],
+        "proposalStatus": "applied"
+      }
+    },
+    "restart_before_apply": {
+      "passed": true,
+      "guard": {
+        "fixture_port_allowed": true,
+        "external_denied": true,
+        "other_loopback_denied": true,
+        "child_egress_denied": true
+      },
+      "providerRequests": 8,
+      "providerErrors": [],
+      "unexpectedSurvivingProcesses": [],
+      "runtime": {
+        "passed": true,
+        "fault": "before-apply",
+        "assignments": 3,
+        "attempts": 4
+      }
+    },
+    "restart_after_apply": {
+      "passed": true,
+      "guard": {
+        "fixture_port_allowed": true,
+        "external_denied": true,
+        "other_loopback_denied": true,
+        "child_egress_denied": true
+      },
+      "providerRequests": 8,
+      "providerErrors": [],
+      "unexpectedSurvivingProcesses": [],
+      "runtime": {
+        "passed": true,
+        "fault": "after-apply",
+        "assignments": 3,
+        "attempts": 4
+      }
+    }
+  },
+  "evidence": {
+    "minimal": ".crewroom/test-results/m3-team-minimal/report.json",
+    "complex": ".crewroom/test-results/m3-team-complex/report.json",
+    "policy_and_snapshots": ".crewroom/test-results/m3-team-final/report.json",
+    "restart_before_apply": ".crewroom/test-results/m3-team-staged/report.json",
+    "restart_after_apply": ".crewroom/test-results/m3-team-final-restart/report.json"
+  },
+  "screenshot": ".crewroom/test-results/m3-roles.png",
+  "scope": "Real application, OMP processes, tmux and Rust Mail; guarded scripted provider responses. No live model, Jira or Bitbucket requests. Coding phases and revision evidence remain M3.2/M3.3.",
+  "sourceSha256": {
+    "server/roles.ts": "2da28eff4f52515c5f314d2a1cfe7a0f42d2bcf611e80103057007f1d444adf6",
+    "server/workbench.ts": "1bc667d2d33efe40832c2b30fea16afaff35b26575130668a7d07e00f0f6b6fb",
+    "server/runtime/supervisor.ts": "5a2a0174e06bf01011b764e449bd5c0545311ddffdd0528c07e844ba1eb139fc",
+    "server/runtime/host.ts": "c607213005bbb043948d827b08c4dc9038e879c4c9b2018334ee86c0c8b282d8",
+    "server/app.ts": "4ff4d4c906787d68bd790188e9c4e3fe1133e51def045748906243a027fb9c04",
+    "src/roles.tsx": "569c8e40830d587879e79f71441b6e3d363afb7de20126c389e610998ff9500c",
+    "src/supervision.tsx": "24994267b735b22736be9f34fb7809c68361415dae95770dcc3809a94ba01287",
+    "tests/assignments.test.ts": "2664ccc52fff7f4c5ca5a2f492cc728f2358c5a75061330e3295ec5500238ee9",
+    "tests/roles.test.ts": "2ace30cf3d9ab1b4622b6ba12613d2a38d7deb64de854f0276183d6dc6267ad6",
+    "tests/e2e/workbench.spec.ts": "d766021fdf979d336dc410b46e34e1395798c33c20c6739f768b823cbd19ef50",
+    "scripts/team-driver.ts": "02ea71867e9e9a3e5793cd33cb9278e109844236c927da4a44705d9a9ba73648",
+    "scripts/team-restart-driver.ts": "aa2e67ba27bb46d3e0d916bd64b16f432b25d5cf6d0aa6b2b88a4b753c5997a7",
+    "scripts/test-application-runtime.py": "e8542ca5373b3f89d49e082acc9d042ecc7ad7c793065b3f2cb202ec2a1d97ea"
+  }
+}

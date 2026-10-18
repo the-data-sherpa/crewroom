@@ -1,0 +1,108 @@
+{
+  "date": "2026-10-06",
+  "implementationRevision": "c698e00ebd1e1dd2cb0590ab0de5ff9057b0c358",
+  "sourceFiles": {
+    "crates/crewroom-desktop/src/workbench/acceptance_tests.rs": "8087663b7ab371c068bcae3b4e9b01d8bd54cc78230f8b9656a9a5be960c6ffe",
+    "crates/crewroom-desktop/src/workbench/agents.rs": "66baed84fc14cdcee7a8e7a506674683e04954d1feef809c90d3cdc138a4e307",
+    "crates/crewroom-desktop/src/workbench/collaboration/tests.rs": "8784008cb75cbe9d75939f0e3413cea31d08b79f667f167e1fd271fdc7e3634e",
+    "crates/crewroom-desktop/src/workbench/shell.rs": "596f5f1f8ba19e9ad78ff920a44662ddbb945010e816cb1627d43de208fb3b32"
+  },
+  "platform": "Apple Silicon macOS",
+  "package": "target/debug/native-package.xzYBrg/Crewroom.app",
+  "guiSha256": "702230481e710aec15d0da6e92393b9e16a0dccef6533a8ae658e79cb6c2fcc1",
+  "checks": {
+    "desktop": {
+      "passed": 41,
+      "ignored": 10
+    },
+    "browser": {
+      "passed": 31
+    },
+    "nativeBuild": "passed",
+    "browserBuild": "passed",
+    "format": "passed"
+  },
+  "liveRunner": {
+    "passed": true,
+    "boundary": "Actual native daemon/OMP/tmux/Rust Mail; synthetic provider replies only.",
+    "runner": {
+      "version": "omp/18.6.3",
+      "sha256": "ab52491643e21b270682691b1319f1161fe2a2658ae4e9a4e3958b1aeb12dcf4"
+    },
+    "providerErrors": [],
+    "allOwnedProcessesExited": true,
+    "externalMailMatches": true,
+    "observationRequests": {
+      "Coordinator": 17,
+      "Specialist1": 17,
+      "Specialist2": 17,
+      "Specialist3": 17
+    },
+    "observationOutput": {
+      "Coordinator": {
+        "replies": 17,
+        "lines": 408,
+        "utf8Bytes": 45735,
+        "unicodeCharacters": 39207
+      },
+      "Specialist1": {
+        "replies": 17,
+        "lines": 408,
+        "utf8Bytes": 45735,
+        "unicodeCharacters": 39207
+      },
+      "Specialist2": {
+        "replies": 17,
+        "lines": 408,
+        "utf8Bytes": 45735,
+        "unicodeCharacters": 39207
+      },
+      "Specialist3": {
+        "replies": 17,
+        "lines": 408,
+        "utf8Bytes": 45735,
+        "unicodeCharacters": 39207
+      }
+    },
+    "binaryHashesUnchanged": true
+  },
+  "liveRunnerLogBaseRevision": "6dae3391089702b63a43075e09fb2d9fd1f8974e",
+  "liveRunnerSourceNote": "Harness captured HEAD before committing; the sourceFiles hashes above bind the tested UI changes to implementationRevision. Native daemon/runtime were unchanged.",
+  "guiChecks": [
+    "Session opens without duplicate accessibility IDs",
+    "Coordinator and three specialist terminal surfaces render recorded Unicode output",
+    "Specialist maximize, timeline and terminal controls work",
+    "Client close preserves all eight host/agent processes; reopen restores session and terminal output",
+    "Needs you shows two recorded decisions; reasoned rejection removes the learning item and changes count to one"
+  ],
+  "guiCloseEvidence": {
+    "allEightAgentProcessesAlive": true,
+    "pids": [
+      95107,
+      95111,
+      97231,
+      97236,
+      98106,
+      98129,
+      198,
+      300
+    ]
+  },
+  "logs": {
+    "/tmp/crewroom-m8-s2-desktop-final.log": "919558e110ec4d82539698dbf953d1ba28ea259666fd9fd5eb416f9ffce3f442",
+    "/tmp/crewroom-m8-s2-browser.log": "2b19c81c64616460cdc67cac649203579d9a74a5e8abc00c975b83aee7bd01dc",
+    "/tmp/crewroom-m8-s2-browser-build.log": "41057b0159a264fe2773edd45ddcde4d45145161d46d6aa467cf48752ef3d49d",
+    "/tmp/crewroom-m8-s2-final-build.log": "23801770ad69f24e46d132924a20125e8027e50becd1cf95be76fb339a19cdb5",
+    "/tmp/crewroom-m8-slot-red.log": "a15fada8f25668db48ce166d3ffa4b9a9e9140fdfaae33e95c1fedfc74d6eeae",
+    "/tmp/crewroom-m8-header-red.log": "e303a658f239656b674e6d487bc773341aacd3bb23cbd3327dd373c805665d73"
+  },
+  "liveReport": {
+    "path": "/tmp/crewroom-m8-s2-live3-20261006/report.json",
+    "sha256": "b8a5abfea290a7f8644f12077c74f903d4897be32aa1cf48fbcb455679cda103"
+  },
+  "limitations": [
+    "Provider replies are scripted; no new live model or Jira/PR delivery.",
+    "Linux/Wayland terminal verification remains unverified; operator approved continuing after macOS checks.",
+    "Screenshots inspected in the computer-use tool; no separate image files retained."
+  ]
+}

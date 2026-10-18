@@ -1,0 +1,466 @@
+{
+  "date": "2026-10-04",
+  "baseRevision": "f76f763399f90d4352421eb199285bc4a9fa8897",
+  "workingTree": true,
+  "scope": "Initial native x86_64 Arch/Wayland source support. Debug local package; no cross-platform release or live-provider acceptance claim.",
+  "environment": {
+    "os": "NAME=\"Omarchy\"\nPRETTY_NAME=\"Omarchy\"\nID=omarchy\nID_LIKE=arch\nBUILD_ID=\"4.0.4\"\nVERSION_ID=\"4.0.4\"\nANSI_COLOR=\"38;2;158;206;106\"\nHOME_URL=\"https://omarchy.org/\"\nDOCUMENTATION_URL=\"https://learn.omacom.io/2/the-omarchy-manual\"\nSUPPORT_URL=\"https://discord.gg/tXFUdasqhY\"\nBUG_REPORT_URL=\"https://github.com/basecamp/omarchy/issues\"\nLOGO=omarchy\n",
+    "kernel": "7.2.5-3-omarchy",
+    "architecture": "x86_64",
+    "compositor": "Hyprland 0.56.2",
+    "rustc": "Arch Linux 1.98.1",
+    "zig": "0.16.0",
+    "node": "26.5.0",
+    "python": "3.14.7",
+    "globalPackagesInstalled": false,
+    "libraryValidation": "Official Arch libc++ and libc++abi 22.1.8 extracted locally; signatures/checksums verified. Set LIBRARY_PATH and LD_LIBRARY_PATH for build/GUI checks."
+  },
+  "modifiedSourceInputs": {
+    "crates/crewroom-desktop/src/main.rs": "df1f61708fd2483d863783561d54b6ffbee418517b04125c68f8fa23c7be89e8",
+    "crates/crewroom-desktop/src/workbench.rs": "25ace06c98405acae5d91a5050c716b483ed3e4ecb57390fb2e3b15f8c745432",
+    "crates/crewroom-desktop/src/workbench/collaboration/tests.rs": "6bbb3ba0e55f897b604480e7e2b253caaf63ad80d0a3f02c0da9792b3644139a",
+    "crates/crewroom-desktop/src/workbench/journey_tests.rs": "02d1f4bee5b5a405a3ddce3aaf4a5db6ea53a2bc77ff5434498bc9b8f5680422",
+    "crates/crewroom-desktop/src/workbench/journey_tests/intake.rs": "ef42994cbae902421810b661fbbf1432f9b043ef9d473f499b3ede476b36e8b9",
+    "crates/crewroom-desktop/src/workbench/lifecycle_tests.rs": "c76a0a6427cf74ba4317574e012da90ced5d78d24a9d409d51b423ce98b0693a",
+    "crates/crewroom-desktop/src/workbench/settings/tests.rs": "6a1d6b071421d3a6c4bf7275856538c2344a77fd2f1f7890952a3dfba4af78f3",
+    "crates/crewroom-runtime/src/helper.rs": "144f2fb52392f66bce34a733655f8bab15d0abc073c60d14b70dad58e5af6cd7",
+    "crates/crewroom-runtime/src/inspect.rs": "afa148ac9c309717ec53546a53a949ee06702ffb90d5382dd3256e583e9c28e9",
+    "crates/crewroom-runtime/src/providers/config.rs": "5b4be61d19312964bb68760a737de29c0ebf95646e7ac2bd89f5af4d82274588",
+    "crates/crewroom-runtime/tests/process_ownership.rs": "7fd7cc5f640204bd76e81dac310ed61d9dc9290e6f31242396a4dc57b79920e8",
+    "scripts/bootstrap-native.py": "51e8465887a4d43c7eb4e5bd54d90dc16e16dea61292ab099ad01414a2eb548c",
+    "scripts/launch-native.sh": "87191c6f960f017f162ee5049f2a23e1abceac3bd7984437fe8488bc9883b3b2",
+    "scripts/package-native.py": "d6740d7074f435d0591fe373f722e85c895e5811f7e519549046011ca06130ae",
+    "scripts/prepare-rust-mail-test.py": "5a5339041c60518b428452316353d136afebcdcb1d893aee6e9fc50b367e5fbc",
+    "scripts/run-native.sh": "964ff0c49ff1f56cb0846bb1f75d76c65c26bef299800f16e382df8a0d89c330",
+    "scripts/rust/publication-git.test.ts": "833de444dabd1bffc9d546026a602e5659e13b09097cff6e32bb8dc950246f10",
+    "scripts/test-native-launcher.py": "fd6deb00fd8c7f55b10343afc21abea0f789a72c9af079a671832600b5cb9115",
+    "scripts/test-native-package.py": "b71acdade9cbfa69460d5a96897aeba1e49c3c7d6099a98c9cedd69e9158e3ca",
+    "scripts/test_native_scripts.py": "d125ebfe15c80b2ca8b8aad22319f563f48afe845672f0043b1a4b2e1158c7b5",
+    "tests/fixtures/publication.ts": "4864e0d3a09f71887aa8ec5ee86f46bc9b48eb282d4ffe75f82d85b9c89205ca",
+    "tests/publication-git.test.ts": "643b65b4b498412de40ba8087f90f938d73a214543bcb3ca96466fe1e436ea29",
+    "vendor/gpui-libghostty/CREWROOM.md": "9104828c4c2b8ddbca1faf647af128dda34c395c2e2663f75756a4116fe75514",
+    "vendor/gpui-libghostty/crewroom-patches.json": "1d9d727bbced8092b486ac3b70dc3e16ce18394e07c5b30c32e3da8f4cebada4",
+    "vendor/gpui-libghostty/src/adapter.rs": "85dfdf45c9371169d0859e65cd141aa7afd33f3c56b530ae55e155e998702fa4",
+    "vendor/gpui-libghostty/src/lib.rs": "007a7bd02804e97a411f012dc3e5bcea3e96e4585c7a1048d28a1bd7cec5d53c",
+    "vendor/gpui-libghostty/src/terminal.rs": "47ed970306be58d9e0ccd425af1cbb1f65b70fb2e954cc46900452852d9a6d4a"
+  },
+  "nativePackage": {
+    "receipt": {
+      "path": ".crewroom/test-results/linux-port/Crewroom.receipt.json",
+      "sha256": "035f807e5f6ccafe82ff06ff2fa6104f757141834278a16ec84e301fd1ef92b7"
+    },
+    "sourceInputsSha256": "decf82badc958141acd173747e0c9402b52678f27ce6335fa79e75c14baa62f8",
+    "sourceInputCount": 2092,
+    "allPackagedInputsStillMatch": true,
+    "binaries": {
+      "crewroom": {
+        "inputSha256": "05166c59638b29a5d1598aefc612d1c202c45abc0ed4481e0ab1c493ba3468f2",
+        "dependencies": [
+          "/home/crewroom/Projects/crewroom/.crewroom/linux-libs/root/usr/lib/libc++.so.1",
+          "/home/crewroom/Projects/crewroom/.crewroom/linux-libs/root/usr/lib/libc++abi.so.1",
+          "/usr/lib/libxml2.so.16",
+          "/usr/lib/libm.so.6",
+          "/usr/lib/libxcb.so.1",
+          "/usr/lib/libxkbcommon.so.0",
+          "/usr/lib/libxkbcommon-x11.so.0",
+          "/usr/lib/libgcc_s.so.1",
+          "/usr/lib/libc.so.6",
+          "/lib64/ld-linux-x86-64.so.2 => /usr/lib64/ld-linux-x86-64.so.2",
+          "/usr/lib/libz.so.1",
+          "/usr/lib/libicuuc.so.78",
+          "/usr/lib/libXau.so.6",
+          "/usr/lib/libXdmcp.so.6",
+          "/usr/lib/libxcb-xkb.so.1",
+          "/usr/lib/libicudata.so.78",
+          "/usr/lib/libstdc++.so.6"
+        ],
+        "packagedSha256": "05166c59638b29a5d1598aefc612d1c202c45abc0ed4481e0ab1c493ba3468f2",
+        "bytes": 197378880
+      },
+      "crewroomd": {
+        "inputSha256": "75f808722ee0919522e3cb03ed8232c95fda85925b19b4fb17d4a22de433679b",
+        "dependencies": [
+          "/usr/lib/libgcc_s.so.1",
+          "/usr/lib/libm.so.6",
+          "/usr/lib/libc.so.6",
+          "/lib64/ld-linux-x86-64.so.2 => /usr/lib64/ld-linux-x86-64.so.2"
+        ],
+        "packagedSha256": "75f808722ee0919522e3cb03ed8232c95fda85925b19b4fb17d4a22de433679b",
+        "bytes": 56722008
+      },
+      "crewroom-process": {
+        "inputSha256": "3363d6c40eb69e571da1b19e6a2daf14dcc17eba73ccb0008cef3b1dd9aa48ce",
+        "dependencies": [
+          "/usr/lib/libgcc_s.so.1",
+          "/usr/lib/libm.so.6",
+          "/usr/lib/libc.so.6",
+          "/lib64/ld-linux-x86-64.so.2 => /usr/lib64/ld-linux-x86-64.so.2"
+        ],
+        "packagedSha256": "3363d6c40eb69e571da1b19e6a2daf14dcc17eba73ccb0008cef3b1dd9aa48ce",
+        "bytes": 6279784
+      },
+      "crewroom-host": {
+        "inputSha256": "bfe50824c0b09e6edfbe79f95362f0d6d21cf36905a2d436e548da5996a4c619",
+        "dependencies": [
+          "/usr/lib/libgcc_s.so.1",
+          "/usr/lib/libm.so.6",
+          "/usr/lib/libc.so.6",
+          "/lib64/ld-linux-x86-64.so.2 => /usr/lib64/ld-linux-x86-64.so.2"
+        ],
+        "packagedSha256": "bfe50824c0b09e6edfbe79f95362f0d6d21cf36905a2d436e548da5996a4c619",
+        "bytes": 23458328
+      }
+    },
+    "launcherSha256": "87191c6f960f017f162ee5049f2a23e1abceac3bd7984437fe8488bc9883b3b2",
+    "wrapperPackage": {
+      "path": ".crewroom/linux-build/debug/native-package.d3eYkl/Crewroom.receipt.json",
+      "sha256": "035f807e5f6ccafe82ff06ff2fa6104f757141834278a16ec84e301fd1ef92b7"
+    },
+    "sharedLibraries": [
+      {
+        "name": "libc++",
+        "url": "https://archive.archlinux.org/packages/l/libc%2B%2B/libc%2B%2B-22.1.8-1-x86_64.pkg.tar.zst",
+        "sha256": "e32a870f8dc6035b2fd472088f7b356b5889eb29a26bedd4ec472df07853c549",
+        "checksumSource": "/var/lib/pacman/sync/extra.db"
+      },
+      {
+        "name": "libc++abi",
+        "url": "https://archive.archlinux.org/packages/l/libc%2B%2Babi/libc%2B%2Babi-22.1.8-1-x86_64.pkg.tar.zst",
+        "sha256": "5603e42dd38a5deeed47d8077b86f49b25097b40f915b294c41f9239df65f8d3",
+        "checksumSource": "/var/lib/pacman/sync/extra.db"
+      }
+    ],
+    "librarySignatureKey": "2191B89431BAC0A8B96DE93D244740D17C7FD0EC (signature verified against existing system Arch keyring; checksum matched local pacman repository DB)"
+  },
+  "checks": [
+    {
+      "command": "cargo test --locked -p crewroom-core -p crewroom-runtime -p crewroom-service",
+      "result": "pass",
+      "passed": 148,
+      "breakdown": {
+        "core": 75,
+        "runtime": 64,
+        "service": 9
+      },
+      "provenance": "Executed by runtime worker; tool transcript retained, no filesystem log. Includes actual processes and shutdown/reopen/origin tests."
+    },
+    {
+      "command": "tsx --test scripts/rust/provider-config.test.ts",
+      "result": "pass",
+      "passed": 6,
+      "provenance": "Runtime worker tool transcript; synthetic credential protocol parity, no live credentials."
+    },
+    {
+      "command": "cargo clippy --locked -p crewroom-core -p crewroom-runtime -p crewroom-service --all-targets -- -D warnings",
+      "result": "pass",
+      "provenance": "Runtime worker tool transcript; cargo subcommand resolves to pinned Clippy 0.1.97, separately from distro cargo build1.98.1."
+    },
+    {
+      "command": "cargo check --locked -p crewroom-desktop",
+      "result": "pass",
+      "log": ".crewroom/linux-desktop-check.log",
+      "logSha256": "bd50f99d4cf02f69ef0f8e44febe0455c3f87782e0b0d9feae13ce242c4cacbc"
+    },
+    {
+      "command": "cargo build --locked --workspace -j6",
+      "result": "pass",
+      "log": ".crewroom/linux-desktop-build.log",
+      "logSha256": "12805661add8bce17ef77c9942c5d7d5a621d4417a574ffe78c153fed41961be"
+    },
+    {
+      "command": "cargo test --locked -p crewroom-desktop -j6",
+      "result": "pass",
+      "passed": 36,
+      "ignored": 9,
+      "failed": 0,
+      "log": ".crewroom/linux-desktop-tests.log",
+      "logSha256": "350146ed8d8b5c563bb36b9d2c3631dbf0d8e73c8e017b1c9aacf7415a87354a"
+    },
+    {
+      "command": "cargo test --manifest-path vendor/gpui-libghostty/Cargo.toml --lib -j2",
+      "result": "pass",
+      "passed": 18,
+      "failed": 0,
+      "log": ".crewroom/linux-ghostty-tests.log",
+      "lock": ".crewroom/linux-ghostty-test.Cargo.lock",
+      "logSha256": "511c20875a8a7773404df8574cb0474ec7f9fcf4d75ece2d59226b025240ffa2"
+    },
+    {
+      "command": "/usr/bin/cargo-fmt fmt -p crewroom-desktop --check",
+      "result": "pass"
+    },
+    {
+      "command": "/usr/bin/cargo-clippy clippy --locked -p crewroom-desktop --all-targets -j6 -- -D warnings",
+      "result": "failed",
+      "reason": "Rust1.98 new chunks_exact_to_as_chunks warnings in runtime config.rs154 and repository/git.rs394",
+      "log": ".crewroom/linux-desktop-clippy-deny-warnings.log",
+      "logSha256": "398962ac0986576716c95a34110ed14b726914996845a4a66f858111d13137e3"
+    },
+    {
+      "command": "/usr/bin/cargo-clippy clippy --locked -p crewroom-desktop --all-targets -j6",
+      "result": "pass-with-warnings",
+      "warningCount": 2,
+      "warnings": "Two Rust1.98 chunks_exact_to_as_chunks warnings in pre-existing runtime code; no desktop warnings",
+      "log": ".crewroom/linux-desktop-clippy.log",
+      "logSha256": "b31c51b516ee743b4a10c28f6d007478addcff681b8957c60d7ff2618d11c3ed"
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "scripts",
+        "-p",
+        "test_native_scripts.py",
+        "-v"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.048,
+      "log": "/home/crewroom/Projects/crewroom/.crewroom/linux-script-checks-20261004/1.log",
+      "logSha256": "38bea6b6891bad2baa891273fb5f272a1250fd6f91a41cfb56b5089d98137e2e"
+    },
+    {
+      "command": [
+        "bash",
+        "-n",
+        "scripts/run-native.sh",
+        "scripts/launch-native.sh"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.002,
+      "log": "/home/crewroom/Projects/crewroom/.crewroom/linux-script-checks-20261004/2.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test-native-package.py",
+        "--output",
+        "/home/crewroom/Projects/crewroom/.crewroom/linux-script-checks-20261004/synthetic-package"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.256,
+      "log": "/home/crewroom/Projects/crewroom/.crewroom/linux-script-checks-20261004/3.log",
+      "logSha256": "2fe5f8608513bf368304fb6e495f25ad07bd221f8d2a90ce5635fe52ec6bb56d"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/bootstrap-native.py",
+        "--check-build-dependencies"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.254,
+      "log": "/home/crewroom/Projects/crewroom/.crewroom/linux-script-checks-20261004/4.log",
+      "logSha256": "4d2919830268754fad88a33ed6b3bb9172f8f59f866719a6e9652c1121143562"
+    },
+    {
+      "command": "./scripts/run-native.sh --build-only",
+      "result": "pass",
+      "log": {
+        "path": ".crewroom/test-results/linux-port/package-build.log",
+        "sha256": "388e87cb765a6d6eb4cb341b626de320c8fbf5dc760215d5a793e8e9adb7da11"
+      },
+      "env": {
+        "ZIG": "/home/crewroom/Projects/crewroom/.crewroom/toolchains/zig-x86_64-linux-0.16.0/zig",
+        "CARGO_TARGET_DIR": "/home/crewroom/Projects/crewroom/.crewroom/linux-build",
+        "LIBRARY_PATH": "/home/crewroom/Projects/crewroom/.crewroom/linux-libs/root/usr/lib",
+        "LD_LIBRARY_PATH": "/home/crewroom/Projects/crewroom/.crewroom/linux-libs/root/usr/lib"
+      }
+    },
+    {
+      "command": "python3 scripts/test-native-launcher.py --bundle <Linux package> --output <private fixture>",
+      "result": "pass",
+      "receipt": {
+        "path": ".crewroom/test-results/linux-port/launcher/report.json",
+        "sha256": "09a5d45654fa16c24aea8c1741d519248303b834de7fc6afc28896e588fd57f6"
+      },
+      "scope": "Headless launcher: no GUI/Finder or configured execution claim; minimal system PATH, absolute private paths with spaces, authenticated reopen, same-service reuse and stopped restart preserve a task.",
+      "ownedDaemonCount": 2,
+      "survivingOwnedDaemons": []
+    },
+    {
+      "command": "python3 <disposable Hyprland GUI smoke helper>",
+      "result": "pass",
+      "script": {
+        "path": ".crewroom/test-results/linux-port/gui-smoke.py",
+        "sha256": "714ab8a5993883d9f6477ae76a4fb7a4cf0baef82deb6426280911b120d0669c"
+      },
+      "receipt": {
+        "path": ".crewroom/test-results/linux-port/gui-final/report.json",
+        "sha256": "98b6a99091ad5bef64eb906c9db92e26ef682d7d96937dd31ec9eaeffa1f2814"
+      },
+      "observations": {
+        "passed": true,
+        "scope": "Real debug ELF package, Wayland window, synthetic local ticket via authenticated API, close/reopen and service persistence. No terminal surface, live providers or model execution.",
+        "windows": [
+          {
+            "pid": 2505871,
+            "size": [
+              1667,
+              1390
+            ],
+            "title": "Crewroom",
+            "screenshot": ".crewroom/test-results/linux-port/gui-final/window-0.png"
+          },
+          {
+            "pid": 2506013,
+            "size": [
+              1667,
+              1390
+            ],
+            "title": "Crewroom",
+            "screenshot": ".crewroom/test-results/linux-port/gui-final/window-1.png"
+          }
+        ],
+        "daemonReusedAcrossGuiReopen": true,
+        "serverCredentialsAbsentFromGui": true,
+        "connectionRemovedAfterStop": true
+      },
+      "screenshots": [
+        {
+          "path": ".crewroom/test-results/linux-port/gui-final/window-0.png",
+          "sha256": "0587af71e332a308f307162d6cdd3f987b4b3c3b221ac863a49ebb7cf987e2d8"
+        },
+        {
+          "path": ".crewroom/test-results/linux-port/gui-final/window-1.png",
+          "sha256": "0587af71e332a308f307162d6cdd3f987b4b3c3b221ac863a49ebb7cf987e2d8"
+        }
+      ]
+    },
+    {
+      "command": "npm test",
+      "result": "pass",
+      "passed": 332,
+      "failed": 0,
+      "log": {
+        "path": ".crewroom/test-results/linux-port/npm-test-final.log",
+        "sha256": "47421c4a6dd486e74f45903fd2944d8007bac0ea392ab78eab04a7c606e1d3e4"
+      }
+    },
+    {
+      "command": "npm run build",
+      "result": "pass",
+      "log": {
+        "path": ".crewroom/test-results/linux-port/browser-build-final.log",
+        "sha256": "6e50f27eb89eb689b4b6d5d0ab3e4d820472434282877c7f8f61ac5f52e58982"
+      },
+      "notes": "Retained existing large bundle warning."
+    },
+    {
+      "command": "npm run test:e2e",
+      "result": "partial",
+      "passed": 29,
+      "failed": 2,
+      "log": {
+        "path": ".crewroom/test-results/linux-port/browser-tests-final.log",
+        "sha256": "90912bf99f4f35d8fb2754094c6d0c166a3d586c331aba781d7adf839ebfdf82"
+      },
+      "blockers": [
+        "refinement.spec.ts and research.spec.ts fail at hardcoded /Users/crewroom/.bun/bin/omp; associated fixtures also require macOS sandbox-exec. Not bypassed or reported as passed."
+      ],
+      "notes": "Retained legacy Ghostty-web terminal RangeError console diagnostics; native GUI stderr was empty."
+    },
+    {
+      "command": "python3 -m unittest discover -s scripts -p test_test_processes.py",
+      "result": "pass",
+      "passed": 13,
+      "log": {
+        "path": ".crewroom/test-results/linux-port/cleanup-tests.log",
+        "sha256": "0fe992981271e27f0380d75c89b1cb0b7c6b66e541cdc4442770ebad4bf2d95c"
+      }
+    },
+    {
+      "command": "python3 scripts/prepare-rust-mail-test.py (download, then verified reuse)",
+      "result": "pass",
+      "release": {
+        "release": "v0.3.36",
+        "target": "x86_64-unknown-linux-gnu",
+        "archiveSha256": "c80943427f434a4b98f8c6a7e5a16440271ed9f3fa9f0825f150c9013c64325e",
+        "binarySha256": "6d0a2000c4e33066b1bca36a15ccdb3ccbccfc90362feee2fa4ca8c6f33f729b",
+        "url": "https://github.com/Dicklesworthstone/mcp_agent_mail_rust/releases/download/v0.3.36/mcp-agent-mail-x86_64-unknown-linux-gnu.tar.xz",
+        "scope": "Local experimental download; no global installation"
+      },
+      "logs": [
+        {
+          "path": ".crewroom/test-results/linux-port/mail-preparation.log",
+          "sha256": "979a532a347acc54c9bd0c03d24d659e350f1ed6a33a8c424cdf303caad40dcf"
+        },
+        {
+          "path": ".crewroom/test-results/linux-port/mail-reuse.log",
+          "sha256": "979a532a347acc54c9bd0c03d24d659e350f1ed6a33a8c424cdf303caad40dcf"
+        }
+      ],
+      "scope": "Linux executable --version reported0.3.36; no Mail service started."
+    },
+    {
+      "command": "npm run test:processes",
+      "result": "pass",
+      "log": {
+        "path": ".crewroom/test-results/linux-port/process-inventory-final.log",
+        "sha256": "3fdda61cc7ee7b9898edad5eeec6ef845152bb6182bdeaeab09029bc09234a67"
+      },
+      "notes": "No attributable test processes; scoped inventory, not machine-wide proof."
+    }
+  ],
+  "retainedFailures": [
+    {
+      "check": "Initial npm test",
+      "passed": 278,
+      "failed": 54,
+      "cause": "Bare Git fixtures inherited default branch rather than main. Explicit -b main fixed fixtures; final complete332/332 pass.",
+      "log": {
+        "path": ".crewroom/test-results/linux-port/npm-test.log",
+        "sha256": "08a877b410cc385dc1a0ff76565607423cad98740adcd654def169a83f6da77d"
+      }
+    },
+    {
+      "check": "Initial browser suite",
+      "passed": 27,
+      "failed": 4,
+      "cause": "Two bare-Git branch assumptions fixed; two macOS fixture failures remain.",
+      "log": {
+        "path": ".crewroom/test-results/linux-port/browser-tests.log",
+        "sha256": "a9e26eb859e5e5e87129d9ab81ca873d9932b24d958da15404485e516dc9974f"
+      }
+    },
+    {
+      "check": "Initial GUI smoke",
+      "cause": "Window rendered; helper used obsolete pre-Lua Hyprland closewindow syntax. Fixed only helper, stopped daemon, repeated with unchanged app binaries.",
+      "receipt": {
+        "path": ".crewroom/test-results/linux-port/gui/report.json",
+        "sha256": "17747c78fee7a308af806010321535ba66422014787624dbe0e20862f98dae6e"
+      },
+      "log": {
+        "path": ".crewroom/test-results/linux-port/gui-smoke.log",
+        "sha256": "7a107790e4d85ce9587709c7351a8bf9ddc0da3371ad8bf93c1716693b9d225e"
+      }
+    },
+    {
+      "check": "Clippy with Rust1.98 -D warnings",
+      "cause": "Two new chunks_exact_to_as_chunks lints in pre-existing provider decoding/Git argument code. Ordinary Clippy completes with these two warnings; no suppression or unrelated source rewrite."
+    },
+    {
+      "check": "Default-host build prerequisite probe",
+      "cause": "System libc++ absent; early actionable failure. Tests/build use verified local libraries. No system install performed."
+    }
+  ],
+  "review": {
+    "separateWorker": true,
+    "finding": "Linux launcher initially inherited provider tokens into GUI. Fixed by unsetting server-only variables after daemon startup; isolated test and real /proc GUI-environment check pass.",
+    "remainingConcreteFindings": 0
+  },
+  "limits": [
+    "Debug build only; optimized Linux release not accepted.",
+    "Wayland window/render/reopen tested; actual Ghostty terminal surface and OS clipboard not exercised.",
+    "X11 GUI unsupported; ARM64 source/download paths unexecuted.",
+    "Nine existing native external-fixture cases ignored; two browser runner fixtures remain macOS-specific.",
+    "No live Jira/Bitbucket/model delivery or real OMP/Mail/Docker workflow acceptance on Linux.",
+    "No macOS execution rerun; existing behavior covered only by isolated script cases and historical receipts.",
+    "No AUR/AppImage/desktop-entry/system-service installation.",
+    "Local dynamically linked package requires compatible host libraries and GPU drivers."
+  ],
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

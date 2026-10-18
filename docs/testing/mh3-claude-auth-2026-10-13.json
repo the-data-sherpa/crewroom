@@ -1,0 +1,356 @@
+{
+  "scope": "actual native CLI; fake login, fake OAuth rotation, synthetic provider; loopback-only namespace",
+  "observedAt": "2026-10-13T06:55:52.151703+00:00",
+  "probeSha256": "66691c28605fd2c8a778490ee22c0e61a3529f763e53bd75ace4eded30049ef4",
+  "version": "2.1.296 (Claude Code)",
+  "binarySha256": "24972e3bc859fab2b46ed4c1e51f7d6130f06d3bd550811a114640de3370d0de",
+  "interfaces": [
+    "lo"
+  ],
+  "cases": {
+    "missing": {
+      "first": {
+        "finished": true,
+        "exitCode": 1,
+        "resultSeen": true,
+        "isError": true,
+        "subtype": "success",
+        "fixtureReply": false,
+        "loginErrorMentioned": true,
+        "lockContendedMentioned": false
+      },
+      "events": [],
+      "maxSimultaneousRefreshes": 0,
+      "refreshCount": 0,
+      "successfulSyntheticRotations": 0,
+      "messageCount": 0,
+      "allMessagesUsedRotatedToken": null,
+      "credentialMode": null,
+      "checks": {
+        "failsBeforeModelRequest": true,
+        "expectedRefreshAttempts": true,
+        "allNativeChildrenReaped": true
+      },
+      "passed": true,
+      "allNativeChildrenReaped": true
+    },
+    "expired": {
+      "first": {
+        "finished": true,
+        "exitCode": 1,
+        "resultSeen": true,
+        "isError": true,
+        "subtype": "success",
+        "fixtureReply": false,
+        "loginErrorMentioned": true,
+        "lockContendedMentioned": false
+      },
+      "events": [
+        {
+          "kind": "refresh_start",
+          "at": 1845383.406078421,
+          "fakeRefreshMatched": true
+        },
+        {
+          "kind": "refresh_end",
+          "at": 1845383.426185162
+        },
+        {
+          "kind": "get",
+          "path": "/api/oauth/profile"
+        },
+        {
+          "kind": "get",
+          "path": "/api/claude_code/settings"
+        },
+        {
+          "kind": "get",
+          "path": "/api/claude_code/policy_limits"
+        }
+      ],
+      "maxSimultaneousRefreshes": 1,
+      "refreshCount": 1,
+      "successfulSyntheticRotations": 0,
+      "messageCount": 0,
+      "allMessagesUsedRotatedToken": null,
+      "credentialMode": "0o600",
+      "checks": {
+        "failsBeforeModelRequest": true,
+        "expectedRefreshAttempts": true,
+        "allNativeChildrenReaped": true
+      },
+      "passed": true,
+      "allNativeChildrenReaped": true
+    },
+    "concurrent": {
+      "firstRefreshReached": true,
+      "nativeLockPresent": true,
+      "refreshStartsWhileFirstBlocked": 1,
+      "first": {
+        "finished": true,
+        "exitCode": 0,
+        "resultSeen": true,
+        "isError": false,
+        "subtype": "success",
+        "fixtureReply": true,
+        "loginErrorMentioned": false,
+        "lockContendedMentioned": false
+      },
+      "second": {
+        "finished": true,
+        "exitCode": 0,
+        "resultSeen": true,
+        "isError": false,
+        "subtype": "success",
+        "fixtureReply": true,
+        "loginErrorMentioned": false,
+        "lockContendedMentioned": false
+      },
+      "events": [
+        {
+          "kind": "refresh_start",
+          "at": 1845384.067432377,
+          "fakeRefreshMatched": true
+        },
+        {
+          "kind": "refresh_end",
+          "at": 1845386.088296883
+        },
+        {
+          "kind": "get",
+          "path": "/api/claude_code/settings"
+        },
+        {
+          "kind": "get",
+          "path": "/api/oauth/profile"
+        },
+        {
+          "kind": "get",
+          "path": "/api/claude_code/policy_limits"
+        },
+        {
+          "kind": "message",
+          "at": 1845386.24617777,
+          "freshTokenUsed": true
+        },
+        {
+          "kind": "get",
+          "path": "/api/claude_code/settings"
+        },
+        {
+          "kind": "get",
+          "path": "/api/oauth/profile"
+        },
+        {
+          "kind": "get",
+          "path": "/api/claude_code/policy_limits"
+        },
+        {
+          "kind": "get",
+          "path": "/api/claude_code/policy_limits"
+        },
+        {
+          "kind": "message",
+          "at": 1845387.65370576,
+          "freshTokenUsed": true
+        }
+      ],
+      "maxSimultaneousRefreshes": 1,
+      "refreshCount": 1,
+      "successfulSyntheticRotations": 1,
+      "messageCount": 2,
+      "allMessagesUsedRotatedToken": true,
+      "credentialMode": "0o600",
+      "checks": {
+        "heldNativeLockBeforeContender": true,
+        "oneRefreshAtATime": true,
+        "oneSuccessfulRotation": true,
+        "freshTokenForEveryMessage": true,
+        "secondCompleted": true,
+        "bothCompletedOneRotation": true,
+        "allNativeChildrenReaped": true
+      },
+      "passed": true,
+      "allNativeChildrenReaped": true
+    },
+    "owner_death": {
+      "firstRefreshReached": true,
+      "nativeLockPresent": true,
+      "refreshStartsWhileFirstBlocked": 1,
+      "killedOwnerReaped": true,
+      "second": {
+        "finished": true,
+        "exitCode": 0,
+        "resultSeen": true,
+        "isError": false,
+        "subtype": "success",
+        "fixtureReply": true,
+        "loginErrorMentioned": false,
+        "lockContendedMentioned": false
+      },
+      "lockPresentAfterReplacement": false,
+      "events": [
+        {
+          "kind": "refresh_start",
+          "at": 1845388.298381328,
+          "fakeRefreshMatched": true
+        },
+        {
+          "kind": "refresh_end",
+          "at": 1845390.349475954
+        },
+        {
+          "kind": "refresh_abandoned_before_rotation"
+        },
+        {
+          "kind": "refresh_start",
+          "at": 1845396.167819103,
+          "fakeRefreshMatched": true
+        },
+        {
+          "kind": "refresh_end",
+          "at": 1845396.187907991
+        },
+        {
+          "kind": "get",
+          "path": "/api/claude_code/policy_limits"
+        },
+        {
+          "kind": "get",
+          "path": "/api/oauth/profile"
+        },
+        {
+          "kind": "get",
+          "path": "/api/claude_code/policy_limits"
+        },
+        {
+          "kind": "get",
+          "path": "/api/claude_code/settings"
+        },
+        {
+          "kind": "message",
+          "at": 1845396.36287349,
+          "freshTokenUsed": true
+        }
+      ],
+      "maxSimultaneousRefreshes": 1,
+      "refreshCount": 2,
+      "successfulSyntheticRotations": 1,
+      "messageCount": 1,
+      "allMessagesUsedRotatedToken": true,
+      "credentialMode": "0o600",
+      "checks": {
+        "heldNativeLockBeforeContender": true,
+        "oneRefreshAtATime": true,
+        "oneSuccessfulRotation": true,
+        "freshTokenForEveryMessage": true,
+        "secondCompleted": true,
+        "ownerDeathBeforeRotationRecovered": true,
+        "allNativeChildrenReaped": true
+      },
+      "passed": true,
+      "allNativeChildrenReaped": true
+    },
+    "parent_death": {
+      "firstRefreshReached": true,
+      "nativeLockPresent": true,
+      "launcherKilled": true,
+      "nativeOwnerSurvivedParent": true,
+      "refreshStartsWhileFirstBlocked": 1,
+      "first": {
+        "finished": true,
+        "exitCode": 0,
+        "resultSeen": true,
+        "isError": false,
+        "subtype": "success",
+        "fixtureReply": true,
+        "loginErrorMentioned": false,
+        "lockContendedMentioned": false
+      },
+      "second": {
+        "finished": true,
+        "exitCode": 0,
+        "resultSeen": true,
+        "isError": false,
+        "subtype": "success",
+        "fixtureReply": true,
+        "loginErrorMentioned": false,
+        "lockContendedMentioned": false
+      },
+      "events": [
+        {
+          "kind": "refresh_start",
+          "at": 1845397.015255418,
+          "fakeRefreshMatched": true
+        },
+        {
+          "kind": "refresh_end",
+          "at": 1845399.037161635
+        },
+        {
+          "kind": "get",
+          "path": "/api/oauth/profile"
+        },
+        {
+          "kind": "get",
+          "path": "/api/claude_code/policy_limits"
+        },
+        {
+          "kind": "get",
+          "path": "/api/claude_code/settings"
+        },
+        {
+          "kind": "message",
+          "at": 1845399.19634481,
+          "freshTokenUsed": true
+        },
+        {
+          "kind": "get",
+          "path": "/api/claude_code/settings"
+        },
+        {
+          "kind": "get",
+          "path": "/api/claude_code/policy_limits"
+        },
+        {
+          "kind": "get",
+          "path": "/api/oauth/profile"
+        },
+        {
+          "kind": "message",
+          "at": 1845400.320572059,
+          "freshTokenUsed": true
+        }
+      ],
+      "maxSimultaneousRefreshes": 1,
+      "refreshCount": 1,
+      "successfulSyntheticRotations": 1,
+      "messageCount": 2,
+      "allMessagesUsedRotatedToken": true,
+      "credentialMode": "0o600",
+      "checks": {
+        "heldNativeLockBeforeContender": true,
+        "oneRefreshAtATime": true,
+        "oneSuccessfulRotation": true,
+        "freshTokenForEveryMessage": true,
+        "secondCompleted": true,
+        "bothCompletedOneRotation": true,
+        "parentDeathPreservesLiveOwner": true,
+        "allNativeChildrenReaped": true
+      },
+      "passed": true,
+      "allNativeChildrenReaped": true
+    }
+  },
+  "issue": "FOR-8",
+  "sourceBaseRevision": "31b8c3eddcc1ac5318d8e96d4c7057375d258821",
+  "command": "python3 scripts/probe_claude_auth.py --claude /home/crewroom/.local/share/claude/versions/2.1.296 --output .crewroom/mh3-probe/auth-final --case all",
+  "limitations": [
+    "Fake credentials only; no operator credential read/copy or real authentication/inference request.",
+    "Actual native binary and locking code; synthetic OAuth endpoint and model replies in a loopback-only network namespace.",
+    "Owner death occurs before synthetic token rotation; remote rotation followed by lost response/persistence remains unverified.",
+    "Launcher death deliberately leaves native process alive; Crewroom supervision must retain actual process ownership.",
+    "Linux 2.1.296 only; no macOS Keychain, real refresh-token lifetime, or long-duration concurrency claim."
+  ],
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

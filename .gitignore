@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.crewroom/
+.env
+.env.*
+!.env.example
+playwright-report/
+test-results/
+.DS_Store
+__pycache__/
+/target/

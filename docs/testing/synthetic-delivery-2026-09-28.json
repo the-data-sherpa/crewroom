@@ -1,0 +1,159 @@
+{
+  "workItem": "M4.4",
+  "date": "2026-09-28",
+  "status": "complete_with_recorded_boundaries",
+  "validation": {
+    "domain": {
+      "passed": 74,
+      "failed": 0,
+      "log": ".crewroom/test-results/m4-delivery-domain-final.log"
+    },
+    "build": {
+      "passed": true,
+      "log": ".crewroom/test-results/m4-delivery-build-final.log"
+    },
+    "browser": {
+      "passed": 5,
+      "failed": 0,
+      "log": ".crewroom/test-results/m4-delivery-browser-final.log"
+    },
+    "runtime": {
+      "simple": {
+        "passed": true,
+        "guard": {
+          "fixture_port_allowed": true,
+          "external_denied": true,
+          "other_loopback_denied": true,
+          "child_egress_denied": true
+        },
+        "providerRequests": 36,
+        "providerErrors": [],
+        "unexpectedSurvivingProcesses": [],
+        "delivery": {
+          "passed": true,
+          "independentProcesses": 4,
+          "distinctSessions": 4,
+          "modelSelectors": 3,
+          "mailReceipts": 6,
+          "publishToolCalls": 1,
+          "jiraToolCalls": 2,
+          "prPosts": 1,
+          "jiraCommentPosts": 1,
+          "jiraTransitions": 1,
+          "restarts": 2,
+          "permissionAndOutageHeld": true,
+          "lostRepliesReconciled": true,
+          "controllerNotices": 8,
+          "browserReadyAndJiraConfirmed": true,
+          "revision": "d6d69fdeeaf519555d35ce2d0c63b6dd5b859249"
+        },
+        "reportPath": ".crewroom/test-results/m4-delivery-final/report.json",
+        "reportSha256": "0b65406281a88fd62026a0434ed64f1b0ea74e22635455f8c448daee40bacedf",
+        "coding": {
+          "candidates": 1,
+          "checks": 1,
+          "reviews": 1,
+          "locallyValidated": true,
+          "finalRevision": "d6d69fdeeaf519555d35ce2d0c63b6dd5b859249"
+        }
+      },
+      "rework": {
+        "passed": true,
+        "guard": {
+          "fixture_port_allowed": true,
+          "external_denied": true,
+          "other_loopback_denied": true,
+          "child_egress_denied": true
+        },
+        "providerRequests": 69,
+        "providerErrors": [],
+        "unexpectedSurvivingProcesses": [],
+        "delivery": {
+          "passed": true,
+          "independentProcesses": 4,
+          "distinctSessions": 4,
+          "modelSelectors": 3,
+          "mailReceipts": 12,
+          "publishToolCalls": 1,
+          "jiraToolCalls": 2,
+          "prPosts": 1,
+          "jiraCommentPosts": 1,
+          "jiraTransitions": 1,
+          "restarts": 2,
+          "permissionAndOutageHeld": true,
+          "lostRepliesReconciled": true,
+          "controllerNotices": 8,
+          "browserReadyAndJiraConfirmed": true,
+          "revision": "405860a2059f93c4fd4f2cd8a7707fb0f65219c9"
+        },
+        "reportPath": ".crewroom/test-results/m4-delivery-rework-2/report.json",
+        "reportSha256": "8abe3f9cb91bcdb6903f5e40ccf9a4ad863051f78092325392b745cb2992be8a",
+        "coding": {
+          "candidates": 3,
+          "checks": 3,
+          "reviews": 2,
+          "locallyValidated": true,
+          "finalRevision": "405860a2059f93c4fd4f2cd8a7707fb0f65219c9"
+        }
+      },
+      "jiraRegression": {
+        "passed": true,
+        "guard": {
+          "fixture_port_allowed": true,
+          "external_denied": true,
+          "other_loopback_denied": true,
+          "child_egress_denied": true
+        },
+        "providerRequests": 7,
+        "providerErrors": [],
+        "unexpectedSurvivingProcesses": [],
+        "delivery": {
+          "passed": true,
+          "independentProcesses": 2,
+          "mailReceipts": 2,
+          "commentPosts": 1,
+          "restartReconciled": true,
+          "changedRequirementsStoppedProcesses": 2,
+          "staleResumeBlocked": true,
+          "browserReceipts": [
+            "pending",
+            "confirmed"
+          ]
+        },
+        "reportPath": ".crewroom/test-results/m4-delivery-jira-regression/report.json",
+        "reportSha256": "9b7fa83048dfb1a144d4d9e369c60b35d981a72ca0188d7cd6364d62175638bf"
+      }
+    }
+  },
+  "behaviors": [
+    "Imported synthetic Jira ticket is explicitly mapped and accepted before actual OMP agents edit an isolated Git worktree, run real container checks, independently review, publish to a real local bare remote and simulated Bitbucket, and report verified evidence to simulated Jira.",
+    "Four concurrent agent processes and sessions use three separately verified scripted-provider model identities. Six simple-path or twelve rework-path peer messages travel through Rust Mail.",
+    "The rework case rejects a failing check and a changes-requested independent review before validating the third revision. Only final candidate evidence appears in its PR.",
+    "Permission/outage holds retain code and pending intents. Lost PR, Jira transition and comment replies reconcile across two graceful application restarts, with exactly one accepted write of each kind.",
+    "Durable controller notices wake the coordinator on changed provider receipts. Their delivery is distinct from operator steering and peer mail; pending/dispatched/received and saved attempt ownership survive restart.",
+    "Older pipeline retry success cannot erase a newer failure. Mismatched status branch identity blocks readiness. An explicit PR-write rejection retains its explanation and is not retried.",
+    "The browser verifies review readiness, confirmed Jira evidence and controller receipt visibility against the same production services."
+  ],
+  "boundaries": [
+    "All model and Jira/Bitbucket boundaries were controlled local fixtures. Real OMP/tmux, Rust Mail, Git, SQLite and Docker ran; no live Jira/Bitbucket mutation or Conductor edit occurred.",
+    "These scenarios use the existing Python sum fixture as concrete variants of E2E-01/03/06. This does not claim every assertion in the original 87-case matrix or all 12 scenarios is complete. Full reconciliation remains M7.",
+    "M4.4 restarts close the application and explicitly resume its preserved run. Abrupt host/controller crash boundaries remain the separately executed M2/M3 evidence.",
+    "The rework run preceded final stale-retry/branch-status gate tightening. The final simple runtime, 74 domain tests and five browser journeys ran with those guards.",
+    "Live model access/assignments, direct Bitbucket server credentials, and dedicated Conductor database/browser checks remain M5 admission work.",
+    "Operator-selected continuation of a published revision, merge/dependency handling and remaining accepted workflows remain M6."
+  ],
+  "sourceSha256": {
+    "scripts/coding-driver.ts": "75a2ece257f2135b3822c6ebcb25998eb88e9cefa03e64797d804718144fdf3b",
+    "scripts/coding_fixture.py": "647dc299e449dbcc7a6183d3997a61503c71d16f1dffee6af7e7cc6b1c57cabe",
+    "scripts/test-application-runtime.py": "ff06a319cb772cf5df1364f41bdd7854020ec65c18e1a328350559dee54c8d26",
+    "server/publication.ts": "1e9d7e0085830dba4c19daf5d26a64fbc29f1ed430233fdbacc7ddf7fcf44d3d",
+    "server/runtime/supervisor.ts": "b8ed232d5dbbbec93b3c9b702817ba83955cf849c68fa675964a0140f552c195",
+    "server/workbench.ts": "0e0145b8ab95e53eca66ef563b93dc2d3793c54b272790b6974840930d8ea551",
+    "src/supervision.tsx": "3bc6b0bb45e464b2db87a568a9041d31e716d2f3d3ce2fc40cb5e78028d425b4",
+    "tests/publication.test.ts": "afb24eeb286541a4abb0c1d4b618aafc1245d6d815d468b17c4091d54f24abc6",
+    "scripts/delivery-driver.ts": "ada6158b35a921e8322fb61a99e9a74f97310a316b837b3abf16248f260e6a38",
+    "scripts/delivery-provider-fixture.ts": "27a94e5af7a677dc338b7dc0ef1be441a808ab91fcdccec6e4a0035778260385",
+    "shared/delivery.ts": "280dcbead3b4b6da5b49409866ab772a7b78728eae1924b35c48bcf233738d98",
+    "tests/delivery-notices.test.ts": "98d182760f70fc2bb0552c0607a8ebff800e091470bce3ce955dba2ede120e2f"
+  }
+}

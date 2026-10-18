@@ -1,0 +1,1710 @@
+{
+  "schemaVersion": 1,
+  "baseline": "946555b",
+  "scope": "Local release acceptance. All model, Jira and Bitbucket responses in these jobs are scripted; the retained live pilot is separate evidence.",
+  "jobs": {
+    "domain": {
+      "command": [
+        "npm",
+        "test"
+      ],
+      "timeoutSeconds": 1800
+    },
+    "build": {
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "timeoutSeconds": 180
+    },
+    "browser": {
+      "command": [
+        "npm",
+        "run",
+        "test:e2e"
+      ],
+      "timeoutSeconds": 900
+    },
+    "small": {
+      "command": [
+        "python3",
+        "scripts/test-application-runtime.py",
+        "--output",
+        "{output}",
+        "--coding",
+        "simple",
+        "--delivery"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "rework": {
+      "command": [
+        "python3",
+        "scripts/test-application-runtime.py",
+        "--output",
+        "{output}",
+        "--coding",
+        "rework"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "team": {
+      "command": [
+        "python3",
+        "scripts/test-application-runtime.py",
+        "--output",
+        "{output}",
+        "--team-size",
+        "3",
+        "--rotate"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "roundtrip": {
+      "command": [
+        "python3",
+        "scripts/test-application-runtime.py",
+        "--output",
+        "{output}"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "specialist": {
+      "command": [
+        "python3",
+        "scripts/test-application-runtime.py",
+        "--output",
+        "{output}",
+        "--fault",
+        "specialist"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "insert": {
+      "command": [
+        "python3",
+        "scripts/test-application-runtime.py",
+        "--output",
+        "{output}",
+        "--coding",
+        "simple",
+        "--coding-fault",
+        "insert"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "insert-restart": {
+      "command": [
+        "python3",
+        "scripts/test-application-runtime.py",
+        "--output",
+        "{output}",
+        "--team-size",
+        "1",
+        "--team-fault",
+        "after-apply",
+        "--operator-insertion"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "commit-restart": {
+      "command": [
+        "python3",
+        "scripts/test-application-runtime.py",
+        "--output",
+        "{output}",
+        "--coding",
+        "simple",
+        "--coding-fault",
+        "after-commit"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "model-guard": {
+      "command": [
+        "python3",
+        "scripts/test-application-model-guard.py",
+        "--output",
+        "{output}"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "session": {
+      "command": [
+        "python3",
+        "scripts/test-application-continuity.py",
+        "--output",
+        "{output}",
+        "--scenario",
+        "session"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "first-turn": {
+      "command": [
+        "python3",
+        "scripts/test-application-continuity.py",
+        "--output",
+        "{output}",
+        "--scenario",
+        "first-turn"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "cycles": {
+      "command": [
+        "python3",
+        "scripts/test-application-continuity.py",
+        "--output",
+        "{output}",
+        "--scenario",
+        "cycles"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "steering": {
+      "command": [
+        "python3",
+        "scripts/test-application-continuity.py",
+        "--output",
+        "{output}",
+        "--scenario",
+        "steering"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "lost-receipt": {
+      "command": [
+        "python3",
+        "scripts/test-application-continuity.py",
+        "--output",
+        "{output}",
+        "--scenario",
+        "lost-receipt"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "adoption": {
+      "command": [
+        "python3",
+        "scripts/test-application-continuity.py",
+        "--output",
+        "{output}",
+        "--scenario",
+        "adoption"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "refinement": {
+      "command": [
+        "python3",
+        "scripts/test-application-continuity.py",
+        "--output",
+        "{output}",
+        "--scenario",
+        "refinement"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "research": {
+      "command": [
+        "python3",
+        "scripts/test-application-continuity.py",
+        "--output",
+        "{output}",
+        "--scenario",
+        "research"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "queue": {
+      "command": [
+        "python3",
+        "scripts/test-application-continuity.py",
+        "--output",
+        "{output}",
+        "--scenario",
+        "queue"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "cancel-continuation": {
+      "command": [
+        "python3",
+        "scripts/test-application-continuity.py",
+        "--output",
+        "{output}",
+        "--scenario",
+        "cancel-continuation"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "interrupt-pause": {
+      "command": [
+        "python3",
+        "scripts/test-application-interruption.py",
+        "--output",
+        "{output}",
+        "--fault",
+        "pause"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "interrupt-host": {
+      "command": [
+        "python3",
+        "scripts/test-application-interruption.py",
+        "--output",
+        "{output}",
+        "--fault",
+        "host"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "interrupt-supervisor": {
+      "command": [
+        "python3",
+        "scripts/test-application-interruption.py",
+        "--output",
+        "{output}",
+        "--fault",
+        "supervisor"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "interrupt-detached": {
+      "command": [
+        "python3",
+        "scripts/test-application-interruption.py",
+        "--output",
+        "{output}",
+        "--fault",
+        "detached"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "interrupt-budget": {
+      "command": [
+        "python3",
+        "scripts/test-application-interruption.py",
+        "--output",
+        "{output}",
+        "--fault",
+        "budget"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "mail": {
+      "command": [
+        "python3",
+        "scripts/test-application-mail.py",
+        "--output",
+        "{output}"
+      ],
+      "timeoutSeconds": 120,
+      "report": "report.json"
+    },
+    "profiles": {
+      "command": [
+        "python3",
+        "scripts/test-omp-offline.py",
+        "--output",
+        "{output}"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "harness": {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "scripts",
+        "-p",
+        "test_release_manifest.py"
+      ],
+      "timeoutSeconds": 60
+    },
+    "reasoning": {
+      "command": [
+        "python3",
+        "scripts/test-application-runtime.py",
+        "--output",
+        "{output}",
+        "--coding",
+        "simple",
+        "--coding-fault",
+        "after-commit",
+        "--reasoning"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "budget-resume": {
+      "command": [
+        "python3",
+        "scripts/test-application-continuity.py",
+        "--scenario",
+        "budget-resume",
+        "--output",
+        "{output}"
+      ],
+      "timeoutSeconds": 120,
+      "report": "report.json"
+    },
+    "provider-matrix": {
+      "command": [
+        "python3",
+        "scripts/test-provider-matrix.py",
+        "--output",
+        "{output}"
+      ],
+      "timeoutSeconds": 600,
+      "report": "report.json"
+    },
+    "send-crash": {
+      "command": [
+        "python3",
+        "scripts/test-application-runtime.py",
+        "--output",
+        "{output}",
+        "--fault",
+        "coordinator-send"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "complex": {
+      "command": [
+        "python3",
+        "scripts/test-application-runtime.py",
+        "--output",
+        "{output}",
+        "--coding",
+        "complex"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "target-drift": {
+      "command": [
+        "python3",
+        "scripts/test-application-runtime.py",
+        "--output",
+        "{output}",
+        "--coding",
+        "complex",
+        "--target-drift"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "authority": {
+      "command": [
+        "python3",
+        "scripts/test-authority.py",
+        "--output",
+        "{output}"
+      ],
+      "timeoutSeconds": 300,
+      "report": "report.json"
+    },
+    "owned-cleanup": {
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "--test",
+        "tests/container.integration.ts",
+        "tests/cleanup.integration.ts"
+      ],
+      "timeoutSeconds": 120
+    },
+    "interrupt-cancel": {
+      "command": [
+        "python3",
+        "scripts/test-application-interruption.py",
+        "--fault",
+        "cancel",
+        "--output",
+        "{output}"
+      ],
+      "timeoutSeconds": 180,
+      "report": "report.json"
+    }
+  },
+  "cases": [
+    {
+      "id": "INT-01",
+      "coverage": "mapped",
+      "tests": [
+        "tests/store.test.ts",
+        "tests/jira-sync.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "INT-02",
+      "coverage": "mapped",
+      "tests": [
+        "tests/queue.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "INT-03",
+      "coverage": "mapped",
+      "tests": [
+        "tests/refinement.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "refinement",
+        "small"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "INT-04",
+      "coverage": "mapped",
+      "tests": [
+        "tests/store.test.ts",
+        "tests/admission-adoption-review.test.ts",
+        "tests/admission-restart-review.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "INT-05",
+      "coverage": "mapped",
+      "tests": [
+        "tests/jira-sync.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "INT-06",
+      "coverage": "mapped",
+      "tests": [
+        "tests/store.test.ts",
+        "tests/repository-config.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "INT-07",
+      "coverage": "mapped",
+      "tests": [
+        "tests/research.test.ts",
+        "tests/research-no-repo.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "research"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "INT-08",
+      "coverage": "mapped",
+      "tests": [
+        "tests/refinement.test.ts",
+        "tests/queue.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "ROL-01",
+      "coverage": "mapped",
+      "tests": [
+        "tests/assignments.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "team",
+        "small"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "ROL-02",
+      "coverage": "mapped",
+      "tests": [
+        "tests/roles.test.ts",
+        "tests/insertion.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "insert-restart"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "ROL-03",
+      "coverage": "mapped",
+      "tests": [
+        "tests/assignments.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "ROL-04",
+      "coverage": "mapped",
+      "tests": [
+        "tests/brief.test.ts",
+        "tests/assignments.test.ts",
+        "tests/release-contracts.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "team"
+      ],
+      "note": "Paired real repository instruction/check snapshots and SQLite transaction failure/corrupt journal boundaries are asserted in release-contracts.test.ts."
+    },
+    {
+      "id": "ROL-05",
+      "coverage": "mapped",
+      "tests": [
+        "tests/evidence.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "ROL-06",
+      "coverage": "mapped",
+      "tests": [
+        "tests/jira-delivery.test.ts",
+        "tests/research.test.ts",
+        "tests/repository-work.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "small"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "ROL-07",
+      "coverage": "mapped",
+      "tests": [
+        "tests/brief.test.ts",
+        "tests/assignments.test.ts",
+        "tests/insertion.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "RTE-01",
+      "coverage": "mapped",
+      "tests": [
+        "tests/release-contracts.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "RTE-02",
+      "coverage": "mapped",
+      "tests": [
+        "tests/assignments.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "roundtrip",
+        "team",
+        "profiles"
+      ],
+      "note": "Pure application assignment coverage and current real OMP 57 profile turns; current production team/roundtrip harnesses verify heterogeneous and rotated admission. Scripted identities, not model quality."
+    },
+    {
+      "id": "RTE-03",
+      "coverage": "mapped",
+      "tests": [
+        "tests/release-contracts.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "roundtrip"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "RTE-04",
+      "coverage": "mapped",
+      "tests": [
+        "tests/model-policy.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "RTE-05",
+      "coverage": "mapped",
+      "tests": [
+        "tests/model-policy.test.ts",
+        "tests/assignments.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "RTE-06",
+      "coverage": "mapped",
+      "tests": [
+        "tests/model-policy.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "model-guard"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "RTE-07",
+      "coverage": "mapped",
+      "tests": [
+        "tests/model-policy.test.ts",
+        "tests/provider-gateway.test.ts",
+        "tests/provider-gateway.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "reasoning",
+        "budget-resume"
+      ],
+      "note": "Serialized text is conservatively byte-budgeted; known opaque reasoning reserves provider-reported output from an assignment-scoped hash ledger, including replacement attempts. Unknown media/files/context references are held. OpenAI/Gemini replay is exercised in real OMP; Anthropic redacted replay is directly gateway-tested. Explicit Resume after an input-history budget rejection starts a fresh OMP session, retaining old history and steering."
+    },
+    {
+      "id": "RTE-08",
+      "coverage": "mapped",
+      "tests": [
+        "tests/model-policy.test.ts",
+        "tests/provider-gateway.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "model-guard"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "RTE-09",
+      "coverage": "mapped",
+      "tests": [
+        "tests/runtime-fallback.test.ts",
+        "tests/model-policy.test.ts",
+        "tests/provider-gateway.test.ts",
+        "tests/provider-usage.test.ts",
+        "tests/e2e/history.spec.ts",
+        "scripts/provider-recovery-driver.ts"
+      ],
+      "jobs": [
+        "domain",
+        "browser",
+        "provider-matrix"
+      ],
+      "note": "Eleven real independent OMP failure scenarios with scripted providers: explicit compatible alternate attempts, missing/incompatible/exhausted fallback holds, authorization, throttling, timeout, disconnect, malformed and empty results. Recorded identity, fresh-session lineage, bounded cycles, revision readiness and history/usage are asserted."
+    },
+    {
+      "id": "RTE-10",
+      "coverage": "mapped",
+      "tests": [
+        "tests/release-contracts.test.ts",
+        "tests/insertion.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "RTE-11",
+      "coverage": "mapped",
+      "tests": [
+        "tests/release-contracts.test.ts",
+        "tests/provider-gateway.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "model-guard"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "RTE-12",
+      "coverage": "mapped",
+      "tests": [
+        "tests/runtime-fallback.test.ts",
+        "tests/model-policy.test.ts",
+        "tests/provider-gateway.test.ts",
+        "tests/provider-usage.test.ts",
+        "tests/e2e/history.spec.ts",
+        "scripts/provider-recovery-driver.ts"
+      ],
+      "jobs": [
+        "domain",
+        "browser",
+        "provider-matrix"
+      ],
+      "note": "Eleven real independent OMP failure scenarios with scripted providers: explicit compatible alternate attempts, missing/incompatible/exhausted fallback holds, authorization, throttling, timeout, disconnect, malformed and empty results. Recorded identity, fresh-session lineage, bounded cycles, revision readiness and history/usage are asserted."
+    },
+    {
+      "id": "MSG-01",
+      "coverage": "mapped",
+      "tests": [
+        "tests/store.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "roundtrip"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "MSG-02",
+      "coverage": "mapped",
+      "tests": [
+        "tests/observation.test.ts",
+        "tests/live.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "roundtrip",
+        "mail"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "MSG-03",
+      "coverage": "mapped",
+      "tests": [
+        "tests/store.test.ts",
+        "tests/runtime.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "mail",
+        "lost-receipt"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "MSG-04",
+      "coverage": "mapped",
+      "tests": [
+        "tests/store.test.ts",
+        "tests/runtime.test.ts",
+        "tests/release-contracts.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "specialist",
+        "mail"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "MSG-05",
+      "coverage": "mapped",
+      "tests": [
+        "tests/messaging.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "mail"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "MSG-06",
+      "coverage": "mapped",
+      "tests": [
+        "tests/runtime.test.ts",
+        "tests/steering.test.ts",
+        "tests/messaging.test.ts",
+        "scripts/mail-window-worker.ts"
+      ],
+      "jobs": [
+        "domain",
+        "lost-receipt",
+        "first-turn",
+        "mail"
+      ],
+      "note": "Five killed-process receive windows exercise durable acceptance, lost acknowledgement before/after transport commit and one keyed reply effect against real Rust Mail. The lost-receipt job separately verifies one real OMP prompt across controller loss and duplicate host input."
+    },
+    {
+      "id": "MSG-07",
+      "coverage": "mapped",
+      "tests": [
+        "tests/messaging.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "mail"
+      ],
+      "note": "Real Rust Mail downtime and two restarts preserve pending intent and one logical delivery; expired unknown sends remain uncertain. HTTP read reconnect backoff is bounded in messaging.test.ts."
+    },
+    {
+      "id": "MSG-08",
+      "coverage": "mapped",
+      "tests": [
+        "tests/store.test.ts",
+        "tests/assignments.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "roundtrip",
+        "authority"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "MSG-09",
+      "coverage": "mapped",
+      "tests": [
+        "tests/messaging.test.ts",
+        "tests/release-contracts.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "mail"
+      ],
+      "note": "Real HTTP 429 and 503 responses assert bounded request counts, exponential delays, Retry-After and no blind uncertain writes. Fake-clock idle bursts assert one observation per 1.5 seconds; pending count, oversized payload and forged fields are bounded."
+    },
+    {
+      "id": "LIF-01",
+      "coverage": "mapped",
+      "tests": [
+        "tests/runtime.test.ts",
+        "tests/supervision-hosts.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "specialist"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "LIF-02",
+      "coverage": "mapped",
+      "tests": [
+        "tests/runtime.test.ts",
+        "tests/repository-work.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "specialist",
+        "session",
+        "first-turn"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "LIF-03",
+      "coverage": "mapped",
+      "tests": [
+        "tests/admission-restart-review.test.ts",
+        "tests/scheduler-replay-holds.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "lost-receipt",
+        "send-crash"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "LIF-04",
+      "coverage": "mapped",
+      "tests": [
+        "tests/processes.test.ts",
+        "tests/supervision-hosts.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "interrupt-supervisor"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "LIF-05",
+      "coverage": "mapped",
+      "tests": [
+        "tests/processes.test.ts",
+        "tests/runtime.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "interrupt-pause",
+        "interrupt-detached"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "LIF-06",
+      "coverage": "mapped",
+      "tests": [
+        "tests/runtime.test.ts",
+        "tests/cancel-continuation.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "cancel-continuation",
+        "interrupt-cancel"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "LIF-07",
+      "coverage": "mapped",
+      "tests": [
+        "tests/processes.test.ts",
+        "tests/http.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "interrupt-host"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "LIF-08",
+      "coverage": "mapped",
+      "tests": [
+        "tests/runtime.test.ts",
+        "tests/coding.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "cycles"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "LIF-09",
+      "coverage": "mapped",
+      "tests": [
+        "tests/roles.test.ts",
+        "tests/processes.test.ts",
+        "tests/release-contracts.test.ts",
+        "tests/supervision-hosts.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "interrupt-host"
+      ],
+      "note": "Paired real repository instruction/check snapshots and SQLite transaction failure/corrupt journal boundaries are asserted in release-contracts.test.ts."
+    },
+    {
+      "id": "QUE-01",
+      "coverage": "mapped",
+      "tests": [
+        "tests/runtime.test.ts",
+        "tests/assignments.test.ts",
+        "tests/coding-slot.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "team",
+        "queue"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "QUE-02",
+      "coverage": "mapped",
+      "tests": [
+        "tests/repository-work.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "QUE-03",
+      "coverage": "mapped",
+      "tests": [
+        "tests/coding-slot.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "queue"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "QUE-04",
+      "coverage": "mapped",
+      "tests": [
+        "tests/dependencies.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "queue"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "QUE-05",
+      "coverage": "mapped",
+      "tests": [
+        "tests/queue.test.ts",
+        "tests/coding-slot.test.ts",
+        "tests/queue-http.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "REP-01",
+      "coverage": "mapped",
+      "tests": [
+        "tests/repository-work.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "small"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "REP-02",
+      "coverage": "mapped",
+      "tests": [
+        "tests/repository-work.test.ts",
+        "tests/cancel-continuation.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "REP-03",
+      "coverage": "mapped",
+      "tests": [
+        "tests/repository-work.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "commit-restart"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "REP-04",
+      "coverage": "mapped",
+      "tests": [
+        "tests/target-refresh.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "REP-05",
+      "coverage": "mapped",
+      "tests": [
+        "tests/coding.test.ts",
+        "tests/repository-work.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "REP-06",
+      "coverage": "mapped",
+      "tests": [
+        "tests/evidence.test.ts",
+        "tests/coding.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "rework"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "EVD-01",
+      "coverage": "mapped",
+      "tests": [
+        "tests/evidence.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "small"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "EVD-02",
+      "coverage": "mapped",
+      "tests": [
+        "tests/evidence.test.ts",
+        "tests/bitbucket.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "EVD-03",
+      "coverage": "mapped",
+      "tests": [
+        "tests/evidence.test.ts",
+        "tests/check-environment.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "rework"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "EVD-04",
+      "coverage": "mapped",
+      "tests": [
+        "tests/evidence.test.ts",
+        "tests/target-refresh.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "EVD-05",
+      "coverage": "mapped",
+      "tests": [
+        "tests/evidence.test.ts",
+        "tests/coding.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "rework"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "EVD-06",
+      "coverage": "mapped",
+      "tests": [
+        "tests/evidence.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "EVD-07",
+      "coverage": "mapped",
+      "tests": [
+        "tests/publication.test.ts",
+        "tests/scheduler-replay-holds.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "EVD-08",
+      "coverage": "mapped",
+      "tests": [
+        "tests/research.test.ts",
+        "tests/research-review-repair.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "research"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "DEL-01",
+      "coverage": "mapped",
+      "tests": [
+        "tests/jira-delivery.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "small"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "DEL-02",
+      "coverage": "mapped",
+      "tests": [
+        "tests/jira-delivery.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "DEL-03",
+      "coverage": "mapped",
+      "tests": [
+        "tests/jira-delivery.test.ts",
+        "tests/publication.test.ts",
+        "tests/publication-git.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "small"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "DEL-04",
+      "coverage": "mapped",
+      "tests": [
+        "tests/publication.test.ts",
+        "tests/feedback-continuation.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "small"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "DEL-05",
+      "coverage": "mapped",
+      "tests": [
+        "tests/feedback-continuation.test.ts",
+        "tests/dependencies.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "DEL-06",
+      "coverage": "mapped",
+      "tests": [
+        "tests/jira-sync.test.ts",
+        "tests/bitbucket.test.ts",
+        "tests/publication.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "DEL-07",
+      "coverage": "mapped",
+      "tests": [
+        "tests/jira-delivery.test.ts",
+        "tests/publication.test.ts",
+        "tests/publication-git.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "UI-01",
+      "coverage": "mapped",
+      "tests": [
+        "tests/e2e/workbench.spec.ts"
+      ],
+      "jobs": [
+        "browser"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "UI-02",
+      "coverage": "mapped",
+      "tests": [
+        "tests/e2e/steering.spec.ts"
+      ],
+      "jobs": [
+        "browser"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "UI-03",
+      "coverage": "mapped",
+      "tests": [
+        "tests/e2e/wall.spec.ts"
+      ],
+      "jobs": [
+        "browser"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "UI-04",
+      "coverage": "mapped",
+      "tests": [
+        "tests/e2e/insertion.spec.ts"
+      ],
+      "jobs": [
+        "browser"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "UI-05",
+      "coverage": "mapped",
+      "tests": [
+        "tests/e2e/history.spec.ts",
+        "tests/e2e/jira.spec.ts",
+        "tests/e2e/workbench.spec.ts"
+      ],
+      "jobs": [
+        "browser"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "UI-06",
+      "coverage": "mapped",
+      "tests": [
+        "tests/e2e/workbench.spec.ts",
+        "tests/e2e/repositories.spec.ts",
+        "tests/e2e/refinement.spec.ts",
+        "tests/e2e/cancel-continuation.spec.ts"
+      ],
+      "jobs": [
+        "browser"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "SEC-01",
+      "coverage": "mapped",
+      "tests": [
+        "tests/http.test.ts",
+        "tests/live.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "SEC-02",
+      "coverage": "mapped",
+      "tests": [
+        "tests/provider-gateway.test.ts",
+        "tests/repository-work.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "model-guard"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "SEC-03",
+      "coverage": "mapped",
+      "tests": [
+        "tests/store.test.ts",
+        "tests/repository-work.test.ts",
+        "tests/evidence.test.ts",
+        "scripts/test-authority.py",
+        "scripts/coding-driver.ts"
+      ],
+      "jobs": [
+        "domain",
+        "authority"
+      ],
+      "note": "Untrusted imported Jira text and a real peer message provoke denied merge, deploy, path escape and forged review tools; an existing foreign research attempt/recipient cannot be messaged using another run token."
+    },
+    {
+      "id": "SEC-04",
+      "coverage": "mapped",
+      "tests": [
+        "tests/processes.test.ts",
+        "scripts/test-authority.py",
+        "scripts/coding-driver.ts"
+      ],
+      "jobs": [
+        "authority",
+        "roundtrip",
+        "interrupt-detached"
+      ],
+      "note": "Controller, fake providers, OMP and Mail inherit an OS network guard; denied external/unallocated-loopback probes and owned listener inventory are recorded. Container child egress is denied."
+    },
+    {
+      "id": "SEC-05",
+      "coverage": "mapped",
+      "tests": [
+        "tests/processes.test.ts",
+        "tests/container.integration.ts",
+        "tests/cleanup.integration.ts"
+      ],
+      "jobs": [
+        "domain",
+        "harness",
+        "owned-cleanup"
+      ],
+      "note": "Kill the resource-owning harness, reconstruct cleanup from durable receipts, preserve foreign processes/containers/files, refuse reused PID and root/ancestor/journal symlinks, and retain output across exact owned-container deletion and lost-delete reply."
+    },
+    {
+      "id": "SEC-06",
+      "coverage": "mapped",
+      "tests": [
+        "tests/repository-work.test.ts",
+        "tests/jira-delivery.test.ts",
+        "scripts/coding-driver.ts"
+      ],
+      "jobs": [
+        "domain",
+        "small",
+        "authority"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "LIM-01",
+      "coverage": "mapped",
+      "tests": [
+        "tests/runtime.test.ts",
+        "tests/run-lifecycle.test.ts",
+        "tests/active-time.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "interrupt-budget"
+      ],
+      "note": "Fake-clock CI/operator waiting and restart retain usage; settled provider-confirmed CI excludes wait, actual agent/tool work and uncertain ownership charge, and budget exhaustion requests safe pause."
+    },
+    {
+      "id": "LIM-02",
+      "coverage": "mapped",
+      "tests": [
+        "tests/results.test.ts",
+        "tests/provider-usage.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "LIM-03",
+      "coverage": "mapped",
+      "tests": [
+        "tests/release-contracts.test.ts",
+        "tests/runtime.test.ts",
+        "tests/messaging.test.ts"
+      ],
+      "jobs": [
+        "domain",
+        "cycles"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    },
+    {
+      "id": "LIM-04",
+      "coverage": "mapped",
+      "tests": [
+        "tests/release-contracts.test.ts"
+      ],
+      "jobs": [
+        "domain"
+      ],
+      "note": "Expected behavior is linked to the named application assertions; command results are recorded separately."
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "E2E-01",
+      "jobs": [
+        "small"
+      ],
+      "coverage": "mapped",
+      "note": "Disposable sum utility replaces the illustrative whitespace utility; real checks, independent reviewer, Jira intake and fake PR handoff."
+    },
+    {
+      "id": "E2E-02",
+      "jobs": [
+        "complex"
+      ],
+      "coverage": "mapped",
+      "note": "Four actual OMP processes stage saved-filter UI, validation and documentation under one writer; execute unit and Chromium checks, independent review, guide plan/read/assessment and publication with verified actual model identities."
+    },
+    {
+      "id": "E2E-03",
+      "jobs": [
+        "rework",
+        "cycles"
+      ],
+      "coverage": "mapped",
+      "note": "Real failing patch, failed check, blocking review, corrected SHA and exhausted recovery variant."
+    },
+    {
+      "id": "E2E-04",
+      "jobs": [
+        "send-crash",
+        "specialist",
+        "lost-receipt",
+        "commit-restart",
+        "interrupt-supervisor",
+        "mail"
+      ],
+      "coverage": "mapped",
+      "note": "Kill coordinator after real Rust Mail commits a send but before the application records its response; restart controller and explicitly resume with one keyed external delivery and causal reply, no stale effects."
+    },
+    {
+      "id": "E2E-05",
+      "jobs": [
+        "steering",
+        "insert-restart",
+        "interrupt-pause",
+        "adoption",
+        "browser"
+      ],
+      "coverage": "mapped",
+      "note": "Busy/disconnected steering, keyed insertion across restart, contained child pause, explicit requirements adoption and browser controls are separate fault variants."
+    },
+    {
+      "id": "E2E-06",
+      "jobs": [
+        "small",
+        "domain",
+        "mail"
+      ],
+      "coverage": "mapped",
+      "note": "Provider-lost replies through the delivery workflow plus existing/absent/unknown fault variants in publication/Jira tests."
+    },
+    {
+      "id": "E2E-07",
+      "jobs": [
+        "queue",
+        "domain"
+      ],
+      "coverage": "mapped",
+      "note": "Real scheduler process scenario with dependency-provider and queue-order variants in domain tests."
+    },
+    {
+      "id": "E2E-08",
+      "jobs": [
+        "domain",
+        "browser",
+        "model-guard",
+        "provider-matrix"
+      ],
+      "coverage": "mapped",
+      "note": "Preflight and wrong/secondary model guards plus eleven real OMP provider-failure variants. Only explicit policy-approved compatible models become recorded replacement attempts; no candidate becomes ready from a model reply."
+    },
+    {
+      "id": "E2E-09",
+      "jobs": [
+        "target-drift",
+        "domain",
+        "browser"
+      ],
+      "coverage": "mapped",
+      "note": "Actual OMP workflow refreshes onto an advanced target, preserves old evidence, executes new unit/browser checks and review, updates one PR, exposes current CI failure and rejects late old-revision success without starting agents."
+    },
+    {
+      "id": "E2E-10",
+      "jobs": [
+        "research"
+      ],
+      "coverage": "mapped",
+      "note": "Real research agents validate pinned source citations and missing/corrected artifacts with no coding evidence."
+    },
+    {
+      "id": "E2E-11",
+      "jobs": [
+        "authority",
+        "model-guard",
+        "domain"
+      ],
+      "coverage": "mapped",
+      "note": "Adversarial imported ticket and delivered peer message encounter actual tool/API authority guards, existing cross-run identity rejection, whole-controller/provider containment and secret/output scans before valid simulated delivery."
+    },
+    {
+      "id": "E2E-12",
+      "jobs": [
+        "interrupt-budget",
+        "cancel-continuation",
+        "domain",
+        "owned-cleanup",
+        "interrupt-cancel"
+      ],
+      "coverage": "mapped",
+      "note": "Budget and cancel/retained-PR recovery combine with killed-harness cleanup proving exact ownership, foreign resource survival and durable container receipts. Pending hosted CI is excluded across restart using fake time; real active-tool Cancel remains terminal and retains its interrupted receipt."
+    }
+  ]
+}

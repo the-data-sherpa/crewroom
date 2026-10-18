@@ -1,0 +1,270 @@
+{
+  "iteration": "Packaged GUI redraw diagnosis; correction of defect inference",
+  "recordedAt": "2026-10-04T07:25:42.955300+00:00",
+  "candidateRevision": "8f3e325870e40209f42c43ef0009e953f45398f5",
+  "status": "occlusion-explanation-confirmed; original-package-GUI-rerun-required",
+  "productionChanges": false,
+  "originalSignedPackage": {
+    "sidecar": {
+      "path": "/private/tmp/cr-n7-1004a/Crewroom.app.receipt.json",
+      "sha256": "5f9b92bf3bda35bd549c1dc8902cd4e62bba48a347f12c9eb62f8051eedf835b",
+      "bytes": 282231
+    },
+    "binariesVerifiedUnchanged": {
+      "crewroom": {
+        "path": "/private/tmp/cr-n7-1004a/Crewroom.app/Contents/MacOS/crewroom",
+        "sha256": "141498a07d2cabd8717eb05dab7b7cd64cf36f5d902e8b92c755c1d3d1297e49",
+        "bytes": 43349680
+      },
+      "crewroomd": {
+        "path": "/private/tmp/cr-n7-1004a/Crewroom.app/Contents/MacOS/crewroomd",
+        "sha256": "0b66c90c1ccef2ac2e53e4d7aab5ce083cc4d4fba59405fe4b6b7a91df79e97d",
+        "bytes": 21811856
+      },
+      "crewroom-process": {
+        "path": "/private/tmp/cr-n7-1004a/Crewroom.app/Contents/MacOS/crewroom-process",
+        "sha256": "90d335fc8ef295497ad4db8e4b4c76098681f6dffd6281af563a5d02c560988f",
+        "bytes": 1710928
+      },
+      "crewroom-host": {
+        "path": "/private/tmp/cr-n7-1004a/Crewroom.app/Contents/MacOS/crewroom-host",
+        "sha256": "318d41097d3c8d44dad8dda3ac54c5dfb52c909d02f3f954e12ca11a6ebc6ff3",
+        "bytes": 8040096
+      }
+    },
+    "allCandidateSourceInputsStillMatchSidecar": true
+  },
+  "diagnostics": [
+    {
+      "version": 1,
+      "bundle": "/private/tmp/cr-redraw-diagnostic/CrewroomRedrawDiagnostic.app",
+      "receipt": {
+        "path": "/private/tmp/cr-redraw-diagnostic/CrewroomRedrawDiagnostic.app.diagnostic.json",
+        "sha256": "d8c80947e7bca068dd44a716b5af0ff286005dc9efcfc0d715137424b70152fb",
+        "bytes": 262342
+      },
+      "desktopSha256": "bcc797a287f4cdcb5e4a277756c17dc3e692da25f9f35c297a67b96bf3e557ee",
+      "baseRevision": "8f3e325870e40209f42c43ef0009e953f45398f5",
+      "sourceManifestSha256": "ce6102d0edde159878097d41d5869b81a84f40cdc8eaa6323d82fe9a652f1f13",
+      "changedSourceHashes": {
+        "Cargo.toml": "1a19d0656ccafec4b402589a38e273a3c7f3da92516654a6b9bb41c71a196008",
+        "Cargo.lock": "8f2ceb27a796b3a6e58935235f88e6688f374476f8fb911af31dbf7029f0e949",
+        "vendor/gpui-pre/src/window.rs": "2bd1fd3140585d04d89617d0f2140f25eea06e0e9d93ae8f3e144ec1ce1c2532",
+        "vendor/gpui-pre-macos/src/window.rs": "5e3a5d01a2ddbd6b38940fba92884c670f47c733d0ca2bc002c8e4c5a2c1b011",
+        "vendor/gpui-pre-macos/src/display_link.rs": "1c721d9252e572dd1b64536518157c2026b2e0caca132124666b83bb65772e34"
+      },
+      "buildLog": {
+        "path": "/private/tmp/cr-redraw-diagnostic/build.log",
+        "sha256": "5c5f653f13e9627311d4753e926461ebb35a11b93401bea936157c2528353520",
+        "bytes": 359190
+      },
+      "releaseBuildPassed": true,
+      "signatureVerified": true,
+      "runtimeBinariesEqualOriginal": {
+        "crewroomd": "0b66c90c1ccef2ac2e53e4d7aab5ce083cc4d4fba59405fe4b6b7a91df79e97d",
+        "crewroom-host": "318d41097d3c8d44dad8dda3ac54c5dfb52c909d02f3f954e12ca11a6ebc6ff3",
+        "crewroom-process": "90d335fc8ef295497ad4db8e4b4c76098681f6dffd6281af563a5d02c560988f"
+      }
+    },
+    {
+      "version": 2,
+      "bundle": "/private/tmp/cr-redraw-diagnostic/CrewroomRedrawDiagnostic2.app",
+      "receipt": {
+        "path": "/private/tmp/cr-redraw-diagnostic/CrewroomRedrawDiagnostic2.app.diagnostic.json",
+        "sha256": "4dce9f7d8445335ce2b7b05a72e730aee7cf6199a4ec40830999e37df08d3545",
+        "bytes": 262443
+      },
+      "desktopSha256": "43a6f7896fe1d84c24a064358cc49ab7f794a6663d44a5127f8abfb6c5438229",
+      "baseRevision": "8f3e325870e40209f42c43ef0009e953f45398f5",
+      "sourceManifestSha256": "518ff64e6c1f8760861ca958ed2dde386750bf66734fb435163b5f458b28712c",
+      "changedSourceHashes": {
+        "Cargo.toml": "1a19d0656ccafec4b402589a38e273a3c7f3da92516654a6b9bb41c71a196008",
+        "Cargo.lock": "8f2ceb27a796b3a6e58935235f88e6688f374476f8fb911af31dbf7029f0e949",
+        "vendor/gpui-pre/src/window.rs": "2bd1fd3140585d04d89617d0f2140f25eea06e0e9d93ae8f3e144ec1ce1c2532",
+        "vendor/gpui-pre-macos/src/window.rs": "dee956f6990922ec869834c07c592a713a7ebbec05dbbf591b7f0ad94a935771",
+        "vendor/gpui-pre-macos/src/display_link.rs": "1c721d9252e572dd1b64536518157c2026b2e0caca132124666b83bb65772e34"
+      },
+      "buildLog": {
+        "path": "/private/tmp/cr-redraw-diagnostic/build2.log",
+        "sha256": "4090668e3eab020f4ce9afd37487769e263814930e65eadc4d21d5d486ae9829",
+        "bytes": 358386
+      },
+      "releaseBuildPassed": true,
+      "signatureVerified": true,
+      "runtimeBinariesEqualOriginal": {
+        "crewroomd": "0b66c90c1ccef2ac2e53e4d7aab5ce083cc4d4fba59405fe4b6b7a91df79e97d",
+        "crewroom-host": "318d41097d3c8d44dad8dda3ac54c5dfb52c909d02f3f954e12ca11a6ebc6ff3",
+        "crewroom-process": "90d335fc8ef295497ad4db8e4b4c76098681f6dffd6281af563a5d02c560988f"
+      }
+    }
+  ],
+  "findings": [
+    {
+      "claim": "Release tests did not overwrite the shipping app or enable GPUI test-support in it.",
+      "evidence": "Shipping Cargo fingerprint depends on gpui-kit assets/component/default and macOS font-kit/runtime_shaders; separate test fingerprint adds test-support. Original target/release/crewroom SHA equals final sidecar inputSha256."
+    },
+    {
+      "claim": "Initial captured input reached a fully occluded window. Active/key status was insufficient to establish visible geometry.",
+      "evidence": "Diagnostic v2 input: occlusion=8192 (public Visible bit 1<<1 absent), isVisible=true, isKey=true, appActive=true, appHidden=false. Delegate self and selector support intact; zero occlusion callbacks; no frame source. WindowServer showed a covering Chrome window."
+    },
+    {
+      "claim": "GPUI correctly resumed the existing display link after the diagnostic window became partly visible.",
+      "evidence": "Terminal agent resized diagnostic window to 2100 px, extending beyond covering Chrome. Trace then records occlusion=8194, occlusion callback 1, link start Ok, CV ticks/step at least1200, renderer draws at least120. Subsequent ordinary typing updated AX and captured pixels immediately without another resize."
+    },
+    {
+      "claim": "The original assertion of a normal foreground redraw defect was unsupported and is corrected. No occlusion bypass, frame-waker patch, dependency upgrade, or timer is justified by this reproduction.",
+      "evidence": "Changing only window geometry in the diagnostic app restored the unmodified frame-delivery mechanism."
+    }
+  ],
+  "traceInterpretation": {
+    "visibleBit": 2,
+    "coveredOcclusion": 8192,
+    "partlyVisibleOcclusion": 8194,
+    "inputPaintWithoutPresentation": "GPUI input dispatch may call Window::draw without present, updating AX while hidden-window pixels remain stale. Resize invokes displayLayer, which requests and presents one frame.",
+    "v2TraceSnapshot": {
+      "path": "/Users/crewroom/.codex/worktrees/native-upgrades/crewroom/.crewroom/test-results/native-gui-release-diagnosis/diagnostic-v2-visible-trace.log",
+      "sha256": "f7ca7ed15d59c747188628ec09caf2da78ee5ab1ff8d41119a5f0be15d613db9",
+      "bytes": 33321
+    },
+    "snapshotBoundary": "Copied after the positive visibility transition and typing observation while root still owned the diagnostic GUI; concatenated v1/v2 stderr retained. This is not a final cleanup receipt."
+  },
+  "retainedFailedAttempt": {
+    "report": {
+      "path": "/private/tmp/cr-n7-observe1/report.json",
+      "sha256": "6063373f01f5741f7492c98d5aa6cf648de6a45938670538618e3f4969ff2a8e",
+      "bytes": 52616
+    },
+    "passed": false,
+    "exitCode": 1,
+    "reference": "docs/testing/rust-native-release-gui-attempt-2026-10-04.json",
+    "correction": "Its stale screenshot observation is retained, but attribution to a packaged GUI redraw defect is superseded by this diagnosis. Its separate missed finish-observation deadline remains a failed controller run.",
+    "normalReattachmentCompleted": false,
+    "resourceSamples": "Diagnostic only; they do not certify a healthy visible wall resource baseline."
+  },
+  "evidence": [
+    {
+      "path": "/Users/crewroom/.codex/worktrees/native-upgrades/crewroom/.crewroom/test-results/native-gui-release-diagnosis/diagnostic-v2-visible-trace.log",
+      "sha256": "f7ca7ed15d59c747188628ec09caf2da78ee5ab1ff8d41119a5f0be15d613db9",
+      "bytes": 33321
+    },
+    {
+      "path": "/private/tmp/cr-redraw-intake1/diagnostic-v1-app.stderr.log",
+      "sha256": "158e4bcc0ce67419104e97079dfcaba32e16e19e878b95e3f33c57e3ef6cf5de",
+      "bytes": 3061
+    },
+    {
+      "path": "/private/tmp/cr-redraw-diagnostic/instrument.py",
+      "sha256": "07452c871a2cf1d19086ae9e84574e95a3d588b22c03ca3344c1ee4736e2a6b6",
+      "bytes": 7897
+    },
+    {
+      "path": "/private/tmp/cr-redraw-diagnostic/instrument-input.py",
+      "sha256": "2bcc5af2a0d38a5972d0d959f2cb0f6dbc8b3a091eacc1ad7e0634163e0df14d",
+      "bytes": 5220
+    },
+    {
+      "path": "/private/tmp/cr-redraw-diagnostic/package.py",
+      "sha256": "7843937c3878b1526b8e3b5deac1f2dec9cb98381e61393f7b53f7561fbecf8a",
+      "bytes": 3910
+    },
+    {
+      "path": "/private/tmp/cr-redraw-diagnostic/package2.py",
+      "sha256": "3a085cfa0ebbc297b53993e27d5bf3594d923bb7d089a60921ba9c701f0269ea",
+      "bytes": 3978
+    },
+    {
+      "path": "/private/tmp/cr-redraw-diagnostic/package.log",
+      "sha256": "234e28d4d27931a8cf03d41db2526f972b648705d2943f87d75143412cb16e81",
+      "bytes": 491
+    },
+    {
+      "path": "/private/tmp/cr-redraw-diagnostic/package2.log",
+      "sha256": "1a7e3fe160923b8a67057fa95dbd465361bae9a876dc3f5d2a3837bd4b133a3d",
+      "bytes": 495
+    },
+    {
+      "path": "/private/tmp/cr-redraw-diagnosis/display-link-probe.c",
+      "sha256": "b6a9a13c7760251c0fead9251210f57f5c0051ece998066b5f382c9b3b91979e",
+      "bytes": 1091
+    },
+    {
+      "path": "/private/tmp/cr-redraw-diagnosis/display-link-probe.txt",
+      "sha256": "878f7b5d7ab080b6c0c900143df1b4ab5ef67b8b265040ffd6c8dbc141331d23",
+      "bytes": 225
+    },
+    {
+      "path": "/private/tmp/cr-redraw-diagnosis/window-above-probe.c",
+      "sha256": "f9791b1777c22361816b7c695e89e4f43f4a8cc1c35ea18af1638f127b787aca",
+      "bytes": 1108
+    },
+    {
+      "path": "/private/tmp/cr-redraw-diagnosis/window-above-probe.txt",
+      "sha256": "c192f9e85074cc4a88f7d529f3d5f8abdfff3d3a2894e4015998454716f8b178",
+      "bytes": 4784
+    },
+    {
+      "path": "/private/tmp/cr-redraw-diagnostic/session-visibility.json",
+      "sha256": "821ecfe32d0dac9527cc4470ed99400426f31abaa1b933c40cdeebc51a1d11ac",
+      "bytes": 198
+    },
+    {
+      "path": "/Users/crewroom/.codex/worktrees/native-upgrades/crewroom/.crewroom/test-results/native-gui-release-diagnosis/audit.json",
+      "sha256": "50e847b690a695c3dded364c18ba6dfc66fea910a32938d7e8e94309d1eab462",
+      "bytes": 38411
+    },
+    {
+      "path": "/private/tmp/cr-redraw-intake1/diagnostic-v2-app.stderr.log",
+      "sha256": "f7ca7ed15d59c747188628ec09caf2da78ee5ab1ff8d41119a5f0be15d613db9",
+      "bytes": 33321
+    },
+    {
+      "path": "/private/tmp/cr-redraw-intake1/cleanup.json",
+      "sha256": "13a33b24c380f74a35bbdbcbd0a2f9b01d82ff7e7b81bc58e959bc9b3cdc70b2",
+      "bytes": 378
+    }
+  ],
+  "scope": {
+    "verified": "Read-only feature/source audit, two separately signed release diagnostic builds, no-content bounded counters, actual native visibility transition, and terminal-agent CUA confirmation.",
+    "notCertified": [
+      "Healthy original signed package GUI and live wall",
+      "Final package narrow reflow, selection/copy and input refusal",
+      "Original package reopen/reconnect and complete finite observation including cleanup",
+      "Healthy visible GUI idle/load/postload resource baseline",
+      "Actual VoiceOver and OS IME"
+    ],
+    "requiredNextGate": "Run the unchanged signed 8f3e325 bundle with independently visible geometry. Recheck pixels after ordinary input and asynchronous updates, then complete the existing finite four-agent GUI/resource/reopen observation without missing its latches.",
+    "ownership": "Upgrade agent launched no GUI or services and sent no process signals. Root/terminal agent own the isolated intake daemon and diagnostic GUI lifecycle. Original package, registry, active primary state and retained pilot remain unchanged."
+  },
+  "finalNarrowDiagnostic": {
+    "bounds": {
+      "x": 0,
+      "y": 30,
+      "width": 390,
+      "height": 702
+    },
+    "observers": "Parent WindowServer check and terminal-agent CUA; reported after ccc6515 checkpoint.",
+    "actions": "Native green-button Zoom moved the diagnostic origin; resizing retained the uncovered strip. Subsequent ordinary typing updated AX and pixels immediately.",
+    "scope": "Diagnostic visibility/input proof at390px, not original-package narrow-wall acceptance.",
+    "finalTrace": {
+      "path": "/private/tmp/cr-redraw-intake1/diagnostic-v2-app.stderr.log",
+      "sha256": "f7ca7ed15d59c747188628ec09caf2da78ee5ab1ff8d41119a5f0be15d613db9",
+      "bytes": 33321
+    }
+  },
+  "diagnosticCleanup": {
+    "guiPid": 27789,
+    "guiClose": "Normal close confirmed by parent/terminal agent.",
+    "daemonPid": 11059,
+    "daemonReceipt": {
+      "path": "/private/tmp/cr-redraw-intake1/cleanup.json",
+      "sha256": "13a33b24c380f74a35bbdbcbd0a2f9b01d82ff7e7b81bc58e959bc9b3cdc70b2",
+      "bytes": 378
+    },
+    "zeroRuns": true,
+    "parentStoppedOwnedDaemonWithSigterm": true,
+    "descriptorGone": true,
+    "bothPidsIndependentlyAbsent": true,
+    "verifiedAt": "2026-10-04T07:28:00.006135+00:00"
+  },
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

@@ -1,0 +1,62 @@
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { publicationFixture } from './fixtures/publication';
+import { Workbench } from '../server/workbench';
+
+test('replacing a failed check environment preserves history and requires new checks and review', async t => {
+  const root = mkdtempSync(join(tmpdir(), 'crewroom-check-image-')); const fixture = (await publicationFixture(root));
+  const { store, evidence, run } = fixture;
+  t.after(() => { store.close(); rmSync(root, { recursive: true, force: true }); });
+  const original = store.codingRecord(run.id)!; const definition = original.requiredChecks[0];
+  const input = { requestId: 'correct-browser-fixture', checkId: 'unit', expectedImage: definition.image, image: `sha256:${'b'.repeat(64)}`, reason: 'Correct fixture data that exceeded the existing field limit.' };
+  assert.equal((await evidence.assess(run.id)).ready, true);
+  assert.throws(() => evidence.correctCheckEnvironment(run.id, input), /paused/i);
+  store.setDesiredState(run.id, 'paused'); store.beginPause(run.id);
+  assert.throws(() => evidence.correctCheckEnvironment(run.id, input), /paused/i);
+  for (const attempt of store.runtime(run.id).attempts) store.recordOwnership(attempt.id, true);
+  store.finishPause(run.id); await fixture.work.reconcileStopped(run.id);
+  assert.throws(() => evidence.correctCheckEnvironment(run.id, { ...input, expectedImage: input.image }), /changed/i);
+  assert.throws(() => evidence.correctCheckEnvironment(run.id, { ...input, image: 'latest' }), /image|sha256|Invalid/i);
+  assert.throws(() => evidence.correctCheckEnvironment(run.id, { ...input, required: false }), /Unrecognized/i);
+  const amendment = evidence.correctCheckEnvironment(run.id, input);
+  assert.equal(amendment.revision, 1);
+  assert.deepEqual(evidence.correctCheckEnvironment(run.id, input), amendment);
+  assert.throws(() => evidence.correctCheckEnvironment(run.id, { ...input, reason: 'Different request' }), /different/i);
+  const changed = store.codingRecord(run.id)!;
+  assert.deepEqual(changed.checks, original.checks); assert.deepEqual(changed.reviews, original.reviews);
+  assert.deepEqual(changed.requiredChecks, [{ ...definition, image: input.image }]);
+  assert.ok((await evidence.assess(run.id)).blockers.some(item => /command policy/i.test(item)));
+  evidence.recordCheck(run.id, { ...original.checks[0], definition: changed.requiredChecks[0], environment: { ...original.checks[0].environment, image: input.image } });
+  assert.equal((await evidence.assess(run.id)).ready, false, 'A new check must not revive a review of the old environment.');
+  assert.ok((await evidence.assess(run.id)).blockers.some(item => /review/i.test(item)));
+  const reviewer = store.runtime(run.id).assignments.find(item => item.name === 'Reviewer')!;
+  const attempt = store.replaceAttempt(reviewer.id, { automatic: false }); store.claimAttempt(attempt.id);
+  store.recordAttemptIdentity(attempt.id, { hostPid: 20, ompPid: 21, sessionId: 'replacement-reviewer', hostUrl: 'http://127.0.0.1:9010', pane: '%10' });
+  store.setDesiredState(run.id, 'running'); store.startExecution(run.id);
+  const previous = original.reviews[0];
+  const review = evidence.review(attempt.id, { candidateId: previous.candidateId, verdict: previous.verdict, summary: previous.summary, findings: previous.findings, coverage: previous.coverage });
+  assert.equal(review.checkPolicyRevision, 1); assert.equal((await evidence.assess(run.id)).ready, true);
+  const reopened = new Workbench(join(root, 'workflow.sqlite'));
+  try { assert.deepEqual(reopened.codingRecord(run.id)!.checkPolicyChanges, [amendment]); } finally { reopened.close(); }
+});
+
+test('a memory-limit correction needs the current limit, records both, and makes the earlier receipt stale', async t => {
+  const root = mkdtempSync(join(tmpdir(), 'crewroom-check-memory-')); const fixture = (await publicationFixture(root));
+  const { store, evidence, run } = fixture;
+  t.after(() => { store.close(); rmSync(root, { recursive: true, force: true }); });
+  store.setDesiredState(run.id, 'paused'); store.beginPause(run.id);
+  for (const attempt of store.runtime(run.id).attempts) store.recordOwnership(attempt.id, true);
+  store.finishPause(run.id); await fixture.work.reconcileStopped(run.id);
+  const definition = store.codingRecord(run.id)!.requiredChecks[0];
+  const input = { requestId: 'more-memory', checkId: 'unit', expectedImage: definition.image, image: definition.image, expectedMemoryMiB: 1024, memoryMiB: 8192, reason: 'The suite needs headroom for a 1.5 GiB admission.' };
+  assert.throws(() => evidence.correctCheckEnvironment(run.id, { ...input, expectedMemoryMiB: undefined }), /expected and the new limit/);
+  assert.throws(() => evidence.correctCheckEnvironment(run.id, { ...input, expectedMemoryMiB: 4096 }), /changed/);
+  assert.throws(() => evidence.correctCheckEnvironment(run.id, { ...input, memoryMiB: 1024 }), /unchanged/);
+  const change = evidence.correctCheckEnvironment(run.id, input);
+  assert.equal(change.memoryMiB, 8192); assert.equal(change.expectedMemoryMiB, 1024);
+  assert.deepEqual(store.codingRecord(run.id)!.requiredChecks, [{ ...definition, memoryMiB: 8192 }]);
+  assert.ok((await evidence.assess(run.id)).blockers.includes('Required check unit has a different command policy.'));
+});

@@ -1,0 +1,3 @@
+# Run agents as externally observable processes
+
+On 2026-09-26, the operator explicitly required a separate operating-system process for the coordinator and every specialist, with activity and messages observable from outside the agent harness. Crewroom will supervise those processes and route their communication through an external, observable message boundary; OMP may serve as an individual runner, but its internal team messaging is excluded. This adds process supervision and delivery integration work, while allowing each agent's progress, failure, and replacement to be inspected independently; the successful single-process experiment remains evidence about OMP, not validation of this architecture.

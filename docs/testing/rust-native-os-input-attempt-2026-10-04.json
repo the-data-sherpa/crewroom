@@ -1,0 +1,169 @@
+{
+  "iteration": "Approved temporary macOS VoiceOver and Japanese input attempt",
+  "recordedAt": "2026-10-04T16:46:14.606494+00:00",
+  "acceptancePassed": false,
+  "classification": "Tool-limited OS acceptance attempt; no production defect established",
+  "scope": "Unchanged original signed package, disposable intake-only service, one local task and zero runs. No agent, Mail, model, or Docker workload was launched.",
+  "candidate": {
+    "revision": "8f3e325870e40209f42c43ef0009e953f45398f5",
+    "package": "/private/tmp/cr-n7-1004a/Crewroom.app",
+    "packageReceiptSha256": "5f9b92bf3bda35bd549c1dc8902cd4e62bba48a347f12c9eb62f8051eedf835b",
+    "binariesBeforeAndAfter": {
+      "Contents/MacOS/crewroom": "141498a07d2cabd8717eb05dab7b7cd64cf36f5d902e8b92c755c1d3d1297e49",
+      "Contents/MacOS/crewroomd": "0b66c90c1ccef2ac2e53e4d7aab5ce083cc4d4fba59405fe4b6b7a91df79e97d",
+      "Contents/MacOS/crewroom-launcher": "eef0c15e3936fad9ac7f1a64550f9c45b6e89f8737a7f56763d32a6c1fa8142c",
+      "Contents/MacOS/crewroom-process": "90d335fc8ef295497ad4db8e4b4c76098681f6dffd6281af563a5d02c560988f",
+      "Contents/MacOS/crewroom-host": "318d41097d3c8d44dad8dda3ac54c5dfb52c909d02f3f954e12ca11a6ebc6ff3"
+    },
+    "unchanged": true
+  },
+  "authorization": {
+    "approved": true,
+    "humanReplyRelayedByParent": "should have my approval now",
+    "scope": "Temporarily enable VoiceOver, add/select Japanese–Romaji and show Input menu if needed; restore baseline afterward.",
+    "policySource": "CUA tool-returned Computer/Browser Use Confirmation Policy, section 3, Non-sensitive system or application settings. This was not a skill requirement or an automatic approval rejection.",
+    "boundary": "All UI actions used documented CUA APIs. No alternate global-key, AppleScript, CGEvent, screen-capture API, security permission, or audio recording was used."
+  },
+  "fixture": {
+    "path": "/private/tmp/cr-os-input-1004",
+    "taskId": "713d658e-1741-4b06-b0f7-44b12a7be90a",
+    "title": "Native accessibility and input check",
+    "guiPid": 74051,
+    "daemonPid": 74023,
+    "startedAtLocal": "Sun Oct 4 12:30:53 2026",
+    "guiStartAndExecutableVerified": true,
+    "unsavedDraftsDiscarded": true,
+    "normalGuiQuit": true,
+    "noPostQuitAppQuery": true,
+    "cleanup": {
+      "recordedAt": "2026-10-04T16:45:21.704633+00:00",
+      "daemonPid": 74023,
+      "guiPid": 74051,
+      "identityBeforeStop": "502 Sun Oct  4 12:30:53 2026     /private/tmp/cr-n7-1004a/Crewroom.app/Contents/MacOS/crewroomd --data-dir /private/tmp/cr-os-input-1004/data --roles /private/tmp/cr-os-input-1004/roles.json --port 51734 --background",
+      "zeroRuns": true,
+      "tasks": 1,
+      "normalSigterm": true,
+      "descriptorGone": true,
+      "daemonGone": true,
+      "guiGoneBeforeServiceStop": true
+    }
+  },
+  "baseline": {
+    "at": "2026-10-04T16:32:55.738821+00:00",
+    "approval": "Parent relayed explicit human approval: should have my approval now.",
+    "observedVia": "CUA System Settings and VoiceOver Utility before changes",
+    "voiceOverEnabled": false,
+    "inputSources": [
+      "U.S."
+    ],
+    "inputMenuVisible": false,
+    "keyboardNavigation": false,
+    "voiceOverCaptionPanel": true,
+    "voiceOverWelcomeDialog": true,
+    "voiceOverAppleScriptControl": false,
+    "changesToRestore": [
+      "VoiceOver enabled",
+      "Added Japanese–Romaji input source and selection",
+      "Input menu visibility only if changed"
+    ],
+    "guiIdentity": "74051   502 Sun Oct  4 12:30:53 2026     /private/tmp/cr-n7-1004a/Crewroom.app/Contents/MacOS/crewroom",
+    "guiArguments": "/private/tmp/cr-n7-1004a/Crewroom.app/Contents/MacOS/crewroom --connection /private/tmp/cr-os-input-1004/data/native-connection.json"
+  },
+  "voiceOver": {
+    "enabledAndProcessObserved": true,
+    "processes": {
+      "VoiceOver": 75627,
+      "screenReaderOutputScrod": 75625
+    },
+    "actions": [
+      "Enabled VoiceOver through System Settings. The first Use VoiceOver followed by a query of the closed Quickstart reached Tutorial; closing Tutorial returned VoiceOver off. Retained as a transient failed setup, not successful readout.",
+      "Enabled again and clicked the observed Use VoiceOver button coordinates without querying the transient app after closure. Read-only process inspection confirmed VoiceOver and scrod running.",
+      "Attempted access to VoiceOver caption surface by exact bundle path and bundle identifier. Both CUA getApp calls returned timeoutReached; app inventory omitted the background-only VoiceOver app.",
+      "Seeded the clipboard through disposable Description text with VOICEOVER_CAPTURE_SENTINEL_1004. Focused Title and sent Control-Option-F4, then Control-Option-Shift-C. Pasted into Description. The sentinel remained, and Title contained U+0003."
+    ],
+    "copyPhraseReference": "https://support.apple.com/en-ie/guide/voiceover/vo2725/mac",
+    "interpretation": "The controlled sentinel prevented stale clipboard text from being accepted as speech. The result is consistent with the targeted input route not reaching the global VoiceOver command handler, but does not establish a production screen-reader defect.",
+    "actualCaptionOrSpokenPhraseCaptured": false,
+    "namedFieldButtonDialogReadoutAccepted": false,
+    "limitations": [
+      "CUA exposes per-App/Target screenshot methods; no full-display screenshot or direct global-key API was documented.",
+      "CUA background VoiceOver surface lookup timed out.",
+      "No sound recording or inferred speech from AX labels was counted."
+    ]
+  },
+  "ime": {
+    "japaneseRomajiAddedAndVerified": true,
+    "inputMenuAutomaticallyEnabled": true,
+    "actions": [
+      "An initial direct table-row click did not change the selected Kana row; adding it briefly installed Japanese–Kana. It was selected by keyboard, removed, and replaced only after the Romaji selected row was verified.",
+      "Japanese–Romaji appeared in the source list and Keyboard summary.",
+      "CUA lookups for TextInputMenuAgent and SystemUIServer each timed out.",
+      "In the focused Crewroom Title, sent Control-Space followed by individual physical key requests n, i, h, o, n, g, o. The visible field and AX value were the plain Latin text nihongo."
+    ],
+    "activeJapaneseModeEstablished": false,
+    "markedCompositionConvertCommitCancelAccepted": false,
+    "interpretation": "The source was installed, but active Hiragana mode and actual OS composition were not established through the available CUA surfaces. Plain Latin input is not IME proof and does not establish a Crewroom composition defect."
+  },
+  "restoration": {
+    "completed": true,
+    "inputSources": [
+      "U.S."
+    ],
+    "inputMenuVisible": false,
+    "voiceOverEnabled": false,
+    "keyboardNavigation": false,
+    "globeKey": "Show Emoji & Symbols",
+    "dictationEnabled": false,
+    "dictationLanguages": [
+      "English (United States)"
+    ],
+    "automaticChangesHandled": "Adding Japanese automatically changed the Globe action and added Japanese Dictation. Removing the input source restored the Globe action; Japanese Dictation was separately unchecked and English-only verified.",
+    "unmodifiedPreferences": [
+      "VoiceOver caption panel on",
+      "VoiceOver welcome dialog on",
+      "VoiceOver AppleScript control off"
+    ],
+    "proof": "Fresh CUA AX receipts verify U.S.-only/menu-off, Keyboard navigation off, Globe action and English-only Dictation, and VoiceOver off. The baseline utility preferences were not changed."
+  },
+  "validation": {
+    "jsonParsed": true,
+    "restorationAssertionsPassed": true,
+    "guiAndDaemonAbsentIndependently": true,
+    "allFivePackageHashesAndSidecarUnchanged": true,
+    "productionSourceChanged": false,
+    "broadSuitesRepeated": false,
+    "reason": "Receipt-only iteration. Existing source-bound production gates remain valid; actual OS acceptance remains open."
+  },
+  "evidence": [
+    {
+      "path": "/private/tmp/cr-os-input-1004/os-baseline.json",
+      "sha256": "ab17d4c593d07e7fe93d9edd0c17922d8900cac9e689425ba3ff1d172bd3d5a9"
+    },
+    {
+      "path": "/private/tmp/cr-os-input-1004/launch.json",
+      "sha256": "9f8d62a4b4ad0f4a3989b0bb57ff197b3cb796422bb02dc64597501bc335d894"
+    },
+    {
+      "path": "/private/tmp/cr-os-input-1004/restored-input-sources.txt",
+      "sha256": "88e3efc3f186498bdd0327db718409b06047a75dc63e2d7f6e772e657cd56632"
+    },
+    {
+      "path": "/private/tmp/cr-os-input-1004/restored-keyboard.txt",
+      "sha256": "1ff3a64f77925575c75c43ec4b5ccc6161ec189655204c510841e03a7e31260d"
+    },
+    {
+      "path": "/private/tmp/cr-os-input-1004/restored-voiceover.txt",
+      "sha256": "3f38ae86480ce667ffbe5e315b5b38e25ef471ba8897101ee9802b683efa0ef2"
+    },
+    {
+      "path": "/private/tmp/cr-os-input-1004/cleanup.json",
+      "sha256": "b21c05e173fb9a656c0f1d150572ac40365b788d92fe7879a9a7c99ee26b9733"
+    }
+  ],
+  "nextRequired": [
+    "Obtain actual named-field/button/dialog VoiceOver output using a supported global-input and caption/readout route, or a human-run check.",
+    "Select active Japanese–Romaji/Hiragana and verify marked composition, conversion, commit and cancellation with actual OS input.",
+    "Restore the same baseline and retain exact package/source attribution for that later attempt."
+  ],
+  "selfEvaluation": "The temporary settings and disposable fixture were restored and cleaned up, and no false acceptance was claimed. This iteration did not close either OS gate. Initial row-selection and transient-app mistakes added avoidable steps; a supported global-input route must be established before repeating the checks."
+}

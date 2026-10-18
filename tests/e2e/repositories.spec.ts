@@ -1,0 +1,116 @@
+import { test, expect } from '@playwright/test';
+import { randomUUID } from 'node:crypto';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { launch } from './process-fixture';
+import { Workbench } from '../../server/workbench';
+import { RepositoryWork } from '../../server/repository-work';
+import { validateRepository } from '../../server/repository-configuration';
+import { saveRepositoryFixture, seedRepository } from '../fixtures/repository';
+
+test('REP-02: keyboard edit, refused and confirmed retirement, retained selection and 390px layout', async ({ page }, testInfo) => {
+  const root = mkdtempSync(join(tmpdir(), 'crewroom-repository-edit-browser-'));
+  const first = join(root, 'first'), second = join(root, 'second'); seedRepository(first); seedRepository(second);
+  const store = new Workbench(join(root, 'workflow.sqlite'));
+  const repo = saveRepositoryFixture(store, { name: 'Original checkout', path: first, targetBranch: 'main' });
+  saveRepositoryFixture(store, { name: 'Other checkout', path: second, targetBranch: 'main' });
+  const queued = store.createTask({ title: 'Queued work', description: '', repositoryId: repo.id });
+  const refined = store.refine(queued.id, { revision: 1, sourceRevision: 1, brief: 'Keep existing task', criteria: ['Protect queue'] });
+  store.queue(queued.id, { revision: refined.revision });
+  const selected = store.createTask({ title: 'Retired target ticket', description: '', repositoryId: repo.id });
+  store.refine(selected.id, { revision: 1, sourceRevision: 1, brief: 'Choose an active target', criteria: ['Re-select before run'] });
+  store.close();
+  const server = await launch(root);
+  try {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`${server.origin}/#${selected.id}`);
+    await page.getByRole('button', { name: 'Repositories', exact: true }).click();
+    const editButton = page.getByRole('button', { name: 'Edit Original checkout' });
+    await editButton.focus(); await page.keyboard.press('Enter');
+    await expect(page.getByRole('heading', { name: 'Edit repository · revision 1' })).toBeVisible();
+    await expect(page.getByLabel('Repository name')).toHaveValue('Original checkout');
+    await page.getByLabel('Repository name').fill('Edited checkout');
+    await page.getByLabel('Branch prefix').fill('edited/');
+    await page.getByRole('button', { name: 'Save repository' }).click();
+    await expect(page.getByRole('status')).toContainText('Repository updated.');
+    await expect(page.locator('.repository-list')).toContainText('Edited checkout');
+    await page.getByRole('button', { name: 'Edit Edited checkout' }).click();
+    await page.getByLabel('Repository name').fill('Unsaved conflict draft');
+    const current = await page.request.post(`${server.origin}/api/repositories/${repo.id}`, { headers: { Origin: server.origin }, data: {
+      name: 'Concurrent checkout', path: first, targetBranch: 'main', branchPrefix: 'edited/', checks: [], revision: 2, requestId: crypto.randomUUID(),
+    } });
+    expect(current.status()).toBe(200);
+    await expect(page.getByText('The saved configuration is now revision 3')).toBeVisible();
+    await page.getByRole('button', { name: 'Save repository' }).click();
+    await expect(page.getByRole('alert')).toContainText('Repository revision changed');
+    await expect(page.getByLabel('Repository name')).toHaveValue('Unsaved conflict draft');
+    page.once('dialog', dialog => dialog.accept());
+    await page.getByRole('button', { name: 'Reload current revision' }).click();
+    await expect(page.getByLabel('Repository name')).toHaveValue('Concurrent checkout');
+    await page.getByLabel('Branch prefix').fill('');
+    await page.getByRole('button', { name: 'Save repository' }).click();
+    await expect(page.getByRole('status')).toContainText('Repository updated.');
+    await expect(page.locator('.repository-list')).toContainText('Branch prefix: codex/crewroom/');
+    page.once('dialog', dialog => dialog.accept());
+    await page.getByRole('button', { name: 'Retire Concurrent checkout' }).click();
+    await expect(page.getByRole('alert')).toContainText(queued.key);
+    await expect(page.locator('.repository-list')).not.toContainText('Retired');
+    await page.getByRole('button', { name: `Remove ${queued.key} from queue` }).click();
+    await expect(page.getByRole('status')).toContainText('Queued plan cancelled');
+    page.once('dialog', dialog => dialog.dismiss());
+    await page.getByRole('button', { name: 'Retire Concurrent checkout' }).focus();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('button', { name: 'Retire Concurrent checkout' })).toBeVisible();
+    page.once('dialog', dialog => dialog.accept());
+    await page.getByRole('button', { name: 'Retire Concurrent checkout' }).focus();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('status')).toContainText('Repository retired.');
+    await expect(page.locator('.repository-list')).toContainText('Concurrent checkout · Retired');
+    await page.reload();
+    await page.getByRole('heading', { name: 'Retired target ticket' }).waitFor({ state: 'visible' });
+    await expect(page.getByRole('heading', { name: 'Target repository' }).locator('..')).toContainText('Saved target: Concurrent checkout · Retired');
+    await expect(page.getByRole('button', { name: 'Queue run' })).toBeDisabled();
+    await expect(page.getByText('Selected repository retired. Choose another target before Run.')).toBeVisible();
+    const select = page.getByRole('combobox', { name: 'Repository', exact: true });
+    await expect(select.locator('option', { hasText: 'Concurrent checkout' })).toHaveAttribute('disabled', '');
+    await select.selectOption({ label: 'Other checkout' });
+    await page.getByRole('button', { name: 'Save target' }).click();
+    await expect(page.getByRole('status')).toContainText('Target repository saved.');
+    await expect(page.getByRole('button', { name: 'Queue run' })).toBeEnabled();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+    await page.screenshot({ path: testInfo.outputPath('repository-retired-mobile.png'), fullPage: true });
+  } finally { await server.close(); rmSync(root, { recursive: true, force: true }); }
+});
+
+test('REP-02: retired historical run shows its original repository in run history and Results', async ({ page }) => {
+  const root = mkdtempSync(join(tmpdir(), 'crewroom-history-repository-browser-'));
+  const checkout = join(root, 'checkout'); seedRepository(checkout);
+  const store = new Workbench(join(root, 'workflow.sqlite'));
+  const repo = saveRepositoryFixture(store, { name: 'Original snapshot', path: checkout, targetBranch: 'main', branchPrefix: 'original/' });
+  const task = store.createTask({ title: 'Prior work', description: '', repositoryId: repo.id });
+  const refined = store.refine(task.id, { revision: 1, sourceRevision: 1, brief: 'Show stored target', criteria: ['Display historical config'] });
+  const first = store.queue(task.id, { revision: refined.revision });
+  await new RepositoryWork(store, join(root, 'owned')).prepare(first.id, { mode: 'new' });
+  store.cancelQueued(first.id, { requestId: randomUUID() });
+  const edited = { name: 'Current selection', path: checkout, targetBranch: 'main', branchPrefix: 'updated/', checks: [], revision: 1, requestId: randomUUID() };
+  const { revision, ...details } = edited;
+  store.updateRepository(repo.id, await validateRepository(details, path => store.isOwnedRepositoryWorktree(path)), edited);
+  const secondRun = store.queue(task.id, { revision: refined.revision });
+  store.cancelQueued(secondRun.id, { requestId: randomUUID() });
+  store.retireRepository(repo.id, { revision: 2, requestId: randomUUID() });
+  store.close();
+  const server = await launch(root);
+  try {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`${server.origin}/#${task.id}`);
+    await page.getByRole('combobox', { name: 'Run history' }).selectOption(first.id);
+    await expect(page.getByLabel('Run history repository')).toContainText('Original snapshot');
+    await expect(page.getByLabel('Run history repository')).toContainText('prefix original/');
+    await page.getByRole('tab', { name: 'Change & evidence' }).click();
+    await expect(page.getByLabel('Run repository snapshot')).toContainText('Original snapshot');
+    await expect(page.getByLabel('Run repository snapshot')).toContainText('Prefix: original/');
+    await expect(page.getByLabel('Run repository snapshot')).toContainText('Current repository configuration differs');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  } finally { await server.close(); rmSync(root, { recursive: true, force: true }); }
+});

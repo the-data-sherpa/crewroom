@@ -1,0 +1,213 @@
+{
+  "date": "2026-09-27",
+  "milestone": "M3.2",
+  "passed": true,
+  "domainTests": 48,
+  "build": "passed",
+  "browserJourneys": 3,
+  "runtime": {
+    "passed": true,
+    "guard": {
+      "fixture_port_allowed": true,
+      "external_denied": true,
+      "other_loopback_denied": true,
+      "child_egress_denied": true
+    },
+    "providerRequests": 9,
+    "providerErrors": [],
+    "unexpectedSurvivingProcesses": [],
+    "runtime": {
+      "passed": true,
+      "repositoryProof": {
+        "branch": "codex/crewroom/b3802630-baeb-4110-aa48-a174e2ea87bf",
+        "checkpoint": {
+          "id": "336fd974-4ebe-415f-9476-b812941eacf8",
+          "at": "2026-09-27T23:22:34.278Z",
+          "reason": "interrupted",
+          "attemptId": "b53cfb78-d3ea-4bd4-b6d6-7f5fcf6ec132",
+          "revision": {
+            "base": "8129d3e37ee1527bd57925e923135c5ce2d34167",
+            "head": "8129d3e37ee1527bd57925e923135c5ce2d34167",
+            "tree": "f72a8e0bafe4ab0ebdf816644732149b52b19e65",
+            "worktreeHash": "b594612addea67792471ec52c668f51263bb89abfae09d933dc05cfe20462ef5",
+            "dirty": true,
+            "requirementsHash": "343f69313a417351c752eaf7e2116f3529444068f958bf6eba3f3deed33bf6f4",
+            "instructionsHash": "909c361673371c7bbd4b520a3f1b53c90113359e3d10c6a6bf000f517970dcc9"
+          }
+        },
+        "writerReleasedAfterStop": true,
+        "operatorUnchanged": true
+      },
+      "origin": "http://127.0.0.1:52113",
+      "runId": "b3802630-baeb-4110-aa48-a174e2ea87bf",
+      "attempts": [
+        {
+          "id": "680713da-7513-4fe9-9bdb-5483adea765b",
+          "assignmentId": "dde10e9f-fc51-4f13-96d3-5ff58a977b98",
+          "runId": "b3802630-baeb-4110-aa48-a174e2ea87bf",
+          "generation": 1,
+          "input": "Send a message through SpecialistOne and SpecialistTwo, then receive the reply.",
+          "state": "idle",
+          "hostPid": 77025,
+          "ompPid": 77062,
+          "sessionId": "01a0e52d-50da-76ef-a977-59fd134ee239",
+          "hostUrl": "http://127.0.0.1:52114",
+          "pane": "%0",
+          "sessionDirectory": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m3-repository/hosts/680713da-7513-4fe9-9bdb-5483adea765b/sessions",
+          "runnerCwd": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m3-repository/hosts/assignments/dde10e9f-fc51-4f13-96d3-5ff58a977b98",
+          "ownership": "held",
+          "activeInputMessageId": "f79368b0-4dec-49c0-88bd-575392668e60"
+        },
+        {
+          "id": "b53cfb78-d3ea-4bd4-b6d6-7f5fcf6ec132",
+          "assignmentId": "0c9eaada-31ac-40a7-bfbe-6999161ca08e",
+          "runId": "b3802630-baeb-4110-aa48-a174e2ea87bf",
+          "generation": 1,
+          "input": "Relay findings through SpecialistTwo and back to Coordinator.",
+          "state": "idle",
+          "hostPid": 77168,
+          "ompPid": 77214,
+          "sessionId": "01a0e52d-545c-7614-b24e-de3a8a205d1c",
+          "hostUrl": "http://127.0.0.1:52115",
+          "pane": "%1",
+          "sessionDirectory": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m3-repository/hosts/b53cfb78-d3ea-4bd4-b6d6-7f5fcf6ec132/sessions",
+          "runnerCwd": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m3-repository/hosts/assignments/0c9eaada-31ac-40a7-bfbe-6999161ca08e",
+          "ownership": "held",
+          "activeInputMessageId": "096f90aa-d6e7-41bf-ac39-30d61ed709a9"
+        },
+        {
+          "id": "4ed26bdb-e292-434d-93ff-b34f7b930590",
+          "assignmentId": "56aed580-af65-478f-9cda-ef304bbb6801",
+          "runId": "b3802630-baeb-4110-aa48-a174e2ea87bf",
+          "generation": 1,
+          "input": "Reply to SpecialistOne.",
+          "state": "idle",
+          "hostPid": 77259,
+          "ompPid": 77296,
+          "sessionId": "01a0e52d-57cb-76e0-b41b-8093fbfccced",
+          "hostUrl": "http://127.0.0.1:52116",
+          "pane": "%2",
+          "sessionDirectory": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m3-repository/hosts/4ed26bdb-e292-434d-93ff-b34f7b930590/sessions",
+          "runnerCwd": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m3-repository/hosts/assignments/56aed580-af65-478f-9cda-ef304bbb6801",
+          "ownership": "held",
+          "activeInputMessageId": "c9b3af48-8a0b-43a7-a63c-b51cb34d0980"
+        }
+      ],
+      "messages": [
+        {
+          "id": "9c9b877c-fa1a-48ca-95e5-616baf291ff8",
+          "runId": "b3802630-baeb-4110-aa48-a174e2ea87bf",
+          "attemptId": "680713da-7513-4fe9-9bdb-5483adea765b",
+          "toolCallId": "call_951ca1884903400b8b4e621c51024ace|fc_951ca1884903400b8b4e621c51024ace",
+          "from": "dde10e9f-fc51-4f13-96d3-5ff58a977b98",
+          "to": "0c9eaada-31ac-40a7-bfbe-6999161ca08e",
+          "body": "Investigate zero.",
+          "createdAt": "2026-09-27T23:22:29.644Z",
+          "disposition": "received",
+          "transportId": 1,
+          "recipientAttemptId": "b53cfb78-d3ea-4bd4-b6d6-7f5fcf6ec132"
+        },
+        {
+          "id": "c9b3af48-8a0b-43a7-a63c-b51cb34d0980",
+          "runId": "b3802630-baeb-4110-aa48-a174e2ea87bf",
+          "attemptId": "b53cfb78-d3ea-4bd4-b6d6-7f5fcf6ec132",
+          "toolCallId": "toolu_be263712808d44cea812c90131588636",
+          "from": "0c9eaada-31ac-40a7-bfbe-6999161ca08e",
+          "to": "56aed580-af65-478f-9cda-ef304bbb6801",
+          "body": "Please check zero.",
+          "replyTo": "9c9b877c-fa1a-48ca-95e5-616baf291ff8",
+          "createdAt": "2026-09-27T23:22:29.923Z",
+          "disposition": "received",
+          "transportId": 2,
+          "recipientAttemptId": "4ed26bdb-e292-434d-93ff-b34f7b930590"
+        },
+        {
+          "id": "096f90aa-d6e7-41bf-ac39-30d61ed709a9",
+          "runId": "b3802630-baeb-4110-aa48-a174e2ea87bf",
+          "attemptId": "4ed26bdb-e292-434d-93ff-b34f7b930590",
+          "toolCallId": "send_message_1790551350123_1",
+          "from": "56aed580-af65-478f-9cda-ef304bbb6801",
+          "to": "0c9eaada-31ac-40a7-bfbe-6999161ca08e",
+          "body": "Zero passes.",
+          "replyTo": "c9b3af48-8a0b-43a7-a63c-b51cb34d0980",
+          "createdAt": "2026-09-27T23:22:30.210Z",
+          "disposition": "received",
+          "transportId": 3,
+          "recipientAttemptId": "b53cfb78-d3ea-4bd4-b6d6-7f5fcf6ec132"
+        },
+        {
+          "id": "f79368b0-4dec-49c0-88bd-575392668e60",
+          "runId": "b3802630-baeb-4110-aa48-a174e2ea87bf",
+          "attemptId": "b53cfb78-d3ea-4bd4-b6d6-7f5fcf6ec132",
+          "toolCallId": "toolu_3ae656cf782743a880fabba91761cf61",
+          "from": "0c9eaada-31ac-40a7-bfbe-6999161ca08e",
+          "to": "dde10e9f-fc51-4f13-96d3-5ff58a977b98",
+          "body": "Zero is confirmed.",
+          "replyTo": "096f90aa-d6e7-41bf-ac39-30d61ed709a9",
+          "createdAt": "2026-09-27T23:22:30.473Z",
+          "disposition": "received",
+          "transportId": 4,
+          "recipientAttemptId": "680713da-7513-4fe9-9bdb-5483adea765b"
+        }
+      ],
+      "socket": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m3-repository/crewroom.sock"
+    }
+  },
+  "teamRegression": {
+    "passed": true,
+    "guard": {
+      "fixture_port_allowed": true,
+      "external_denied": true,
+      "other_loopback_denied": true,
+      "child_egress_denied": true
+    },
+    "providerRequests": 13,
+    "providerErrors": [],
+    "unexpectedSurvivingProcesses": [],
+    "runtime": {
+      "passed": true,
+      "teamSize": 3,
+      "assignments": [
+        {
+          "name": "Coordinator",
+          "roleId": "triage",
+          "model": "aperture-openai/openai.gpt-6-sol"
+        },
+        {
+          "name": "SpecialistOne",
+          "roleId": "implementer",
+          "model": "aperture-anthropic/anthropic.claude-sonnet-5"
+        },
+        {
+          "name": "SpecialistTwo",
+          "roleId": "custom-reviewer",
+          "model": "aperture-google/gemini-3.8-flash"
+        },
+        {
+          "name": "Reporter",
+          "roleId": "delivery-reporter",
+          "model": "aperture-openai/openai.gpt-6-sol"
+        }
+      ],
+      "proposalStatus": "applied"
+    }
+  },
+  "evidence": [
+    ".crewroom/test-results/m3-repository/report.json",
+    ".crewroom/test-results/m3-team-upgrade/report.json"
+  ],
+  "scope": "Real Git worktrees, SQLite and server reopen; real OMP/tmux/Rust Mail pause with fixture-staged edits. This does not yet prove agent code editing, repository checks or independent review; those are M3.3. No live model, Jira or Bitbucket calls.",
+  "sourceSha256": {
+    "server/repository-work.ts": "2107d4af9c7ad38a1273fad62df0a89ab015306786675c0dd5db73b1b55fdb66",
+    "shared/repository.ts": "83d14ef554f776ebc9549225b7468af35da9f659673a66b1fa913d31ae1533ce",
+    "server/workbench.ts": "faf92b4eaab220e481a2c7b59585ebb1e252fd53ef3c95ca4a5e1262f93cd327",
+    "server/app.ts": "0437eb78ea8e08df79e178f29d38ef7aefce682fbc4632ba224333c90ee9d456",
+    "server/runtime/supervisor.ts": "824a6031ed32bc65f6100023b1bd14bf05a9435659e4dc90267b3597d9d9374b",
+    "tests/repository-work.test.ts": "5c7a0b4c2d7b939519350dfebe81fdafb1ade25610789aef072bebcc3c40bec0",
+    "tests/repository-http.test.ts": "9a40bd6b3b953eba8cf8aee5e0244e528801be5fb690ba8126e0a91a1f20b88d",
+    "scripts/runtime-driver.ts": "32b1282fc00d0eb84d5543b4b028f0db0144e7006fb0f4a1c8d2c71b476927e8",
+    "scripts/test-application-runtime.py": "b5c1762603690e14fe71e371c531e0df96337156334ca8559e3868d4bfc57064",
+    "scripts/team-driver.ts": "6771d03648a49c209acbcb493e5990bc3214a1f3906dd37d78b5c7681bf143ce"
+  },
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

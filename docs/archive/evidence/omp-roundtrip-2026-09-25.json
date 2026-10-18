@@ -1,0 +1,75 @@
+{
+  "passed": true,
+  "scope": "One live native OMP round trip; no crash/recovery claim",
+  "trace": "crewroom-e14cd839207d4a16",
+  "elapsed_seconds": 8.29,
+  "sessions": {
+    "Main": {
+      "session_id": "01a0dbc2-2a48-7629-8cc8-50fe9bff5f8c",
+      "models": [
+        "aperture-openai/openai.gpt-6-sol"
+      ]
+    },
+    "SpecialistOne": {
+      "session_id": "01a0dbc2-33af-762e-aed8-fc278b96cf5a",
+      "models": [
+        "aperture-openai/openai.gpt-6-sol"
+      ]
+    },
+    "SpecialistTwo": {
+      "session_id": "01a0dbc2-33b1-757e-adba-7adfac3d5739",
+      "models": [
+        "aperture-openai/openai.gpt-6-sol"
+      ]
+    }
+  },
+  "hops": [
+    {
+      "from": "Main",
+      "to": "SpecialistOne",
+      "payload": "START crewroom-e14cd839207d4a16 SpecialistTwo. Return the reply to me, the actual sender of this START, with S1_RELAY S2_ACK crewroom-e14cd839207d4a16 after you receive SpecialistTwo's S2_ACK.",
+      "tool_call_id": "call_7560f328fe7f5c6d9a21f6e7b80d029b|fc_dc8be89792395602a6433efbdf20d04c",
+      "delivery": "woken",
+      "recipient_message_id": "158e3de2ce46693f",
+      "recipient_timestamp": "2026-09-26T03:28:54.585Z"
+    },
+    {
+      "from": "SpecialistOne",
+      "to": "SpecialistTwo",
+      "payload": "FORWARD crewroom-e14cd839207d4a16",
+      "tool_call_id": "call_9dba6563f30d5b7186d1dadfe61579f6|fc_335714272da853f0a69abb32e6ece8ef",
+      "delivery": "woken",
+      "recipient_message_id": "158e3de3ac466940",
+      "recipient_timestamp": "2026-09-26T03:28:55.473Z"
+    },
+    {
+      "from": "SpecialistTwo",
+      "to": "SpecialistOne",
+      "payload": "S2_ACK crewroom-e14cd839207d4a16",
+      "tool_call_id": "call_48201199d2cc5efabb3285a9fc5400b0|fc_6ee68142b56f5990a39d6af5cf923377",
+      "delivery": "woken",
+      "recipient_message_id": "158e3de513c66941",
+      "recipient_timestamp": "2026-09-26T03:28:56.911Z"
+    },
+    {
+      "from": "SpecialistOne",
+      "to": "Main",
+      "payload": "S1_RELAY S2_ACK crewroom-e14cd839207d4a16",
+      "tool_call_id": "call_8b1f414733fb5b0a8f9ee61761d0de20|fc_7be782507e4f59da9294d2b00030c51d",
+      "delivery": "injected",
+      "recipient_message_id": "158e3de5d5c66942",
+      "recipient_timestamp": "2026-09-26T03:28:57.687Z"
+    }
+  ],
+  "specialist_two_trace_first_arrived_in_peer_message": true,
+  "shutdown": {
+    "exit_code": 0,
+    "forced": false
+  },
+  "raw_sha256": {
+    "events.jsonl": "d69d6937afa699ce8ded417550ebefae48432ebc6fee6b3cf21a2f4330ab95a9",
+    "Main": "406865ef8860aba5c847b69f51a809f6b2d6eeb5ebfa0e648e8615ce8f94a37d",
+    "SpecialistOne": "6bfea50af6c1900f502b3f02ffb13d68948b885e8fa034bad4dacc1edf3519b7",
+    "SpecialistTwo": "ec55cb4716b994646552b418cd45236c997f442053405dd86651cc60fa575461"
+  }
+}

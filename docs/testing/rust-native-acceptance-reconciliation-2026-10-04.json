@@ -1,0 +1,1730 @@
+{
+  "kind": "native-acceptance-reconciliation",
+  "recordedAt": "2026-10-04",
+  "candidateSource": "8f3e325870e40209f42c43ef0009e953f45398f5",
+  "mainSnapshotBeforeRecord": "8b23fb7f13846a09ad9c0599a29c5a82f4246333",
+  "scope": "Final required-workflow evidence mapping and native-default cutover. VoiceOver and actual Japanese IME remain optional unverified compatibility; no OS pass is claimed. Historical receipts remain authoritative for each bounded proof.",
+  "inputs": [
+    {
+      "path": "docs/testing/rust-native-acceptance-map-2026-10-04.json",
+      "sha256": "11026c3168e8877e98ad42e5f6e800f3777f0aab203c7f286715b46c56de4bfc"
+    },
+    {
+      "path": "docs/testing/rust-native-acceptance-runtime-2026-10-04.json",
+      "sha256": "48782e51a530015ba61ed80b8ef6096605edca0c19c43057706b43ed6dd1fd97"
+    },
+    {
+      "path": "docs/testing/rust-native-keyboard-queue-2026-10-04.json",
+      "sha256": "14a20c4823cd9949321e951c3fd91c2d4291d5b634be55e69a9072c81081efd7"
+    },
+    {
+      "path": "docs/testing/rust-native-final-scenarios-2026-10-04.json",
+      "sha256": "1b5d2544d989fcea0eba8295218dff86dd62f33b4159954c9a41d7f5350155cc"
+    },
+    {
+      "path": "docs/testing/rust-native-final-gui-2026-10-04.json",
+      "sha256": "519342a29dcebba92fdfad2c3aba7975bf9444a308f4c811e441bda4bf2caa21"
+    },
+    {
+      "path": "docs/testing/rust-native-cutover-browser-environment-2026-10-04.json",
+      "sha256": "d00b0be069135bd7cc593605218eb2ec231436248222011b746357ddb5d1ec79"
+    },
+    {
+      "path": "docs/testing/rust-native-os-input-attempt-2026-10-04.json",
+      "sha256": "14a2cb6b738391a4b84f1e536908918c4e3c6d7a35f22508569431645d2d5cb4"
+    },
+    {
+      "path": "docs/testing/rust-native-default-cutover-2026-10-04.json",
+      "sha256": "b7ad4017c9c7f86c86a8d84a20120ec721883356e09cb2a74ec4b23e2f412a5a"
+    }
+  ],
+  "counts": {
+    "behaviorCases": 87,
+    "behaviorCasesMapped": 87,
+    "behaviorCasesPartial": 0,
+    "nativeJourneys": 31,
+    "nativeJourneysMapped": 31,
+    "nativeJourneysKeyboardCoveredOsReleasePending": 0,
+    "scenarios": 12,
+    "scenarioComposedExisting": 9,
+    "scenarioFinalCandidateExecuted": 3,
+    "gapGroupsResolved": 14,
+    "gapGroupsPartial": 0,
+    "acceptancePercentage": null
+  },
+  "gapReconciliation": {
+    "G01": {
+      "assertion": "All 950 retained catalog role/model bindings compared through the native binding boundary.",
+      "cases": [
+        "RTE-01"
+      ],
+      "status": "covered",
+      "evidence": "All 19 role identities ×50 captured models =950 native/retained binding comparisons. Unknown tools remain null; binding never claims live dispatch eligibility."
+    },
+    "G02": {
+      "assertion": "Named baseline, heterogeneous and rotated role profiles executed with per-process observed identities.",
+      "cases": [
+        "RTE-02"
+      ],
+      "status": "covered-with-bounded-profile-scope",
+      "evidence": "All57 named profile selections compared at policy boundary; baseline/heterogeneous/rotated each execute a selected legal coordinator+three-specialist team through actual native daemon/OMP. Every model/provider/API/effort readback and scripted wire request matches its assignment. All five pool selectors and three API families represented. Not all19 roles launched simultaneously, and not12 full named scenario replays."
+    },
+    "G03": {
+      "assertion": "Coordinator → specialist A → specialist B → A → coordinator external addressed round trip.",
+      "cases": [
+        "MSG-01"
+      ],
+      "status": "covered",
+      "evidence": "Each profile runs coordinator→specialist1→specialist2→specialist1→coordinator. Four real Mail transport IDs, causal replyTo chain, originating tool events and recipient completion events match native records and external Mail sender/recipient/read acknowledgements. Same eight OS identities survive actual daemon SIGKILL; stopped afterward."
+    },
+    "G04": {
+      "assertion": "Same saved randomized schedule seed replays controls, duplicates, crashes and replies with invariant/event trace.",
+      "cases": [
+        "LIM-04"
+      ],
+      "status": "covered-retained-contract",
+      "evidence": "Three fixed seeds ×100 message schedule steps run twice with identical normalized event traces. Duplicate keys keep one ID, delayed dispatch cannot undo receipt, reopen preserves history, cancellation is terminal. Existing physical crash fixtures remain separate evidence."
+    },
+    "G05": {
+      "assertion": "Native complete keyboard/narrow operator flows including the newest continuation, recovery and result controls.",
+      "status": "resolved-required-scope",
+      "closedSubgate": "Named browser-equivalent narrow keyboard residuals have native390px Tab/Space/Cmd-Enter controls, viewport assertions, readonly retained evidence, restart and reverse focus/manual-scroll regression. Native buttons use platform Space activation; browser-only roving ARIA tab mechanics are not claimed. The original signed package also passes visible 1240/390 px terminal, read-only input, selection/copy, hidden-field Quit, controlled output, close/reopen and measured resource checks.",
+      "source": [
+        {
+          "path": "crates/crewroom-desktop/src/workbench/journey_tests.rs",
+          "sha256": "40c15491db317aa4162f840092e4fca7994b37f84a78a36526d7ccaaab9dbdc3",
+          "symbol": "native_journey_cancelled_continuation_preserves_branch_diff_lineage_and_reopen",
+          "line": 154,
+          "readAtCommit": "8f3e325870e40209f42c43ef0009e953f45398f5"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/acceptance_tests.rs",
+          "sha256": "8bc162133e09ab55d834cf32a36e7c20ae5e9dc3279c352a97c56e091a40c2ff",
+          "symbol": "native_acceptance_history_tabs_and_back_work_by_keyboard_at_390",
+          "line": 555,
+          "readAtCommit": "8f3e325870e40209f42c43ef0009e953f45398f5"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/acceptance_tests.rs",
+          "sha256": "8bc162133e09ab55d834cf32a36e7c20ae5e9dc3279c352a97c56e091a40c2ff",
+          "symbol": "native_acceptance_queued_specialist_keyboard_at_390_keeps_pending_after_restart",
+          "line": 590,
+          "readAtCommit": "8f3e325870e40209f42c43ef0009e953f45398f5"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/acceptance_tests.rs",
+          "sha256": "8bc162133e09ab55d834cf32a36e7c20ae5e9dc3279c352a97c56e091a40c2ff",
+          "symbol": "native_acceptance_steering_states_times_legacy_and_narrow_keyboard",
+          "line": 168,
+          "readAtCommit": "8f3e325870e40209f42c43ef0009e953f45398f5"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/acceptance_tests.rs",
+          "sha256": "8bc162133e09ab55d834cf32a36e7c20ae5e9dc3279c352a97c56e091a40c2ff",
+          "symbol": "native_acceptance_unowned_cancel_is_confirmed_by_keyboard_at_390_and_only_new_branch_queues",
+          "line": 428,
+          "readAtCommit": "8f3e325870e40209f42c43ef0009e953f45398f5"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/acceptance_tests.rs",
+          "sha256": "8bc162133e09ab55d834cf32a36e7c20ae5e9dc3279c352a97c56e091a40c2ff",
+          "symbol": "native_acceptance_tab_reveals_nested_controls_without_moving_siblings_or_pinning_scroll",
+          "line": 640,
+          "readAtCommit": "8f3e325870e40209f42c43ef0009e953f45398f5"
+        }
+      ],
+      "receipts": [
+        "rust-tests",
+        "native-journeys"
+      ],
+      "remaining": [],
+      "packagedGuiReceipt": "docs/testing/rust-native-final-gui-2026-10-04.json",
+      "osAttemptReceipt": "docs/testing/rust-native-os-input-attempt-2026-10-04.json",
+      "optionalCompatibilityRefs": [
+        "optional-voiceover",
+        "optional-os-ime"
+      ],
+      "scopeDecision": "The original UI-06 basic operator and required narrow keyboard assertions pass. Operator direction removes optional VoiceOver as a release blocker; Japanese IME remains additional unverified compatibility. Neither OS check is counted as passed."
+    },
+    "G06": {
+      "assertion": "Native steering distinguishes received/applied/rejected/unknown legacy times and terminal-run disabled explanations.",
+      "status": "mapped-executed-bounded",
+      "resolvedAssertions": [
+        "Rendered pending/dispatched/received/applied/rejected timestamps and replies; legacy received transitions retain unknown times.",
+        "390 px Cmd-Enter stores paused steering; service/UI restart preserves it. Closed and completed runs explain refusal and reject new steering."
+      ],
+      "source": [
+        {
+          "path": "crates/crewroom-desktop/src/workbench/acceptance_tests.rs",
+          "sha256": "8bc162133e09ab55d834cf32a36e7c20ae5e9dc3279c352a97c56e091a40c2ff",
+          "symbol": "native_acceptance_steering_states_times_legacy_and_narrow_keyboard",
+          "line": 168,
+          "readAtCommit": "8f3e325870e40209f42c43ef0009e953f45398f5"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/acceptance_tests.rs",
+          "sha256": "8bc162133e09ab55d834cf32a36e7c20ae5e9dc3279c352a97c56e091a40c2ff",
+          "symbol": "native_acceptance_closed_and_completed_keep_legacy_times_unknown_after_reopen",
+          "line": 294,
+          "readAtCommit": "8f3e325870e40209f42c43ef0009e953f45398f5"
+        }
+      ],
+      "receipts": [
+        "rust-tests"
+      ]
+    },
+    "G07": {
+      "assertion": "Observation outage is distinct from a recorded agent failure; fallback attempts show their own model in history and tiles after reload.",
+      "status": "mapped-executed-bounded",
+      "resolvedAssertions": [
+        "Each attempt retains its requested/resolved/fallback model in native History and tiles after service/UI reopen.",
+        "Observation error changes staleness/availability presentation without replacing recorded provider failure or attempt records."
+      ],
+      "source": [
+        {
+          "path": "crates/crewroom-desktop/src/workbench/acceptance_tests.rs",
+          "sha256": "8bc162133e09ab55d834cf32a36e7c20ae5e9dc3279c352a97c56e091a40c2ff",
+          "symbol": "native_acceptance_attempt_models_and_fallback_survive_service_and_ui_reopen",
+          "line": 76,
+          "readAtCommit": "8f3e325870e40209f42c43ef0009e953f45398f5"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/workbench/acceptance_tests.rs",
+          "sha256": "8bc162133e09ab55d834cf32a36e7c20ae5e9dc3279c352a97c56e091a40c2ff",
+          "symbol": "native_acceptance_observation_error_does_not_replace_recorded_failure",
+          "line": 135,
+          "readAtCommit": "8f3e325870e40209f42c43ef0009e953f45398f5"
+        },
+        {
+          "path": "crates/crewroom-desktop/src/wall.rs",
+          "sha256": "c9aabffde9fd6791d96538aa10dfa1c63b493ba37b6542df9ac473f2694300e4",
+          "symbol": "agent_tiles_retain_each_attempt_model_and_distinguish_stale_observation",
+          "line": 692,
+          "readAtCommit": "8f3e325870e40209f42c43ef0009e953f45398f5"
+        }
+      ],
+      "receipts": [
+        "rust-tests"
+      ]
+    },
+    "G08": {
+      "assertion": "Native busy insertion and Pause show intermediate states until confirmed with real active child work.",
+      "status": "mapped-executed-bounded",
+      "resolvedAssertions": [
+        "Native insertion remains pending while real service-owned scripted RPC process is busy; safe-point adoption creates replacement and specialist.",
+        "Native Pause renders pausing while ownership is unstopped, then confirmed paused/stopped, and remains truthful after daemon restart."
+      ],
+      "source": [
+        {
+          "path": "crates/crewroom-desktop/src/workbench/journey_tests/operator.rs",
+          "sha256": "b59140176dd39dfd5bb9b68ba5d733e243d1be9b9568545565a018e71f8f50e8",
+          "symbol": "native_external_operator_control",
+          "line": 8,
+          "readAtCommit": "8f3e325870e40209f42c43ef0009e953f45398f5"
+        },
+        {
+          "path": "scripts/rust/native-controls.test.ts",
+          "sha256": "7964738421abe5e82409f2a560552f1a937839cc601736829749e8ad6fc9f722",
+          "readAtCommit": "8f3e325870e40209f42c43ef0009e953f45398f5"
+        }
+      ],
+      "receipts": [
+        "native-controls-fixture-corrected"
+      ]
+    },
+    "G09": {
+      "assertion": "Native feedback Resume produces validated revision and republishes to same PR.",
+      "status": "mapped-executed-bounded",
+      "resolvedAssertions": [
+        "Native feedback observation/Resume creates a successor candidate; stale validation is refused, fresh real check and independent recorded review pass; update retains one publication, branch and PR.",
+        "Final diagnostics: POST1/PUT1, candidates2/checks2/reviews2/attempts12, original source checkout unchanged by publication."
+      ],
+      "source": [
+        {
+          "path": "crates/crewroom-desktop/src/workbench/journey_tests/external.rs",
+          "sha256": "ad2756c271c9d482c51e65d509da5c0ec8c176015687538e0c0ad3e88135d5b2",
+          "symbol": "native_external_feedback_resume",
+          "line": 8,
+          "readAtCommit": "8f3e325870e40209f42c43ef0009e953f45398f5"
+        },
+        {
+          "path": "scripts/rust/native-resume.test.ts",
+          "sha256": "27149fea5e63e95c4cb398c545009ea371acb32eb48958a67837b2418a036e82",
+          "readAtCommit": "8f3e325870e40209f42c43ef0009e953f45398f5"
+        }
+      ],
+      "receipts": [
+        "native-controls-fixture-corrected"
+      ]
+    },
+    "G10": {
+      "assertion": "Native retired historical repository appears as captured in both Results and History.",
+      "status": "mapped-executed-bounded",
+      "resolvedAssertions": [
+        "Real prepared Git run captures original repository; current definition renamed/prefix changed and retired. Results and History retain original capture after daemon/UI reopen; Results labels retirement and changed settings."
+      ],
+      "source": [
+        {
+          "path": "crates/crewroom-desktop/src/workbench/acceptance_tests.rs",
+          "sha256": "8bc162133e09ab55d834cf32a36e7c20ae5e9dc3279c352a97c56e091a40c2ff",
+          "symbol": "native_acceptance_retired_repository_keeps_captured_settings_in_results_and_history",
+          "line": 480,
+          "readAtCommit": "8f3e325870e40209f42c43ef0009e953f45398f5"
+        }
+      ],
+      "receipts": [
+        "captured-repository"
+      ]
+    },
+    "G11": {
+      "assertion": "Native queue displays paused review-release vs waiting hold and drives merged dependency release.",
+      "status": "mapped-executed-bounded",
+      "resolvedAssertions": [
+        "Native views show paused review release, waiting-ticket hold and queued Resume slot semantics.",
+        "Merged dependency remains held while checkout lacks provider-observed merge, then existing queued plan admits automatically once explicit fixture FF includes it; native queue shows the new owner."
+      ],
+      "source": [
+        {
+          "path": "crates/crewroom-desktop/src/workbench/journey_tests/operator.rs",
+          "sha256": "b59140176dd39dfd5bb9b68ba5d733e243d1be9b9568545565a018e71f8f50e8",
+          "symbol": "native_external_operator_control",
+          "line": 8,
+          "readAtCommit": "8f3e325870e40209f42c43ef0009e953f45398f5"
+        },
+        {
+          "path": "scripts/rust/native-resume.test.ts",
+          "sha256": "27149fea5e63e95c4cb398c545009ea371acb32eb48958a67837b2418a036e82",
+          "readAtCommit": "8f3e325870e40209f42c43ef0009e953f45398f5"
+        }
+      ],
+      "receipts": [
+        "native-controls-fixture-corrected"
+      ]
+    },
+    "G12": {
+      "assertion": "Native M1 import/refine/refresh/queue/steering sequence survives one production daemon restart.",
+      "status": "mapped-executed-bounded",
+      "resolvedAssertions": [
+        "One native sequence imports Jira-shaped fixture, refines brief/criteria, refreshes source while retaining brief, requires reacceptance, queues and stores pending steering.",
+        "Production daemon restarts with a different PID; native reopen preserves task/run/message exactly, zero attempts, queue intent remains awaiting_runner."
+      ],
+      "source": [
+        {
+          "path": "crates/crewroom-desktop/src/workbench/journey_tests/intake.rs",
+          "sha256": "a652ed49c56147d418c28138472b897d1016fcdc15db07331c026bace55720fc",
+          "symbol": "native_external_intake_restart",
+          "line": 7,
+          "readAtCommit": "8f3e325870e40209f42c43ef0009e953f45398f5"
+        },
+        {
+          "path": "scripts/rust/native-intake.test.ts",
+          "sha256": "6abf78deb2a1d54e269d2672d1bd162b4b57369a6196ddc5c20724bb2ff065b2",
+          "readAtCommit": "8f3e325870e40209f42c43ef0009e953f45398f5"
+        }
+      ],
+      "receipts": [
+        "native-controls-fixture-corrected"
+      ]
+    },
+    "G13": {
+      "assertion": "Native unowned cancelled plan offers only the new-branch continuation and keyboard cancel confirmation.",
+      "status": "mapped-executed-bounded",
+      "resolvedAssertions": [
+        "At390 px native Tab+Space dismisses and confirms Cancel; unowned cancelled plan hides Resume/Continue later and explains new run only.",
+        "Queue from accepted Brief creates mode=new with no continuedFrom; restart retains both runs and no attempts."
+      ],
+      "source": [
+        {
+          "path": "crates/crewroom-desktop/src/workbench/acceptance_tests.rs",
+          "sha256": "8bc162133e09ab55d834cf32a36e7c20ae5e9dc3279c352a97c56e091a40c2ff",
+          "symbol": "native_acceptance_unowned_cancel_is_confirmed_by_keyboard_at_390_and_only_new_branch_queues",
+          "line": 428,
+          "readAtCommit": "8f3e325870e40209f42c43ef0009e953f45398f5"
+        }
+      ],
+      "receipts": [
+        "rust-tests"
+      ]
+    },
+    "G14": {
+      "assertion": "Native Direct Run control admits execution automatically while Explore/Grill remain noncoding.",
+      "status": "mapped-executed-bounded",
+      "resolvedAssertions": [
+        "Native Run/queue action creates configured launch and service automatically admits coordinator without second Start action.",
+        "Existing Explore/Grill refinement/adoption evidence remains separate; this coding driver does not relabel them executing."
+      ],
+      "source": [
+        {
+          "path": "crates/crewroom-desktop/src/workbench/journey_tests/operator.rs",
+          "sha256": "b59140176dd39dfd5bb9b68ba5d733e243d1be9b9568545565a018e71f8f50e8",
+          "symbol": "native_external_operator_control",
+          "line": 8,
+          "readAtCommit": "8f3e325870e40209f42c43ef0009e953f45398f5"
+        },
+        {
+          "path": "scripts/rust/native-controls.test.ts",
+          "sha256": "7964738421abe5e82409f2a560552f1a937839cc601736829749e8ad6fc9f722",
+          "readAtCommit": "8f3e325870e40209f42c43ef0009e953f45398f5"
+        }
+      ],
+      "receipts": [
+        "native-controls-fixture-corrected"
+      ]
+    }
+  },
+  "uiExecutedLogs": {
+    "rust-tests": {
+      "path": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/n61c2c-20261004/rust-tests.log",
+      "sha256": "3acdfbc799c9ca1c56732095ef43e0b71cc8b83c3f8a81f70085bd806a1d8162",
+      "sourceManifestSha256": "530bd52fbee5279b6eab96c486a6db43709f5232e33d7d24101ef75aeb4874f8"
+    },
+    "native-journeys": {
+      "path": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/n61c2c-20261004/native-journeys.log",
+      "sha256": "b39121ce8b72e6d9f9d2f9e2214308590ef0b554ba5f2b97ff3a38e38caf8b72",
+      "sourceManifestSha256": "530bd52fbee5279b6eab96c486a6db43709f5232e33d7d24101ef75aeb4874f8"
+    },
+    "captured-repository": {
+      "path": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/n61c2c-20261004/captured-repository.log",
+      "sha256": "8b07ca7c0de3b04467ddf2ccc6d6d037bbdeb416e220a71ac66f4a044216ef87",
+      "sourceManifestSha256": "530bd52fbee5279b6eab96c486a6db43709f5232e33d7d24101ef75aeb4874f8"
+    },
+    "native-controls-fixture-corrected": {
+      "path": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/n61c2c-20261004/native-controls-fixture-corrected.log",
+      "sha256": "c0528e0178b579ccbbe5b21a18520b27a0c0df84301bdb6960db4f18acb45ef3",
+      "sourceManifestSha256": "b7a682c0ba5dbab7b000533faf0d33f43ad3c6f3c0f3f506fa3f7187605fca21"
+    }
+  },
+  "cases": [
+    {
+      "id": "INT-01",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "providers",
+        "input-boundaries",
+        "jira-delivery"
+      ]
+    },
+    {
+      "id": "INT-02",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "providers",
+        "daemon-scheduling",
+        "journeys"
+      ]
+    },
+    {
+      "id": "INT-03",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "workflow",
+        "outcomes",
+        "workflow-supervision",
+        "collaboration"
+      ]
+    },
+    {
+      "id": "INT-04",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "workflow",
+        "collaboration"
+      ]
+    },
+    {
+      "id": "INT-05",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "jira-delivery",
+        "workflow-supervision"
+      ]
+    },
+    {
+      "id": "INT-06",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "repository-work",
+        "repository",
+        "target-service",
+        "planning"
+      ]
+    },
+    {
+      "id": "INT-07",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "evidence",
+        "workflow-supervision",
+        "journeys"
+      ]
+    },
+    {
+      "id": "INT-08",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "daemon-scheduling",
+        "workflow",
+        "planning"
+      ]
+    },
+    {
+      "id": "ROL-01",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "teams",
+        "workflow-inputs",
+        "workflow-supervision"
+      ]
+    },
+    {
+      "id": "ROL-02",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "learning",
+        "teams",
+        "workflow-supervision",
+        "configuration",
+        "collaboration"
+      ]
+    },
+    {
+      "id": "ROL-03",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "attempts",
+        "learning",
+        "workflow-inputs"
+      ]
+    },
+    {
+      "id": "ROL-04",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "workflow-inputs",
+        "repository",
+        "learning"
+      ]
+    },
+    {
+      "id": "ROL-05",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "evidence",
+        "workflow-supervision"
+      ]
+    },
+    {
+      "id": "ROL-06",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "jira-delivery",
+        "repository",
+        "workflow-supervision"
+      ]
+    },
+    {
+      "id": "ROL-07",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "teams",
+        "workflow-inputs",
+        "workflow-supervision"
+      ]
+    },
+    {
+      "id": "RTE-01",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [
+        "G01"
+      ],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "omp-rpc"
+      ]
+    },
+    {
+      "id": "RTE-02",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [
+        "G02"
+      ],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "omp-rpc",
+        "workflow-inputs",
+        "daemon-scheduling"
+      ]
+    },
+    {
+      "id": "RTE-03",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "omp-rpc",
+        "provider-gateway"
+      ]
+    },
+    {
+      "id": "RTE-04",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "omp-rpc",
+        "workflow-inputs"
+      ]
+    },
+    {
+      "id": "RTE-05",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "omp-rpc",
+        "attempts",
+        "daemon-scheduling"
+      ]
+    },
+    {
+      "id": "RTE-06",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "omp-rpc",
+        "provider-gateway"
+      ]
+    },
+    {
+      "id": "RTE-07",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "omp-rpc",
+        "provider-gateway"
+      ]
+    },
+    {
+      "id": "RTE-08",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "omp-rpc",
+        "provider-gateway",
+        "host"
+      ]
+    },
+    {
+      "id": "RTE-09",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "daemon-scheduling",
+        "attempts"
+      ]
+    },
+    {
+      "id": "RTE-10",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "omp-rpc",
+        "teams",
+        "workflow-inputs"
+      ]
+    },
+    {
+      "id": "RTE-11",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "omp-rpc",
+        "workflow-inputs",
+        "provider-gateway"
+      ]
+    },
+    {
+      "id": "RTE-12",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "provider-gateway",
+        "omp-rpc",
+        "daemon-scheduling"
+      ]
+    },
+    {
+      "id": "MSG-01",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [
+        "G03"
+      ],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "messages",
+        "mail",
+        "daemon-scheduling"
+      ]
+    },
+    {
+      "id": "MSG-02",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "messages",
+        "mail",
+        "host-protocol",
+        "terminal",
+        "collaboration"
+      ]
+    },
+    {
+      "id": "MSG-03",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "mail",
+        "workflow-supervision"
+      ]
+    },
+    {
+      "id": "MSG-04",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "messages",
+        "mail",
+        "host"
+      ]
+    },
+    {
+      "id": "MSG-05",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "mail",
+        "workflow-supervision"
+      ]
+    },
+    {
+      "id": "MSG-06",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "mail"
+      ]
+    },
+    {
+      "id": "MSG-07",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "mail",
+        "daemon-scheduling"
+      ]
+    },
+    {
+      "id": "MSG-08",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "mail",
+        "workflow-supervision"
+      ]
+    },
+    {
+      "id": "MSG-09",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "mail",
+        "host-protocol"
+      ]
+    },
+    {
+      "id": "LIF-01",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "supervisor-lifecycle",
+        "workflow-supervision",
+        "daemon-scheduling"
+      ]
+    },
+    {
+      "id": "LIF-02",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "host",
+        "supervisor-lifecycle",
+        "daemon-scheduling"
+      ]
+    },
+    {
+      "id": "LIF-03",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "workflow-supervision",
+        "mail",
+        "daemon-scheduling"
+      ]
+    },
+    {
+      "id": "LIF-04",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "supervisor-lifecycle",
+        "daemon-scheduling"
+      ]
+    },
+    {
+      "id": "LIF-05",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "workflow-supervision",
+        "repository-shutdown",
+        "containers"
+      ]
+    },
+    {
+      "id": "LIF-06",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "daemon-scheduling",
+        "retained-work",
+        "journeys"
+      ]
+    },
+    {
+      "id": "LIF-07",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "processes",
+        "supervisor-lifecycle",
+        "containers"
+      ]
+    },
+    {
+      "id": "LIF-08",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "attempts",
+        "workflow-supervision",
+        "daemon-scheduling"
+      ]
+    },
+    {
+      "id": "LIF-09",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "host-protocol",
+        "workflow-supervision",
+        "upgrades"
+      ]
+    },
+    {
+      "id": "QUE-01",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "teams",
+        "scheduling",
+        "daemon-scheduling"
+      ]
+    },
+    {
+      "id": "QUE-02",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "repository",
+        "evidence",
+        "workflow-supervision"
+      ]
+    },
+    {
+      "id": "QUE-03",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "daemon-scheduling",
+        "publication-service"
+      ]
+    },
+    {
+      "id": "QUE-04",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "daemon-scheduling",
+        "target-service"
+      ]
+    },
+    {
+      "id": "QUE-05",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "scheduling",
+        "daemon-scheduling",
+        "planning"
+      ]
+    },
+    {
+      "id": "REP-01",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "repository",
+        "retained-work",
+        "journeys"
+      ]
+    },
+    {
+      "id": "REP-02",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "retained-work",
+        "target-service",
+        "journeys"
+      ]
+    },
+    {
+      "id": "REP-03",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "repository",
+        "evidence",
+        "retained-work"
+      ]
+    },
+    {
+      "id": "REP-04",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "target-refresh",
+        "conflict-continuation",
+        "conflict-promotion",
+        "journeys"
+      ]
+    },
+    {
+      "id": "REP-05",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "repository",
+        "containers"
+      ]
+    },
+    {
+      "id": "REP-06",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "evidence",
+        "workflow-supervision"
+      ]
+    },
+    {
+      "id": "EVD-01",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "evidence",
+        "workflow-supervision",
+        "publication-service"
+      ]
+    },
+    {
+      "id": "EVD-02",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "evidence",
+        "host",
+        "journeys"
+      ]
+    },
+    {
+      "id": "EVD-03",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "evidence",
+        "journeys",
+        "lifecycle"
+      ]
+    },
+    {
+      "id": "EVD-04",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "evidence",
+        "target-refresh",
+        "lifecycle"
+      ]
+    },
+    {
+      "id": "EVD-05",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "evidence",
+        "workflow-supervision",
+        "publication-service"
+      ]
+    },
+    {
+      "id": "EVD-06",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "evidence",
+        "repository"
+      ]
+    },
+    {
+      "id": "EVD-07",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "publication-service",
+        "daemon-scheduling",
+        "journeys"
+      ]
+    },
+    {
+      "id": "EVD-08",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "evidence",
+        "workflow-supervision",
+        "journeys"
+      ]
+    },
+    {
+      "id": "DEL-01",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "jira-delivery",
+        "workflow-supervision"
+      ]
+    },
+    {
+      "id": "DEL-02",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "jira-delivery",
+        "providers",
+        "journeys"
+      ]
+    },
+    {
+      "id": "DEL-03",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "jira-delivery",
+        "publication-service"
+      ]
+    },
+    {
+      "id": "DEL-04",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "publication-service",
+        "publication-git"
+      ]
+    },
+    {
+      "id": "DEL-05",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "publication-service",
+        "daemon-scheduling",
+        "journeys"
+      ]
+    },
+    {
+      "id": "DEL-06",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "providers",
+        "jira-delivery",
+        "publication-service"
+      ]
+    },
+    {
+      "id": "DEL-07",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "provider-clients",
+        "jira-delivery",
+        "publication-service"
+      ]
+    },
+    {
+      "id": "UI-01",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "planning",
+        "collaboration",
+        "lifecycle",
+        "journeys"
+      ]
+    },
+    {
+      "id": "UI-02",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [
+        "G06"
+      ],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "messages",
+        "daemon-scheduling",
+        "collaboration"
+      ]
+    },
+    {
+      "id": "UI-03",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [
+        "G07"
+      ],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "host",
+        "terminal",
+        "terminal-accessibility",
+        "collaboration"
+      ]
+    },
+    {
+      "id": "UI-04",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [
+        "G08"
+      ],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "collaboration",
+        "workflow-supervision",
+        "lifecycle"
+      ]
+    },
+    {
+      "id": "UI-05",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [
+        "G07"
+      ],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "configuration",
+        "collaboration",
+        "lifecycle",
+        "journeys"
+      ]
+    },
+    {
+      "id": "UI-06",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [
+        "G05"
+      ],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "configuration",
+        "planning",
+        "collaboration",
+        "lifecycle",
+        "journeys",
+        "terminal-accessibility"
+      ],
+      "optionalCompatibilityRefs": [
+        "optional-voiceover",
+        "optional-os-ime"
+      ]
+    },
+    {
+      "id": "SEC-01",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "daemon-scheduling"
+      ]
+    },
+    {
+      "id": "SEC-02",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "repository",
+        "host",
+        "provider-gateway",
+        "journeys"
+      ]
+    },
+    {
+      "id": "SEC-03",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "workflow-supervision",
+        "repository",
+        "mail"
+      ]
+    },
+    {
+      "id": "SEC-04",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "omp-rpc",
+        "daemon-scheduling",
+        "containers"
+      ]
+    },
+    {
+      "id": "SEC-05",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "processes",
+        "containers",
+        "repository-shutdown",
+        "upgrades-operations"
+      ]
+    },
+    {
+      "id": "SEC-06",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "workflow-inputs",
+        "workflow-supervision",
+        "jira-delivery"
+      ]
+    },
+    {
+      "id": "LIM-01",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "attempts",
+        "scheduling",
+        "workflow-supervision"
+      ]
+    },
+    {
+      "id": "LIM-02",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "provider-gateway",
+        "daemon-scheduling",
+        "lifecycle"
+      ]
+    },
+    {
+      "id": "LIM-03",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "mail",
+        "provider-gateway",
+        "daemon-scheduling"
+      ]
+    },
+    {
+      "id": "LIM-04",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [
+        "G04"
+      ],
+      "remainingGapRefs": [],
+      "retainedEvidenceRefs": [
+        "attempts",
+        "scheduling",
+        "messages"
+      ]
+    }
+  ],
+  "nativeJourneys": [
+    {
+      "id": "NUI-01",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [
+        "G05"
+      ],
+      "remainingGapRefs": [],
+      "optionalCompatibilityRefs": [
+        "optional-voiceover",
+        "optional-os-ime"
+      ]
+    },
+    {
+      "id": "NUI-02",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [
+        "G13"
+      ],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-03",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-04",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [
+        "G09"
+      ],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-05",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [
+        "G05"
+      ],
+      "remainingGapRefs": [],
+      "optionalCompatibilityRefs": [
+        "optional-voiceover",
+        "optional-os-ime"
+      ]
+    },
+    {
+      "id": "NUI-06",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [
+        "G07"
+      ],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-07",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [
+        "G07"
+      ],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-08",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [
+        "G05"
+      ],
+      "remainingGapRefs": [],
+      "optionalCompatibilityRefs": [
+        "optional-voiceover",
+        "optional-os-ime"
+      ]
+    },
+    {
+      "id": "NUI-09",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-10",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-11",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-12",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-13",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-14",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [
+        "G14"
+      ],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-15",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-16",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [
+        "G10"
+      ],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-17",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-18",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [
+        "G06",
+        "G05"
+      ],
+      "remainingGapRefs": [],
+      "optionalCompatibilityRefs": [
+        "optional-voiceover",
+        "optional-os-ime"
+      ]
+    },
+    {
+      "id": "NUI-19",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [
+        "G06"
+      ],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-20",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-21",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-22",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [
+        "G08"
+      ],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-23",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-24",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-25",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [
+        "G11"
+      ],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-26",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [
+        "G11"
+      ],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-27",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-28",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [
+        "G12"
+      ],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-29",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-30",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": []
+    },
+    {
+      "id": "NUI-31",
+      "coverage": "mapped-bounded-native-evidence",
+      "resolvedGapRefs": [],
+      "remainingGapRefs": []
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "E2E-01",
+      "status": "composed-existing-native",
+      "finding": "Native Jira intake, real owned worktree/check/independent review, publication and hosted-readiness receipts cover the small coding contract.",
+      "pointers": "workflow-supervision; jira-delivery; publication-service; native-installation",
+      "boundary": "Original jobs also compose component variants. Existing receipt identity and scope remain authoritative; this entry is an assertion mapping, not a new monolithic scenario run."
+    },
+    {
+      "id": "E2E-02",
+      "status": "final-candidate-executed",
+      "pointers": "complex-driver.ts; complex_fixture.py; scripts/rust/workflow-support.ts",
+      "originalMissingStep": "Missing actual staged code+guide workflow with three criteria, unit AND Chromium execution, guide plan/read/assessment, one writer, independent review and publication. Three research profile runs establish model identity only.",
+      "proof": "complex"
+    },
+    {
+      "id": "E2E-03",
+      "status": "final-candidate-executed",
+      "pointers": "coding-driver.ts; coding_fixture.py; scripts/rust/evidence.test.ts; workflow-recovery.test.ts",
+      "originalMissingStep": "Failed Docker checks and exhausted actual-runner repair cycles exist separately; native workflow has not executed failing patch→failed output inspection→blocking changes_requested review→corrected candidate with fresh checks/review.",
+      "proof": "rework"
+    },
+    {
+      "id": "E2E-04",
+      "status": "composed-existing-native",
+      "finding": "Actual host/controller SIGKILL and retained process/session recovery compose with durable native Mail send/inbox/ack windows, duplicate/stale receipt checks and coding commit recovery. Do not call SQLite boundary workers actual OMP kills.",
+      "pointers": "messaging-live.ts; mail-window-worker.ts; workflow-delivery.test.ts; workflow-interruption.test.ts; release-profiles-live.ts",
+      "boundary": "Original jobs also compose component variants. Existing receipt identity and scope remain authoritative; this entry is an assertion mapping, not a new monolithic scenario run."
+    },
+    {
+      "id": "E2E-05",
+      "status": "composed-existing-native",
+      "finding": "Native disconnected/received/applied steering, busy insertion and active-child Pause, restart/idempotence and requirements adoption cover runtime steps; completed/narrow UI closure belongs to root pending receipt.",
+      "pointers": "workflow-supervision; daemon-scheduling; native-controls; root final native controls",
+      "boundary": "Original jobs also compose component variants. Existing receipt identity and scope remain authoritative; this entry is an assertion mapping, not a new monolithic scenario run.",
+      "subsequentUiEvidence": "rust-native-keyboard-queue-2026-10-04.json: frozen narrow/operator/queue controls are executed; OS/package release gate remains separate."
+    },
+    {
+      "id": "E2E-06",
+      "status": "composed-existing-native",
+      "finding": "Native Jira/publication lost external replies and existing/absent/unknown readbacks, exactly keyed reconciliation and retained evidence cover provider outage steps.",
+      "pointers": "jira-delivery; publication-service; publication-recovery.test.ts",
+      "boundary": "Original jobs also compose component variants. Existing receipt identity and scope remain authoritative; this entry is an assertion mapping, not a new monolithic scenario run."
+    },
+    {
+      "id": "E2E-07",
+      "status": "composed-existing-native",
+      "finding": "Queue order separate from Jira rank, paused review release/wait hold, provider readiness and merged-base dependency gate exist in native service; root reports native operator journey pass pending frozen receipt.",
+      "pointers": "daemon-scheduling; providers; root native-resume.test.ts",
+      "boundary": "Original jobs also compose component variants. Existing receipt identity and scope remain authoritative; this entry is an assertion mapping, not a new monolithic scenario run.",
+      "subsequentUiEvidence": "rust-native-keyboard-queue-2026-10-04.json: frozen narrow/operator/queue controls are executed; OS/package release gate remains separate."
+    },
+    {
+      "id": "E2E-08",
+      "status": "composed-existing-native",
+      "finding": "950 exact bindings and profile identities combine with native preflight, actual OMP 429/recovery/fallback/no-fallback/wrong-model guard variants. No 950 live-call claim.",
+      "pointers": "runtime-closure; provider-gateway; omp-rpc; daemon-scheduling",
+      "boundary": "Original jobs also compose component variants. Existing receipt identity and scope remain authoritative; this entry is an assertion mapping, not a new monolithic scenario run."
+    },
+    {
+      "id": "E2E-09",
+      "status": "final-candidate-executed",
+      "pointers": "complex-driver.ts targetDrift; complex_fixture.py enqueue_drift; target-refresh; publication-service; journeys",
+      "originalMissingStep": "Native actual Git target refresh/conflict promotion and old/current hosted observations are covered. Original accepted target-drift job additionally re-executed unit AND Chromium checks with independent review after refresh and updated the same PR. Close by running existing complex fixture targetDrift variant through native service.",
+      "proof": "complex"
+    },
+    {
+      "id": "E2E-10",
+      "status": "composed-existing-native",
+      "finding": "Actual native research plus pinned citation verification, rejected missing citations, corrected artifacts, readonly source and completion cover accepted research assertions.",
+      "pointers": "workflow-supervision; evidence; journeys",
+      "boundary": "Original jobs also compose component variants. Existing receipt identity and scope remain authoritative; this entry is an assertion mapping, not a new monolithic scenario run."
+    },
+    {
+      "id": "E2E-11",
+      "status": "composed-existing-native",
+      "finding": "Native authorization rejects unauthorized tools, cross-attempt identity, repository escapes and foreign origin; actual model/host egress containment and valid continuation evidence compose. Explicitly separate scripted imported/peer text from live provider delivery.",
+      "pointers": "repository; workflow-supervision; daemon-scheduling; provider-gateway; runtime-closure",
+      "boundary": "Original jobs also compose component variants. Existing receipt identity and scope remain authoritative; this entry is an assertion mapping, not a new monolithic scenario run."
+    },
+    {
+      "id": "E2E-12",
+      "status": "composed-existing-native",
+      "finding": "Native active/waiting budget and restart clocks, actual owned child Pause/Cancel, retained PR/history and continuation, foreign PID/path survival compose. Root terminal cancellation keyboard/retired history closes UI residuals separately.",
+      "pointers": "attempts; workflow-supervision; retained-work; publication-service; containers; native-controls",
+      "boundary": "Original jobs also compose component variants. Existing receipt identity and scope remain authoritative; this entry is an assertion mapping, not a new monolithic scenario run.",
+      "subsequentUiEvidence": "rust-native-keyboard-queue-2026-10-04.json: frozen narrow/operator/queue controls are executed; OS/package release gate remains separate."
+    }
+  ],
+  "releaseGatesRemaining": [],
+  "boundaries": [
+    "These are coverage mappings, not 87 new end-to-end executions or an acceptance percentage.",
+    "The 12 scenario audit distinguishes three new final-candidate scenarios from nine composed native proofs. No 12 monolithic rerun claim.",
+    "The four formerly pending journey labels share G05. Their required narrow keyboard assertions and final packaged GUI checks pass; optional VoiceOver/OS IME compatibility remains separately unverified.",
+    "Provider/model replies and remote provider endpoints in automated proofs are fixtures; retained M5 is the separate historical live delivery.",
+    "Current active data, retained pilot and credentials remain unchanged. Approved temporary OS settings were restored after the bounded CUA attempt."
+  ],
+  "releaseGatesCompleted": [
+    {
+      "gate": "Original signed package visible GUI, read-only terminal, controlled output, close/reopen and measured footprint",
+      "receipt": "docs/testing/rust-native-final-gui-2026-10-04.json",
+      "result": "Passed within the stated bounded scope; preferred timing targets exceeded but hard bounds met. Daemon interruption/reattachment occurred after the GUI closed."
+    },
+    {
+      "gate": "Fresh retained regression suites with proposed native startup aliases",
+      "receipt": "docs/testing/rust-native-cutover-browser-environment-2026-10-04.json",
+      "result": "Domain 332/332, build passed, browser 31/31 after repairing the disposable checkout Mail prerequisite. Original 29/31 browser attempt retained; production source unchanged."
+    },
+    {
+      "gate": "Native-default startup and current documentation",
+      "receipt": "docs/testing/rust-native-default-cutover-2026-10-04.json",
+      "result": "Exact tested aliases, source bindings, npm dispatch and real private installed-launcher startup/reuse/cleanup pass. Optional OS compatibility is separately unverified."
+    }
+  ],
+  "optionalCompatibility": [
+    {
+      "id": "optional-voiceover",
+      "status": "unverified-nonblocking",
+      "reason": "Operator deprioritized VoiceOver for the personal release on 2026-10-04.",
+      "evidence": "docs/testing/rust-native-os-input-attempt-2026-10-04.json"
+    },
+    {
+      "id": "optional-os-ime",
+      "status": "unverified-nonblocking",
+      "reason": "Additional Japanese input-method compatibility check selected during migration; outside the accepted basic keyboard/layout requirement. No actual composition acceptance.",
+      "evidence": "docs/testing/rust-native-os-input-attempt-2026-10-04.json"
+    }
+  ],
+  "cutoverRevision": "8b23fb7f13846a09ad9c0599a29c5a82f4246333",
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

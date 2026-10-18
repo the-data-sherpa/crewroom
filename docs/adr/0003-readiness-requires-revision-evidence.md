@@ -1,0 +1,3 @@
+# Readiness requires evidence for the current revision
+
+Every coding result requires acceptance-criteria coverage, actual required check results, and independent review from a separate agent that did not implement it, all tied to the code revision assessed. Creating a PR and being ready for human review are separate facts: the pilot repository's hosted validation starts after PR creation, so publication must be possible while validation is pending. Failed or unavailable required checks prevent readiness; preserving this distinction costs additional state and provider reconciliation but avoids presenting publication or terminal inactivity as proof of correctness.

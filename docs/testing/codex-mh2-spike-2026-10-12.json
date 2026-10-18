@@ -1,0 +1,2270 @@
+{
+  "issue": "FOR-7",
+  "date": "2026-10-12",
+  "scope": "Compatibility spike, not production adapter acceptance",
+  "sourceRevision": "77054f8690ad361f582892042323dae454568c0e",
+  "operatorDirection": "Harnesses supply model access through existing authentication; no separate Crewroom API key prerequisite",
+  "syntheticRuns": [
+    {
+      "model": "gpt-6.1-sol",
+      "localEvidencePath": ".crewroom/mh2-spike-final-2026-10-12",
+      "exitCode": 0,
+      "passed": 23,
+      "total": 23,
+      "launch": {
+        "command": [
+          "bwrap",
+          "--unshare-all",
+          "--die-with-parent",
+          "--new-session",
+          "--ro-bind",
+          "/usr",
+          "/usr",
+          "--symlink",
+          "usr/bin",
+          "/bin",
+          "--symlink",
+          "usr/lib",
+          "/lib",
+          "--symlink",
+          "usr/lib",
+          "/lib64",
+          "--proc",
+          "/proc",
+          "--dev",
+          "/dev",
+          "--tmpfs",
+          "/tmp",
+          "--dir",
+          "/etc",
+          "--bind",
+          "/home/crewroom/Projects/crewroom/.crewroom/mh2-spike-final-2026-10-12",
+          "/work",
+          "--ro-bind",
+          "/home/crewroom/Projects/crewroom/scripts/probe_codex_runtime.py",
+          "/probe.py",
+          "--clearenv",
+          "--setenv",
+          "PATH",
+          "/usr/bin",
+          "--setenv",
+          "LANG",
+          "C.UTF-8",
+          "--ro-bind",
+          "/home/crewroom/.local/share/mise/installs/codex/0.162.0/bin/codex",
+          "/tools/codex",
+          "--ro-bind",
+          "/home/crewroom/Projects/crewroom/target/debug/examples/gateway-fixture",
+          "/tools/gateway",
+          "--ro-bind",
+          "/home/crewroom/Projects/crewroom/target/debug/examples/provider-oracle",
+          "/tools/oracle",
+          "--chdir",
+          "/work",
+          "--",
+          "/usr/bin/python3",
+          "/probe.py",
+          "--inside",
+          "--output",
+          "/work"
+        ],
+        "sourceRevision": "77054f8690ad361f582892042323dae454568c0e",
+        "scriptSha256": "b14ad814973ec68677636b7dc04aa82eed4d52f4dd340a1115beb4864f0d2602",
+        "binaries": {
+          "codex": {
+            "path": "/home/crewroom/.local/share/mise/installs/codex/0.162.0/bin/codex",
+            "sha256": "50ed828f357c655a3c82054d346cab8434f24901f14ec19b8267571bdd008b38"
+          },
+          "gateway": {
+            "path": "/home/crewroom/Projects/crewroom/target/debug/examples/gateway-fixture",
+            "sha256": "cd73e9be0a71b1cb445dc19725a7793a53f9916b08883588b463f73698fe76fd"
+          },
+          "oracle": {
+            "path": "/home/crewroom/Projects/crewroom/target/debug/examples/provider-oracle",
+            "sha256": "e8cad72ca867140bf4e9c286c5bbe159a5d4771570bbbe25bc7f34bef63f2794"
+          }
+        }
+      },
+      "isolation": {
+        "homeMounted": false,
+        "interfaces": [
+          {
+            "ifindex": 1,
+            "ifname": "lo",
+            "flags": [
+              "LOOPBACK",
+              "UP",
+              "LOWER_UP"
+            ],
+            "mtu": 65536,
+            "qdisc": "noqueue",
+            "operstate": "UNKNOWN",
+            "group": "default",
+            "txqlen": 1000,
+            "link_type": "loopback",
+            "address": "00:00:00:00:00:00",
+            "broadcast": "00:00:00:00:00:00",
+            "addr_info": [
+              {
+                "family": "inet",
+                "local": "127.0.0.1",
+                "prefixlen": 8,
+                "scope": "host",
+                "label": "lo",
+                "valid_life_time": 4294967295,
+                "preferred_life_time": 4294967295
+              },
+              {
+                "family": "inet6",
+                "local": "::1",
+                "prefixlen": 128,
+                "scope": "host",
+                "protocol": "kernel_lo",
+                "valid_life_time": 4294967295,
+                "preferred_life_time": 4294967295
+              }
+            ]
+          }
+        ],
+        "routes": []
+      },
+      "resultSha256": "961a898d37f1143a1bbbe37165a7281e8d0bcaf4d4f522433030bfaa14d55bbd",
+      "cases": [
+        {
+          "name": "flags-only-gateway",
+          "assertionsPassed": true,
+          "terminal": "failed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 403,
+              "model": null,
+              "effort": null,
+              "tools": []
+            }
+          ],
+          "upstreamRequestCount": 0,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "gatewayRejections": [
+            {
+              "type": "model_policy_rejected",
+              "code": "input_budget",
+              "cause": "unsupported_input",
+              "recovery": "configuration"
+            }
+          ]
+        },
+        {
+          "name": "restricted-gateway",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": null,
+              "effort": null,
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 1,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "gatewayRejections": []
+        },
+        {
+          "name": "restricted-direct-diagnostic",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/v1/responses",
+              "status": null,
+              "model": null,
+              "effort": null,
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 1,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "gatewayRejections": []
+        },
+        {
+          "name": "roundtrip",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 2,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "addressedResultObserved": true,
+          "gatewayRejections": []
+        },
+        {
+          "name": "deny-exec_command",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 2,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "nativeMarkerAbsent": true,
+          "serverToolCalls": 0,
+          "gatewayRejections": []
+        },
+        {
+          "name": "deny-apply_patch",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 2,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "nativeMarkerAbsent": true,
+          "serverToolCalls": 0,
+          "gatewayRejections": []
+        },
+        {
+          "name": "deny-apply_patch_custom",
+          "assertionsPassed": true,
+          "terminal": "failed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 403,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 1,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "nativeMarkerAbsent": true,
+          "serverToolCalls": 0,
+          "gatewayRejections": [
+            {
+              "type": "model_policy_rejected",
+              "code": "input_budget",
+              "cause": "unsupported_input",
+              "recovery": "configuration"
+            }
+          ]
+        },
+        {
+          "name": "deny-spawn_agent",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 2,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "nativeMarkerAbsent": true,
+          "serverToolCalls": 0,
+          "gatewayRejections": []
+        },
+        {
+          "name": "deny-update_plan",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 2,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "nativeMarkerAbsent": true,
+          "serverToolCalls": 0,
+          "gatewayRejections": []
+        },
+        {
+          "name": "deny-request_user_input",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 2,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "nativeMarkerAbsent": true,
+          "serverToolCalls": 0,
+          "gatewayRejections": []
+        },
+        {
+          "name": "deny-web.run",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 2,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "nativeMarkerAbsent": true,
+          "serverToolCalls": 0,
+          "gatewayRejections": []
+        },
+        {
+          "name": "interrupt-stream",
+          "assertionsPassed": true,
+          "terminal": "interrupted",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 1,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "gatewayRejections": []
+        },
+        {
+          "name": "interrupt-tool",
+          "assertionsPassed": true,
+          "terminal": "interrupted",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 1,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "gatewayRejections": []
+        },
+        {
+          "name": "resume-completed",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 3,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "historyAndDynamicToolSurvived": true,
+          "gatewayRejections": []
+        },
+        {
+          "name": "crash-before-effect",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 3,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "effectCount": 0,
+          "hostReceiptPresent": false,
+          "recoveredToolOutputs": [
+            {
+              "type": "function_call_output",
+              "id": "fco_af8f4a45-ccd8-514b-91ce-d7701268dae5",
+              "call_id": "stable_fixture_call",
+              "output": "aborted"
+            }
+          ],
+          "gatewayRejections": []
+        },
+        {
+          "name": "crash-after-effect",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 3,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "effectCount": 1,
+          "hostReceiptPresent": false,
+          "recoveredToolOutputs": [
+            {
+              "type": "function_call_output",
+              "id": "fco_c9655edc-b26c-58ed-8195-7c053ff0c4c5",
+              "call_id": "stable_fixture_call",
+              "output": "aborted"
+            }
+          ],
+          "gatewayRejections": []
+        },
+        {
+          "name": "crash-after-receipt",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 3,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "effectCount": 1,
+          "hostReceiptPresent": true,
+          "recoveredToolOutputs": [
+            {
+              "type": "function_call_output",
+              "id": "fco_7dda6db9-e897-588d-a511-6ce4ce9f3159",
+              "call_id": "stable_fixture_call",
+              "output": "aborted"
+            }
+          ],
+          "gatewayRejections": []
+        },
+        {
+          "name": "crash-after-reply",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 4,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "effectCount": 1,
+          "hostReceiptPresent": true,
+          "recoveredToolOutputs": [
+            {
+              "type": "function_call_output",
+              "id": "fco_01a131f0-0001-7ae0-9103-15b8a8f3f08b",
+              "call_id": "stable_fixture_call",
+              "output": "SAVED_RESULT"
+            }
+          ],
+          "gatewayRejections": []
+        },
+        {
+          "name": "policy-effort",
+          "assertionsPassed": true,
+          "terminal": "failed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 403,
+              "model": "gpt-6.1-sol",
+              "effort": "high",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 0,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "gatewayRejections": [
+            {
+              "type": "model_policy_rejected"
+            }
+          ]
+        },
+        {
+          "name": "policy-context",
+          "assertionsPassed": true,
+          "terminal": "failed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 403,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 0,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "gatewayRejections": [
+            {
+              "type": "model_policy_rejected",
+              "code": "input_budget",
+              "cause": "context_window",
+              "recovery": "fresh_session"
+            }
+          ]
+        },
+        {
+          "name": "provider-error",
+          "assertionsPassed": true,
+          "terminal": "failed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 429,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 1,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "gatewayRejections": []
+        },
+        {
+          "name": "compact",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": []
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 4,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "compactionRequest": {
+            "path": "/provider/v1/responses",
+            "status": 200,
+            "encoding": null
+          },
+          "compactionCompatible": true,
+          "gatewayRejections": []
+        },
+        {
+          "name": "two-processes",
+          "assertionsPassed": true,
+          "terminal": null,
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6.1-sol",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 4,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "distinctAddressedProcesses": true,
+          "gatewayRejections": []
+        }
+      ]
+    },
+    {
+      "model": "gpt-6-astra",
+      "localEvidencePath": ".crewroom/mh2-spike-astra-2026-10-12",
+      "exitCode": 0,
+      "passed": 23,
+      "total": 23,
+      "launch": {
+        "command": [
+          "bwrap",
+          "--unshare-all",
+          "--die-with-parent",
+          "--new-session",
+          "--ro-bind",
+          "/usr",
+          "/usr",
+          "--symlink",
+          "usr/bin",
+          "/bin",
+          "--symlink",
+          "usr/lib",
+          "/lib",
+          "--symlink",
+          "usr/lib",
+          "/lib64",
+          "--proc",
+          "/proc",
+          "--dev",
+          "/dev",
+          "--tmpfs",
+          "/tmp",
+          "--dir",
+          "/etc",
+          "--bind",
+          "/home/crewroom/Projects/crewroom/.crewroom/mh2-spike-astra-2026-10-12",
+          "/work",
+          "--ro-bind",
+          "/home/crewroom/Projects/crewroom/scripts/probe_codex_runtime.py",
+          "/probe.py",
+          "--clearenv",
+          "--setenv",
+          "PATH",
+          "/usr/bin",
+          "--setenv",
+          "LANG",
+          "C.UTF-8",
+          "--ro-bind",
+          "/home/crewroom/.local/share/mise/installs/codex/0.162.0/bin/codex",
+          "/tools/codex",
+          "--ro-bind",
+          "/home/crewroom/Projects/crewroom/target/debug/examples/gateway-fixture",
+          "/tools/gateway",
+          "--ro-bind",
+          "/home/crewroom/Projects/crewroom/target/debug/examples/provider-oracle",
+          "/tools/oracle",
+          "--chdir",
+          "/work",
+          "--",
+          "/usr/bin/python3",
+          "/probe.py",
+          "--inside",
+          "--output",
+          "/work",
+          "--model",
+          "gpt-6-astra"
+        ],
+        "sourceRevision": "77054f8690ad361f582892042323dae454568c0e",
+        "scriptSha256": "e6bb083376171a99dd99ca3b28b1de08490c85b4d2d9f4ecfa85eae9a0df2178",
+        "binaries": {
+          "codex": {
+            "path": "/home/crewroom/.local/share/mise/installs/codex/0.162.0/bin/codex",
+            "sha256": "50ed828f357c655a3c82054d346cab8434f24901f14ec19b8267571bdd008b38"
+          },
+          "gateway": {
+            "path": "/home/crewroom/Projects/crewroom/target/debug/examples/gateway-fixture",
+            "sha256": "cd73e9be0a71b1cb445dc19725a7793a53f9916b08883588b463f73698fe76fd"
+          },
+          "oracle": {
+            "path": "/home/crewroom/Projects/crewroom/target/debug/examples/provider-oracle",
+            "sha256": "e8cad72ca867140bf4e9c286c5bbe159a5d4771570bbbe25bc7f34bef63f2794"
+          }
+        }
+      },
+      "isolation": {
+        "homeMounted": false,
+        "interfaces": [
+          {
+            "ifindex": 1,
+            "ifname": "lo",
+            "flags": [
+              "LOOPBACK",
+              "UP",
+              "LOWER_UP"
+            ],
+            "mtu": 65536,
+            "qdisc": "noqueue",
+            "operstate": "UNKNOWN",
+            "group": "default",
+            "txqlen": 1000,
+            "link_type": "loopback",
+            "address": "00:00:00:00:00:00",
+            "broadcast": "00:00:00:00:00:00",
+            "addr_info": [
+              {
+                "family": "inet",
+                "local": "127.0.0.1",
+                "prefixlen": 8,
+                "scope": "host",
+                "label": "lo",
+                "valid_life_time": 4294967295,
+                "preferred_life_time": 4294967295
+              },
+              {
+                "family": "inet6",
+                "local": "::1",
+                "prefixlen": 128,
+                "scope": "host",
+                "protocol": "kernel_lo",
+                "valid_life_time": 4294967295,
+                "preferred_life_time": 4294967295
+              }
+            ]
+          }
+        ],
+        "routes": []
+      },
+      "resultSha256": "ec0b3ab6b60f9aa43f77317886e0dcf8cfaa8669e3180ca7a8a6d61563a5f15e",
+      "cases": [
+        {
+          "name": "flags-only-gateway",
+          "assertionsPassed": true,
+          "terminal": "failed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 403,
+              "model": null,
+              "effort": null,
+              "tools": []
+            }
+          ],
+          "upstreamRequestCount": 0,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "gatewayRejections": [
+            {
+              "type": "model_policy_rejected",
+              "code": "input_budget",
+              "cause": "unsupported_input",
+              "recovery": "configuration"
+            }
+          ]
+        },
+        {
+          "name": "restricted-gateway",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": null,
+              "effort": null,
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 1,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "gatewayRejections": []
+        },
+        {
+          "name": "restricted-direct-diagnostic",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/v1/responses",
+              "status": null,
+              "model": null,
+              "effort": null,
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 1,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "gatewayRejections": []
+        },
+        {
+          "name": "roundtrip",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 2,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "addressedResultObserved": true,
+          "gatewayRejections": []
+        },
+        {
+          "name": "deny-exec_command",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 2,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "nativeMarkerAbsent": true,
+          "serverToolCalls": 0,
+          "gatewayRejections": []
+        },
+        {
+          "name": "deny-apply_patch",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 2,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "nativeMarkerAbsent": true,
+          "serverToolCalls": 0,
+          "gatewayRejections": []
+        },
+        {
+          "name": "deny-apply_patch_custom",
+          "assertionsPassed": true,
+          "terminal": "failed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 403,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 1,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "nativeMarkerAbsent": true,
+          "serverToolCalls": 0,
+          "gatewayRejections": [
+            {
+              "type": "model_policy_rejected",
+              "code": "input_budget",
+              "cause": "unsupported_input",
+              "recovery": "configuration"
+            }
+          ]
+        },
+        {
+          "name": "deny-spawn_agent",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 2,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "nativeMarkerAbsent": true,
+          "serverToolCalls": 0,
+          "gatewayRejections": []
+        },
+        {
+          "name": "deny-update_plan",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 2,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "nativeMarkerAbsent": true,
+          "serverToolCalls": 0,
+          "gatewayRejections": []
+        },
+        {
+          "name": "deny-request_user_input",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 2,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "nativeMarkerAbsent": true,
+          "serverToolCalls": 0,
+          "gatewayRejections": []
+        },
+        {
+          "name": "deny-web.run",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 2,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "nativeMarkerAbsent": true,
+          "serverToolCalls": 0,
+          "gatewayRejections": []
+        },
+        {
+          "name": "interrupt-stream",
+          "assertionsPassed": true,
+          "terminal": "interrupted",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 1,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "gatewayRejections": []
+        },
+        {
+          "name": "interrupt-tool",
+          "assertionsPassed": true,
+          "terminal": "interrupted",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 1,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "gatewayRejections": []
+        },
+        {
+          "name": "resume-completed",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 3,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "historyAndDynamicToolSurvived": true,
+          "gatewayRejections": []
+        },
+        {
+          "name": "crash-before-effect",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 3,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "effectCount": 0,
+          "hostReceiptPresent": false,
+          "recoveredToolOutputs": [
+            {
+              "type": "function_call_output",
+              "id": "fco_20f5c48c-d322-5748-9bd4-07a8695e463d",
+              "call_id": "stable_fixture_call",
+              "output": "aborted"
+            }
+          ],
+          "gatewayRejections": []
+        },
+        {
+          "name": "crash-after-effect",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 3,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "effectCount": 1,
+          "hostReceiptPresent": false,
+          "recoveredToolOutputs": [
+            {
+              "type": "function_call_output",
+              "id": "fco_826154d1-80c2-542a-83c9-0c5198bc3299",
+              "call_id": "stable_fixture_call",
+              "output": "aborted"
+            }
+          ],
+          "gatewayRejections": []
+        },
+        {
+          "name": "crash-after-receipt",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 3,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "effectCount": 1,
+          "hostReceiptPresent": true,
+          "recoveredToolOutputs": [
+            {
+              "type": "function_call_output",
+              "id": "fco_7c231936-74fb-507b-a901-211a2d10891b",
+              "call_id": "stable_fixture_call",
+              "output": "aborted"
+            }
+          ],
+          "gatewayRejections": []
+        },
+        {
+          "name": "crash-after-reply",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 4,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "effectCount": 1,
+          "hostReceiptPresent": true,
+          "recoveredToolOutputs": [
+            {
+              "type": "function_call_output",
+              "id": "fco_01a131f1-4453-76b3-9085-7c71647b14b3",
+              "call_id": "stable_fixture_call",
+              "output": "SAVED_RESULT"
+            }
+          ],
+          "gatewayRejections": []
+        },
+        {
+          "name": "policy-effort",
+          "assertionsPassed": true,
+          "terminal": "failed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 403,
+              "model": "gpt-6-astra",
+              "effort": "high",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 0,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "gatewayRejections": [
+            {
+              "type": "model_policy_rejected"
+            }
+          ]
+        },
+        {
+          "name": "policy-context",
+          "assertionsPassed": true,
+          "terminal": "failed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 403,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 0,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "gatewayRejections": [
+            {
+              "type": "model_policy_rejected",
+              "code": "input_budget",
+              "cause": "context_window",
+              "recovery": "fresh_session"
+            }
+          ]
+        },
+        {
+          "name": "provider-error",
+          "assertionsPassed": true,
+          "terminal": "failed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 429,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 1,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "gatewayRejections": []
+        },
+        {
+          "name": "compact",
+          "assertionsPassed": true,
+          "terminal": "completed",
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": []
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 4,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "compactionRequest": {
+            "path": "/provider/v1/responses",
+            "status": 200,
+            "encoding": null
+          },
+          "compactionCompatible": true,
+          "gatewayRejections": []
+        },
+        {
+          "name": "two-processes",
+          "assertionsPassed": true,
+          "terminal": null,
+          "requestSummaries": [
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            },
+            {
+              "path": "/provider/v1/responses",
+              "status": 200,
+              "model": "gpt-6-astra",
+              "effort": "low",
+              "tools": [
+                {
+                  "type": "function",
+                  "name": "crewroom_echo"
+                }
+              ]
+            }
+          ],
+          "upstreamRequestCount": 4,
+          "allChildrenReaped": true,
+          "fixtureErrors": [],
+          "distinctAddressedProcesses": true,
+          "gatewayRejections": []
+        }
+      ]
+    }
+  ],
+  "liveNativeAuth": {
+    "localEvidencePath": ".crewroom/mh2-native-auth-ca-2026-10-12",
+    "exitCode": 0,
+    "launch": {
+      "sourceRevision": "77054f8690ad361f582892042323dae454568c0e",
+      "model": "gpt-6-astra",
+      "codexPath": "/home/crewroom/.local/share/mise/installs/codex/0.162.0/bin/codex",
+      "scriptSha256": "fdc1bd1b280a20eb6e299cb55a9071e70946fd975ac59a375b8a30ceb8ffff6f",
+      "helperSha256": "e6bb083376171a99dd99ca3b28b1de08490c85b4d2d9f4ecfa85eae9a0df2178",
+      "codexSha256": "50ed828f357c655a3c82054d346cab8434f24901f14ec19b8267571bdd008b38",
+      "authSource": "existing Codex login, read-only bind; no credential copy",
+      "wallLimitSeconds": 180
+    },
+    "result": {
+      "scope": "live native ChatGPT-authenticated Codex; no Crewroom gateway",
+      "model": "gpt-6-astra",
+      "effort": "low",
+      "assertionsPassed": true,
+      "authFileReadOnly": true,
+      "networkNamespace": "shared host network",
+      "repositoryMounted": false,
+      "accountType": "chatgpt",
+      "accountResponseShape": {
+        "replyKeys": [
+          "id",
+          "result"
+        ],
+        "resultKeys": [
+          "account",
+          "requiresOpenaiAuth",
+          "workspaceRouting"
+        ],
+        "errorCode": null,
+        "errorMessage": null
+      },
+      "effective": {
+        "model": "gpt-6-astra",
+        "modelProvider": "openai",
+        "reasoningEffort": "low",
+        "approvalPolicy": "never",
+        "sandbox": {
+          "type": "readOnly",
+          "networkAccess": false
+        }
+      },
+      "threadId": "01a131f2-3914-7a10-a7ee-2abccad69d82",
+      "initial": {
+        "turnId": "01a131f2-391a-76f2-a49c-beae3cd21c13",
+        "status": "completed",
+        "toolCalls": [
+          {
+            "rpcId": 0,
+            "threadId": "01a131f2-3914-7a10-a7ee-2abccad69d82",
+            "turnId": "01a131f2-391a-76f2-a49c-beae3cd21c13",
+            "callId": "call_9dMnlTvZmmBL3hQCbzwQj5Ww",
+            "namespace": null,
+            "tool": "crewroom_echo",
+            "arguments": {
+              "text": "LIVE_REQUEST"
+            }
+          }
+        ],
+        "returnedExpectedResult": true,
+        "usage": [
+          {
+            "total": {
+              "totalTokens": 5081,
+              "inputTokens": 5044,
+              "cachedInputTokens": 0,
+              "cacheWriteInputTokens": 0,
+              "outputTokens": 37,
+              "reasoningOutputTokens": 0
+            },
+            "last": {
+              "totalTokens": 5081,
+              "inputTokens": 5044,
+              "cachedInputTokens": 0,
+              "cacheWriteInputTokens": 0,
+              "outputTokens": 37,
+              "reasoningOutputTokens": 0
+            },
+            "modelContextWindow": 258400
+          },
+          {
+            "total": {
+              "totalTokens": 10225,
+              "inputTokens": 10161,
+              "cachedInputTokens": 4864,
+              "cacheWriteInputTokens": 0,
+              "outputTokens": 64,
+              "reasoningOutputTokens": 0
+            },
+            "last": {
+              "totalTokens": 5144,
+              "inputTokens": 5117,
+              "cachedInputTokens": 4864,
+              "cacheWriteInputTokens": 0,
+              "outputTokens": 27,
+              "reasoningOutputTokens": 0
+            },
+            "modelContextWindow": 258400
+          }
+        ]
+      },
+      "firstStop": {
+        "pid": 21,
+        "exitCode": -9,
+        "reaped": true
+      },
+      "resumedSameThread": true,
+      "afterRestart": {
+        "turnId": "01a131f2-50f4-7003-adfc-c310bb4e0f90",
+        "status": "completed",
+        "toolCalls": [],
+        "returnedExpectedResult": true,
+        "usage": [
+          {
+            "total": {
+              "totalTokens": 15421,
+              "inputTokens": 15330,
+              "cachedInputTokens": 9856,
+              "cacheWriteInputTokens": 0,
+              "outputTokens": 91,
+              "reasoningOutputTokens": 0
+            },
+            "last": {
+              "totalTokens": 5196,
+              "inputTokens": 5169,
+              "cachedInputTokens": 4992,
+              "cacheWriteInputTokens": 0,
+              "outputTokens": 27,
+              "reasoningOutputTokens": 0
+            },
+            "modelContextWindow": 258400
+          }
+        ]
+      },
+      "modelReroutes": [],
+      "cleanup": [
+        {
+          "pid": 84,
+          "exitCode": 0,
+          "reaped": true
+        },
+        {
+          "pid": 21,
+          "exitCode": -9,
+          "reaped": true
+        }
+      ]
+    },
+    "authSourceCheck": {
+      "sizeAndMtimeUnchanged": true
+    },
+    "resultSha256": "0c92a8b4fc0041749eda90fd0c79f2c348d3a2a630bbc675064f7803a365c2c5"
+  },
+  "failedDevelopmentRuns": [
+    {
+      "path": ".crewroom/mh2-spike-initial-2026-10-12",
+      "reason": "Probe root calculation assumed two parents inside /probe.py; corrected before cases ran."
+    },
+    {
+      "path": ".crewroom/mh2-spike-expanded-2026-10-12",
+      "passed": 21,
+      "total": 23,
+      "reason": "Context case exceeded Codex own 1048576-character input limit before gateway. Compaction fixture had no queued response, causing synthetic HTTP 500. Corrected fixture budget/prompt and supplied compaction response."
+    },
+    {
+      "path": ".crewroom/mh2-native-auth-2026-10-12",
+      "reason": "Native account/read failed before thread/inference. Initial fixture omitted CA trust bundle target."
+    },
+    {
+      "path": ".crewroom/mh2-native-auth-diagnostic-2026-10-12",
+      "reason": "account/read -32603 workspace routing discovery failed; curl confirmed missing trust anchors. Added read-only /etc/ca-certificates mount."
+    }
+  ],
+  "validation": {
+    "rustFixtureBuild": "cargo build --locked -p crewroom-runtime --example gateway-fixture --example provider-oracle: passed",
+    "pythonSyntax": "python3 -m py_compile scripts/probe_codex_runtime.py scripts/probe_codex_native_auth.py: passed",
+    "applicationSuites": "Not rerun; production Rust/TypeScript/domain/user-flow code unchanged. Earlier focused baseline and historical Linux 29/31 browser result remain separate.",
+    "reviewArtifact": "Existing Crewroom palette; updated follow-up rendered in dark/light at 1280 and 390 px, without overflow or page errors.",
+    "receiptIntegrity": "Checked current synthetic/native probe SHA-256 against receipt and report relative links; git diff --check passed."
+  },
+  "remaining": [
+    "Production runner seam and Codex adapter",
+    "Stable host receipt mapping/reconciliation across replacement attempts",
+    "Harness auth refresh/concurrent-account ownership contract",
+    "Native-route usage snapshots, active-time enforcement, reroute and unsupported-control handling",
+    "External Mail, production stopped-ownership/contained-tool and legacy OMP regression acceptance"
+  ],
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

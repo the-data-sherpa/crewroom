@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "id": "replay-before-revalidation",
+  "issue": "FOR-13",
+  "repository": "the-data-sherpa/crewroom",
+  "invariant": "Within an authenticated request path, check immutable request identity and return an already committed receipt before revalidating mutable state that belongs only to a new request. A different payload under the same key still conflicts.",
+  "scope": "Committed keyed learning proposals and package reports; caller authentication, run/attempt scope and immutable request identity remain mandatory. This is an existing-enforcement claim, not a new workflow authority.",
+  "occurrences": [
+    {
+      "id": "r8-learning-proposal-review-2026-09-29",
+      "observedAt": null,
+      "affectedRevision": null,
+      "behavior": "The retained R8 independent-review summary reports that replay revalidated the changed target before looking up the saved call. The final correction returns the stored proposal before reading current role or guidance versions.",
+      "independence": "A learning-proposal correction recorded on 2026-09-29, independent of the later MH6 package-report review. The checked-in summary is available; the original reviewer transcript and pre-fix executable were not recovered. The pinned commit contains the post-repair record, not an identified bad executable.",
+      "source": {
+        "kind": "git",
+        "revision": "062e30b70fd9f50cb6eb02c99bc26b2239e7a529",
+        "path": "docs/testing/mvp-progress.md",
+        "sha256": "2c5fb7c30096aa7db8d22520824c293b1e96fef9505f367fe2c37755f2a36145",
+        "excerpt": {
+          "startLine": 438,
+          "endLine": 438,
+          "sha256": "9f59ffcb086133b92e229aa7e012e9fd5df51f09b0fde6509471fa616b025a75"
+        }
+      }
+    },
+    {
+      "id": "mh6-package-report-review-finding-3",
+      "observedAt": null,
+      "affectedRevision": "2a9bf0c0f6c7f5ae24426e214974208527f5d7df",
+      "behavior": "After a saved package report and a legitimate later writer edit, retrying the identical key/payload failed with Package artifact changed before the durable receipt could be consulted. Exactly one saved report remained.",
+      "independence": "Finding 3 in the retained MH6 specification review against 2a9bf0c is a separate domain and later review event. The original diagnostic and log corroborate this occurrence and are not additional occurrences.",
+      "source": {
+        "kind": "private",
+        "path": "historical-01/originals/for11-spec-review.md",
+        "sha256": "bdc57b0a73159784071a877298d1b5db6ac4b3b574fe5917876f75f4f8e45869",
+        "excerpt": {
+          "startLine": 23,
+          "endLine": 29,
+          "sha256": "c5e719ebdafd863a2c7692849ac627e12e85565d224638ec9affffba1af96ff1"
+        }
+      }
+    }
+  ],
+  "remedy": {
+    "primaryLayer": "domain_api",
+    "supportingLayers": [
+      "behavioral_test"
+    ],
+    "rationale": "The keyed receipt boundary can distinguish a committed replay from a new request and reject changed immutable content before consulting mutable target or file state. The existing implementation already owns that ordering.",
+    "strongerLayersConsidered": [
+      {
+        "layer": "types",
+        "reason": "Types alone cannot establish whether this request committed or whether current persistent/file state changed after that receipt."
+      },
+      {
+        "layer": "static_analysis",
+        "reason": "A generic syntactic rule cannot establish the correct lifecycle ordering across these two domain boundaries."
+      }
+    ],
+    "existingEnforcementInspection": "Within the authenticated request path, server/learning.ts Learning.propose reads committed replay before current target validation; caller/coordinator authentication is enforced by its surrounding request path. tests/learning.test.ts covers changed target and changed payload. Native Workflow::choreography_tool calls Store::replay_package before artifact IO, backed by crates/crewroom-core/src/choreography/records.rs. The portable fixture reuses this existing production enforcement."
+  },
+  "enforcement": {
+    "claim": "mechanical",
+    "source": {
+      "kind": "git",
+      "revision": "a80ade02b821c228a96c006021ef1dcda192e222",
+      "path": "crates/crewroom-runtime/src/supervisor/workflow/choreography.rs",
+      "sha256": "4443208c414da66aacc2bcfcf04d53162cc199da50c484ac45fcdf744cc5c209"
+    },
+    "symbol": "Workflow::choreography_tool (coding/package) / Store::replay_package",
+    "check": {
+      "kind": "private",
+      "path": "historical-01/correction-replay.test.ts",
+      "sha256": "177b4c5a2ab0f4617503da1698c15e26c622a922dbf2b241ba873e2e23470728"
+    },
+    "historicalBadSource": {
+      "kind": "git",
+      "revision": "2a9bf0c0f6c7f5ae24426e214974208527f5d7df",
+      "path": "crates/crewroom-runtime/src/supervisor/workflow/choreography.rs",
+      "sha256": "abedf43289ee8a66ccbfc5305951fe1e1e494bdd21c9972d9448c6879abedd24"
+    },
+    "legitimateBehavior": "An unchanged authenticated report replay returns its original receipt after a real authorized later file edit, preserving that edit, one saved report and its artifact inventory. A different payload under that key conflicts."
+  },
+  "verification": {
+    "proof": {
+      "kind": "private",
+      "path": "historical-01/proof.json",
+      "sha256": "5ae5a6e3232869ad0cf85c946e9757d6b99f0869b1bc941a4546f82040acb1a8",
+      "jsonPointer": {
+        "pointer": "/correctionProof",
+        "sha256": "80a44eb8c7cb075b3cf493e35539658cdcfd125fc192c736df5c5b5e86621921"
+      }
+    },
+    "limits": [
+      "R8 recurrence evidence is the checked-in historical review summary; no original reviewer transcript or historical bad executable was found.",
+      "MH6 diagnostic success originally meant the defect was observed; only the inverted portable fixture establishes correct-behavior regression proof.",
+      "No live provider delivery, S7 proposal/adoption, native UI journey, platform certification or new production enforcement is claimed."
+    ]
+  },
+  "disposition": {
+    "kind": "existing_enforcement_reused",
+    "links": []
+  },
+  "independentReview": {
+    "kind": "private",
+    "path": "review-01.json",
+    "sha256": "c4dc25cf67a464f30eddb361aae900de1ef1d55189974233fa84fe0508be99f1"
+  },
+  "validationOutputs": []
+}

@@ -1,0 +1,102 @@
+{
+  "accepted": true,
+  "date": "2026-10-02",
+  "checkout": "/Users/crewroom/.codex/worktrees/m7-installation/crewroom",
+  "applicationCommit": "47de5837092e1d07a0502bacf99835486a497e39",
+  "initialNodeModulesAbsent": true,
+  "initialTrackedWorktreeClean": true,
+  "npmCi": {
+    "passed": true,
+    "installedPackages": 115,
+    "log": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-fresh-installation/fresh-npm-ci.log"
+  },
+  "build": {
+    "passed": true,
+    "log": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-fresh-installation/fresh-build.log"
+  },
+  "startup": {
+    "passed": true,
+    "error": null,
+    "applicationCommit": "47de5837092e1d07a0502bacf99835486a497e39",
+    "command": "npm start",
+    "freshWorkbench": true,
+    "builtUiServed": true,
+    "foreignOriginRefused": true,
+    "shutdownProcesses": [
+      [
+        "21177",
+        "npm start"
+      ],
+      [
+        "21192",
+        "node /Users/crewroom/.codex/worktrees/m7-installation/crewroom/node_modules/.bin/tsx server/index.ts --production"
+      ],
+      [
+        "21193",
+        "/opt/homebrew/Cellar/node/26.10.0_1/bin/node --require /Users/crewroom/.codex/worktrees/m7-installation/crewroom/node_modules/tsx/dist/preflight.cjs --import file:///Users/crewroom/.codex/worktrees/m7-installation/crewroom/node_modules/tsx/dist/loader.mjs server/index.ts --production"
+      ],
+      [
+        "21194",
+        "/Users/crewroom/.codex/worktrees/m7-installation/crewroom/node_modules/@esbuild/darwin-arm64/bin/esbuild --service=0.28.2 --ping"
+      ],
+      [
+        "21210",
+        "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python /Users/crewroom/.codex/worktrees/m7-installation/crewroom/server/runtime/process-lease.py hold /private/tmp/cr-m7-start1/data/controller abc2e351-dac7-4227-bd41-e30b59e6cd91"
+      ]
+    ],
+    "scope": "No runtime or provider configuration. Real production CLI and built UI; no live integrations."
+  },
+  "configurationRestoreAndSubsequentRun": {
+    "passed": true,
+    "applicationCommit": "47de5837092e1d07a0502bacf99835486a497e39",
+    "error": null,
+    "providerRequests": 26,
+    "providerErrors": [],
+    "unexpectedSurvivingProcesses": [],
+    "backupEntries": 695,
+    "mailRestarts": 2,
+    "retainedCommandReceipts": 1,
+    "observedModelIdentities": true,
+    "runtime": {
+      "passed": true,
+      "freshConfiguration": true,
+      "cliLaunches": 2,
+      "runId": "f53e24ba-1f7e-4749-856b-86b0aa8c8c98",
+      "subsequentRun": "1ae720d7-41ef-4ed0-adf8-596f41aceb2b",
+      "firstLocalEvidenceReady": true,
+      "subsequentResearchCompleted": true,
+      "restored": {
+        "requirements": true,
+        "steering": true,
+        "messages": 3,
+        "sessions": 4,
+        "artifacts": [
+          "747bd13f-b059-4381-8ecb-4100bbeeafac",
+          "bd0c12b2-6ffb-485b-ae13-24e3fb3420cf"
+        ],
+        "candidate": {
+          "base": "19e9f47b4415b291c22c13d94f9ed8a0e235ab10",
+          "head": "a1ebdba674845d9bfe124b1ff009d86dabfec5ba",
+          "tree": "694c09b7bef7fbe4645bb4ddfaa6291a8d7b4d70",
+          "worktreeHash": "37e6cfd4261401d1bf01f5c7347709a19414ffeec5a19cca13f56f44d36d641b",
+          "dirty": false,
+          "requirementsHash": "6dbe3969c7fc3189a2e7a6010ddbffcaf3969b4e05640463b069b6f7393c53b2",
+          "instructionsHash": "0f0a7c9ccc371dfa4418d70204f7311391947bfddf5dcb731411fbcc168f7a6d"
+        },
+        "ownedWorktree": "/private/tmp/cr-m7-fresh1/installation/data/worktrees/f53e24ba-1f7e-4749-856b-86b0aa8c8c98",
+        "roleHash": "545df794ffe507debcd5c1bfa58e4a57f45cd79d0e813d8fc2c445c5f41a61ff",
+        "runtimeHash": "6e33a76d1704da6fafc5094970cb4e1de1828985ff3d9dafd7dfbf9475669308"
+      },
+      "providerBoundary": "Scripted model responses; no Jira or Bitbucket delivery configured."
+    },
+    "scope": "Fresh configuration and whole-state same-path recovery with real CLI/OMP/Mail/Git/checks; scripted models; no live Jira or Bitbucket delivery."
+  },
+  "dependencyTreesIdentical": true,
+  "dependencyTreeSha256": "1ccfd57f00a49fd88354294420b46ce375d77c70ca9cd681f610781bf3e55e0a",
+  "applicationAndLockfileDiffFromFinalChecks": [],
+  "requiredCheckEvidence": "m7-operations-2026-10-02.json",
+  "checkScope": "332/332 domain and 31/31 browser on unchanged application source and identical resolved dependencies at 5ea1b1b. Later f25a951 only changes fixture editor settings and default release-output path; affected fixture 1/1 and release accounting 6/6 pass, and build passes from fresh checkout. No claim that the full domain suite ran again inside this checkout.",
+  "retainedRoot": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-fresh-installation",
+  "runtimeProvisioning": "Existing validated macOS Node/Python/Git/OMP/tmux/Mail/Docker and pinned images; fresh npm dependencies and application configuration, not a new OS installation.",
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

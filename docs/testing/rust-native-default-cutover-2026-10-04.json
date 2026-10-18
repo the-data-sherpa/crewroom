@@ -1,0 +1,166 @@
+{
+  "kind": "native-default-cutover",
+  "recordedAt": "2026-10-04T16:51:45.426835+00:00",
+  "passed": true,
+  "scope": "Repository native startup and documentation cutover for the agreed personal operator workflow. No active installation migrated or restarted.",
+  "mainBeforeCutover": "bb951cccc4b23455a7a7c7d129e999babb6cabad",
+  "candidateSource": "8f3e325870e40209f42c43ef0009e953f45398f5",
+  "acceptanceScope": {
+    "userSteering": "I don’t think that I really care for VoiceOver, unless it’s an optional feature",
+    "voiceOver": "Optional, unverified; removed as a release blocker following operator direction.",
+    "osIme": "Optional, unverified compatibility follow-up. Actual Japanese composition was an additional agent-selected validation beyond the accepted basic keyboard/layout contract; no claim that the operator requested or passed it.",
+    "requiredKeyboardAndLayout": "Accepted original MVP requirement: basic keyboard access and usable narrow layouts. Native controls, labels, Unicode text, draft protection and packaged interaction remain implemented and have direct bounded evidence.",
+    "priorAttempt": "docs/testing/rust-native-os-input-attempt-2026-10-04.json",
+    "newOsChanges": false,
+    "alternateAutomationUsed": false
+  },
+  "sourceBinding": {
+    "packageJsonSha256": "b1740385fe9c637f6cbb95bb6ceb1d9767b2eac103d204161df0dac4b2209205",
+    "matchesExactTestedProposal": true,
+    "retainedRegressionInputCount": 175,
+    "originalManifestEntries": 2082,
+    "matchedOriginalEntries": 2081,
+    "testOnlyDifferences": [
+      {
+        "path": "scripts/rust/daemon-client.ts",
+        "candidateSha256": "a9683138ab183b85c5bdb47b081c4a6cfd661e0f5928632a7f7307668e883b65",
+        "currentSha256": "e788c839fbd8fc65dd71c3e7f7033c3af6744bda094c76b22b9096a909adfbc9",
+        "reason": "Test-only optional daemon binary injection for package-bound final scenarios; not a shipping build input."
+      }
+    ],
+    "startupSourceHashes": {
+      "scripts/run-native.sh": "9c88a07aa32b88006b4ff2fd4bbc29a50e96c5275aa1f105e7712f87380c16ec",
+      "scripts/launch-native.sh": "eef0c15e3936fad9ac7f1a64550f9c45b6e89f8737a7f56763d32a6c1fa8142c",
+      "scripts/package-native.py": "2346856a696f98349a0d0325e93618a2c920cae04086d07769b4ae23733fb87a",
+      "scripts/bootstrap-native.py": "375392221c47ad655ef39e4a7a9cad62187e1332a4c0ca8291be6a6c88821ad3"
+    },
+    "productionSourceUnchanged": true
+  },
+  "verification": {
+    "passed": true,
+    "recordedAt": "2026-10-04T16:50:15.316281+00:00",
+    "mainBeforeCutoverCommit": "bb951cccc4b23455a7a7c7d129e999babb6cabad",
+    "candidateSource": "8f3e325870e40209f42c43ef0009e953f45398f5",
+    "packageJsonSha256": "b1740385fe9c637f6cbb95bb6ceb1d9767b2eac103d204161df0dac4b2209205",
+    "retainedRegressionInputsMatched": 175,
+    "nativeSourceInputsMatched": 2081,
+    "manifestInputCount": 2082,
+    "fixtureInputDifferences": [
+      {
+        "path": "scripts/rust/daemon-client.ts",
+        "candidateSha256": "a9683138ab183b85c5bdb47b081c4a6cfd661e0f5928632a7f7307668e883b65",
+        "currentSha256": "e788c839fbd8fc65dd71c3e7f7033c3af6744bda094c76b22b9096a909adfbc9",
+        "reason": "Test-only optional daemon binary injection for package-bound final scenarios; not a shipping build input."
+      }
+    ],
+    "startupSourceHashes": {
+      "scripts/run-native.sh": "9c88a07aa32b88006b4ff2fd4bbc29a50e96c5275aa1f105e7712f87380c16ec",
+      "scripts/launch-native.sh": "eef0c15e3936fad9ac7f1a64550f9c45b6e89f8737a7f56763d32a6c1fa8142c",
+      "scripts/package-native.py": "2346856a696f98349a0d0325e93618a2c920cae04086d07769b4ae23733fb87a",
+      "scripts/bootstrap-native.py": "375392221c47ad655ef39e4a7a9cad62187e1332a4c0ca8291be6a6c88821ad3"
+    },
+    "dispatchChecks": [
+      {
+        "command": [
+          "npm",
+          "start"
+        ],
+        "exitCode": 0,
+        "argumentsObserved": [
+          "argc=1",
+          "arg=--release"
+        ],
+        "scope": "dispatch-only recording stub; not end-to-end source launch"
+      },
+      {
+        "command": [
+          "npm",
+          "run",
+          "dev"
+        ],
+        "exitCode": 0,
+        "argumentsObserved": [
+          "argc=0"
+        ],
+        "scope": "dispatch-only recording stub; not end-to-end source launch"
+      }
+    ],
+    "installedLauncher": {
+      "arguments": [
+        "/private/tmp/cr-n7-1004a/Crewroom.app/Contents/MacOS/crewroom-launcher",
+        "--data-dir",
+        "/private/tmp/cr-native-default-1004/data",
+        "--roles",
+        "/private/tmp/cr-native-default-1004/config/roles.json",
+        "--port",
+        "52843",
+        "--headless"
+      ],
+      "daemonPid": 77983,
+      "identity": "502 Sun Oct  4 12:50:14 2026     /private/tmp/cr-n7-1004a/Crewroom.app/Contents/MacOS/crewroomd --data-dir /private/tmp/cr-native-default-1004/data --roles /private/tmp/cr-native-default-1004/config/roles.json --port 52843 --background",
+      "zeroRuns": true,
+      "authenticatedWorkspace": true,
+      "sameDaemonReused": true,
+      "firstStdout": "Started the bundled service. Closing this launcher or the app leaves it running.\nRust workflow service connected at http://127.0.0.1:52843 (PID 77983).\n",
+      "reopenStdout": "Reusing the authenticated service. Its existing role, port and runtime configuration remain in effect.\nRust workflow service connected at http://127.0.0.1:52843 (PID 77983).\n"
+    },
+    "binaryHashes": {
+      "crewroom": "141498a07d2cabd8717eb05dab7b7cd64cf36f5d902e8b92c755c1d3d1297e49",
+      "crewroomd": "0b66c90c1ccef2ac2e53e4d7aab5ce083cc4d4fba59405fe4b6b7a91df79e97d",
+      "crewroom-launcher": "eef0c15e3936fad9ac7f1a64550f9c45b6e89f8737a7f56763d32a6c1fa8142c",
+      "crewroom-process": "90d335fc8ef295497ad4db8e4b4c76098681f6dffd6281af563a5d02c560988f",
+      "crewroom-host": "318d41097d3c8d44dad8dda3ac54c5dfb52c909d02f3f954e12ca11a6ebc6ff3"
+    },
+    "boundaries": [
+      "Literal npm script selection is a dispatch-only stub check. Real unchanged source build/package and GUI acceptance are separate accepted receipts.",
+      "The actual bundled launcher start/reopen is headless and uses new private paths. No existing installation or global configuration is changed."
+    ],
+    "cleanup": {
+      "normalSigterm": true,
+      "daemonGone": true,
+      "descriptorGone": true,
+      "zeroAgentWorkloads": true
+    },
+    "binaryHashesUnchanged": true
+  },
+  "acceptedGates": [
+    "docs/testing/rust-native-keyboard-queue-2026-10-04.json",
+    "docs/testing/rust-native-release-headless-2026-10-04.json",
+    "docs/testing/rust-native-final-scenarios-2026-10-04.json",
+    "docs/testing/rust-native-final-gui-2026-10-04.json",
+    "docs/testing/rust-native-cutover-browser-environment-2026-10-04.json",
+    "docs/testing/rust-native-rollback-2026-10-04.json"
+  ],
+  "evidence": [
+    {
+      "path": "/private/tmp/cr-native-default-1004/report.json",
+      "sha256": "b1ffbf4e953e89e0c8c503411920de2d581a68dfc550bf578eb841e8deb41652"
+    },
+    {
+      "path": "/private/tmp/cr-final-cutover/verify-cutover.py",
+      "sha256": "4bfd660e87ac2eaad2ff12bedb590338cfa334ece26d593c435f3b4b102b0b0e"
+    }
+  ],
+  "selfEvaluation": "The final iteration changes launch aliases and current documentation, matches the already tested proposal, and verifies private service startup/reuse/cleanup. Shipping source is unchanged. Optional OS checks remain explicitly unverified. Required personal-workflow migration is complete; remote equality is verified after publishing this release-record commit.",
+  "acceptedGateHashes": {
+    "docs/testing/rust-native-keyboard-queue-2026-10-04.json": "14a20c4823cd9949321e951c3fd91c2d4291d5b634be55e69a9072c81081efd7",
+    "docs/testing/rust-native-release-headless-2026-10-04.json": "9d314b2e4f915f33759aac9dd6fd2cdfa5aef9d62c1a4134ef98dcaf959f97d8",
+    "docs/testing/rust-native-final-scenarios-2026-10-04.json": "1b5d2544d989fcea0eba8295218dff86dd62f33b4159954c9a41d7f5350155cc",
+    "docs/testing/rust-native-final-gui-2026-10-04.json": "519342a29dcebba92fdfad2c3aba7975bf9444a308f4c811e441bda4bf2caa21",
+    "docs/testing/rust-native-cutover-browser-environment-2026-10-04.json": "d00b0be069135bd7cc593605218eb2ec231436248222011b746357ddb5d1ec79",
+    "docs/testing/rust-native-rollback-2026-10-04.json": "7c5010bd28d93606a2f065d46b41c08a28dbb7e104deef2d20e3631151478fdc"
+  },
+  "review": {
+    "reviewer": "native_upgrades subagent",
+    "scope": "Read-only final aliases, operator/operations documentation, optional OS scope and source/evidence bindings.",
+    "result": "No implementation or scope blocker. Stale architecture wording was corrected before the cutover commit; this follow-up record binds the exact committed cutover SHA.",
+    "independentChecks": [
+      "Exact tested package bytes",
+      "All 175 retained regression inputs",
+      "Recorded startup script hashes",
+      "Unchanged crates, vendor, Cargo/toolchain and native build/package/launcher source"
+    ],
+    "unrelatedUserFilesExcluded": true
+  },
+  "cutoverRevision": "8b23fb7f13846a09ad9c0599a29c5a82f4246333"
+}

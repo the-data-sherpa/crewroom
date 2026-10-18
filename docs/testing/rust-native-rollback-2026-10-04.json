@@ -1,0 +1,189 @@
+{
+  "recordedAt": "2026-10-04",
+  "scope": "N7 disposable matching-old-build rollback. Queued schema-26 intake/brief/steering/role/repository scope; no active legacy process adoption or live provider effects.",
+  "passed": true,
+  "nativeApplicationEvidence": {
+    "receipt": "docs/testing/rust-native-acceptance-runtime-2026-10-04.json",
+    "receiptSha256": "48782e51a530015ba61ed80b8ef6096605edca0c19c43057706b43ed6dd1fd97",
+    "sourceManifestSha256": "692f6746b3c621ad7980a63b4d63771120f7c3e173a96c3324d1f8bca43d8ed7",
+    "binaryHashesExactlyMatch": true
+  },
+  "harness": {
+    "path": "scripts/test-native-rollback.py",
+    "sha256": "2060fb48c31a422df6ac9219754382f20092cf8d07a8ca00917158fe23b6d589",
+    "command": [
+      "python3",
+      "scripts/test-native-rollback.py",
+      "--output",
+      "/private/tmp/cr-n7-rollback1"
+    ],
+    "syntaxCompilePassed": true
+  },
+  "legacyAcceptance": {
+    "commit": "965a563b6a42dcc5b4511927585644fe08f4d023",
+    "reference": "docs/release-0.1.0.md",
+    "acceptedInstallationReceipt": "docs/testing/m7-installation-2026-10-02.json",
+    "build": "Fresh git archive, npm ci and npm run build; complete source/dependency/dist inventory preserved unchanged through both legacy starts."
+  },
+  "report": {
+    "passed": true,
+    "legacyCommit": "965a563b6a42dcc5b4511927585644fe08f4d023",
+    "nativeSourceCommit": "feb49d13809ef05dc4a6dbd130289ce9d00a8c8d",
+    "scope": "Disposable schema-26 queued intake, accepted briefs, steering, roles and repository. No executing legacy workflow, Mail or provider delivery.",
+    "commands": [
+      {
+        "name": "npm-ci",
+        "argv": [
+          "npm",
+          "ci"
+        ],
+        "exitCode": 0,
+        "seconds": 4.264,
+        "logSha256": "92dd1ed72647a30cecdc633b1fac03ce488c2f51b87e3e9bb38a2a84b4b79485"
+      },
+      {
+        "name": "legacy-build",
+        "argv": [
+          "npm",
+          "run",
+          "build"
+        ],
+        "exitCode": 0,
+        "seconds": 2.811,
+        "logSha256": "34dbf0c7e0641f36a7bb00fa933cf09b940d8cbe3b03ad6939d1a5bdbdb92bb3"
+      },
+      {
+        "name": "repository-init",
+        "argv": [
+          "git",
+          "-C",
+          "/private/tmp/cr-n7-rollback1/installation/repository",
+          "init",
+          "-b",
+          "main"
+        ],
+        "exitCode": 0,
+        "seconds": 0.044,
+        "logSha256": "3cd73aa7aa47f34824e03ddc9906ccccaa5c1bacba4ef601519662df01e342ca"
+      },
+      {
+        "name": "repository-add",
+        "argv": [
+          "git",
+          "-C",
+          "/private/tmp/cr-n7-rollback1/installation/repository",
+          "add",
+          "."
+        ],
+        "exitCode": 0,
+        "seconds": 0.018,
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "repository-commit",
+        "argv": [
+          "git",
+          "-C",
+          "/private/tmp/cr-n7-rollback1/installation/repository",
+          "-c",
+          "user.name=Fixture",
+          "-c",
+          "user.email=fixture@example.invalid",
+          "commit",
+          "-m",
+          "Rollback fixture"
+        ],
+        "exitCode": 0,
+        "seconds": 0.057,
+        "logSha256": "0d591ef30fa867885b60193c6cc6f9c130b27baf1948ce6f038770f4c9b06146"
+      }
+    ],
+    "legacySourceArchiveSha256": "97c4cdcdb95fb1b38e69206f27e471b56c6772ddb082d753afdceaf45de5653d",
+    "nativeBinarySha256": {
+      "crewroomd": "c65c0415506a330865c64d55803977664a42ebe2921b9c43c87d7191eb4258a1",
+      "crewroom-process": "4d59e1987aaf2f6e415114db5c1c58ff7290679c7aded39874a80d8d8f5e10d1",
+      "crewroom-host": "704412e5da467e7e8a99e834f4ad2318906ebbb548501cda9c4b57d058c88ada"
+    },
+    "legacyBuildInventorySha256": "9aef502d2266c2c80fc40c8da0398b5d2cef33dc8b659c069f0d3235ee441c98",
+    "snapshotEntries": 58,
+    "preservedNewerEntries": 62,
+    "legacyBuildEntries": 7793,
+    "originalPath": "/private/tmp/cr-n7-rollback1/installation",
+    "snapshotPath": "/private/tmp/cr-n7-rollback1/pre-native-snapshot",
+    "preservedNewerPath": "/private/tmp/cr-n7-rollback1/preserved-newer-native-state",
+    "preNativeInventorySha256": "9dc4dfa98cf5e5b77cf1a489fb8002360ee33a1a355bdf23ec912e3404714357",
+    "newerInventorySha256": "24433879cc1d7b13dfb433fac042ac00b49de393fbb7870442e72cdc15b4956f",
+    "factsSha256": "14f13c2b53e212997734562f58bf38e9e50b3335647ff8483ec462f37b41ae9b",
+    "sameAbsolutePaths": true,
+    "contentsLinksModesVerified": true,
+    "matchingOldBuildRelaunched": true,
+    "olderBuildNeverOpenedNewerState": true,
+    "postRollbackNewTaskSaved": true,
+    "processes": [
+      {
+        "kind": "legacy",
+        "label": "legacy-before",
+        "pid": 45062,
+        "identity": "502 Sun Oct  4 01:47:31 2026     node --import tsx server/index.ts --production",
+        "exitCode": 0,
+        "stopped": true,
+        "logSha256": "6a820f189628dae2c508c03bce76c6fd28dfad07fcf5523486ac25c1ea48ccef"
+      },
+      {
+        "kind": "native",
+        "label": "native-use",
+        "pid": 46920,
+        "identity": "502 Sun Oct  4 01:47:32 2026     /private/tmp/cr-n7-rollback1/native-build/crewroomd --data-dir /private/tmp/cr-n7-rollback1/installation/data --roles /private/tmp/cr-n7-rollback1/installation/user/roles.json --port 0",
+        "exitCode": 0,
+        "stopped": true,
+        "logSha256": "989d4c34ea52f921b66433e42ff7fb0a0963d984218294cdc320ee830c2802e9"
+      },
+      {
+        "kind": "legacy",
+        "label": "legacy-restored",
+        "pid": 49039,
+        "identity": "502 Sun Oct  4 01:47:34 2026     node --import tsx server/index.ts --production",
+        "exitCode": 0,
+        "stopped": true,
+        "logSha256": "8df70cb8268248371d86139cd8f0c61fafb9a7bbe5a9f1243d8d710b200cb663"
+      }
+    ]
+  },
+  "localReportSha256": "e5d9fc5ccb1d1844c817f608a9de12b01fd55e91508c72bf8b34eb135b5e564e",
+  "runtimeVersions": {
+    "node": "v26.10.0",
+    "nodeSha256": "4ca2a42d6d55a834b04d0892c5bc646a6869fcebec57f91c849dac0aa1031610",
+    "npm": "11.19.1",
+    "python": "3.14.7",
+    "macOS": "26.6.2",
+    "architecture": "arm64"
+  },
+  "cleanup": {
+    "exactOwnedServerProcesses": 3,
+    "allExitedZero": true,
+    "additionalProcessesReferencingFixture": 0,
+    "noUnknownProcessesSignaled": true
+  },
+  "complementaryEvidence": [
+    {
+      "receipt": "docs/testing/rust-native-upgrades-operations-2026-10-04.json",
+      "scope": "Native same-build whole-runtime backup/restore includes actual host sessions, Mail database/archive, Git/worktree, coding/check/review evidence and subsequent research. This is separate from old-build rollback."
+    },
+    {
+      "receipt": "docs/testing/rust-native-upgrades-2026-10-03.json",
+      "scope": "Historical schemas1\u201325\u219226, real historical DDL/rows, rollback and conservative ownership audits. The rollback fixture begins at schema26 and never lowers user_version."
+    }
+  ],
+  "remaining": [
+    "Bind final combined release package/install and footprint to root-provided frozen revision.",
+    "Root-owned UI/focus/OS accessibility assertions and final acceptance/default-retirement decision."
+  ],
+  "limitations": [
+    "No executing retained legacy run is migrated or resumed; all plans are unadmitted and no runner/provider/Mail is configured.",
+    "Both builds use schema26. This proves matching old code plus its original stopped whole-state snapshot, not old code opening native-modified or future-schema state.",
+    "No real credentials, primary .crewroom/rust, retained pilot, Conductor or retired installation are accessed.",
+    "Old source and installed dependencies are retained locally as a rollback bundle with content/link/mode inventory; this is not a signed distribution package.",
+    "Original backup and newer native snapshot remain separate and unchanged. Any real remote side effects since a snapshot require reconciliation before integrations resume."
+  ],
+  "selfAssessment": "The requested operational rollback boundary is executed and source-bound. Native whole-runtime same-build recovery remains complementary; no unsupported active legacy adoption is implied."
+}

@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-04",
+  "scope": "Operator CLI for listing and stopping attributable test processes; no runtime ownership contract changes",
+  "baseRevision": "6a52aa73bafb1799584bbfd9dcb1d1fde8bf73ce",
+  "sourceSha256": {
+    "scripts/test_processes.py": "b71e9a4b5655ce1c5193c7bbfe2c518d654733405e981a48fbc4c663a34a3fd5",
+    "scripts/test_test_processes.py": "567c1f55e5d610217702fefdd1e734c5f6d06bb4e9a632e4dbfe2bbd968f8acd",
+    "package.json": "4ea3d3c8e80f0653551556d54932e61c310f7fbc23a9e1f501c12e4a87fecb9f"
+  },
+  "sourceFingerprint": "9a35898f961067d183438c3aa1421912b7667ca9efb5d593f75a5820046837c0",
+  "platform": "Darwin 25.6.0 arm64",
+  "python": "3.14.7",
+  "validation": {
+    "command": "npm run test:cleanup-tool",
+    "passed": 13,
+    "failed": 0,
+    "seconds": 5.898,
+    "cases": [
+      "current-process birth identity and read-only discovery",
+      "run scoping and same-executable unrelated processes",
+      "private output excludes secret values and raw arguments",
+      "TERM-resistant process requires force escalation",
+      "explicit fixture path with sibling-prefix exclusion",
+      "sanitized runtime environment and ignored arbitrary path variables",
+      "detached marked child after wrapper exit",
+      "scrubbed descendant after parent termination",
+      "normal native and pilot path protection despite a valid marker",
+      "wide/protected/symlink root refusal",
+      "public, mismatched and symlinked registry refusal",
+      "PID reuse refusal with controlled process-table double",
+      "wrapper exit code and private registry permissions",
+      "actual CLI JSON, scope errors, survivor exit code and force stop"
+    ],
+    "npmAliasSmoke": [
+      "test:processes -- --json: exit 0, zero candidates, active daemon protected",
+      "test:run -- python3 -c <print-only fixture>: exit 0, registered run reported",
+      "test:cleanup -- --run <completed smoke run> --force --timeout .1 --json: exit 0, no signals, normal daemon protected"
+    ],
+    "finalReadOnlyInventory": {
+      "identifiedTestProcesses": 0,
+      "protectedNormalDaemonPid": 81598
+    },
+    "developmentFailures": [
+      "Darwin KERN_PROCARGS2 rejected an oversized buffer; changed to kernel-reported allocation",
+      "Two wrapper tests failed because Path.open does not accept opener; replaced with built-in open and reran"
+    ]
+  },
+  "limits": [
+    "Live process checks ran on macOS; Linux procfs reader is implemented but not executed here",
+    "Already detached processes without retained marker or recognized fixture paths cannot be attributed",
+    "Unreadable processes are not selected; zero candidates is not machine-wide absence proof",
+    "No Docker cleanup, file deletion, production daemon stop, or live provider delivery",
+    "Domain, build and GUI suites were not rerun: this change adds standalone tooling and npm aliases only"
+  ]
+}

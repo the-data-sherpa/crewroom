@@ -1,0 +1,17 @@
+{
+  "id": "task-01",
+  "version": 1,
+  "checks": [
+    {
+      "id": "unit",
+      "script": "delivery-unit.cjs",
+      "surface": "logic"
+    },
+    {
+      "id": "acceptance",
+      "script": "delivery-acceptance.cjs",
+      "surface": "logic"
+    }
+  ],
+  "priorCheckId": "unit"
+}

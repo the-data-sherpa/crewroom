@@ -1,0 +1,347 @@
+{
+  "accepted": true,
+  "date": "2026-10-02",
+  "applicationImplementation": "5ea1b1bf35f6685c80017f4c0de6512dd9828e4a",
+  "fixtureReliability": "f25a951335174aa848e1df23c9920924c67556f1",
+  "domain": {
+    "passed": 332,
+    "failed": 0,
+    "skipped": 0,
+    "durationMs": 636814.942583,
+    "revision": "5ea1b1bf35f6685c80017f4c0de6512dd9828e4a"
+  },
+  "browser": {
+    "passed": 31,
+    "failed": 0,
+    "revision": "5ea1b1bf35f6685c80017f4c0de6512dd9828e4a"
+  },
+  "build": "passed after final fixture changes",
+  "containerIntegrations": {
+    "passed": 6,
+    "failed": 0
+  },
+  "noninteractiveRebase": {
+    "red": "Caller GIT_EDITOR=false rejected rebase --continue",
+    "green": "1/1 with caller GIT_EDITOR=false, GIT_SEQUENCE_EDITOR=false and GIT_TERMINAL_PROMPT=1; fixture overrides keep Git noninteractive"
+  },
+  "releaseAccounting": {
+    "passed": 6
+  },
+  "cleanupVariants": [
+    {
+      "fault": "complete",
+      "exitCode": 0,
+      "report": ".crewroom/m7-clean-complete/report.json"
+    },
+    {
+      "fault": "pause",
+      "exitCode": 0,
+      "report": ".crewroom/m7-clean-pause/report.json"
+    },
+    {
+      "fault": "cancel",
+      "exitCode": 0,
+      "report": ".crewroom/m7-clean-cancel/report.json"
+    },
+    {
+      "fault": "detached",
+      "exitCode": 0,
+      "report": ".crewroom/m7-clean-detached/report.json"
+    },
+    {
+      "fault": "supervisor-host",
+      "exitCode": 0,
+      "report": ".crewroom/m7-clean-supervisor-host/report.json"
+    },
+    {
+      "fault": "host",
+      "exitCode": 0,
+      "report": ".crewroom/m7-clean-host/report.json"
+    },
+    {
+      "fault": "budget",
+      "exitCode": 0,
+      "report": ".crewroom/m7-clean-budget/report.json"
+    }
+  ],
+  "finalCleanupVariants": [
+    {
+      "fault": "complete",
+      "exitCode": 0,
+      "report": ".crewroom/m7-final-complete/report.json"
+    },
+    {
+      "fault": "cancel",
+      "exitCode": 0,
+      "report": ".crewroom/m7-final-cancel/report.json"
+    },
+    {
+      "fault": "supervisor-host",
+      "exitCode": 0,
+      "report": ".crewroom/m7-final-supervisor-host/report.json"
+    }
+  ],
+  "shellPauseResume": {
+    "passed": true,
+    "guard": {
+      "fixture_port_allowed": true,
+      "external_denied": true,
+      "other_loopback_denied": true,
+      "child_egress_denied": true
+    },
+    "providerRequests": 21,
+    "providerErrors": [],
+    "unexpectedSurvivingProcesses": [],
+    "briefsPresented": true,
+    "reasoningReplayed": null,
+    "observedIdentities": null,
+    "runtime": {
+      "passed": true,
+      "scenario": "simple",
+      "runId": "87d06840-a45b-455d-bf5e-7ec521325ef7",
+      "candidates": [
+        {
+          "id": "f6bbb610-8728-4495-8c15-b87fd0f8e713",
+          "runId": "87d06840-a45b-455d-bf5e-7ec521325ef7",
+          "revision": {
+            "base": "ec16d17922d519c1277c4ce462576900f9f32240",
+            "head": "8a6b1354a6d6a971826f00b292850bf46b7cec0e",
+            "tree": "736b41bd2d387ac96ff51838991178dc138622fd",
+            "worktreeHash": "f40a11308ec3a6bd64f259275c72a869b11e5221268a2d2735e9f98e141112b9",
+            "dirty": false,
+            "requirementsHash": "ea95b74f9ad146ecd8390930554066cefb35200bcb44d448f65cf95120a6717e",
+            "instructionsHash": "c9fed67a5df490fd2dc040c8e11574c3188ea7753d34836c2d920c2c793bcd77"
+          },
+          "implementationAttempts": [
+            "2f333485-5134-45da-9d6e-39241ab2e50f"
+          ],
+          "createdAt": "2026-10-02T07:21:22.100Z"
+        }
+      ],
+      "checks": [
+        {
+          "candidateId": "f6bbb610-8728-4495-8c15-b87fd0f8e713",
+          "attemptId": "1484a432-9a56-4d53-9c42-208c8a1b60eb",
+          "checkId": "unit",
+          "definition": {
+            "id": "unit",
+            "image": "sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285",
+            "command": "/usr/local/bin/python3",
+            "args": [
+              "-B",
+              "-m",
+              "unittest",
+              "-v"
+            ],
+            "timeoutMs": 5000,
+            "required": true
+          },
+          "environment": {
+            "image": "sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285",
+            "network": "none",
+            "platform": "linux/arm64",
+            "memoryMiB": 1024,
+            "tmpExecutable": false
+          },
+          "started": true,
+          "completed": true,
+          "exitCode": 0,
+          "timedOut": false,
+          "source": {
+            "id": "3b2681fd-01be-4a8b-8c3d-fd633d041916",
+            "sha256": "f40a11308ec3a6bd64f259275c72a869b11e5221268a2d2735e9f98e141112b9",
+            "bytes": 324
+          },
+          "sourceIntact": true,
+          "output": {
+            "id": "8f3a201b-1baf-4846-a1f3-1d5c50dfcede",
+            "sha256": "f1208a804a3b6ecb0174b241226164731f98e066b5491be98bdc90186cf1f67a",
+            "bytes": 200
+          },
+          "id": "620f9c96-d681-4037-963e-afbde7569aa3",
+          "completedAt": "2026-10-02T07:21:26.295Z"
+        }
+      ],
+      "reviews": [
+        {
+          "candidateId": "f6bbb610-8728-4495-8c15-b87fd0f8e713",
+          "verdict": "pass",
+          "summary": "Current code and unit evidence inspected.",
+          "findings": [],
+          "coverage": [
+            {
+              "criterion": 0,
+              "assessment": "Unit test covers empty input.",
+              "checkIds": [
+                "unit"
+              ]
+            },
+            {
+              "criterion": 1,
+              "assessment": "Unit test covers nonempty input.",
+              "checkIds": [
+                "unit"
+              ]
+            },
+            {
+              "criterion": 2,
+              "assessment": "Function docstring explains the empty-list result.",
+              "checkIds": []
+            }
+          ],
+          "attemptId": "1484a432-9a56-4d53-9c42-208c8a1b60eb",
+          "assignmentId": "6c42fbb2-91ee-42e0-8e6a-4b207ed1b734",
+          "sessionId": "01a0fb7d-3fea-7198-8e6f-e40383363b14",
+          "checkPolicyRevision": 0,
+          "id": "7be9b7de-f874-49a9-a216-5a62d4b869e7",
+          "artifact": {
+            "id": "2a53c959-7e60-455d-aa0f-b0f739214c2f",
+            "sha256": "bd48d2e6caa479caa5cbf7d4b7f22e3bcaeb14a273802b19348d10dfe291822c",
+            "bytes": 593
+          },
+          "createdAt": "2026-10-02T07:21:26.390Z"
+        }
+      ],
+      "assessment": {
+        "ready": true,
+        "candidate": {
+          "id": "f6bbb610-8728-4495-8c15-b87fd0f8e713",
+          "runId": "87d06840-a45b-455d-bf5e-7ec521325ef7",
+          "revision": {
+            "base": "ec16d17922d519c1277c4ce462576900f9f32240",
+            "head": "8a6b1354a6d6a971826f00b292850bf46b7cec0e",
+            "tree": "736b41bd2d387ac96ff51838991178dc138622fd",
+            "worktreeHash": "f40a11308ec3a6bd64f259275c72a869b11e5221268a2d2735e9f98e141112b9",
+            "dirty": false,
+            "requirementsHash": "ea95b74f9ad146ecd8390930554066cefb35200bcb44d448f65cf95120a6717e",
+            "instructionsHash": "c9fed67a5df490fd2dc040c8e11574c3188ea7753d34836c2d920c2c793bcd77"
+          },
+          "implementationAttempts": [
+            "2f333485-5134-45da-9d6e-39241ab2e50f"
+          ],
+          "createdAt": "2026-10-02T07:21:22.100Z"
+        },
+        "blockers": [],
+        "confirmedInvalidation": false
+      }
+    }
+  },
+  "backupRestore": {
+    "passed": true,
+    "applicationCommit": "5ea1b1bf35f6685c80017f4c0de6512dd9828e4a",
+    "error": null,
+    "providerRequests": 26,
+    "providerErrors": [],
+    "unexpectedSurvivingProcesses": [],
+    "backupEntries": 695,
+    "mailRestarts": 2,
+    "retainedCommandReceipts": 1,
+    "observedModelIdentities": true,
+    "runtime": {
+      "passed": true,
+      "freshConfiguration": true,
+      "cliLaunches": 2,
+      "runId": "d6d947d9-1da2-437f-ab02-319fe8cb0228",
+      "subsequentRun": "5a7d9416-6f0e-4e12-a3ad-61419f6c12e1",
+      "firstLocalEvidenceReady": true,
+      "subsequentResearchCompleted": true,
+      "restored": {
+        "requirements": true,
+        "steering": true,
+        "messages": 3,
+        "sessions": 4,
+        "artifacts": [
+          "7241738f-4bee-44b1-a638-a301fca4c4ba",
+          "4a4faf23-7800-4fac-8574-fa894e5f7b69"
+        ],
+        "candidate": {
+          "base": "9bb9c54a9c1b76fff0510cd0a63d7cfea425c900",
+          "head": "d1c17be9019a4aa6adbd8bb2844c0016f1b3f0af",
+          "tree": "694c09b7bef7fbe4645bb4ddfaa6291a8d7b4d70",
+          "worktreeHash": "37e6cfd4261401d1bf01f5c7347709a19414ffeec5a19cca13f56f44d36d641b",
+          "dirty": false,
+          "requirementsHash": "a49d5bcbaf94afe5330b5033be8b3fe38db9d8ff09800b93f1ba8c8053306246",
+          "instructionsHash": "0f0a7c9ccc371dfa4418d70204f7311391947bfddf5dcb731411fbcc168f7a6d"
+        },
+        "ownedWorktree": "/private/tmp/cr-m7-ops1/installation/data/worktrees/d6d947d9-1da2-437f-ab02-319fe8cb0228",
+        "roleHash": "545df794ffe507debcd5c1bfa58e4a57f45cd79d0e813d8fc2c445c5f41a61ff",
+        "runtimeHash": "e543ee0ce912844d6185baaf69ad81aa23911ec55eeab332985231e2ac63479e"
+      },
+      "providerBoundary": "Scripted model responses; no Jira or Bitbucket delivery configured."
+    },
+    "scope": "Fresh configuration and whole-state same-path recovery with real CLI/OMP/Mail/Git/checks; scripted models; no live Jira or Bitbucket delivery."
+  },
+  "retainedLogs": [
+    {
+      "name": "ops-domain",
+      "log": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-operations-gates/ops-domain.log",
+      "sha256": "2ca757f6caab523ec76adf5e3f6ac96eb8c35ae33d0f656c1be1a46f7687ad61"
+    },
+    {
+      "name": "ops-browser",
+      "log": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-operations-gates/ops-browser.log",
+      "sha256": "031436d40c5eb70082cccba6a28559eb895201f26f4338635aa03fba5134665d"
+    },
+    {
+      "name": "ops-build-final",
+      "log": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-operations-gates/ops-build-final.log",
+      "sha256": "ec20e5dd6c638f123ede676304fb03c293339508c18d938926afd8af7b63e68f"
+    },
+    {
+      "name": "ops-containers3",
+      "log": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-operations-gates/ops-containers3.log",
+      "sha256": "342d8281b272d2cd358b77dc0458fcd0b5e2df83a5c22cb1e84b4cd5442082f0"
+    },
+    {
+      "name": "git-editor-red",
+      "log": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-operations-gates/git-editor-red.log",
+      "sha256": "a65516bca6bf25da41e70bf1b1b63bc5c86eb97a14c5f5c385fcac9c4673790e"
+    },
+    {
+      "name": "git-editor-green",
+      "log": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-operations-gates/git-editor-green.log",
+      "sha256": "50af5c5e104a7c2227a1bfc5f15d41a7dde55b8b9031bef9619fc6805efc8d6c"
+    },
+    {
+      "name": "accounting-final",
+      "log": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-operations-gates/accounting-final.log",
+      "sha256": "16bfa9041ae9b70216c314293f503e2bc1c6d800648224b9d4b9113fdec896da"
+    },
+    {
+      "name": "cleanup-checks",
+      "log": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-operations-gates/cleanup-checks.log",
+      "sha256": "bcf58b437ec048ad51e7d0f9c8151c24322fd72698eaec4777e2506c8d2eaac3"
+    },
+    {
+      "name": "cleanup-final",
+      "log": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-operations-gates/cleanup-final.log",
+      "sha256": "ff49876962698b568aff363827a88474eb942d7c52e15e2bd31377bb11b42e81"
+    },
+    {
+      "name": "clean-red",
+      "log": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-operations-gates/clean-red.log",
+      "sha256": "1b485434a0e05a9ff183acac1f9d3fbc1643096a183f9f06989a522f52b3d819"
+    },
+    {
+      "name": "reopen-red",
+      "log": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-operations-gates/reopen-red.log",
+      "sha256": "7bb8e91d67a101834f1a1be0956354688f9a2b41198f69999f0e43f84f547eb0"
+    },
+    {
+      "name": "shell-clean",
+      "log": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-operations-gates/shell-clean.log",
+      "sha256": "4b5d2ffa79c3918434df652331ae5a902eedece66f9eedfbfa646c8c7ddf0176"
+    },
+    {
+      "name": "install1",
+      "log": "/Users/crewroom/Projects/Git/crewroom/.crewroom/test-results/m7-operations-gates/install1.log",
+      "sha256": "33015859cd188b20cf41376f794b6381ed0c981904ccbc1ef2982ec01f49b795"
+    }
+  ],
+  "review": {
+    "standards": "clear after survivor scan moved before emergency teardown",
+    "spec": "clear after startup reconciles already-stopped commands and retention wording corrected"
+  },
+  "scope": "Real local runtime and whole-state recovery with scripted provider responses. No live pilot, Jira or Bitbucket writes.",
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

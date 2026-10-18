@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "recipes": [
+    {
+      "key": "steering-reconnect",
+      "title": "Steering across reconnect",
+      "aliases": [
+        "steering",
+        "reconnect"
+      ],
+      "recipePath": "docs/testing/feature-map/steering-reconnect.md",
+      "cases": [
+        "UI-02",
+        "E2E-05"
+      ],
+      "entryPoint": "scripts/rust/feature-recipes.test.ts",
+      "testName": "steering-reconnect",
+      "nativeSelector": "workbench::journey_tests::feature_recipes::native_feature_recipe_control",
+      "sourcePaths": [
+        "docs/testing/feature-map/README.md",
+        "docs/testing/feature-map/manifest.json",
+        "scripts/verify-feature.py",
+        "scripts/rust/feature-recipes.test.ts",
+        "scripts/rust/native-ui-driver.ts",
+        "scripts/rust/feature-owned-process.ts",
+        "scripts/rust/daemon-client.ts",
+        "scripts/rust/workflow-support.ts",
+        "scripts/rust/workflow-fixture-rpc.py",
+        "scripts/rust/host-fixture-rpc.py",
+        "scripts/rust/process-adapter.ts",
+        "scripts/rust/host-fixture.ts",
+        "crates/crewroom-desktop/src/workbench/journey_tests/feature_recipes.rs"
+      ],
+      "assertions": [
+        "native-stored-pending",
+        "reconnect-preserves-pending",
+        "host-received",
+        "native-received",
+        "host-applied",
+        "reconnect-preserves-applied"
+      ],
+      "requiresDocker": false,
+      "timeoutSeconds": 240
+    },
+    {
+      "key": "pause-resume",
+      "title": "Pause/resume",
+      "aliases": [
+        "pause",
+        "resume"
+      ],
+      "recipePath": "docs/testing/feature-map/pause-resume.md",
+      "cases": [
+        "UI-04",
+        "LIF-05",
+        "LIF-06",
+        "E2E-05"
+      ],
+      "entryPoint": "scripts/rust/feature-recipes.test.ts",
+      "testName": "pause-resume",
+      "nativeSelector": "workbench::journey_tests::feature_recipes::native_feature_recipe_control",
+      "sourcePaths": [
+        "docs/testing/feature-map/README.md",
+        "docs/testing/feature-map/manifest.json",
+        "scripts/verify-feature.py",
+        "scripts/rust/feature-recipes.test.ts",
+        "scripts/rust/native-ui-driver.ts",
+        "scripts/rust/feature-owned-process.ts",
+        "scripts/rust/daemon-client.ts",
+        "scripts/rust/workflow-support.ts",
+        "scripts/rust/workflow-fixture-rpc.py",
+        "scripts/rust/host-fixture-rpc.py",
+        "scripts/rust/process-adapter.ts",
+        "scripts/rust/host-fixture.ts",
+        "crates/crewroom-desktop/src/workbench/journey_tests/feature_recipes.rs"
+      ],
+      "assertions": [
+        "owned-active-progress",
+        "native-pausing-before-stopped",
+        "paused-owned-stop",
+        "reopen-preserves-history",
+        "native-explicit-resume",
+        "resumed-progress-no-old-writer"
+      ],
+      "requiresDocker": false,
+      "timeoutSeconds": 240
+    },
+    {
+      "key": "readiness-invalidation",
+      "title": "Readiness invalidation after a revision change",
+      "aliases": [
+        "readiness",
+        "revision drift"
+      ],
+      "recipePath": "docs/testing/feature-map/readiness-invalidation.md",
+      "cases": [
+        "EVD-04",
+        "E2E-09"
+      ],
+      "entryPoint": "scripts/rust/feature-recipes.test.ts",
+      "testName": "readiness-invalidation",
+      "nativeSelector": "workbench::journey_tests::feature_recipes::native_feature_recipe_control",
+      "sourcePaths": [
+        "docs/testing/feature-map/README.md",
+        "docs/testing/feature-map/manifest.json",
+        "scripts/verify-feature.py",
+        "scripts/rust/feature-recipes.test.ts",
+        "scripts/rust/native-ui-driver.ts",
+        "scripts/rust/feature-owned-process.ts",
+        "scripts/rust/daemon-client.ts",
+        "scripts/rust/workflow-support.ts",
+        "scripts/rust/workflow-fixture-rpc.py",
+        "scripts/rust/host-fixture-rpc.py",
+        "scripts/rust/process-adapter.ts",
+        "scripts/rust/host-fixture.ts",
+        "crates/crewroom-desktop/src/workbench/journey_tests/feature_recipes.rs",
+        "scripts/rust/workflow-coding-fixture.ts",
+        "scripts/rust/container-adapter.ts"
+      ],
+      "assertions": [
+        "ready-candidate-real-check-review",
+        "native-ready-results",
+        "stopped-before-refresh",
+        "native-target-refresh",
+        "revision-invalidates-readiness",
+        "historical-evidence-retained"
+      ],
+      "requiresDocker": true,
+      "timeoutSeconds": 240
+    }
+  ]
+}

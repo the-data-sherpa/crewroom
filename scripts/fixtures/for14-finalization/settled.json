@@ -1,0 +1,131 @@
+{
+  "id": "f6290dc9-63cf-417d-bcde-58fa1a0232c2",
+  "manifestHash": "4d6694cc62e87be302f9092526ac1122bb6a18820c07e14dd3bc60cc87cf22d1",
+  "state": "cancelled",
+  "attentionReason": null,
+  "cells": [
+    {
+      "id": "d3f3cf0e-0c5d-43dc-aec3-5f13afa1405c",
+      "runId": "ab665770-892a-4ca2-9740-cac9693d2d77",
+      "state": "completed",
+      "attentionReason": null,
+      "attempts": [
+        {
+          "id": "345b8f72-a820-4acf-8cf4-9e626a7158db",
+          "runId": "ab665770-892a-4ca2-9740-cac9693d2d77"
+        },
+        {
+          "id": "f70011d9-be07-4d7a-b283-2540a32d159d",
+          "runId": "ab665770-892a-4ca2-9740-cac9693d2d77"
+        }
+      ],
+      "events": [
+        {
+          "id": "e3efae90-9331-4e36-888f-e788cd2a5c4a",
+          "comparisonId": "f6290dc9-63cf-417d-bcde-58fa1a0232c2",
+          "cellId": "d3f3cf0e-0c5d-43dc-aec3-5f13afa1405c",
+          "runId": "ab665770-892a-4ca2-9740-cac9693d2d77",
+          "requestId": "f70011d9-be07-4d7a-b283-2540a32d159d:e86e0e94f083f064817c9464c3901f14f9063c2b0a76944d71511b1e0fbdf10b",
+          "attemptId": "f70011d9-be07-4d7a-b283-2540a32d159d",
+          "type": "handoff",
+          "payload": {
+            "arguments": {
+              "status": "complete",
+              "summary": "Retained handoff summary SHA-256 8ec4013f8264e74d98da9430b95c5feec791ae4a238b9b32d5a44a7c1ed924e2"
+            },
+            "receipt": {
+              "status": "complete",
+              "summary": "Retained handoff summary SHA-256 8ec4013f8264e74d98da9430b95c5feec791ae4a238b9b32d5a44a7c1ed924e2",
+              "source": {
+                "sha256": "dd54ec2ee4abd0dbe1d40fdc373a0b07101b48bafcfcf42f017ea1e1366a5305",
+                "files": [
+                  {
+                    "path": "AGENTS.md",
+                    "sha256": "1a8b8db666e19b4f1059ad6229223483262ead63952b9e8869bb9682599aeab3"
+                  },
+                  {
+                    "path": "index.html",
+                    "sha256": "72ce16643a836d801daeb30485bbf2579c2e395ddd7194fa7839017fe2a0a7c0"
+                  },
+                  {
+                    "path": "people.cjs",
+                    "sha256": "27e66a4385b5cad492eacc38c52c26f8018f1b283d63539cbf47c6ca09967f70"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": "290c0a05-37f3-4391-b05c-3ac5956e6dd6",
+          "comparisonId": "f6290dc9-63cf-417d-bcde-58fa1a0232c2",
+          "cellId": "d3f3cf0e-0c5d-43dc-aec3-5f13afa1405c",
+          "runId": "ab665770-892a-4ca2-9740-cac9693d2d77",
+          "requestId": "finalization:ab665770-892a-4ca2-9740-cac9693d2d77",
+          "attemptId": null,
+          "type": "finalization",
+          "payload": {
+            "source": {
+              "sha256": "dd54ec2ee4abd0dbe1d40fdc373a0b07101b48bafcfcf42f017ea1e1366a5305",
+              "files": [
+                {
+                  "path": "AGENTS.md",
+                  "sha256": "1a8b8db666e19b4f1059ad6229223483262ead63952b9e8869bb9682599aeab3"
+                },
+                {
+                  "path": "index.html",
+                  "sha256": "72ce16643a836d801daeb30485bbf2579c2e395ddd7194fa7839017fe2a0a7c0"
+                },
+                {
+                  "path": "people.cjs",
+                  "sha256": "27e66a4385b5cad492eacc38c52c26f8018f1b283d63539cbf47c6ca09967f70"
+                }
+              ]
+            },
+            "handoffEventId": "e3efae90-9331-4e36-888f-e788cd2a5c4a",
+            "handoffRequestId": "f70011d9-be07-4d7a-b283-2540a32d159d:e86e0e94f083f064817c9464c3901f14f9063c2b0a76944d71511b1e0fbdf10b"
+          }
+        }
+      ],
+      "resultHash": "589c388b2a7b9a165027922649aeca21d2cb6ebd3a35e34354a01f084bcefa04",
+      "result": {
+        "source": {
+          "sha256": "dd54ec2ee4abd0dbe1d40fdc373a0b07101b48bafcfcf42f017ea1e1366a5305",
+          "files": [
+            {
+              "path": "AGENTS.md",
+              "sha256": "1a8b8db666e19b4f1059ad6229223483262ead63952b9e8869bb9682599aeab3"
+            },
+            {
+              "path": "index.html",
+              "sha256": "72ce16643a836d801daeb30485bbf2579c2e395ddd7194fa7839017fe2a0a7c0"
+            },
+            {
+              "path": "people.cjs",
+              "sha256": "27e66a4385b5cad492eacc38c52c26f8018f1b283d63539cbf47c6ca09967f70"
+            }
+          ]
+        },
+        "handoff": {
+          "source": {
+            "sha256": "dd54ec2ee4abd0dbe1d40fdc373a0b07101b48bafcfcf42f017ea1e1366a5305",
+            "files": [
+              {
+                "path": "AGENTS.md",
+                "sha256": "1a8b8db666e19b4f1059ad6229223483262ead63952b9e8869bb9682599aeab3"
+              },
+              {
+                "path": "index.html",
+                "sha256": "72ce16643a836d801daeb30485bbf2579c2e395ddd7194fa7839017fe2a0a7c0"
+              },
+              {
+                "path": "people.cjs",
+                "sha256": "27e66a4385b5cad492eacc38c52c26f8018f1b283d63539cbf47c6ca09967f70"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

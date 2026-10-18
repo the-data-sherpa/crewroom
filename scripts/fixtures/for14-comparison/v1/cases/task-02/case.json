@@ -1,0 +1,17 @@
+{
+  "id": "task-02",
+  "version": 1,
+  "checks": [
+    {
+      "id": "unit",
+      "script": "pagination-unit.cjs",
+      "surface": "logic"
+    },
+    {
+      "id": "acceptance",
+      "script": "pagination-acceptance.cjs",
+      "surface": "logic"
+    }
+  ],
+  "priorCheckId": "unit"
+}

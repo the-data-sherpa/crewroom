@@ -1,0 +1,21 @@
+{
+  "packageArchiveSha256": "2b12d0d271cf0ca99a9073bdc148ce43782713c6d01be33af2a105b00c62ef5d",
+  "changed": {
+    "build.rs": {
+      "upstream": "36bb1c28583a1351c39a8ce5145c2e4fb66c69b49029b9d3de4f750ad6ff80b0",
+      "crewroom": "7634a346f07658ba3c3556ddf1bc1a7721b64abc72da2e7d189eb8d2626832ea"
+    },
+    "src/adapter.rs": {
+      "upstream": "0bb7eea650ad89ccc30dc43342115597409e252a24bf93bcbb5d14fe4c272399",
+      "crewroom": "85dfdf45c9371169d0859e65cd141aa7afd33f3c56b530ae55e155e998702fa4"
+    },
+    "src/terminal.rs": {
+      "upstream": "6d8fc67032e634f4b11437d238e1d735cbaeed2e9efdcd5c6e1af88d32e2a52d",
+      "crewroom": "47ed970306be58d9e0ccd425af1cbb1f65b70fb2e954cc46900452852d9a6d4a"
+    },
+    "src/lib.rs": {
+      "upstream": "dc3f49f4ea49cdc6abd6c2c4a38a4a32e08c6b97053672a6efa56265b4052ef4",
+      "crewroom": "007a7bd02804e97a411f012dc3e5bcea3e96e4585c7a1048d28a1bd7cec5d53c"
+    }
+  }
+}

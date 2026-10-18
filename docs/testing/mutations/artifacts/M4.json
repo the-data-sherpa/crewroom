@@ -1,0 +1,9 @@
+{
+  "id": "M4",
+  "name": "disable-write-size",
+  "path": "crates/crewroom-runtime/src/evidence/artifacts.rs",
+  "preimageSha256": "283149d06fbcd73fb06f852892013d836df246c0fc8909735f7c9ef5bbebc763",
+  "old": "if body.len() > 4 * 1024 * 1024 {",
+  "new": "if false {",
+  "postimageSha256": "31e6783267c5d58c103ab0b97eb437e57726342b582bbaf96ecff3c13aea83f5"
+}

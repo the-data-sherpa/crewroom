@@ -1,0 +1,37 @@
+{
+  "baseRevision": "83a8389debdc40ae44063fb49c14a0e234cbd44d",
+  "sourceSha256": {
+    "crates/crewroom-desktop/src/accessibility.rs": "60fc7d488a8d320edf4af65f0b831fec6642196dbc752d6baa96dd43432b50db",
+    "crates/crewroom-desktop/src/main.rs": "7bab9e16a08f67ff5087f6768a4298829a1951dda830da608f521b2aca31b452",
+    "crates/crewroom-desktop/src/workbench.rs": "0f8bef024655b425620c5a37c4d471b5df09ba15a8af728f9d7e66f352a67695",
+    "crates/crewroom-desktop/src/workbench/planning.rs": "d1889881ff581787968135bbc387eff57691698723b9eb3249f50a8b25def6ab",
+    "crates/crewroom-desktop/src/workbench/settings.rs": "7c07f436c501c8852560441417bee7cafb11c18a6082a30adaace5bff7da63d6",
+    "crates/crewroom-desktop/src/workbench/composition_tests.rs": "d241e32b40456ee054cc4d1ad5a6b2220a276f1fa9b80e23c897f4d8c2075397",
+    "scripts/rust/native-terminal-ui.ts": "52a582985b9dbe41d39d8ee90a70ba6b319a4b958079ef530693a2a17aec7477"
+  },
+  "desktopTests": 12,
+  "logs": {
+    "accessibility-frozen-tests.log": "7930a299431830dcf10acb072a22f95992bf37af8fe4cf0817063da19023b3aa",
+    "accessibility-clippy.log": "5effa2ecbd26d9b1df1537f7ee16f5a846cbb42bbd20da5b861bc7c896fcc8c5",
+    "load-complete.json": "8463232e6ded8febfd396e9331e6d188f40c200d3648d0d9a781ff8ef62eb56f",
+    "load-sample.json": "92fbdf16cc95483b6a7a7a605415da867527040fd55fba146b593413456d24e5",
+    "debug-a11y-before.json": "9e3b4f09817468a757d08018f8debec13ca6ab3e41fc1557a0abcdf36bf5dac5",
+    "accessibility-fmt.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "load": {
+    "rounds": 145,
+    "lines": 29000,
+    "elapsedMs": 127196,
+    "failures": [],
+    "paneHistory": [
+      "62346:160:40:1926:2000",
+      "63097:160:40:1931:2000",
+      "63244:160:40:1931:2000",
+      "63988:160:40:1929:2000"
+    ],
+    "uiClosed": true,
+    "clientsAfterQuit": [],
+    "sameEightProcessesAlive": true
+  },
+  "acceptance": "partial; accurate native focus, VoiceOver and OS IME remain open"
+}

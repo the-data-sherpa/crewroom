@@ -1,0 +1,94 @@
+{
+  "passed": true,
+  "sourceSha256": {
+    "scripts/rust/verify-release-profiles.py": "f9cd8ca4a8c432d9b7da6ee56ada652e52465fc9b993505e63e43f27b662cf05",
+    "scripts/rust/release-profiles-live.ts": "f064954b0a6b59bfc76ea9974d8cd2d06bb280ad291620b2a938c40e33cd9ef4",
+    "docs/native-release-validation.md": "4b0bdc977c51e8e0d6c4865065c5d9bb90dfc7d59c4900703f4e12653f87d11b"
+  },
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "scripts/rust/verify-release-profiles.py"
+      ],
+      "exitCode": 0,
+      "seconds": 0.063,
+      "log": ".crewroom/test-results/native-profile-observation-wiring/0.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/rust/verify-release-profiles.py",
+        "--help"
+      ],
+      "exitCode": 0,
+      "seconds": 0.095,
+      "log": ".crewroom/test-results/native-profile-observation-wiring/1.log",
+      "logSha256": "ddbf1b73fd5f16fbefab6656e6edfa1d5685bfb7ec0577852db2d913901c0e4c"
+    },
+    {
+      "command": [
+        "node_modules/.bin/tsc",
+        "--ignoreConfig",
+        "--noEmit",
+        "--target",
+        "ES2023",
+        "--module",
+        "ESNext",
+        "--moduleResolution",
+        "Bundler",
+        "--strict",
+        "--esModuleInterop",
+        "--skipLibCheck",
+        "--types",
+        "node",
+        "scripts/rust/release-profiles-live.ts"
+      ],
+      "exitCode": 0,
+      "seconds": 0.398,
+      "log": ".crewroom/test-results/native-profile-observation-wiring/2.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "seconds": 0.021,
+      "log": ".crewroom/test-results/native-profile-observation-wiring/3.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "pureProviderEncoding": [
+    {
+      "provider": "aperture-openai",
+      "normalFramesUnchanged": true,
+      "unicodeRoundTrip": true,
+      "chunks": 12
+    },
+    {
+      "provider": "aperture-anthropic",
+      "normalFramesUnchanged": true,
+      "unicodeRoundTrip": true,
+      "chunks": 12
+    },
+    {
+      "provider": "aperture-google",
+      "normalFramesUnchanged": true,
+      "unicodeRoundTrip": true,
+      "chunks": 12
+    }
+  ],
+  "boundary": "Opt-in fixture wiring, syntax, strict type and pure chunk protocol checks only. No new actual OMP/GUI/resource observation run or release claim. Existing stopped rollback inventory untouched.",
+  "finalCounterMetadataRecheck": {
+    "pythonSyntax": true,
+    "strictTypecheck": true,
+    "diffCheck": true,
+    "lineContract": "24 Unicode lines in12 chunks per reply; final report checks each of4 agents has exactly the recorded roundCount provider replies and records line/byte/character counts."
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "kind": "native-scenario-final-signed-sidecar-binding",
+  "recordedAt": "2026-10-04",
+  "parentCommit": "daafca55625a44f7100872305c5f6aa2ebb8ea0f",
+  "sourceSha256": {
+    "scripts/rust/verify-native-scenarios.py": "b5218f9ce38001faa404121ecb013c5b727d2629520a890f3541e62df019237c",
+    "scripts/rust/test-native-scenario-sidecar.py": "99b1a31d342d4484e60ab99679cd9a595f657a28f64fb151832cca5ee9117ed4"
+  },
+  "validation": {
+    "passed": true,
+    "focusedTests": 8,
+    "log": ".crewroom/test-results/native-scenario-sidecar/tests.log",
+    "logSha256": "a0f4118b266d1b2e81f01bc13f32228de040de181429cff3366e1df13ed2001e",
+    "checks": [
+      "Final signed hashes accepted when internal pre-signature hashes differ",
+      "Candidate SHA mismatch rejected",
+      "Changed packaged helper hash rejected",
+      "Missing final sidecar rejected even with internal receipt",
+      "Missing explicit candidate SHA rejected for bundle",
+      "Changed internal provenance bytes rejected",
+      "Unverified bundle-signature receipt rejected",
+      "Ordinary development binaries remain supported",
+      "Python compile/help, strict native fixture TypeScript, git diff --check"
+    ]
+  },
+  "boundary": "Fixture-only validation. Final packaged complex/drift/rework execution is still pending. Separate provider-daemon binary/source proof is not represented as a packaged executable. Earlier development runs and failed logs retain their original hashes."
+}

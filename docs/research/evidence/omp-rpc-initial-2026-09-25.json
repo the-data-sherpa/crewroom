@@ -1,0 +1,29 @@
+{
+  "version": "omp/18.3.1",
+  "scope": "Initial control probe; no explicit prompt command. Idle steering unexpectedly started a turn; no tools enabled or provider credential environment variables inherited.",
+  "observations": {
+    "initial": {
+      "sessionId": "01a0db9a-fff4-7362-a6c1-eb5af038452a",
+      "sessionName": null,
+      "isStreaming": false,
+      "isCompacting": false,
+      "queuedMessageCount": 0,
+      "messageCount": 0
+    },
+    "after_steer_ack": {
+      "sessionId": "01a0db9a-fff4-7362-a6c1-eb5af038452a",
+      "sessionName": "Crewroom control contract probe",
+      "isStreaming": true,
+      "isCompacting": false,
+      "queuedMessageCount": 0,
+      "messageCount": 0
+    },
+    "final_shutdown": {
+      "exit_code": 0,
+      "forced": false
+    }
+  },
+  "passed": false,
+  "error": "AssertionError: Steering acknowledgement did not leave one queued message",
+  "recorded_date": "2026-09-25"
+}

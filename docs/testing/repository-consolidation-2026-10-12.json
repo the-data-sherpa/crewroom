@@ -1,0 +1,200 @@
+{
+  "recordedAt": "2026-10-12T06:17:22.334708+00:00",
+  "scope": "Consolidate existing source and accepted direction into the primary checkout; no new workflow implementation or release acceptance.",
+  "primaryCheckout": "/home/crewroom/Projects/crewroom",
+  "branch": "main",
+  "applicationSourceCommit": "d2931304df01722af7730c00ca53e814948abc62",
+  "importedApplicationSourceUnchanged": true,
+  "remoteMainAtImport": "dc85a54a24e36b2dc57779bb2b9e46f12fcb26db",
+  "previousPrimaryHead": "9acea5a68ff6ae92e1c1a317ac26c36e985b5230",
+  "preservation": {
+    "preservedOriginalFiles": [
+      ".lavish/agent-workflow-resources.html",
+      "docs/mvp-plan.md",
+      "docs/research/agent-workflow-resources-assessment-2026-10-04.md",
+      "docs/research/crewroom-specialist-workflow-assessment-2026-10-12.md",
+      "docs/research/poteto-talk-source-notes-2026-10-04.md",
+      "docs/research/video-source-notes-2026-10-04.md",
+      "docs/status.md",
+      "docs/workbench-redesign.md"
+    ],
+    "originalS9AcceptanceSectionUnchanged": true,
+    "allImportedApplicationSourceUnchangedFrom": "d2931304df01722af7730c00ca53e814948abc62",
+    "sourceHeadsRetainedInAncestry": [
+      "9acea5a",
+      "dc85a54",
+      "d293130"
+    ],
+    "onlyWorktree": "/home/crewroom/Projects/crewroom",
+    "backupPath": "/home/crewroom/Projects/crewroom/.crewroom/consolidation-2026-10-12",
+    "modelCatalogSha256": "1ec847ad6ca91da1e9d853b75a694b2ee5dd1a4997de078e7784410be10f1a8d"
+  },
+  "direction": {
+    "currentTrack": "MH2 then MH3–MH6",
+    "retainedApprovedFollowUp": "S9.1–S9.3",
+    "productionExecution": "OMP; new execution adapters still require real-runner acceptance"
+  },
+  "environment": {
+    "platform": "x86_64 Arch Linux",
+    "node": "v24.21.0",
+    "rust": "rustc 1.98.1 (48a229cea 2026-09-01) (Arch Linux rust 1:1.98.1-1)"
+  },
+  "checks": [
+    {
+      "name": "domain",
+      "command": [
+        "npm",
+        "test"
+      ],
+      "sourceCommit": "d2931304df01722af7730c00ca53e814948abc62",
+      "startedAt": "2026-10-12T06:11:58.432518+00:00",
+      "durationSeconds": 186.61,
+      "exitCode": 0,
+      "logPath": "/home/crewroom/Projects/crewroom/.crewroom/consolidation-2026-10-12/domain.log",
+      "logSha256": "e291541978a2e7320a94c2a2e081bf71d413bb659293d762cc0b288a8cec7c54",
+      "passed": 332,
+      "failed": 0
+    },
+    {
+      "name": "native-domain",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-core",
+        "-p",
+        "crewroom-runtime",
+        "-p",
+        "crewroom-service",
+        "-j",
+        "6"
+      ],
+      "sourceCommit": "d2931304df01722af7730c00ca53e814948abc62",
+      "startedAt": "2026-10-12T06:11:58.435825+00:00",
+      "durationSeconds": 72.43,
+      "exitCode": 0,
+      "logPath": "/home/crewroom/Projects/crewroom/.crewroom/consolidation-2026-10-12/native-domain.log",
+      "logSha256": "40f365b683af6103d49a8a3fa9e2008c753b7dc360218ebc170ae3dd437b67c8",
+      "passed": 167,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "discovery",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "scripts",
+        "-p",
+        "test_harness_discovery.py",
+        "-v"
+      ],
+      "sourceCommit": "d2931304df01722af7730c00ca53e814948abc62",
+      "startedAt": "2026-10-12T06:11:58.435200+00:00",
+      "durationSeconds": 1.06,
+      "exitCode": 0,
+      "logPath": "/home/crewroom/Projects/crewroom/.crewroom/consolidation-2026-10-12/discovery.log",
+      "logSha256": "a5cb957fc1d272e24e73e1b6f6ba02a07ac9a22b17b833edcf8ea6835ecc46ee",
+      "passed": 9,
+      "failed": 0,
+      "providerMode": "fixtures; no live inference or installed CLI discovery rerun"
+    },
+    {
+      "name": "browser-build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "sourceCommit": "d2931304df01722af7730c00ca53e814948abc62",
+      "startedAt": "2026-10-12T06:11:58.432433+00:00",
+      "durationSeconds": 3.63,
+      "exitCode": 0,
+      "logPath": "/home/crewroom/Projects/crewroom/.crewroom/consolidation-2026-10-12/browser-build.log",
+      "logSha256": "d6344c7fa88e25cc73899597095a53b1097e18204e2f386c0fe2079df6e3cf3b"
+    },
+    {
+      "name": "browser-e2e",
+      "command": [
+        "npm",
+        "run",
+        "test:e2e"
+      ],
+      "sourceCommit": "d2931304df01722af7730c00ca53e814948abc62",
+      "startedAt": "2026-10-12T06:13:33.558631+00:00",
+      "durationSeconds": 116.63,
+      "exitCode": 1,
+      "logPath": "/home/crewroom/Projects/crewroom/.crewroom/consolidation-2026-10-12/browser-e2e.log",
+      "logSha256": "d71d9673fa1643f1bc25c55eb1cc722e652666e9c221e8999721dfd595a8357d",
+      "passed": 29,
+      "failed": 2,
+      "failures": [
+        {
+          "test": "tests/e2e/refinement.spec.ts:28",
+          "reason": "Legacy fixture copies missing macOS executable /Users/crewroom/.bun/bin/omp."
+        },
+        {
+          "test": "tests/e2e/research.spec.ts:27",
+          "reason": "Legacy fixture copies missing macOS executable /Users/crewroom/.bun/bin/omp."
+        }
+      ],
+      "historicalRecord": "docs/testing/linux-native-2026-10-04.json",
+      "otherObservedDiagnostics": "Four retained ghostty-web offset-is-out-of-bounds console diagnostics."
+    },
+    {
+      "name": "native-desktop",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "crewroom-desktop",
+        "-j",
+        "6"
+      ],
+      "sourceCommit": "d2931304df01722af7730c00ca53e814948abc62",
+      "startedAt": "2026-10-12T06:13:32.391499+00:00",
+      "durationSeconds": 175.2,
+      "exitCode": 0,
+      "logPath": "/home/crewroom/Projects/crewroom/.crewroom/consolidation-2026-10-12/native-desktop.log",
+      "logSha256": "904ab8da5ec5ae061b1689f3d55766421d01bfee5bfbd6c809b693ffcc340a58",
+      "passed": 47,
+      "failed": 0,
+      "ignored": 10,
+      "scope": "Headless GPUI interaction tests; existing external-fixture cases ignored. No on-screen Linux terminal validation.",
+      "environment": {
+        "CARGO_TARGET_DIR": "/home/crewroom/Projects/crewroom/.crewroom/linux-build",
+        "ZIG": "/home/crewroom/Projects/crewroom/.crewroom/toolchains/zig-x86_64-linux-0.16.0/zig",
+        "LIBRARY_PATH": "/home/crewroom/Projects/crewroom/.crewroom/linux-libs/root/usr/lib",
+        "LD_LIBRARY_PATH": "/home/crewroom/Projects/crewroom/.crewroom/linux-libs/root/usr/lib"
+      }
+    }
+  ],
+  "documentSha256": {
+    ".lavish/agent-workflow-resources.html": "6a8e4879b0313491cf78beaa0801e0319b27c9da5ec055e8d354298a73ec80f2",
+    "AGENTS.md": "fdffed9684794c6659c520a6ec7b824cbbfa0eee6ba19bd2a74899ce6ab55958",
+    "HANDOFF.md": "449989d164017fbbb1304141decbd8412fd5192e222a34f63521dccb04fb8c17",
+    "README.md": "a3a4956c2c9710f756b3ee6e6d9eb593c05a32af5e02e2e810d275208bb85add",
+    "docs/multi-harness-plan.md": "c92e695e88ed9735ef3a73872ead73baf82306ec17dafbb57f474315d4693334",
+    "docs/mvp-plan.md": "4bb8e4b4e0744c3f1ef51912586a630191ac35874427077d1bb633d48c076e5f",
+    "docs/research/agent-workflow-resources-assessment-2026-10-04.md": "0c1e7bfb5598666bfd712756c3953f70335290a36e20f68fa0fabe4b897bd0d9",
+    "docs/research/crewroom-specialist-workflow-assessment-2026-10-12.md": "ae5130d0922ad7ac673e1c5a7ed0c93d817f97ae2b277ec9d53f5efecb7bbba9",
+    "docs/research/poteto-talk-source-notes-2026-10-04.md": "c2031e36d279cefe94046b918d9b4d2a11fc453348b909867a7e49498df0c6b0",
+    "docs/research/video-source-notes-2026-10-04.md": "7f75c7470507b57174c95c914047002dc8cec10cf91a00efedd7b2a73282baf0",
+    "docs/status.md": "c017c9551c74dfc5a9eb278d39573286d6461a837b00b0b9363c9163f69738cb",
+    "docs/testing/mvp-progress.md": "90ccce5f9f8d4478123572e9c17140bcbdafdb4e8cd057942cde3b4776471705",
+    "docs/workbench-redesign.md": "5371bf05c7ce62e4b8979f1973bb98f42a72034281ec0d33f8b67a0adeffc0ef"
+  },
+  "retainedBrowserArtifacts": "/home/crewroom/Projects/crewroom/.crewroom/consolidation-2026-10-12/browser-artifacts",
+  "limits": [
+    "Two macOS-specific browser runner fixtures fail on Linux; no all-green browser-suite claim.",
+    "Ten existing native external-fixture tests ignored.",
+    "No installed CLI discovery rerun, live inference, new runner adapter, live provider delivery or on-screen native terminal check.",
+    "Backup files and raw test logs are local ignored artifacts; their hashes and outcomes are retained here."
+  ],
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}

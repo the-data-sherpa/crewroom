@@ -1,0 +1,119 @@
+{
+  "date": "2026-10-06",
+  "baseRevision": "7fb9b48017f3d4c048ce2d5b42bf05f9f9027d20",
+  "sourceFiles": {
+    "crates/crewroom-core/src/learning.rs": "c43928ae66b3302b3ab6a5fc99935faf86bb7259578b177f32303652d2d5e854",
+    "crates/crewroom-core/src/lib.rs": "8e9fd8fe8a3d6f604b3aa662cdfcf962c4bf7a5c1cb2e4104de918eef82125bd",
+    "crates/crewroom-core/src/migrations.rs": "b07f59a3e4e033015044912a7abc23f4d73323aa9b44e3b491e42b4f2433e905",
+    "crates/crewroom-core/src/migrations/schema.json": "c024b0603f061341be7b6aa7b121e886ddb7e76f6d8898a2cab4bfae7bf1a848",
+    "crates/crewroom-core/src/outcomes.rs": "06796e54054f4693872e63f564105ef41b8fa592e78347a91f07fb75682546ff",
+    "crates/crewroom-core/src/roles.rs": "2166fc8021535666e757005d99709f0ec8ae8acbce7379f8c3bdcff4e590b68a",
+    "crates/crewroom-core/src/schema.sql": "9e69a2f91e6ecc82f19273ebc08d029c99479988be6a1497e8589532fe046c7c",
+    "crates/crewroom-core/src/store.rs": "6d6495e3a12f5fee96a442eb1f9781426e595a391e900490f7d9981cf47d0e2f",
+    "crates/crewroom-core/tests/migrations.rs": "c0f275d354ae2dfa94de085ee2dbf68e961cdf6b71f361205085ac3c2ab666f6",
+    "crates/crewroom-core/tests/store.rs": "aa62902b9bbfe4eebfb4d670109e66b401dad7e5e3ddf4c51a491fb6efb21bbf",
+    "crates/crewroom-desktop/src/workbench/collaboration/learning.rs": "08e33a69c2efe32df2b110adae0546705ddf908fd4cfb3bccbb3c0464960f062",
+    "crates/crewroom-desktop/src/workbench/collaboration/refinement.rs": "a1767bfaa4cdc786c6144ae6447d75685553e36dda5a89b137c15693136f7327",
+    "crates/crewroom-desktop/src/workbench/settings.rs": "6722a5feac0688b56651fb6a1e14f94423c66d915dc3933660a08c03520e7242",
+    "crates/crewroom-desktop/src/workbench/settings/roles.rs": "b57a0da0324c868afd32d9f6ecb4c368145ca4a974723124da41c1063b49f3a9",
+    "crates/crewroom-desktop/src/workbench/settings/tests.rs": "1edd140cf5531419d86a2f76a34b21df278758f4ac22ac366b02b0373e3156df",
+    "crates/crewroom-runtime/src/supervisor/workflow/configuration.rs": "a808f93ba7cfe1c3681bbd53f2e4154ec4185d888e61dbb5b371bc9ee581bebf",
+    "crates/crewroom-runtime/src/supervisor/workflow/transitions.rs": "6c404803dffbee58b9db9b011b862fa3f2bb9acc5597d07a868dca0bb89b468d",
+    "crates/crewroom-service/src/lib.rs": "3292dbfe61dd5b6ecc685c8ccc4547239761968aef8c14f46ff503e6b92d0446",
+    "crates/crewroom-service/src/routes.rs": "484b3cd4d8ddeb6e6b02738251c1b364c4a300d24a9a7a602211dfea695503f3",
+    "crates/crewroom-service/src/views/needs.rs": "4295890267186a02dc55751e9ff21ab4ab2f716734c9934346f6aa9b24146583",
+    "crates/crewroom-service/tests/http.rs": "3a6d60c303a93aa74e8995ea08bea9415992e49a8b0a62fed08ec25b842a0469",
+    "docs/operations.md": "48377cd30ab807d3ccdbeb253179d6ca91aa3635a85b9e3d66e0462d3150c0b9",
+    "scripts/rust/release-profiles-live.ts": "a7e7989cc5498782732194832d3d841a5b9a643925f9612552c26e52b1858ca5",
+    "scripts/rust/verify-release-profiles.py": "869af319cf8c33c3392256ca55f90b45c4b11dcfeb1a07dc89a9d593c659655b",
+    "crates/crewroom-core/src/role_drafts.rs": "cedb60f5deb29ec2c99b72ec5503f06338208472d3eb6332dd53a27682f08603",
+    "crates/crewroom-core/src/role_history.rs": "6bd5325a54380c8873d36b6ac149392b2dd9d2789364c372afa65805157ae90c",
+    "crates/crewroom-core/tests/role_learning.rs": "6bd3ddb2e05e0aa97a4eefe4cb721572d8cc347d2e0f205865b588e6103bd934",
+    "crates/crewroom-desktop/src/workbench/settings/learning.rs": "a4d66b756ae0d03125fa4492e8ea8b70c076876077149d2f0afe178b6db067e9"
+  },
+  "checks": {
+    "nativeCoreRuntimeService": {
+      "fullPassed": 161,
+      "fullFailed": 1,
+      "finalHttpPassed": 6,
+      "finalLearningPassed": 5,
+      "note": "Old HTTP assertion expected the operator proposal endpoint to be absent (404). Updated for its required validation (400); all six service cases pass. New fixture identity and future-schema expectations were corrected before the final domain run."
+    },
+    "desktop": {
+      "passed": 45,
+      "ignored": 10,
+      "finalAffectedPassed": 1,
+      "note": "Final focused interaction covers clearing a submitted operator form; final learning tests cover checked revision arithmetic."
+    },
+    "retainedDomain": {
+      "passed": 332
+    },
+    "browser": {
+      "passed": 31
+    },
+    "nativeBuild": "passed",
+    "browserBuild": "passed",
+    "clippy": "passed",
+    "format": "passed"
+  },
+  "package": "target/debug/native-package.MNr6Bf/Crewroom.app",
+  "guiSha256": "4355f34e8bfde944af4df00fad6c64db2c197d5712270f453975e478987804f2",
+  "runnerAndVisualPackage": "target/debug/native-package.eGPrGt/Crewroom.app",
+  "packageSourceNote": "Real-runner and visible GUI proof predates only clearing a submitted operator form and checked history revision arithmetic. Final focused tests, Clippy and build cover those changes. No single combined final-package GUI invocation claimed.",
+  "guiChecks": [
+    "Inspected the native unavailable-drafting fallback and role editor at 1280px.",
+    "Opened role history; imported baseline is labelled earlier history unavailable, with field differences.",
+    "Native interaction test verifies operator proposal, approval, provenance and 390px controls."
+  ],
+  "liveRunner": {
+    "passed": true,
+    "boundary": "Actual native daemon/OMP/tmux/Rust Mail; synthetic provider replies only.",
+    "runner": {
+      "version": "omp/18.6.3",
+      "sha256": "ab52491643e21b270682691b1319f1161fe2a2658ae4e9a4e3958b1aeb12dcf4"
+    },
+    "allOwnedProcessesExited": true,
+    "externalMailMatches": true,
+    "observedEveryIdentity": true,
+    "binaryHashesUnchanged": true
+  },
+  "roleDraftsRunner": {
+    "actualCoordinatorProcesses": 2,
+    "successStoppedAutomatically": true,
+    "manualEditBeforeSave": true,
+    "invalidProposalCreatedNoRole": true,
+    "operatorApprovalExactlyOnce": true
+  },
+  "liveReport": {
+    "path": "/tmp/crewroom-m8-s7-drafts-20261006/report.json",
+    "sha256": "4c5b1aac52494eec631ccbd416aef6ea5341154d8c0357c45cb51296490e4ffd",
+    "driverSha256": "2125491a71a6458a510a8d46c6f85e427b7ee6ea4486ed5d8cbdfd54496b522f"
+  },
+  "logs": {
+    "/tmp/crewroom-m8-s7-check.log": "e4035bff7f4076e529c0f1bfc34709ee07e49ccfe73faa7d7a14d3115ae1793a",
+    "/tmp/crewroom-m8-s7-build.log": "c72eaa21eae532eef2ede77e27c7ab0c6f245a8b9a25b6cae56fb5650efc612e",
+    "/tmp/crewroom-m8-s7-final-clippy.log": "52590267a9d8e4268ff8668ab063bc579744cf1054ab7c6c21be075c8b57a164",
+    "/tmp/crewroom-m8-s7-domain.log": "257c48d0424983411e87e9b975d229b8ba7bd5cd311458916d9431b54cc9ccec",
+    "/tmp/crewroom-m8-s7-desktop.log": "26659ce88dd2ddb2e85be3059c5913aef591c5fe9882f4388afc29d5c7a0ad5a",
+    "/tmp/crewroom-m8-s7-browser-build.log": "d430f4a3942a8de6952d13b6538b11aeac6ae0429256dfcf746a925c7e457835",
+    "/tmp/crewroom-m8-s7-final-http.log": "5e18ca1f8a990d65016b84825ba800f2bc62fc6ad1e9a28cb3139a5352c4048f",
+    "/tmp/crewroom-m8-s7-browser.log": "58a7e97c14c7c81a040d0d73e4aa0061559dc8fd9c184b549d17474ac50ab6b9",
+    "/tmp/crewroom-m8-s7-gui.log": "f8964a16a00b297af72e5f7c6878421a26d8ec9ad76b50d17f9035ccbd7c327a",
+    "/tmp/crewroom-m8-s7-learning.log": "f98e9d4eb2fbdb0edfb77fb71e741bb4c43a7baa2a01e9d39523741217f5859c",
+    "/tmp/crewroom-m8-s7-role-learning.log": "63f1b39d8943a92b2d980a9f797533173dabd96a7b3d5e0b042bd0103f59c5ff",
+    "/tmp/crewroom-m8-s7-final-learning.log": "3d52dd81542100da4975b32b8d8a094e35395d7f851d44a37eb1108d3a62e3a9",
+    "/tmp/crewroom-m8-s7-seed.log": "c10da800386ca11edb5eb12f6c290fd0b91ba4f95c3f6ce32ede3072c216daf5",
+    "/tmp/crewroom-m8-s7-runner.log": "1aa9198f2de52dc5e80a90e4432e92407ad35c0688dd6551c4e6cd8822966116",
+    "/tmp/crewroom-m8-s7-final-build.log": "534d98bc22fdad0bc71af94a12d47a99c63ef2477e8cbc76c1d2b5e0f1eb57a3",
+    "/tmp/crewroom-m8-s7-retained.log": "45426718be17408a4260bb82de56d57544fdca8575785280d296a72604a8d919",
+    "/tmp/crewroom-m8-s7-final-ui.log": "dcfd41e4435b065cc812e808b9a59b0ffa9b845a6ba97ce6cda77ca53738a7ec",
+    "/tmp/crewroom-m8-s7-clippy.log": "82bfe2eb18eb656f0b77a009f54f1f7a1c94117e07c0e3bdf4b87334817792c9"
+  },
+  "limitations": [
+    "Actual native daemon, OMP, tmux and external Rust Mail; provider replies scripted. No new live model delivery.",
+    "Linux/Wayland remains an explicit follow-up under the operator decision.",
+    "Schema 27 permits standalone operator proposals; rollback requires the matching stopped database and role catalog backup.",
+    "S7 disposable GUI and exact daemon stopped; no active installation, real configuration or retained pilot changes."
+  ],
+  "implementationRevision": "827def78fe39aee8d24f7ec08a408c10e1d40a85"
+}

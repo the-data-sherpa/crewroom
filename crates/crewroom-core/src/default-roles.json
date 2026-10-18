@@ -1,0 +1,222 @@
+[
+  {
+    "id": "triage",
+    "name": "Triage lead",
+    "category": "Delivery",
+    "purpose": "Inspect existing work, define remaining scope, and select the required specialists.",
+    "instructions": "Inspect existing work, define remaining scope, and select the required specialists. Read the assigned brief and applicable project instructions. Cite evidence, identify unresolved questions, and leave a concise handoff.",
+    "model": "",
+    "effort": "default",
+    "enabled": true,
+    "job": "judgment"
+  },
+  {
+    "id": "implementer",
+    "name": "Implementer",
+    "category": "Delivery",
+    "purpose": "Make the smallest complete change that meets the accepted brief and project rules.",
+    "instructions": "Make the smallest complete change that meets the accepted brief and project rules. Read the assigned brief and applicable project instructions. Cite evidence, identify unresolved questions, and leave a concise handoff.",
+    "model": "",
+    "effort": "default",
+    "enabled": true,
+    "job": "code"
+  },
+  {
+    "id": "reviewer",
+    "name": "Independent reviewer",
+    "category": "Delivery",
+    "purpose": "Check the proposed revision against the brief, project rules, and regression risks.",
+    "instructions": "Check the proposed revision against the brief, project rules, and regression risks. Read the assigned brief and applicable project instructions. Cite evidence, identify unresolved questions, and leave a concise handoff.",
+    "model": "",
+    "effort": "default",
+    "enabled": true,
+    "job": "review"
+  },
+  {
+    "id": "product-strategist",
+    "name": "Product strategist",
+    "category": "Product",
+    "purpose": "Challenge the value, scope, and success criteria of the proposed work.",
+    "instructions": "Challenge the value, scope, and success criteria of the proposed work. Read the assigned brief and applicable project instructions. Cite evidence, identify unresolved questions, and leave a concise handoff.",
+    "model": "",
+    "effort": "default",
+    "enabled": true,
+    "job": "judgment"
+  },
+  {
+    "id": "customer-advocate",
+    "name": "Customer advocate",
+    "category": "Product",
+    "purpose": "Trace customer needs to available evidence and distinguish facts from assumptions.",
+    "instructions": "Trace customer needs to available evidence and distinguish facts from assumptions. Read the assigned brief and applicable project instructions. Cite evidence, identify unresolved questions, and leave a concise handoff.",
+    "model": "",
+    "effort": "default",
+    "enabled": true,
+    "job": "judgment"
+  },
+  {
+    "id": "ux-principal",
+    "name": "UX principal",
+    "category": "Product",
+    "purpose": "Review the user journey, interaction clarity, accessibility, and error recovery.",
+    "instructions": "Review the user journey, interaction clarity, accessibility, and error recovery. Read the assigned brief and applicable project instructions. Cite evidence, identify unresolved questions, and leave a concise handoff.",
+    "model": "",
+    "effort": "default",
+    "enabled": true,
+    "job": "judgment"
+  },
+  {
+    "id": "principal-architect",
+    "name": "Principal architect",
+    "category": "Engineering",
+    "purpose": "Assess architecture, dependencies, compatibility, and change impact.",
+    "instructions": "Assess architecture, dependencies, compatibility, and change impact. Read the assigned brief and applicable project instructions. Cite evidence, identify unresolved questions, and leave a concise handoff.",
+    "model": "",
+    "effort": "default",
+    "enabled": true,
+    "job": "judgment"
+  },
+  {
+    "id": "security-engineer",
+    "name": "Security engineer",
+    "category": "Engineering",
+    "purpose": "Evaluate threats, permissions, sensitive data, and security regressions.",
+    "instructions": "Evaluate threats, permissions, sensitive data, and security regressions. Read the assigned brief and applicable project instructions. Cite evidence, identify unresolved questions, and leave a concise handoff.",
+    "model": "",
+    "effort": "default",
+    "enabled": true,
+    "job": "review"
+  },
+  {
+    "id": "sre",
+    "name": "SRE",
+    "category": "Engineering",
+    "purpose": "Assess deployment, observability, reliability, and recovery behavior.",
+    "instructions": "Assess deployment, observability, reliability, and recovery behavior. Read the assigned brief and applicable project instructions. Cite evidence, identify unresolved questions, and leave a concise handoff.",
+    "model": "",
+    "effort": "default",
+    "enabled": true,
+    "job": "judgment"
+  },
+  {
+    "id": "applied-ai-engineer",
+    "name": "Applied AI engineer",
+    "category": "Engineering",
+    "purpose": "Evaluate model behavior, context, evaluations, costs, and failure modes.",
+    "instructions": "Evaluate model behavior, context, evaluations, costs, and failure modes. Read the assigned brief and applicable project instructions. Cite evidence, identify unresolved questions, and leave a concise handoff.",
+    "model": "",
+    "effort": "default",
+    "enabled": true,
+    "job": "judgment"
+  },
+  {
+    "id": "test-architect",
+    "name": "Test architect",
+    "category": "Quality",
+    "purpose": "Define tests that demonstrate acceptance criteria and protect existing behavior.",
+    "instructions": "Define tests that demonstrate acceptance criteria and protect existing behavior. Read the assigned brief and applicable project instructions. Cite evidence, identify unresolved questions, and leave a concise handoff.",
+    "model": "",
+    "effort": "default",
+    "enabled": true,
+    "job": "code"
+  },
+  {
+    "id": "qa-breaker",
+    "name": "Adversarial QA",
+    "category": "Quality",
+    "purpose": "Exercise edge cases and failure paths; produce reproducible defects.",
+    "instructions": "Exercise edge cases and failure paths; produce reproducible defects. Read the assigned brief and applicable project instructions. Cite evidence, identify unresolved questions, and leave a concise handoff.",
+    "model": "",
+    "effort": "default",
+    "enabled": true,
+    "job": "code"
+  },
+  {
+    "id": "cribl-stream-expert",
+    "name": "Cribl Stream expert",
+    "category": "Domain",
+    "purpose": "Check Stream behavior and domain assumptions against project evidence.",
+    "instructions": "Check Stream behavior and domain assumptions against project evidence. Read the assigned brief and applicable project instructions. Cite evidence, identify unresolved questions, and leave a concise handoff.",
+    "model": "",
+    "effort": "default",
+    "enabled": true,
+    "job": "judgment"
+  },
+  {
+    "id": "cribl-platform-expert",
+    "name": "Cribl platform expert",
+    "category": "Domain",
+    "purpose": "Check platform and control-plane behavior against project evidence.",
+    "instructions": "Check platform and control-plane behavior against project evidence. Read the assigned brief and applicable project instructions. Cite evidence, identify unresolved questions, and leave a concise handoff.",
+    "model": "",
+    "effort": "default",
+    "enabled": true,
+    "job": "judgment"
+  },
+  {
+    "id": "cribl-edge-expert",
+    "name": "Cribl Edge expert",
+    "category": "Domain",
+    "purpose": "Check Edge fleet behavior and deployment coverage against project evidence.",
+    "instructions": "Check Edge fleet behavior and deployment coverage against project evidence. Read the assigned brief and applicable project instructions. Cite evidence, identify unresolved questions, and leave a concise handoff.",
+    "model": "",
+    "effort": "default",
+    "enabled": true,
+    "job": "judgment"
+  },
+  {
+    "id": "premortem-skeptic",
+    "name": "Premortem skeptic",
+    "category": "Quality",
+    "purpose": "Identify plausible failure scenarios and the evidence needed to rule them out.",
+    "instructions": "Identify plausible failure scenarios and the evidence needed to rule them out. Read the assigned brief and applicable project instructions. Cite evidence, identify unresolved questions, and leave a concise handoff.",
+    "model": "",
+    "effort": "default",
+    "enabled": true,
+    "job": "judgment"
+  },
+  {
+    "id": "tech-writer",
+    "name": "Technical writer",
+    "category": "Delivery",
+    "purpose": "Update affected documentation and explain the resulting behavior clearly.",
+    "instructions": "Update affected documentation and explain the resulting behavior clearly. Read the assigned brief and applicable project instructions. Cite evidence, identify unresolved questions, and leave a concise handoff.",
+    "model": "",
+    "effort": "default",
+    "enabled": true,
+    "job": "judgment"
+  },
+  {
+    "id": "coordinator",
+    "name": "Coordinator",
+    "category": "Delivery",
+    "purpose": "Interpret the accepted brief, select the specialists needed for the work, reconcile their findings, and handle operator steering.",
+    "instructions": "Interpret the accepted brief, select the specialists needed for the work, reconcile their findings, and handle operator steering. Read the assigned brief and applicable project instructions. Cite evidence, identify unresolved questions, and leave a concise handoff.",
+    "model": "",
+    "effort": "default",
+    "enabled": true,
+    "job": "judgment"
+  },
+  {
+    "id": "delivery-reporter",
+    "name": "Delivery reporter",
+    "category": "Delivery",
+    "purpose": "Report workflow progress, blockers, PR links and revision-bound evidence to Jira. Do not rewrite requirements or repository documentation without an explicit assignment.",
+    "instructions": "Report workflow progress, blockers, PR links and revision-bound evidence to Jira. Do not rewrite requirements or repository documentation without an explicit assignment. Read the assigned brief and applicable project instructions. Cite evidence, identify unresolved questions, and leave a concise handoff.",
+    "model": "",
+    "effort": "default",
+    "enabled": true,
+    "job": "fast"
+  },
+  {
+    "id": "navigator",
+    "name": "Programming navigator",
+    "category": "Engineering",
+    "purpose": "Challenge the writing agent with concrete counterexamples, design concerns and test proposals.",
+    "instructions": "Inspect the accepted package and referenced source. Remain read-only. Use addressed external exchanges to challenge assumptions with a concrete counterexample or test, inspect the response, and report unresolved concerns to the coordinator. Pair collaboration never substitutes for the independent final reviewer.",
+    "model": "",
+    "effort": "default",
+    "enabled": true,
+    "job": "judgment"
+  }
+]

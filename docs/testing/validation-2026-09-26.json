@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-26",
+  "scope": "Scaffold tests and specification consistency only; no new model or live provider calls.",
+  "runtime": "Node 26.9.0 via /opt/homebrew/opt/node/bin",
+  "scaffoldTests": {
+    "command": "PATH=/opt/homebrew/opt/node/bin:$PATH npm test",
+    "exitCode": 0,
+    "passed": 14,
+    "failed": 0,
+    "skipped": 0,
+    "files": ["tests/jira.test.ts", "tests/roles.test.ts", "tests/seed.test.ts"]
+  },
+  "build": {
+    "command": "PATH=/opt/homebrew/opt/node/bin:$PATH npm run build",
+    "exitCode": 1,
+    "typecheck": "passed",
+    "vite": "failed: index.html references missing /src/main.tsx",
+    "preexistingScaffoldLimitation": true
+  },
+  "specificationConsistency": {
+    "method": "One-off local Node assertion script; this is fixture validation, not product behavior verification.",
+    "result": "valid",
+    "checks": [
+      "50 unique captured selectors and matching provider counts",
+      "17 scaffold role IDs match defaultRoles; 2 additional planned roles",
+      "All 3 profiles cover all 19 roles exactly once",
+      "Profile identities and efforts match captured metadata",
+      "Rotated profile changes every role's model",
+      "87 unique case IDs with valid requirement references and specified status",
+      "12 unique scenarios with valid case, role and profile references",
+      "Negative-case model selectors refer to captured entries",
+      "950 planned bindings equals 19 roles times 50 selectors",
+      "Captured model fixture excludes common credential/endpoint/header fields"
+    ]
+  },
+  "notExecuted": [
+    "87 specified behavior cases",
+    "12 specified end-to-end scenarios",
+    "950 planned role/model identity bindings",
+    "OMP process launch or model requests",
+    "Loopback model-provider compatibility and network-isolation contracts",
+    "Real-process crash/recovery scenarios",
+    "Browser acceptance",
+    "Live Jira, Bitbucket or Conductor integration"
+  ]
+}

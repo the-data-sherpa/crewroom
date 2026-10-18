@@ -1,0 +1,305 @@
+{
+  "schemaVersion": 1,
+  "issue": "FOR-13",
+  "method": "original historical and current binaries with identical minimal correct-behavior fixture",
+  "status": "passed",
+  "fixture": {
+    "path": "scripts/rust/correction-replay.test.ts",
+    "sha256": "177b4c5a2ab0f4617503da1698c15e26c622a922dbf2b241ba873e2e23470728",
+    "derivedFrom": {
+      "kind": "private",
+      "path": "historical-01/originals/for11-review-replay.test.ts",
+      "sha256": "9b9cd49105ebbaf0c52732eb3b9394c7bedf799f323912cf17553fff67630cbd"
+    },
+    "derivationDiff": {
+      "kind": "private",
+      "path": "historical-01/diagnostic-to-regression.diff",
+      "sha256": "672e8ec9830d57f75a0382b4a1e6606d7f3b446067d1465115190cd5cbfb241f"
+    }
+  },
+  "occurrence": {
+    "originalReview": {
+      "kind": "private",
+      "path": "historical-01/originals/for11-spec-review.md",
+      "sha256": "bdc57b0a73159784071a877298d1b5db6ac4b3b574fe5917876f75f4f8e45869"
+    },
+    "excerpt": {
+      "startLine": 23,
+      "endLine": 29,
+      "sha256": "c5e719ebdafd863a2c7692849ac627e12e85565d224638ec9affffba1af96ff1"
+    },
+    "originalDiagnosticLog": {
+      "kind": "private",
+      "path": "historical-01/originals/for11-review-replay.log",
+      "sha256": "9d729710496a3a127a9eb112ed2d712df8744d1b9dc580fd204af61d09f4cef1"
+    }
+  },
+  "sources": {
+    "old": {
+      "revision": "2a9bf0c0f6c7f5ae24426e214974208527f5d7df",
+      "choreographyBlob": "1d5bcc17d4bb826ffb4f8849b5b69bdb90e96855",
+      "choreographySha256": "abedf43289ee8a66ccbfc5305951fe1e1e494bdd21c9972d9448c6879abedd24",
+      "nativeSourcesSha256": "19897773edcefb3d20ad990f425e8e0753323c0a0fd3941afadb3964a2fad905",
+      "sourceBinding": {
+        "kind": "private",
+        "path": "historical-01/old-source-binding.json",
+        "sha256": "4abc3e32e2048007a83653679a82802d3d4b43aa7ce25ef21327f7d05b29d1ef"
+      },
+      "binaries": {
+        "crewroomd": {
+          "kind": "private",
+          "path": "historical-01/binaries/old/crewroomd",
+          "sha256": "0db94fd156246410ea9dc910ea2d6993be708268f17d986490288bb19b537bf7"
+        },
+        "crewroom-host": {
+          "kind": "private",
+          "path": "historical-01/binaries/old/crewroom-host",
+          "sha256": "a00e2a55c7cd0998cce08f3fc69d3f16690fa115250337083360b76906f9cde4"
+        },
+        "crewroom-process": {
+          "kind": "private",
+          "path": "historical-01/binaries/old/crewroom-process",
+          "sha256": "fda919c1cd49ab2ece4562e3fccbb7ed98ceb7e92444f6d220ca7ac3e4260f1f"
+        }
+      },
+      "build": {
+        "command": [
+          "cargo",
+          "build",
+          "--locked",
+          "--offline",
+          "-p",
+          "crewroom-runtime",
+          "-p",
+          "crewroom-service",
+          "--bins",
+          "-j",
+          "2"
+        ],
+        "cwd": "/home/crewroom/Projects/crewroom/.crewroom/test-results/for13/historical-worktrees/old",
+        "startedUnix": 1791948886.4506006,
+        "elapsedSeconds": 24.505791425704956,
+        "timeoutSeconds": 600,
+        "exitCode": 0,
+        "status": "passed",
+        "cargoTargetDirUnset": true
+      },
+      "buildOutput": {
+        "kind": "private",
+        "path": "historical-01/old-build-01.log",
+        "sha256": "fddeee522fe3f5ee734eba17ce8d5d59af73f9c4bd35fa738c375ff65af9efdd"
+      }
+    },
+    "current": {
+      "revision": "a80ade02b821c228a96c006021ef1dcda192e222",
+      "choreographyBlob": "64123b4eef0fddb6d79e3e3a7a3149242fe48569",
+      "choreographySha256": "4443208c414da66aacc2bcfcf04d53162cc199da50c484ac45fcdf744cc5c209",
+      "nativeSourcesSha256": "8230e18817906aef7213447f01933e1eb2fc270d81c7fc2a5bfea3a4cd01d23b",
+      "sourceBinding": {
+        "kind": "private",
+        "path": "historical-01/current-source-binding.json",
+        "sha256": "5724ffec20e6bf3a61053d32526e16a8da0f72b360ac1119cf251cd41eb1c1fe"
+      },
+      "binaries": {
+        "crewroomd": {
+          "kind": "private",
+          "path": "historical-01/binaries/current/crewroomd",
+          "sha256": "23a424458b837d13988db55d800d60f6ba7b10defc5e19aebe1792729af9108e"
+        },
+        "crewroom-host": {
+          "kind": "private",
+          "path": "historical-01/binaries/current/crewroom-host",
+          "sha256": "ceea35dc314403e5dfa142bc41e5e1e029b46814971d43b05fc814acb975f8eb"
+        },
+        "crewroom-process": {
+          "kind": "private",
+          "path": "historical-01/binaries/current/crewroom-process",
+          "sha256": "e3dfdcb050e48053c011466eae6a3fca0377491572293ab5e67b767b8e7052e1"
+        }
+      },
+      "build": {
+        "command": [
+          "cargo",
+          "build",
+          "--locked",
+          "--offline",
+          "-p",
+          "crewroom-runtime",
+          "-p",
+          "crewroom-service",
+          "--bins",
+          "-j",
+          "2"
+        ],
+        "cwd": "/home/crewroom/Projects/crewroom/.crewroom/test-results/for13/historical-worktrees/current",
+        "startedUnix": 1791948957.3968973,
+        "elapsedSeconds": 25.00918173789978,
+        "timeoutSeconds": 600,
+        "exitCode": 0,
+        "status": "passed",
+        "cargoTargetDirUnset": true
+      },
+      "buildOutput": {
+        "kind": "private",
+        "path": "historical-01/current-build-01.log",
+        "sha256": "04cb5a468756c3e84f8ce2f663a49f5ed8d5c185dba257189c2c0121e2143d0e"
+      }
+    }
+  },
+  "runs": [
+    {
+      "id": "old",
+      "command": {
+        "command": [
+          "/home/crewroom/.local/share/mise/installs/node/26/bin/node",
+          "--import",
+          "tsx",
+          "--test",
+          "--test-reporter=tap",
+          "--test-concurrency=1",
+          "--test-name-pattern",
+          "^FOR-13 committed package replay precedes mutable artifact validation$",
+          "scripts/rust/correction-replay.test.ts"
+        ],
+        "cwd": "/home/crewroom/Projects/crewroom/.crewroom/test-results/for13/historical-worktrees/old",
+        "startedUnix": 1791948945.9457643,
+        "elapsedSeconds": 4.271047830581665,
+        "timeoutSeconds": 240,
+        "exitCode": 1,
+        "status": "failed",
+        "binaryDirectory": "checkout target/debug",
+        "retainFixture": true
+      },
+      "counts": {
+        "tests": 1,
+        "pass": 0,
+        "fail": 1,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "output": {
+        "kind": "private",
+        "path": "historical-01/old-test-01.tap",
+        "sha256": "e57050ae52b4aa40e0c3b6b0da97ff78836da9a732f8d13d63f41314ab2cc9e3"
+      },
+      "cleanup": {
+        "kind": "private",
+        "path": "historical-01/old-cleanup.json",
+        "sha256": "8fa138922a54cb016a9585c69b65b5fdd3c826acf95b860f8f6d859395c32954"
+      }
+    },
+    {
+      "id": "current-minimal",
+      "command": {
+        "command": [
+          "/home/crewroom/.local/share/mise/installs/node/26/bin/node",
+          "--import",
+          "tsx",
+          "--test",
+          "--test-reporter=tap",
+          "--test-concurrency=1",
+          "--test-name-pattern",
+          "^FOR-13 committed package replay precedes mutable artifact validation$",
+          "scripts/rust/correction-replay.test.ts"
+        ],
+        "cwd": "/home/crewroom/Projects/crewroom/.crewroom/test-results/for13/historical-worktrees/current",
+        "startedUnix": 1791949036.049764,
+        "elapsedSeconds": 4.170552015304565,
+        "timeoutSeconds": 240,
+        "exitCode": 0,
+        "status": "passed",
+        "binaryDirectory": "checkout target/debug",
+        "retainFixture": true
+      },
+      "counts": {
+        "tests": 1,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "output": {
+        "kind": "private",
+        "path": "historical-01/current-minimal-test-01.tap",
+        "sha256": "7331f8ee7c9512ffe41b77d1b712f4092cda3eba7fca745226e17caf3c95814a"
+      },
+      "cleanup": {
+        "kind": "private",
+        "path": "historical-01/current-minimal-cleanup.json",
+        "sha256": "d6443b0f3100cb75f32837a5df5471fe23cc049b1c0c0150b26e6f6d9549e9c3"
+      }
+    },
+    {
+      "id": "current-broad",
+      "command": {
+        "command": [
+          "/home/crewroom/.local/share/mise/installs/node/26/bin/node",
+          "--import",
+          "tsx",
+          "--test",
+          "--test-reporter=tap",
+          "--test-concurrency=1",
+          "--test-name-pattern",
+          "^MH6 stages pair, checkpoint, documentation and independent review through the daemon$",
+          "scripts/rust/choreography.test.ts"
+        ],
+        "cwd": "/home/crewroom/Projects/crewroom/.crewroom/test-results/for13/historical-worktrees/current",
+        "startedUnix": 1791949040.2206378,
+        "elapsedSeconds": 38.87729287147522,
+        "timeoutSeconds": 240,
+        "exitCode": 0,
+        "status": "passed",
+        "binaryDirectory": "checkout target/debug",
+        "retainFixture": true
+      },
+      "counts": {
+        "tests": 1,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "output": {
+        "kind": "private",
+        "path": "historical-01/current-broad-test-01.tap",
+        "sha256": "a8d88b259fd4156541071ddfe04dae600ff10751b2600150b27870820a327fbd"
+      },
+      "cleanup": {
+        "kind": "private",
+        "path": "historical-01/current-broad-cleanup.json",
+        "sha256": "b9f31da55281921233b989f37b08b3a0d1d2b1e5d77d8b38295e38138744475f"
+      }
+    }
+  ],
+  "proof": {
+    "kind": "private",
+    "path": "historical-01/proof.json",
+    "sha256": "5ae5a6e3232869ad0cf85c946e9757d6b99f0869b1bc941a4546f82040acb1a8",
+    "jsonPointer": "/correctionProof"
+  },
+  "cleanup": {
+    "kind": "private",
+    "path": "historical-01/cleanup.json",
+    "sha256": "4017e09629beb85eb091f680a2148bb7ab6bc7fa4ebd67cc637cd2dfb0e810ad"
+  },
+  "environment": {
+    "python": "Python 3.14.7",
+    "node": "v26.10.0",
+    "cargo": "cargo 1.98.1 (797e8a9bc 2026-08-05) (Arch Linux rust 1:1.98.1-1)",
+    "git": "git version 2.55.0",
+    "platform": "Linux x86_64",
+    "nativeBootstrap": "Not needed for runtime/service-only bins; GPUI/Ghostty build not selected.",
+    "lockfileInstalledDependencies": "Same package-lock/Cargo.lock in both source revisions; existing node_modules reused via symlink; offline Cargo cache used."
+  },
+  "limits": [
+    "Inference and Mail are explicitly synthetic loopback fixtures; no live delivery.",
+    "This proof covers authenticated package report replay ordering, not all idempotency or authorization paths.",
+    "Current production source revision a80ade02b821c228a96c006021ef1dcda192e222 predates FOR-13 helper commits; source and identical portable fixture content hashes bind this proof.",
+    "All builds used private reflink dependency cache copies with every crewroom project artifact and fingerprint removed before compilation. No main executable was reused.",
+    "The original diagnostic log passes by observing defective behavior and is occurrence provenance only; fresh historical correct-behavior regression failed as expected."
+  ],
+  "_publicationSanitization": "Paths or local identifiers were redacted for publication. Original revision/hash evidence belongs to the private pre-rewrite archive; this copy is not byte-identical evidence."
+}
