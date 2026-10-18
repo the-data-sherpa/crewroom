@@ -104,11 +104,14 @@ print(json.dumps({'models':[{'provider':p,'id':'same','selector':p+'/same','name
 
 #[tokio::test]
 async fn failures_are_sanitized_and_children_are_reaped() {
-    for body in [
-        "time.sleep(30)",
-        "print('x'*(9*1024*1024),flush=True)",
-        "print('not json')",
-        "print(json.dumps({'models':[]}));sys.exit(1)",
+    // Only the hung harness needs a short bound. The others fail on their own;
+    // their long bound keeps a loaded machine from turning them into timeouts
+    // before the metadata helper has published its owner receipt.
+    for (body, bound) in [
+        ("time.sleep(30)", 5),
+        ("print('x'*(9*1024*1024),flush=True)", 20),
+        ("print('not json')", 20),
+        ("print(json.dumps({'models':[]}));sys.exit(1)", 20),
     ] {
         let root = tempfile::tempdir().unwrap();
         let c = config(root.path(), Harness::Omp, body);
@@ -118,7 +121,7 @@ async fn failures_are_sanitized_and_children_are_reaped() {
             &dir,
             100,
             &CancellationToken::new(),
-            Duration::from_millis(200),
+            Duration::from_secs(bound),
         )
         .await
         .unwrap_err();
@@ -173,12 +176,16 @@ for line in sys.stdin:
         tokio::time::sleep(Duration::from_millis(100)).await;
         cancel.cancel();
     });
+    // The cancellation can land before either helper starts, before it
+    // publishes its owner receipt or during the exchange. Each must report
+    // cancellation; the long bound keeps the timeout from winning on a loaded
+    // machine. The deterministic cases are covered separately below.
     let cancelled = discover(
         &c,
         &root.path().join("cancel"),
         100,
         &token,
-        Duration::from_secs(3),
+        Duration::from_secs(20),
     )
     .await
     .unwrap_err()
@@ -213,6 +220,67 @@ for line in sys.stdin:
     assert!(drift.contains("OMP reported version \"1.2.3\""), "{drift}");
     assert!(drift.contains("omp/18.4.12"), "{drift}");
     assert!(drift.contains("then refresh"), "{drift}");
+}
+
+#[tokio::test]
+async fn cancellation_before_start_launches_nothing() {
+    let root = tempfile::tempdir().unwrap();
+    let c = config(root.path(), Harness::Omp, "time.sleep(30)");
+    let token = CancellationToken::new();
+    token.cancel();
+    let dir = root.path().join("discovery");
+    let error = discover(&c, &dir, 100, &token, Duration::from_secs(20))
+        .await
+        .unwrap_err()
+        .to_string();
+    assert!(error.contains("cancelled"), "{error}");
+    assert!(!dir.exists());
+}
+
+#[tokio::test]
+async fn cancellation_after_the_harness_starts_stops_its_group_and_reports_cancelled() {
+    let root = tempfile::tempdir().unwrap();
+    // The harness signals readiness only after the helper published its owner
+    // receipt and exec'd it, so this cancel always takes the owned-stop path.
+    let c = config(
+        root.path(),
+        Harness::Omp,
+        "open(os.path.join(os.environ['HOME'],'ready'),'w').close()\ntime.sleep(30)",
+    );
+    let dir = root.path().join("discovery");
+    let token = CancellationToken::new();
+    let task = tokio::spawn({
+        let (c, dir, token) = (c.clone(), dir.clone(), token.clone());
+        async move { discover(&c, &dir, 100, &token, Duration::from_secs(60)).await }
+    });
+    let ready = dir.join("home/ready");
+    let deadline = tokio::time::Instant::now() + Duration::from_secs(60);
+    while !ready.exists() {
+        if task.is_finished() {
+            panic!("discovery ended first: {:?}", task.await.unwrap().err());
+        }
+        assert!(
+            tokio::time::Instant::now() < deadline,
+            "harness never started"
+        );
+        tokio::time::sleep(Duration::from_millis(10)).await;
+    }
+    token.cancel();
+    let error = task.await.unwrap().unwrap_err().to_string();
+    assert!(error.contains("cancelled"), "{error}");
+    let metadata = dir.join("metadata");
+    let owner: Value =
+        serde_json::from_slice(&std::fs::read(metadata.join("owner.json")).unwrap()).unwrap();
+    // No member of the harness's process group survives.
+    assert_eq!(
+        unsafe { libc::kill(-(owner["pgid"].as_i64().unwrap() as i32), 0) },
+        -1
+    );
+    assert!(!metadata.join("owner.json.partial").exists());
+    assert_eq!(
+        crewroom_runtime::inspect_settled(&metadata).await.state,
+        "stopped"
+    );
 }
 
 /// Opt-in metadata exchange with the CLIs installed on this machine. It runs

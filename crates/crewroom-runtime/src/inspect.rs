@@ -383,6 +383,9 @@ mod tests {
     async fn a_helper_reaped_before_its_owner_receipt_launched_nothing() {
         let root = prepared();
         assert!(stopped_before_owner(root.path(), reaped_group()).await);
+        // Killed while writing its receipt: only the unpublished file exists.
+        durable_new(&root.path().join("owner.json.partial"), b"{\"pi").unwrap();
+        assert!(stopped_before_owner(root.path(), reaped_group()).await);
     }
 
     #[tokio::test]

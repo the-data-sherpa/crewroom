@@ -80,7 +80,19 @@ fn owner(root: &Path, token: &str, checked: Option<&CheckedProcess>) -> Result<(
         value["specSha256"] = json!(descriptor.spec_sha256);
         value["epoch"] = json!(descriptor.epoch);
     }
-    durable_new(&root.join("owner.json"), &serde_json::to_vec(&value)?)
+    publish_owner(root, &serde_json::to_vec(&value)?)
+}
+/// `owner.json` is either absent or complete. A helper killed while writing
+/// leaves only the partial file, so inspection never reads a torn receipt and
+/// an absent receipt still proves the command was not executed.
+fn publish_owner(root: &Path, bytes: &[u8]) -> Result<()> {
+    let partial = root.join("owner.json.partial");
+    durable_new(&partial, bytes)?;
+    // A hard link fails if a receipt already exists, unlike rename.
+    std::fs::hard_link(&partial, root.join("owner.json"))?;
+    std::fs::remove_file(&partial)?;
+    File::open(root)?.sync_all()?;
+    Ok(())
 }
 fn command(spec: &CommandSpec, lease: &File) -> Command {
     let mut command = Command::new(&spec.command);
