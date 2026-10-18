@@ -4,6 +4,27 @@ The operator requested that each work item pass its checks before the next start
 
 Historical revision IDs and source hashes below refer to the original private snapshots before the FOR-17 history rewrite. Sanitized copies are not byte-identical evidence for rewritten revisions; replay requires the private archive. New validation is recorded separately.
 
+## FOR-54 — Usage counts only started attempts as unrecorded (2026-10-18)
+
+Implementation `96565b807f160308074ff64f766ae682881e6f8e` on branch `for-54-usage-unrecorded-started-only-rebased` from main `db0be2c`. It is `a41f46ed56f3883f92508acaeec0324e85cabd66` (branch `for-54-usage-unrecorded-started-only`, from main `aa2d619`) rebased without code changes; the original evidence commit `e10dc36` was replaced by this section. `route_total` in `crates/crewroom-service/src/views/history.rs` counted unrecorded-route attempts over every route member, including attempts still awaiting start, while `attempts` counted only started ones. It now counts started attempts only.
+
+Simulated (SQLite store fixtures, no OS processes, no inference):
+
+- `queued_attempts_are_neither_started_nor_unrecorded`: a research run with a started API attempt, a started attempt without a recorded route, a queued attempt without a recorded route, and a queued subscription attempt. Unknown route: 1 attempt, 1 unrecorded. API: 1 attempt, 0 unrecorded. The subscription route holds only the queued attempt: awaiting start, 0 attempts, 0 unrecorded, no tokens. Every route has unrecorded ≤ attempts, and there is no cross-route total.
+- `queued_attempt_counts_as_unrecorded_once_started`: one attempt without a recorded route reads 0 attempts / 0 unrecorded while admitted, then 1 / 1 after it is claimed.
+- At `96565b8`, with `members` temporarily restored in place of `started`, both tests fail; with the fix, both pass. The existing FOR-44 tests (recorded attempts on all three routes; historical unrecorded attempt) still pass.
+
+Checks at `96565b8` (private `CARGO_TARGET_DIR` in the worktree, `-j6`, 1-minute load average 7–12):
+
+- `npm test`: **342/342**, two consecutive runs. The earlier failures at `a41f46e` (load 22–35, a different unrelated TypeScript test each run) are covered by FOR-60, now on main; this change touches no TypeScript.
+- `npm run build`: passes.
+- `cargo test -p crewroom-service -- --test-threads=4`: all suites pass (lib 13, daemon 4 after `cargo build -p crewroom-runtime --bins` in the fresh target, FOR-59).
+- `cargo clippy -p crewroom-service --all-targets -- -D warnings` and `cargo fmt -p crewroom-service --check`: clean.
+- `cargo test -p crewroom-desktop usage`: 2/2 (`usage_is_grouped_by_billing_route_without_a_dollar_figure_for_subscription`, `missing_cells_and_unavailable_usage_never_become_positive_results`); the desktop crate is unchanged and renders the service counts.
+- `npm run test:e2e`: not run (integrator).
+
+No live usage run: it needs inference, as recorded for FOR-44.
+
 ## FOR-60 — `npm test` under machine load (2026-10-18)
 
 Code revision `45b434f` (branch `for-60-reliable-npm-test`, from main `2b1b5e7`), integrated on main as `3ec4f26` without code changes. This also covers the failures listed in FOR-63 and FOR-66. All runs are local tests with simulated providers and fixture Git remotes; nothing contacted a live service. The machine has 16 cores and is shared with other agents. Load came from 16 busy-loop CPU burners (`sh -c 'while :; do :; done'`) running for the whole series, plus the other agents' builds. Each run used `tsx --test --test-reporter=tap tests/*.test.ts`, which is the `npm test` command with a TAP reporter added so that each failed file's exit signal is recorded.
