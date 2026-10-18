@@ -352,6 +352,12 @@ impl<S: StoreAccess> Repository<S> {
             .git
             .run(path, &["ls-tree", commit, "--", name])
             .await?;
+        // `ls-tree` succeeds with no entry for an absent path; report it as absent, not as a non-regular file.
+        if entry.trim().is_empty() {
+            return Err(Error::NotFound(format!(
+                "Pinned source path {name} does not exist at {commit}."
+            )));
+        }
         if !entry.starts_with("100644 blob ") && !entry.starts_with("100755 blob ") {
             return Err(conflict("Pinned source must be a regular text file."));
         }
