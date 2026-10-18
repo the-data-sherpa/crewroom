@@ -179,7 +179,7 @@ async fn main() {
             let local =
                 json!({"ready":true,"candidate":{"id":"live","revision":record["revision"]}});
             receipt["readiness"] =
-                crewroom_runtime::publication::assess(&record, Some(&local), false);
+                crewroom_runtime::publication::assess(&record, Some(&local), None);
         }
         other => panic!("unknown stage {other}"),
     }

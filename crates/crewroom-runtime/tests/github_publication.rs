@@ -461,7 +461,7 @@ async fn github_pull_requests_publish_continue_and_report_readiness_at_a_named_r
     let assess_now = |observation: Value| {
         let mut current = record.clone();
         current["observation"] = observation;
-        assess(&current, Some(&local), false)
+        assess(&current, Some(&local), None)
     };
     let alice = ("reviewer-fixture", 7);
     let bob = ("second-reviewer", 9);
