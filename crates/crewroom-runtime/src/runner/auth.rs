@@ -290,7 +290,9 @@ for line in sys.stdin:
         durable_new(&source, stringify(&json!({"auth_mode":"chatgpt","tokens":{"access_token":token(1),"account_id":"fixture"}})).as_bytes()).unwrap();
         let executable = root.join("codex");
         let ready = root.join("ready");
-        durable_new(&executable, format!("#!/usr/bin/python3\nimport os,time\nopen({:?},'w').write(str(os.getpid()))\ntime.sleep(60)\n", ready.to_str().unwrap()).as_bytes()).unwrap();
+        // Publish the PID by rename: the test polls for the path, and a plain
+        // open('w') makes it visible before the PID is written.
+        durable_new(&executable, format!("#!/usr/bin/python3\nimport os,time\nopen({0:?}+'.tmp','w').write(str(os.getpid()))\nos.rename({0:?}+'.tmp',{0:?})\ntime.sleep(60)\n", ready.to_str().unwrap()).as_bytes()).unwrap();
         std::fs::set_permissions(&executable, std::fs::Permissions::from_mode(0o700)).unwrap();
         let config = root.join("config.json");
         durable_new(&config, stringify(&json!({"codex":{"binary":executable,"authFile":source,"authRoot":root.join("first-runtime")}})).as_bytes()).unwrap();

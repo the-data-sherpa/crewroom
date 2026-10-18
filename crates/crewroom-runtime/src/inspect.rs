@@ -207,6 +207,36 @@ pub async fn inspect_settled(root: &Path) -> Ownership {
     )
     .await
 }
+/// Whether a helper that its caller already signalled and reaped as process
+/// group leader `pgid` stopped before it could launch anything. The helper
+/// writes `owner.json` durably before it execs the command, so an absent
+/// receipt means the command never started. The free lease and the empty
+/// process group rule out anything the helper forked on the way.
+pub(crate) async fn stopped_before_owner(root: &Path, pgid: i32) -> bool {
+    let check = async {
+        if root.join("owner.json").try_exists()? {
+            return Ok(false);
+        }
+        // A member killed with the group (such as the helper's own `ps`) can
+        // still be listed, and still hold the inherited lease, for a moment.
+        let deadline = Instant::now() + Duration::from_secs(1);
+        loop {
+            let table = output("/bin/ps", &["-axo", "pgid=,stat="]).await?;
+            let empty = !table.lines().any(|line| {
+                let fields: Vec<_> = line.split_whitespace().collect();
+                fields.len() == 2
+                    && fields[0].parse::<i32>() == Ok(pgid)
+                    && !fields[1].starts_with('Z')
+            });
+            let stopped = empty && lease_free(root)?;
+            if stopped || Instant::now() >= deadline {
+                return Ok::<_, crewroom_core::Error>(stopped);
+            }
+            sleep(Duration::from_millis(50)).await;
+        }
+    };
+    check.await.unwrap_or(false)
+}
 pub async fn stop_owned(root: &Path) -> Ownership {
     let mut state = inspect_settled(root).await;
     if state.state != "live" {
@@ -327,4 +357,54 @@ pub async fn seal_checked(descriptor: &CheckedProcess) -> Ownership {
     };
     let _ = seal(); // A refused seal never proves stop; re-inspect the original descriptor.
     inspect_checked(descriptor).await
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::os::unix::process::CommandExt;
+
+    fn prepared() -> tempfile::TempDir {
+        let root = tempfile::tempdir().unwrap();
+        durable_new(&root.path().join("launch.json"), br#"{"token":"t"}"#).unwrap();
+        root
+    }
+    fn reaped_group() -> i32 {
+        let mut child = std::process::Command::new("/bin/true")
+            .process_group(0)
+            .spawn()
+            .unwrap();
+        let pid = child.id() as i32;
+        child.wait().unwrap();
+        pid
+    }
+
+    #[tokio::test]
+    async fn a_helper_reaped_before_its_owner_receipt_launched_nothing() {
+        let root = prepared();
+        assert!(stopped_before_owner(root.path(), reaped_group()).await);
+    }
+
+    #[tokio::test]
+    async fn an_owner_receipt_a_held_lease_or_a_live_member_needs_inspection() {
+        let root = prepared();
+        let lease = open_lease(root.path()).unwrap();
+        assert!(flock(&lease, libc::LOCK_EX | libc::LOCK_NB).unwrap());
+        assert!(!stopped_before_owner(root.path(), reaped_group()).await);
+        drop(lease);
+
+        let mut member = std::process::Command::new("/bin/sleep")
+            .arg("30")
+            .process_group(0)
+            .spawn()
+            .unwrap();
+        let live = member.id() as i32;
+        let survived = stopped_before_owner(root.path(), live).await;
+        member.kill().unwrap();
+        member.wait().unwrap();
+        assert!(!survived);
+
+        durable_new(&root.path().join("owner.json"), b"{}").unwrap();
+        assert!(!stopped_before_owner(root.path(), reaped_group()).await);
+    }
 }

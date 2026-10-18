@@ -1,7 +1,7 @@
 //! Private fsynced host journals. A partial append is uncertain dispatch, never an
 //! empty inbox. Event observers retain offsets, not every completed event payload.
-use crate::{canonical, conflict, flock};
-use crewroom_core::{Result, serialized::stringify};
+use crate::{canonical, conflict};
+use crewroom_core::{Result, authority::try_lock_settled, serialized::stringify};
 use serde_json::{Value, json};
 use std::{
     collections::HashMap,
@@ -65,7 +65,9 @@ impl Journal {
             .mode(0o600)
             .custom_flags(libc::O_NOFOLLOW | libc::O_CLOEXEC | libc::O_NONBLOCK)
             .open(path)?;
-        if !flock(&file, libc::LOCK_EX | libc::LOCK_NB)? {
+        // A writer this process just dropped can stay locked while another
+        // thread's fork still holds the inherited descriptor; wait that out.
+        if !try_lock_settled(&file, libc::LOCK_EX)? {
             return Err(conflict("Host journal already has a writer."));
         }
         let metadata = file.metadata()?;

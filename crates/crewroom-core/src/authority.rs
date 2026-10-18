@@ -25,6 +25,30 @@ fn open_lock(path: &Path) -> Result<File> {
         .custom_flags(libc::O_NOFOLLOW | libc::O_CLOEXEC)
         .open(path)?)
 }
+/// How long a lock this process may itself have just released can stay held.
+///
+/// Every `fork` copies all open descriptors, `O_CLOEXEC` included, and a
+/// `flock` belongs to the shared open file description. Until that child
+/// calls `exec` or exits, it keeps alive a lock whose `File` another thread
+/// already dropped. A short wait tells that transient copy apart from a
+/// genuine holder, which keeps the lock for its whole lifetime.
+pub const INHERITED_LOCK_WINDOW: std::time::Duration = std::time::Duration::from_secs(1);
+
+/// Non-blocking `flock` that tolerates the transient inherited copies above
+/// for at most [`INHERITED_LOCK_WINDOW`]. Returns `Ok(false)` only when the
+/// lock stays contended for the whole window.
+pub fn try_lock_settled(file: &File, mode: i32) -> Result<bool> {
+    let deadline = std::time::Instant::now() + INHERITED_LOCK_WINDOW;
+    loop {
+        if try_lock(file, mode)? {
+            return Ok(true);
+        }
+        if std::time::Instant::now() >= deadline {
+            return Ok(false);
+        }
+        std::thread::sleep(std::time::Duration::from_millis(10));
+    }
+}
 fn try_lock(file: &File, mode: i32) -> Result<bool> {
     loop {
         // SAFETY: fd belongs to a live File; flock does not retain it.
@@ -42,7 +66,7 @@ fn try_lock(file: &File, mode: i32) -> Result<bool> {
     }
 }
 fn lock(file: &File, mode: i32) -> Result<()> {
-    if !try_lock(file, mode)? {
+    if !try_lock_settled(file, mode)? {
         return Err(Error::Conflict(
             "Another controller owns this workbench.".into(),
         ));
@@ -187,6 +211,43 @@ mod tests {
                 & 0o777,
             0o600
         );
+    }
+    #[test]
+    fn a_released_lease_still_held_by_an_inherited_copy_is_acquired_once_it_closes() {
+        use std::os::{fd::AsRawFd, unix::process::CommandExt};
+        let data = tempfile::tempdir().unwrap();
+        let first = Authority::acquire(data.path()).unwrap();
+        let fd = first.lease.as_raw_fd();
+        // Model another thread's fork: the child shares the lease's open file
+        // description, and with it the lock, until it closes its copy.
+        let mut child = unsafe {
+            std::process::Command::new("/bin/sh")
+                .args(["-c", "read _"])
+                .stdin(std::process::Stdio::piped())
+                .pre_exec(move || {
+                    if libc::fcntl(fd, libc::F_SETFD, 0) == -1 {
+                        Err(std::io::Error::last_os_error())
+                    } else {
+                        Ok(())
+                    }
+                })
+                .spawn()
+                .unwrap()
+        };
+        let input = child.stdin.take().unwrap();
+        let lease = first.root().join("lease.lock");
+        drop(first);
+        let probe = open_lock(&lease).unwrap();
+        assert!(!try_lock(&probe, libc::LOCK_EX).unwrap());
+        drop(probe);
+        let release = std::thread::spawn(move || {
+            std::thread::sleep(std::time::Duration::from_millis(100));
+            drop(input);
+        });
+        let second = Authority::acquire(data.path()).unwrap();
+        second.assert_current().unwrap();
+        release.join().unwrap();
+        child.wait().unwrap();
     }
     #[test]
     fn replaced_epoch_revokes_authority_without_changing_its_locks() {

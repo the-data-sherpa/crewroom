@@ -153,16 +153,19 @@ for line in sys.stdin:
  print(json.dumps({'id':v['id'],'result':result}),flush=True)
 "#,
     );
+    // The bound only guards a hung fixture; two Python starts can exceed a
+    // few seconds on a loaded machine before the repeated cursor arrives.
     let error = discover(
         &c,
         &root.path().join("loop"),
         100,
         &CancellationToken::new(),
-        Duration::from_secs(3),
+        Duration::from_secs(20),
     )
     .await
-    .unwrap_err();
-    assert!(error.to_string().contains("cursor"));
+    .unwrap_err()
+    .to_string();
+    assert!(error.contains("cursor"), "{error}");
     let c = config(root.path(), Harness::Omp, "time.sleep(30)");
     let token = CancellationToken::new();
     let cancel = token.clone();
@@ -170,19 +173,17 @@ for line in sys.stdin:
         tokio::time::sleep(Duration::from_millis(100)).await;
         cancel.cancel();
     });
-    assert!(
-        discover(
-            &c,
-            &root.path().join("cancel"),
-            100,
-            &token,
-            Duration::from_secs(3)
-        )
-        .await
-        .unwrap_err()
-        .to_string()
-        .contains("cancelled")
-    );
+    let cancelled = discover(
+        &c,
+        &root.path().join("cancel"),
+        100,
+        &token,
+        Duration::from_secs(3),
+    )
+    .await
+    .unwrap_err()
+    .to_string();
+    assert!(cancelled.contains("cancelled"), "{cancelled}");
     let mut missing = c.clone();
     missing.binary = root.path().join("missing");
     assert!(

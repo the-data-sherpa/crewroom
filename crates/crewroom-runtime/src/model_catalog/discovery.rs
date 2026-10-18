@@ -1,7 +1,9 @@
 //! Bounded metadata-only exchanges. Each child retains the existing process
 //! ownership receipt; shutdown and restart can verify cleanup independently.
 use super::*;
-use crate::{CommandSpec, canonical, durable_new, prepare_owned, stop_owned};
+use crate::{
+    CommandSpec, canonical, durable_new, inspect::stopped_before_owner, prepare_owned, stop_owned,
+};
 use sha2::{Digest, Sha256};
 use std::{
     collections::{BTreeMap, HashSet},
@@ -263,7 +265,8 @@ impl Process {
         self.input.take();
         // No wait/try_wait has reaped this child. Its PID still identifies our
         // process group, even when it exited before publishing an owner receipt.
-        if let Some(pid) = self.child.id() {
+        let group = self.child.id();
+        if let Some(pid) = group {
             // SAFETY: a positive, unreaped child PID is the group created at spawn.
             unsafe {
                 libc::kill(-(pid as i32), libc::SIGKILL);
@@ -273,6 +276,13 @@ impl Process {
             .await
             .map_err(|_| conflict("Discovery cleanup timed out."))?
             .map_err(|_| conflict("Discovery exit could not be verified."))?;
+        // Cancellation can kill the helper before it publishes its owner
+        // receipt. The harness never ran then, and there is nothing to inspect.
+        if let Some(pid) = group
+            && stopped_before_owner(&self.root, pid as i32).await
+        {
+            return Ok(());
+        }
         let ownership = stop_owned(&self.root).await;
         if ownership.state != "stopped" {
             return Err(conflict("Discovery process ownership needs inspection."));
