@@ -34,7 +34,7 @@ export class NativeWorkflow {
  async close(){if(this.proc.exitCode===null&&this.proc.signalCode===null){this.proc.stdin.end(JSON.stringify({op:'close'})+'\n');const timer=new AbortController();await Promise.race([this.exit,sleep(60000,undefined,{signal:timer.signal}).catch(()=>{})]);timer.abort();}if(this.proc.exitCode===null&&this.proc.signalCode===null)this.proc.kill('SIGKILL');await this.exit;}
 }
 export type FixtureCleanup = {passed:boolean, daemonExitCode:number|null, daemonSignal:string|null, fallback:boolean, processes:{attemptId:string,hostState:string,runnerState:string}[], errors:string[]};
-export async function workflowFixture(t:TestContext,purpose:'research'|'coding'|'explore'|'grill'='research',specialists=1,pinned=false,options:{parent?:string,service?:boolean,jira?:{source:any,issue:any,apiUrl:string},cleanup?:(report:FixtureCleanup)=>void|Promise<void>,configure?:(context:{root:string,source:string,database:string,config:any,team:any[],roles:typeof defaultRoles})=>void|Promise<void>}={}){
+export async function workflowFixture(t:TestContext,purpose:'research'|'coding'|'explore'|'grill'='research',specialists=1,pinned=false,options:{parent?:string,service?:boolean,jira?:{source:any,issue:any,apiUrl:string},github?:{repository:string,issue:any,apiUrl:string},cleanup?:(report:FixtureCleanup)=>void|Promise<void>,configure?:(context:{root:string,source:string,database:string,config:any,team:any[],roles:typeof defaultRoles})=>void|Promise<void>}={}){
  const root=realpathSync(mkdtempSync(join(options.parent??tmpdir(),'cr-wf-'))),runtime=join(root,'runtime'),database=join(root,options.service?'data':'','workflow.sqlite');mkdirSync(runtime,{mode:0o700});if(options.service)mkdirSync(join(root,'data'),{mode:0o700});
  const roles=defaultRoles.map(r=>({...r,model:'fixture/model',effort:'low' as const}));writeFileSync(join(root,'roles.json'),JSON.stringify(roles),{mode:0o600});
  const source=join(root,'source');mkdirSync(source);seedRepository(source);
@@ -62,18 +62,23 @@ export async function workflowFixture(t:TestContext,purpose:'research'|'coding'|
  const store=new Workbench(database);let run:any,task:any,repository:any;
  try{
   if(purpose==='coding'||pinned)repository=saveRepositoryFixture(store,{name:'Native workflow',path:source,targetBranch:'main'});
+  // A GitHub-sourced ticket is imported by the native store after start-up (below).
+  if(options.github){if(purpose!=='research'||!repository)throw new Error('GitHub fixture tickets are pinned research only.');}
+  else{
   task=options.jira?store.importJira({siteUrl:options.jira.source.siteUrl,issues:[options.jira.issue]})[0]:store.createTask({title:'Full native workflow',description:'',...(repository?{repositoryId:repository.id}:{})});
   if(options.jira&&repository)task=store.assignRepository(task.id,{revision:task.revision,repositoryId:repository.id});
   store.refine(task.id,{revision:task.revision,sourceRevision:task.sourceRevision,brief:'Preserve workflow boundaries',criteria:['Retain independently verified evidence']});
   const revision=store.getTask(task.id).revision;
-  run=purpose==='coding'?store.queue(task.id,{revision}):purpose==='research'?store.queueResearch(task.id,{revision,requestId:randomUUID()},repository?await new RepositoryWork(store,join(root,'seed-work')).pinResearch(repository):undefined):store.queueRefinement(task.id,{revision,requestId:randomUUID(),purpose});
+  run=purpose==='coding'?store.queue(task.id,{revision}):purpose==='research'?store.queueResearch(task.id,{revision,requestId:randomUUID()},repository?await new RepositoryWork(store,join(root,'seed-work')).pinResearch(repository):undefined):store.queueRefinement(task.id,{revision,requestId:randomUUID(),purpose});}
  }catch(error){server.closeAllConnections();await new Promise<void>(r=>server.close(()=>r()));rmSync(root,{recursive:true,force:true});throw error;}finally{store.close();}
  const team=[{name:'Coordinator',roleId:'coordinator',coordinator:true,input:'Coordinate this isolated workflow.'},...Array.from({length:specialists},(_,i)=>({name:`Specialist${i+1}`,roleId:purpose==='coding'?(i===0?'implementer':'reviewer'):'tech-writer',coordinator:false,input:'Investigate the accepted criterion.',criteria:[{index:0,obligation:'Verify the accepted criterion',checkIds:[]}]}))];
  const config:any={authority:join(root,'data'),database,repositories:join(root,'repositories'),backend:origin,roles:join(root,'roles.json'),environment:{PATH:process.env.PATH,HOME:homedir()},runtime:{root:runtime,socket:join(runtime,'tmux.sock'),ompBinary:'/fixture/omp',launchPrefix:['/usr/bin/env','python3','-u',resolve('scripts/rust/workflow-fixture-rpc.py')],mail:{url:origin+'/mcp/',token:'synthetic-mail-token',projectRoot:join(root,'mail-projects'),retentionSeconds:86400,atcDisabled:true},catalog:[{provider:'fixture',id:'model',api:'openai-responses',inputs:['text'],efforts:['low'],tools:true}],policy:{},models:{providers:{fixture:{baseUrl:origin+'/v1',api:'openai-responses',apiKey:'synthetic-upstream-key',models:[{id:'model',contextWindow:1050000,maxTokens:128000}]}}},commandEngine:{socket:process.platform==='darwin'?join(homedir(),'.docker/run/docker.sock'):'/var/run/docker.sock'}}};
  if(purpose==='coding')config.runtime.launchPrefix.push('--unique-sessions');
  if(options.jira)config.jira={source:options.jira.source,apiUrl:options.jira.apiUrl};
+ if(options.github)config.github={apiUrl:options.github.apiUrl};
  try{await options.configure?.({root,source,database,config,team,roles});
  c=options.service?new NativeDaemon(config):new NativeWorkflow(config);await c.ready;
+ if(options.github){const seeded=await c.command('github_seed',{input:{repository:options.github.repository,issue:options.github.issue,repositoryId:repository.id}});task=seeded.task;run=seeded.run;}
  // Explicit operator acceptance through the same public plan gate used by the native workbench.
  if(purpose==='coding'){
   const current=await c.command('task',{target:task.id});

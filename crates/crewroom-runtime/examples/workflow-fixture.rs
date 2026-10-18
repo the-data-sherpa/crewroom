@@ -3,6 +3,7 @@
 use crewroom_core::{Result, authority::Authority, store::Store};
 use crewroom_runtime::{
     evidence::{Checks, Evidence, Research},
+    github_delivery::GitHubDelivery,
     jira_delivery::JiraDelivery,
     messaging::StoreAccess,
     providers::{Credential, Credentials, bitbucket::BitbucketClient, jira::JiraClient},
@@ -68,6 +69,22 @@ async fn main() -> Result<()> {
             Ok(JiraDelivery::new(
                 store.clone(),
                 client,
+                Some(evidence.clone()),
+                Some(research.clone()),
+            ))
+        })
+        .transpose()?;
+    // GitHub issue delivery (FOR-48) against a loopback GitHub REST fixture.
+    let github = config
+        .get("github")
+        .map(|settings| -> Result<_> {
+            let credentials: Credentials = Arc::new(|| {
+                Box::pin(async { Ok(Credential::Bearer("synthetic-github-token".into())) })
+            });
+            Ok(GitHubDelivery::new(
+                store.clone(),
+                credentials,
+                Some(loopback(&settings["apiUrl"])?.into()),
                 Some(evidence.clone()),
                 Some(research.clone()),
             ))
@@ -149,7 +166,7 @@ async fn main() -> Result<()> {
             research: research.clone(),
             publication: publication.clone(),
             jira: jira.clone(),
-            github: None,
+            github: github.clone(),
         },
         move |_| {
             notifications.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
@@ -171,6 +188,7 @@ async fn main() -> Result<()> {
             output(json!({"id":r["id"],"value":null}));
             continue;
         }
+        let github = github.clone();
         let (workflow, store, work, evidence, checks, research, publication, jira, changed) = (
             workflow.clone(),
             store.clone(),
@@ -263,6 +281,29 @@ async fn main() -> Result<()> {
                     "task" => store.with_store(|s| s.get_task(target))?,
                     "research" => research.read(target)?,
                     "jira_updates" => json!(store.with_store(|s| s.jira_updates(Some(target)))?),
+                    // Imports one GitHub issue as the ticket, assigns the saved
+                    // repository, accepts the brief and queues pinned research.
+                    "github_seed" => store.with_store(|s| {
+                        let saved = s.save_github_source(&json!({"repository":r["input"]["repository"]}))?;
+                        s.commit_github_sync(&saved["source"], &json!([r["input"]["issue"]]), &json!([]), &json!([]))?;
+                        let task = s.snapshot()?["tasks"]
+                            .as_array()
+                            .and_then(|tasks| tasks.first())
+                            .cloned()
+                            .ok_or_else(|| crewroom_core::Error::Conflict("GitHub issue was not imported.".into()))?;
+                        let id = task["id"].as_str().unwrap_or_default().to_owned();
+                        let revision = |s: &Store| -> Result<Value> { Ok(s.get_task(&id)?["revision"].clone()) };
+                        s.assign_repository(&id, &json!({"revision":revision(s)?,"repositoryId":r["input"]["repositoryId"]}))?;
+                        s.refine(&id, &json!({"revision":revision(s)?,"sourceRevision":1,"brief":"Preserve workflow boundaries","criteria":["Retain independently verified evidence"]}))?;
+                        let run = s.queue_research(&id, &json!({"revision":revision(s)?,"requestId":uuid::Uuid::new_v4().to_string()}))?;
+                        Ok(json!({"task":s.get_task(&id)?,"run":run}))
+                    })?,
+                    "github_updates" => json!(store.with_store(|s| s.github_updates(Some(target)))?),
+                    "github_flush" => {
+                        github.as_ref().unwrap().flush().await?;
+                        workflow.notify(target);
+                        Value::Null
+                    }
                     "jira_flush" => {
                         jira.as_ref().unwrap().flush().await?;
                         workflow.notify(target);

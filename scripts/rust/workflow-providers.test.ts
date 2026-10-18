@@ -22,6 +22,26 @@ test('native research completion requires a saved Jira summary and confirms exac
  await f.c.command('jira_flush',{target:f.run.id});await f.c.command('jira_flush',{target:f.run.id});assert.equal(comments.length,1);assert.equal((await f.c.command('jira_updates',{target:f.run.id}))[0].state,'confirmed');assert.ok((await f.snapshot()).attempts.every((a:any)=>a.ownership==='stopped'));
 });
 
+test('native research completion holds a GitHub-sourced run until its outcome comment is queued, then posts it exactly once after stop',{timeout:90000},async t=>{
+ // Loopback GitHub REST fixture (not github.com): one issue, its comments.
+ const comments:any[]=[];let posts=0;const apiUrl=await provider(t,'synthetic-github-token',async(req,res)=>{assert.ok(req.url?.startsWith('/repos/fixture/issues/issues/1/comments'),req.url);if(req.method==='POST'){posts++;const created={id:500+comments.length,body:(await body(req)).body};comments.push(created);res.statusCode=201;res.end(JSON.stringify(created));}else{const page=Number(new URL(req.url!,'http://x').searchParams.get('page')??'1');res.end(JSON.stringify(page===1?comments:[]));}});
+ const issue={id:7001,number:1,title:'Synthetic',body:'Synthetic body',state:'open',html_url:'https://github.com/fixture/issues/issues/1',updated_at:'2026-10-18T08:00:00Z'};
+ const f=await workflowFixture(t,'research',1,true,{github:{repository:'fixture/issues',issue,apiUrl:apiUrl+'/'}});assert.equal(f.task.source,'github');await f.start();const runtime=await f.idle(),coordinator=runtime.assignments[0].currentAttemptId;
+ await f.tool(coordinator,'research/submit',{title:'Research result',kind:'research',body:'# Findings\nThe pinned source says before.',citations:[{path:'source.txt',commit:f.run.researchSource.commit,startLine:1,endLine:1,excerpt:'before'}],limitations:'Scripted provider fixture only.',coverage:[{criterionId:0,section:'Findings'}]},'research');
+ // The supervisor's research-completion transition is held: completion was
+ // requested and the team is idle, but no outcome comment is queued yet.
+ await f.tool(coordinator,'research/complete',{},'complete');await f.idle();await f.c.command('notify',{target:f.run.id});await f.idle();
+ let current=await f.c.command('run',{target:f.run.id});assert.equal(current.status,'running');assert.ok(current.researchCompletion);assert.equal(posts,0);
+ const saved=await f.tool(coordinator,'github/report',{kind:'research_outcome',eventKey:`research-outcome-${f.run.taskRevision}`},'report');assert.match(saved.body,/SHA-256/);assert.equal(saved.state,'pending');
+ // Queuing the outcome releases the transition: the supervisor stops every host and completes research.
+ await until(async()=>(await f.c.command('run',{target:f.run.id})).status==='completed');assert.equal(posts,0,'Nothing is posted before confirmed completion.');
+ assert.ok((await f.snapshot()).attempts.every((a:any)=>a.ownership==='stopped'));
+ const task=await f.c.command('task',{target:f.task.id});assert.equal(task.sourceStatus,'open','GitHub state stays a separate source fact.');
+ await f.c.command('github_flush',{target:f.run.id});await f.c.command('github_flush',{target:f.run.id});assert.equal(posts,1);assert.equal(comments.length,1);
+ assert.match(comments[0].body,/^\*\*Crewroom verified evidence\*\*/);assert.match(comments[0].body,/Research outcome completed for accepted revision/);
+ const updates=await f.c.command('github_updates',{target:f.run.id});assert.deepEqual(updates.map((u:any)=>[u.kind,u.state]),[['research_outcome','confirmed']]);
+});
+
 test('authenticated publication publishes the reviewed revision to disposable Git and a scripted Bitbucket PR exactly once',{timeout:120000},async t=>{
  const prs:any[]=[];let remote='';const reference=(branch:string)=>execFileSync('git',['-C',remote,'rev-parse',`refs/heads/${branch}`],{encoding:'utf8'}).trim();
  const apiUrl=await provider(t,'synthetic-bitbucket-token',async(req,res)=>{
