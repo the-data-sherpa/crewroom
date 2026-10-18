@@ -61,10 +61,18 @@ pub struct JiraConnection {
 }
 #[derive(Clone)]
 pub struct PublicationConnection {
+    pub provider: remote::PublicationProvider,
     pub repository_path: PathBuf,
     pub repository: Value,
     pub policy: Value,
     pub credentials: Credentials,
+}
+/// Publication metadata resolved through each repository's publish remote.
+/// Repositories whose remote has no provider stay visible as unavailable.
+#[derive(Clone, Default)]
+pub struct PublicationConfig {
+    pub connections: Vec<PublicationConnection>,
+    pub unavailable: Vec<remote::UnavailablePublication>,
 }
 fn credential_error(provider: Provider) -> Error {
     unavailable(match provider {
@@ -553,11 +561,8 @@ impl BitbucketCredentials {
 }
 /// Production route: environment override, then the encrypted install store,
 /// then (macOS only) the bkt keychain.
-pub fn load_publication_connections(
-    path: &Path,
-    secrets: SecretStore,
-) -> Result<Vec<PublicationConnection>> {
-    load_publication_connections_options(
+pub fn load_publication_config(path: &Path, secrets: SecretStore) -> Result<PublicationConfig> {
+    load_publication_config_options(
         path,
         command(),
         Arc::new(crewroom_core::now_ms),
@@ -566,14 +571,23 @@ pub fn load_publication_connections(
         cfg!(target_os = "macos"),
     )
 }
+/// Supported connections only; prefer [`load_publication_config`], which also
+/// reports repositories whose publish remote has no provider.
+pub fn load_publication_connections(
+    path: &Path,
+    secrets: SecretStore,
+) -> Result<Vec<PublicationConnection>> {
+    Ok(load_publication_config(path, secrets)?.connections)
+}
 pub fn load_publication_connections_with(
     path: &Path,
     command: Command,
     clock: Clock,
     environment: TokenEnvironment,
 ) -> Result<Vec<PublicationConnection>> {
-    load_publication_connections_options(path, command, clock, environment, None, true)
+    Ok(load_publication_config_options(path, command, clock, environment, None, true)?.connections)
 }
+#[cfg(test)]
 fn load_publication_connections_options(
     path: &Path,
     command: Command,
@@ -582,8 +596,23 @@ fn load_publication_connections_options(
     stored: Option<StoredTokens>,
     keychain: bool,
 ) -> Result<Vec<PublicationConnection>> {
+    Ok(
+        load_publication_config_options(path, command, clock, environment, stored, keychain)?
+            .connections,
+    )
+}
+/// Each entry selects its provider from its optional `remote` (the publish
+/// remote). Without one, the entry keeps the original Bitbucket contract.
+fn load_publication_config_options(
+    path: &Path,
+    command: Command,
+    clock: Clock,
+    environment: TokenEnvironment,
+    stored: Option<StoredTokens>,
+    keychain: bool,
+) -> Result<PublicationConfig> {
     let Some(metadata) = json_file(path)? else {
-        return Ok(vec![]);
+        return Ok(PublicationConfig::default());
     };
     let entries = array(&metadata)?;
     if entries.len() > 20 {
@@ -599,15 +628,48 @@ fn load_publication_connections_options(
         unavailable: AtomicBool::new(false),
         reading: SingleFlight::default(),
     });
-    entries
-        .iter()
-        .map(|entry| {
-            strict(entry, &["repositoryPath", "repository", "policy"])?;
-            let path = string(&entry["repositoryPath"])?;
-            let repository_path = PathBuf::from(path);
-            if !repository_path.is_absolute() {
-                return Err(invalid());
+    let mut config = PublicationConfig::default();
+    for entry in entries {
+        strict(entry, &["repositoryPath", "repository", "policy", "remote"])?;
+        let path = string(&entry["repositoryPath"])?;
+        let repository_path = PathBuf::from(path);
+        if !repository_path.is_absolute() {
+            return Err(invalid());
+        }
+        let selected = entry
+            .get("remote")
+            .map(|v| remote::select(&string(v)?))
+            .transpose()?;
+        let provider = match selected {
+            None => remote::PublicationProvider::Bitbucket,
+            Some(remote::RemoteSelection::Unsupported { host }) => {
+                config
+                    .unavailable
+                    .push(remote::UnavailablePublication::unsupported(
+                        repository_path,
+                        &host,
+                    ));
+                continue;
             }
+            Some(remote::RemoteSelection::Supported {
+                provider,
+                owner,
+                name,
+            }) => {
+                let configured = bitbucket::repository(&entry["repository"])?;
+                if !configured["workspace"]
+                    .as_str()
+                    .is_some_and(|s| s.eq_ignore_ascii_case(&owner))
+                    || !configured["slug"]
+                        .as_str()
+                        .is_some_and(|s| s.eq_ignore_ascii_case(&name))
+                {
+                    return Err(invalid());
+                }
+                provider
+            }
+        };
+        config.connections.push({
             let repository = bitbucket::repository(&entry["repository"])?;
             let policy = &entry["policy"];
             strict(policy, &["statusKeys", "pipelineSteps", "optionalSteps"])?;
@@ -624,7 +686,8 @@ fn load_publication_connections_options(
                 normalized[key] = json!(values);
             }
             let inner = inner.clone();
-            Ok(PublicationConnection {
+            PublicationConnection {
+                provider,
                 repository_path,
                 repository,
                 policy: normalized,
@@ -632,9 +695,10 @@ fn load_publication_connections_options(
                     let inner = inner.clone();
                     Box::pin(async move { inner.credentials().await })
                 }),
-            })
-        })
-        .collect()
+            }
+        });
+    }
+    Ok(config)
 }
 
 #[cfg(test)]
@@ -735,6 +799,69 @@ mod tests {
                 _ => panic!("Unexpected token authentication result"),
             }
         }
+    }
+
+    #[test]
+    fn publication_provider_resolves_from_the_configured_publish_remote() {
+        let root = tempfile::tempdir().unwrap();
+        let path = root.path().join("bitbucket.json");
+        let repository = json!({"workspace":"fixture","slug":"repository","uuid":"{00000000-0000-4000-8000-000000000011}"});
+        let policy = json!({"statusKeys":["pr"],"pipelineSteps":["Test"]});
+        let load = |metadata: Value| {
+            std::fs::write(&path, serde_json::to_vec(&metadata).unwrap()).unwrap();
+            load_publication_config_options(
+                &path,
+                no_credential_commands(),
+                Arc::new(|| 0),
+                Arc::new(|| None),
+                None,
+                false,
+            )
+        };
+        // Without a remote, the original Bitbucket contract is unchanged.
+        let legacy = load(json!([{"repositoryPath":"/disposable/legacy","repository":repository,"policy":policy}])).unwrap();
+        assert_eq!(legacy.connections.len(), 1);
+        assert!(legacy.unavailable.is_empty());
+        assert_eq!(
+            legacy.connections[0].provider,
+            remote::PublicationProvider::Bitbucket
+        );
+        assert_eq!(legacy.connections[0].repository, repository);
+        // A Bitbucket publish remote selects Bitbucket; an unsupported host is
+        // reported as an unavailable provider instead of failing or vanishing.
+        let mixed = load(json!([
+            {"repositoryPath":"/disposable/bitbucket","remote":"git@bitbucket.org:fixture/repository.git","repository":repository,"policy":policy},
+            {"repositoryPath":"/disposable/github","remote":"https://github.com/fixture/repository.git"}
+        ]))
+        .unwrap();
+        assert_eq!(mixed.connections.len(), 1);
+        assert_eq!(
+            mixed.connections[0].provider,
+            remote::PublicationProvider::Bitbucket
+        );
+        assert_eq!(
+            mixed.connections[0].repository_path,
+            PathBuf::from("/disposable/bitbucket")
+        );
+        assert_eq!(
+            mixed.unavailable,
+            vec![remote::UnavailablePublication::unsupported(
+                "/disposable/github".into(),
+                "github.com"
+            )]
+        );
+        // A Bitbucket remote naming another repository, or a credentialed
+        // remote, is invalid metadata rather than a silent mismatch.
+        for remote in [
+            "https://bitbucket.org/fixture/other.git",
+            "https://user:synthetic-secret@bitbucket.org/fixture/repository.git",
+        ] {
+            let error = load(json!([{"repositoryPath":"/disposable/bitbucket","remote":remote,"repository":repository,"policy":policy}]))
+                .err()
+                .unwrap();
+            assert!(!error.to_string().contains("synthetic-secret"));
+        }
+        assert!(load(json!([{"repositoryPath":"/disposable/bitbucket","remote":7,"repository":repository,"policy":policy}])).is_err());
     }
 
     #[tokio::test]

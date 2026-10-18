@@ -2,7 +2,7 @@ use super::*;
 use crate::{
     providers,
     publication_git::{PublicationGit, Push},
-    publication_remote::Connection,
+    publication_remote::{Connection, unmatched},
 };
 use std::{path::PathBuf, sync::Mutex as SyncMutex};
 enum Failure {
@@ -86,8 +86,7 @@ impl<S: StoreAccess> Publication<S> {
             return Ok(());
         }
         let Some(connection) = self.remote.matched(&record) else {
-            record["error"] =
-                json!("The configured Bitbucket repository no longer matches this publication.");
+            record["error"] = json!(unmatched(&record));
             record["ready"] = json!(false);
             return self.save(&record);
         };
@@ -189,7 +188,7 @@ impl<S: StoreAccess> Publication<S> {
         connection: &Connection,
         git: &PublicationGit,
     ) -> std::result::Result<(), Failure> {
-        let client = &connection.client;
+        let client = &connection.host;
         let run = text(record, "runId")?.to_owned();
         ticket.check().map_err(operational)?;
         client.verify_repository().await?;
@@ -458,11 +457,11 @@ impl<S: StoreAccess> Publication<S> {
         });
         let result = if update {
             connection
-                .client
+                .host
                 .update_pull_request(pr_id(record)?, record, Some(&before))
                 .await
         } else {
-            connection.client.create_pull_request(&json!({"title":record["title"],"description":record["description"],"branch":record["branch"],"target":record["target"],"head":record["revision"]["head"]}),Some(&before)).await
+            connection.host.create_pull_request(&json!({"title":record["title"],"description":record["description"],"branch":record["branch"],"target":record["target"],"head":record["revision"]["head"]}),Some(&before)).await
         };
         if let Some(e) = failure.lock().unwrap().take() {
             return Err(Failure::Store(e));

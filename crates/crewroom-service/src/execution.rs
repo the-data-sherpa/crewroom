@@ -7,7 +7,9 @@ use crewroom_runtime::{
     jira_delivery::JiraDelivery,
     jira_sync::JiraSync,
     messaging::StoreAccess,
-    providers::{bitbucket::BitbucketClient, config, jira::JiraClient},
+    providers::{
+        bitbucket::BitbucketClient, config, jira::JiraClient, remote::UnavailablePublication,
+    },
     publication::Publication,
     publication_remote::{Connection, PublicationRemote},
     repository::Repository,
@@ -34,6 +36,8 @@ pub struct ServiceOptions {
     pub tmux: PathBuf,
     pub jira: Option<JiraClient>,
     pub publication: Vec<Connection>,
+    /// Configured repositories whose publish remote has no publication provider.
+    pub publication_unavailable: Vec<UnavailablePublication>,
     pub environment: Value,
 }
 impl ServiceOptions {
@@ -62,15 +66,16 @@ impl ServiceOptions {
             .map(|c| JiraClient::new(&c.source, c.credentials, None))
             .transpose()
             .map_err(std::io::Error::other)?;
-        let publication =
-            config::load_publication_connections(&data.join("bitbucket.json"), secrets)?
-                .into_iter()
-                .map(|c| -> Result<Connection> {
-                    let client = BitbucketClient::new(&c.repository, c.credentials, None)
-                        .map_err(std::io::Error::other)?;
-                    Connection::new(&c.repository_path, &c.repository, client, &c.policy, None)
-                })
-                .collect::<Result<Vec<_>>>()?;
+        let configured = config::load_publication_config(&data.join("bitbucket.json"), secrets)?;
+        let publication = configured
+            .connections
+            .into_iter()
+            .map(|c| -> Result<Connection> {
+                let client = BitbucketClient::new(&c.repository, c.credentials, None)
+                    .map_err(std::io::Error::other)?;
+                Connection::new(&c.repository_path, &c.repository, client, &c.policy, None)
+            })
+            .collect::<Result<Vec<_>>>()?;
         let tmux = std::env::var_os("CREWROOM_TMUX")
             .map(PathBuf::from)
             .or_else(|| {
@@ -86,6 +91,7 @@ impl ServiceOptions {
             tmux,
             jira,
             publication,
+            publication_unavailable: configured.unavailable,
             environment: json!(std::env::vars().collect::<std::collections::BTreeMap<_, _>>()),
         })
     }
@@ -105,6 +111,7 @@ pub(crate) struct Execution {
     pub operations: RunTasks,
     pub ready: AtomicBool,
     pub publication_paths: Vec<PathBuf>,
+    pub publication_unavailable: Vec<UnavailablePublication>,
     changes: watch::Sender<u64>,
 }
 impl Execution {
@@ -130,12 +137,24 @@ impl Execution {
             .iter()
             .map(|c| c.repository_path().to_owned())
             .collect();
-        let remote = PublicationRemote::new(
+        let publication_unavailable = options
+            .publication_unavailable
+            .iter()
+            .map(|u| {
+                let mut u = u.clone();
+                if let Ok(path) = std::fs::canonicalize(&u.repository_path) {
+                    u.repository_path = path;
+                }
+                u
+            })
+            .collect();
+        let remote = PublicationRemote::with_unavailable(
             store.clone(),
             data.join("publication"),
             std::fs::canonicalize(&options.helper)?,
             authority.clone(),
             options.publication,
+            options.publication_unavailable,
         )?;
         remote.install_observers(&work);
         let target = TargetRefresh::new(work.clone(), evidence.clone(), remote.clone());
@@ -227,6 +246,7 @@ impl Execution {
             operations: RunTasks::default(),
             ready: AtomicBool::new(false),
             publication_paths,
+            publication_unavailable,
             changes,
         });
         let _ = callback.set(Arc::downgrade(&result));

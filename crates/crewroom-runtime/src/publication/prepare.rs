@@ -147,10 +147,11 @@ impl<S: StoreAccess> Publication<S> {
                 proof.check(s)?;
                 if local["ready"]!=true || local["candidate"]["id"]!=candidate || local["candidate"]["revision"]!=owned["revision"] || present(&owned["writer"]) || owned["revision"]["head"]==owned["revision"]["base"] {return Err(conflict("Publication requires a changed, clean and locally validated current candidate."));}
                 if previous.as_ref().is_some_and(|p|owned["branch"]!=p["branch"] || owned["repository"]["path"]!=p["repositoryPath"] || owned["repository"]["targetBranch"]!=p["target"]) {return Err(conflict("The owned branch or target repository changed. The existing PR cannot be replaced."));}
-                let connection=this.remote.connection(text(&owned["repository"],"path")?).ok_or_else(||conflict("Bitbucket publication is not configured for this repository."))?;
+                let path=text(&owned["repository"],"path")?;
+                let connection=this.remote.connection(path).ok_or_else(||conflict(&this.remote.unavailable(path).map_or_else(||"Bitbucket publication is not configured for this repository.".into(),|u|u.reason)))?;
                 if owned["branch"]==owned["repository"]["targetBranch"] {return Err(conflict("Publication cannot push the target branch."));}
                 let mut record=if let Some(mut previous)=previous {
-                    if this.remote.matched(&previous).is_none() {return Err(conflict("The configured Bitbucket repository no longer matches this publication."));}
+                    if this.remote.matched(&previous).is_none() {return Err(conflict(&crate::publication_remote::unmatched(&previous)));}
                     let pushed=if previous["push"]["state"]=="confirmed" {Some(previous["revision"]["head"].clone())} else {None};
                     let mut entry=json!({"candidateId":previous["candidateId"],"revision":previous["revision"],"supersededAt":time()});
                     if let Some(pushed)=&pushed {entry["pushedHead"]=pushed.clone();}

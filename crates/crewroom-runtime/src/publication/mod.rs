@@ -8,7 +8,8 @@ use crate::{
     delivery_flight::DeliveryFlight,
     evidence::Evidence,
     messaging::StoreAccess,
-    publication_remote::{PublicationRemote, Ticket},
+    providers::remote::UnavailablePublication,
+    publication_remote::{PublicationRemote, Ticket, unmatched},
     repository::{Repository, array, text},
 };
 use crewroom_core::{Error, Result, store::Store};
@@ -70,6 +71,15 @@ impl<S: StoreAccess> Publication<S> {
                     .is_some()
             }))
     }
+    fn unavailable_provider(&self, run: &str) -> Result<Option<UnavailablePublication>> {
+        Ok(self
+            .remote
+            .store(|s| s.repository_work(run))?
+            .and_then(|w| {
+                self.remote
+                    .unavailable(w["repository"]["path"].as_str().unwrap_or(""))
+            }))
+    }
     async fn local(&self, run: &str) -> Option<Value> {
         self.evidence.assess(run).await.ok()
     }
@@ -117,11 +127,16 @@ impl<S: StoreAccess> Publication<S> {
         } else if available {
             "Publication is available after local validation. The coordinator can request it."
                 .into()
+        } else if let Some(unavailable) = self.unavailable_provider(run)? {
+            unavailable.reason
         } else {
             "PR publication is unavailable. Local validation can complete; no PR has been created."
                 .into()
         };
         let mut view = json!({"available":available,"reason":reason});
+        if !available && let Some(unavailable) = self.unavailable_provider(run)? {
+            view["provider"] = json!({"state":"unavailable","host":unavailable.host});
+        }
         if let Some(record) = record {
             view["record"] = record;
         }
@@ -130,19 +145,34 @@ impl<S: StoreAccess> Publication<S> {
     pub async fn observe_feedback(&self, run: &str) -> Result<Option<Value>> {
         let this = self.clone();
         let id = run.to_owned();
-        self.remote.operation(run, move |ticket|async move {
-            let Some(record)=this.remote.store(|s|s.publication(&id))? else {return Ok(None)};
-            if record["pr"]["state"]!="confirmed" || record["pr"]["id"].as_i64().is_none() {return Ok(record.get("feedback").cloned());}
-            let started=time(); let pr=record["pr"]["id"].as_i64().unwrap();
-            ticket.check()?;
-            let observation=match this.remote.matched(&record) {
-                Some(connection)=>connection.client.comments(pr).await.map_err(|e|conflict(&e.to_string()))?,
-                None=>json!({"state":"unavailable","comments":[],"reason":"The configured Bitbucket repository no longer matches this publication."})
-            };
-            // An already observed response is useful after stop; it authorizes no
-            // new effect. The store verifies PR identity and merges newer feedback.
-            this.remote.store(|s|s.save_publication_feedback(&id,pr as u64,&observation,&started)).map(Some)
-        }).await
+        self.remote
+            .operation(run, move |ticket| async move {
+                let Some(record) = this.remote.store(|s| s.publication(&id))? else {
+                    return Ok(None);
+                };
+                if record["pr"]["state"] != "confirmed" || record["pr"]["id"].as_i64().is_none() {
+                    return Ok(record.get("feedback").cloned());
+                }
+                let started = time();
+                let pr = record["pr"]["id"].as_i64().unwrap();
+                ticket.check()?;
+                let observation = match this.remote.matched(&record) {
+                    Some(connection) => connection
+                        .host
+                        .comments(pr)
+                        .await
+                        .map_err(|e| conflict(&e.to_string()))?,
+                    None => {
+                        json!({"state":"unavailable","comments":[],"reason":unmatched(&record)})
+                    }
+                };
+                // An already observed response is useful after stop; it authorizes no
+                // new effect. The store verifies PR identity and merges newer feedback.
+                this.remote
+                    .store(|s| s.save_publication_feedback(&id, pr as u64, &observation, &started))
+                    .map(Some)
+            })
+            .await
     }
     pub async fn flush(&self) -> Result<()> {
         let this = self.clone();

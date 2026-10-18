@@ -59,6 +59,7 @@ fn options(_root: &Path) -> crewroom_service::ServiceOptions {
         tmux: "/usr/bin/false".into(),
         jira: None,
         publication: vec![],
+        publication_unavailable: vec![],
         environment: json!({}),
     }
 }

@@ -1415,3 +1415,22 @@ fn deleting_an_unreferenced_principle_closes_its_editor(cx: &mut gpui::TestAppCo
     })
     .unwrap();
 }
+
+#[test]
+fn repository_publication_state_distinguishes_unsupported_remote_from_unconfigured() {
+    use super::publication_state;
+    assert_eq!(
+        publication_state(&json!({"publicationAvailable":true})),
+        "configured"
+    );
+    assert_eq!(
+        publication_state(&json!({"publicationAvailable":false})),
+        "not configured"
+    );
+    assert_eq!(
+        publication_state(
+            &json!({"publicationAvailable":false,"publicationProvider":{"state":"unavailable","host":"github.com","reason":"synthetic"}})
+        ),
+        "unavailable"
+    );
+}

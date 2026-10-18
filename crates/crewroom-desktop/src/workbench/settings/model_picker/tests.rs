@@ -32,6 +32,7 @@ print(json.dumps({'models':[{'provider':'fixture','id':k,'selector':'fixture/'+k
         tmux: "/usr/bin/tmux".into(),
         jira: None,
         publication: vec![],
+        publication_unavailable: vec![],
         environment: json!({"PATH":"/usr/bin:/bin","HOME":root}),
         runtime: Some(
             json!({"root":runtime,"socket":runtime.join("tmux.sock"),"ompBinary":binary,

@@ -1,14 +1,16 @@
 //! Read-only provider identity and request-owned target snapshots. Repository
 //! callbacks never reacquire repository operation locks.
+mod host;
 mod lifecycle;
 use crate::{
     conflict,
     messaging::StoreAccess,
-    providers::bitbucket::BitbucketClient,
+    providers::remote::{PublicationProvider, UnavailablePublication},
     publication_git::{PublicationGit, Remote, Target},
     repository::{Repository, array, request, text},
 };
 use crewroom_core::{Error, Result, authority::Authority, serialized::stringify};
+pub use host::PullRequestHost;
 use lifecycle::Operations;
 pub(crate) use lifecycle::Ticket;
 use serde_json::{Value, json};
@@ -23,26 +25,22 @@ use std::{
 pub struct Connection {
     pub(crate) path: PathBuf,
     pub(crate) repository: Value,
-    pub(crate) client: BitbucketClient,
+    pub(crate) host: PullRequestHost,
     pub(crate) policy: Value,
     fixture: Option<PathBuf>,
 }
 impl Connection {
+    /// `host` is the provider resolved from the repository's publish remote;
+    /// a provider client converts into it directly.
     pub fn new(
         path: &Path,
         repository: &Value,
-        client: BitbucketClient,
+        host: impl Into<PullRequestHost>,
         policy: &Value,
         fixture: Option<&Path>,
     ) -> Result<Self> {
-        if crate::providers::bitbucket::repository(repository)
-            .map_err(|_| Error::Invalid("Invalid configured Bitbucket repository.".into()))?
-            != client.repository
-        {
-            return Err(Error::Invalid(
-                "Configured Bitbucket client identity changed.".into(),
-            ));
-        }
+        let host = host.into();
+        host.check_configured(repository)?;
         request(policy, &["statusKeys", "pipelineSteps", "optionalSteps"])?;
         let mut normalized = json!({});
         for key in ["statusKeys", "pipelineSteps", "optionalSteps"] {
@@ -67,7 +65,7 @@ impl Connection {
         Ok(Self {
             path: std::fs::canonicalize(path)?,
             repository: repository.clone(),
-            client,
+            host,
             policy: normalized,
             fixture: fixture.map(std::fs::canonicalize).transpose()?,
         })
@@ -78,15 +76,27 @@ impl Connection {
     pub fn repository_path(&self) -> &Path {
         &self.path
     }
-    fn remote(&self) -> Result<Remote> {
-        Ok(match &self.fixture {
-            Some(path) => Remote::Fixture(path.clone()),
-            None => Remote::Bitbucket {
-                workspace: text(&self.client.repository, "workspace")?.into(),
-                slug: text(&self.client.repository, "slug")?.into(),
-            },
-        })
+    pub fn provider(&self) -> PublicationProvider {
+        self.host.provider()
     }
+    fn remote(&self) -> Result<Remote> {
+        match &self.fixture {
+            Some(path) => Ok(Remote::Fixture(path.clone())),
+            None => self.host.git_remote(),
+        }
+    }
+}
+/// The provider that wrote a durable publication record. Every retained
+/// record carries a Bitbucket repository identity; it is the only provider.
+pub(crate) fn recorded_provider(_record: &Value) -> PublicationProvider {
+    PublicationProvider::Bitbucket
+}
+/// Explains why a record's repository has no matching configured provider.
+pub(crate) fn unmatched(record: &Value) -> String {
+    format!(
+        "The configured {} repository no longer matches this publication.",
+        recorded_provider(record).name()
+    )
 }
 struct Inner<S: StoreAccess> {
     store: S,
@@ -94,6 +104,7 @@ struct Inner<S: StoreAccess> {
     helper: PathBuf,
     authority: Arc<Authority>,
     connections: Vec<Connection>,
+    unavailable: Vec<UnavailablePublication>,
     operations: Operations,
 }
 #[derive(Clone)]
@@ -106,15 +117,37 @@ impl<S: StoreAccess> PublicationRemote<S> {
         authority: Arc<Authority>,
         connections: Vec<Connection>,
     ) -> Result<Self> {
+        Self::with_unavailable(store, root, helper, authority, connections, vec![])
+    }
+    /// `unavailable` lists configured repositories whose publish remote has no
+    /// publication provider; they are reported, never published.
+    pub fn with_unavailable(
+        store: S,
+        root: PathBuf,
+        helper: PathBuf,
+        authority: Arc<Authority>,
+        connections: Vec<Connection>,
+        unavailable: Vec<UnavailablePublication>,
+    ) -> Result<Self> {
         authority.assert_current()?;
         crate::create_root(&root)?;
         crate::canonical(&helper)?;
+        let unavailable = unavailable
+            .into_iter()
+            .map(|mut u| {
+                if let Ok(path) = std::fs::canonicalize(&u.repository_path) {
+                    u.repository_path = path;
+                }
+                u
+            })
+            .collect();
         Ok(Self(Arc::new(Inner {
             store,
             root,
             helper,
             authority,
             connections,
+            unavailable,
             operations: Operations::default(),
         })))
     }
@@ -156,6 +189,18 @@ impl<S: StoreAccess> PublicationRemote<S> {
             .connections
             .iter()
             .find(|c| c.path == Path::new(path))
+            .cloned()
+    }
+    /// The unavailable-provider report for a configured repository whose
+    /// publish remote no provider implements.
+    pub fn unavailable(&self, path: &str) -> Option<UnavailablePublication> {
+        if self.connection(path).is_some() {
+            return None;
+        }
+        self.0
+            .unavailable
+            .iter()
+            .find(|u| u.repository_path == Path::new(path))
             .cloned()
     }
     pub(crate) fn matched(&self, record: &Value) -> Option<Connection> {
@@ -346,7 +391,7 @@ impl<S: StoreAccess> PublicationRemote<S> {
             let Some(record)=this.store(|s|s.continuation_publication(&id))? else {return Ok(())};
             let connection=this.matched(&record).ok_or_else(||conflict("Continuation held: the recorded PR cannot be verified."))?;
             let pr_id=record["pr"]["id"].as_i64().ok_or_else(||conflict("Continuation held: the recorded PR cannot be verified."))?;
-            let client=connection.client;
+            let client=connection.host;
             client.verify_repository().await.map_err(|_|conflict("Continuation held: live PR verification is unavailable. Retry when the provider is available."))?;
             ticket.check()?;
             let pr=client.pull_request(pr_id).await.map_err(|_|conflict("Continuation held: live PR verification is unavailable. Retry when the provider is available."))?;

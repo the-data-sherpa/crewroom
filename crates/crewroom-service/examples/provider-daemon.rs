@@ -71,6 +71,7 @@ async fn main() -> anyhow::Result<()> {
             }),
         jira,
         publication,
+        publication_unavailable: vec![],
         environment: config["environment"].clone(),
     };
     let server = Service::start_with_options(

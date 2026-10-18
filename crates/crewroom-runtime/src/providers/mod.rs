@@ -4,6 +4,7 @@ pub mod bitbucket;
 mod bitbucket_schema;
 pub mod config;
 pub mod jira;
+pub mod remote;
 mod schema;
 pub mod secrets;
 mod singleflight;

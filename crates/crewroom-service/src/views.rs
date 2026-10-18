@@ -88,7 +88,15 @@ pub(super) fn workspace(e: &Execution, v: &mut Value) -> Result<()> {
         for r in repos {
             let path = std::path::PathBuf::from(r["path"].as_str().unwrap_or(""));
             let canonical = std::fs::canonicalize(&path).unwrap_or(path);
-            r["publicationAvailable"] = json!(e.publication_paths.contains(&canonical));
+            let available = e.publication_paths.contains(&canonical);
+            r["publicationAvailable"] = json!(available);
+            if let Some(unavailable) = e
+                .publication_unavailable
+                .iter()
+                .find(|u| !available && u.repository_path == canonical)
+            {
+                r["publicationProvider"] = json!({"state":"unavailable","host":unavailable.host,"reason":unavailable.reason});
+            }
         }
     }
     v["activity"] = json!(activity);

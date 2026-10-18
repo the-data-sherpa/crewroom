@@ -533,12 +533,11 @@ impl Workbench {
                     string(&repo, "targetBranch"),
                     repo["branchPrefix"].as_str().unwrap_or("codex/crewroom/"),
                     records(&repo, "checks").len(),
-                    if repo["publicationAvailable"] == true {
-                        "configured"
-                    } else {
-                        "not configured"
-                    }
+                    publication_state(&repo)
                 )));
+            if let Some(reason) = repo["publicationProvider"]["reason"].as_str() {
+                row = row.child(hint(reason));
+            }
             if !retired {
                 row=row.child(div().flex().flex_wrap().gap_2().child(Button::new(SharedString::from(format!("edit-repository-{target}"))).label(format!("Edit {name}")).selected(target==id).disabled(self.busy).on_click(cx.listener(move|this,_,_,cx|{this.settings.repository=edit.clone();cx.notify();}))).child(Button::new(SharedString::from(format!("retire-repository-{target}"))).label("Retire repository").disabled(self.blocked()).on_click(cx.listener(move|_,_,window,cx|{let view=cx.entity().downgrade();let target=target.clone();window.open_alert_dialog(cx,move|dialog,_,_|{let view=view.clone();let target=target.clone();dialog.title(crate::accessibility::text("Retire this repository?")).description(crate::accessibility::text("New work will require another target. Saved tickets, history and worktrees are retained. Active or queued work can prevent retirement.")).show_cancel(true).cancel_text("Keep repository").ok_text("Retire repository").on_ok(move|_,_,cx|{let _=view.update(cx,|this,cx|this.send(format!("/repositories/{target}/retire"),json!({"revision":revision}),true,cx));true})});}))));
             }
@@ -718,5 +717,16 @@ impl Workbench {
     }
 }
 
+/// Publication configuration for a repository row. An unsupported publish
+/// remote is reported as unavailable, distinct from no configuration.
+fn publication_state(repo: &Value) -> &'static str {
+    if repo["publicationAvailable"] == true {
+        "configured"
+    } else if repo["publicationProvider"]["state"] == "unavailable" {
+        "unavailable"
+    } else {
+        "not configured"
+    }
+}
 #[cfg(test)]
 mod tests;

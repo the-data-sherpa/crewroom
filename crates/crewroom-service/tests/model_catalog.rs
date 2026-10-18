@@ -79,6 +79,7 @@ print(json.dumps({'models':[{'provider':'fixture','id':'model','selector':'fixtu
         tmux: "/usr/bin/tmux".into(),
         jira: None,
         publication: vec![],
+        publication_unavailable: vec![],
         environment: json!({"PATH":"/usr/bin:/bin","HOME":root}),
     }
 }
@@ -596,4 +597,66 @@ async fn legacy_history_and_stop_remain_independent_of_refresh_and_shutdown_canc
             "{error}"
         );
     }
+}
+
+#[tokio::test]
+async fn unsupported_publish_remote_is_reported_as_an_unavailable_publication_provider() {
+    let root = tempfile::tempdir().unwrap();
+    let roles = root.path().join("roles.json");
+    let checkout = root.path().join("repo");
+    std::fs::create_dir(&checkout).unwrap();
+    for args in [
+        vec!["init", "-b", "main"],
+        vec![
+            "-c",
+            "user.name=Fixture",
+            "-c",
+            "user.email=fixture@example.invalid",
+            "commit",
+            "--allow-empty",
+            "-m",
+            "fixture",
+        ],
+    ] {
+        assert!(
+            std::process::Command::new("git")
+                .current_dir(&checkout)
+                .args(args)
+                .output()
+                .unwrap()
+                .status
+                .success()
+        );
+    }
+    let mut setup = options(root.path());
+    setup.publication_unavailable = vec![
+        crewroom_runtime::providers::remote::UnavailablePublication::unsupported(
+            checkout.clone(),
+            "github.com",
+        ),
+    ];
+    let service = Service::start_with_options(root.path(), &roles, 0, setup)
+        .await
+        .unwrap();
+    let info = &service.info;
+    let created = post(
+        info,
+        "repositories",
+        json!({"name":"Fixture","path":checkout,"targetBranch":"main"}),
+    )
+    .await;
+    assert!(created.status().is_success(), "{created:?}");
+    let workspace = get(info, "workspace").await;
+    let repo = &workspace["repositories"][0];
+    assert_eq!(repo["publicationAvailable"], false);
+    assert_eq!(repo["publicationProvider"]["state"], "unavailable");
+    assert_eq!(repo["publicationProvider"]["host"], "github.com");
+    assert!(
+        repo["publicationProvider"]["reason"]
+            .as_str()
+            .unwrap()
+            .contains("no supported publication provider")
+    );
+    assert_eq!(workspace["capabilities"]["publication"], false);
+    service.close().await.unwrap();
 }

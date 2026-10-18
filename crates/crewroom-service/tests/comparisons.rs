@@ -49,6 +49,7 @@ async fn comparison_preflight_is_readonly_and_ordinary_saves_work_for_all_instru
             tmux: "/usr/bin/false".into(),
             jira: None,
             publication: vec![],
+            publication_unavailable: vec![],
             environment: json!({}),
         },
     )
