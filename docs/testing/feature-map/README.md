@@ -31,7 +31,7 @@ python3 scripts/verify-feature.py build --evidence-dir .crewroom/test-results/fo
 
 `build` is an explicit setup action. It invokes the existing pinned native bootstrap and locked Cargo build, then records current native source inputs and binary hashes in `.crewroom/feature-verification/build.json`. Bootstrap can download its pinned Zig archive if absent. A source hash plus an old executable does not count as a rebuilt application. After relevant native source changes, repeat this build step; unrelated documentation changes do not require a native rebuild.
 
-Readiness invalidation additionally requires the local Docker engine at `/var/run/docker.sock` and a pinned Linux image with `/bin/sh`, `cat` and `test`. The recorded machine already has this Node 24 image; selecting it neither pulls nor changes it:
+Readiness invalidation additionally requires a reachable local Docker engine and a pinned Linux image. Preflight resolves the engine socket with `scripts/docker_engine.py`, in this order: `CREWROOM_DOCKER_SOCKET`, a `unix://` `DOCKER_HOST`, the active Docker CLI context, then the platform default (`/var/run/docker.sock` on Linux). It reports an engine that does not answer `/_ping` as unavailable, naming the socket it tried, and passes the socket it reached to the journey. The image needs `/bin/sh`, `cat` and `test`. The recorded machine already has this Node 24 image; selecting it neither pulls nor changes it:
 
 ```sh
 export CREWROOM_CHECK_IMAGE=sha256:3638d9a6fe4030bd716be989438248074489337ba3275657f93595428be4fc03
