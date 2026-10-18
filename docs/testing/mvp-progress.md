@@ -88,9 +88,19 @@ The run used 101 synthetic issues, #10 to #110, labelled `for-45-pages`. They we
 - Two live repositories syncing in separate projects.
 - A live rate limit, a revoked token or a repository with issues disabled.
 - A fine-grained or classic PAT.
-- `npm run test:e2e`, left to the integrator.
+- `npm run test:e2e` at the implementation revision; it ran at integration (below).
 
 Jira refresh driven by a confirmed Jira site is not part of this change. It is tracked as follow-up FOR-53.
+
+**Integration onto main `f2db753` (2026-10-18).** Rebased as `f80be9a` (pre-rebase `6a0a65d`), `30041fb` (pre-rebase `ab7680f`), `1eae08e` (pre-rebase `cb5717b`) and `479e4bb` (pre-rebase `8ad3fa2`). Conflicts were in docs only (`docs/operations.md`, `docs/status.md`, this file) and were resolved by keeping every entry; the schema-34 note keeps the FOR-40 restore-script sentence. The rebase broke three callers that main had added or kept against the removed workspace-level API, fixed in `13555ab`: the FOR-48 live probe example `github-issue-delivery-verified-live` and the `workflow-fixture` `github_seed` operation now confirm GitHub Issues on the project and sync and save labels per project, and the FOR-40 whole-state restore test expects schema 34. Checks on `13555ab`:
+- `cargo test --locked --no-fail-fast -p crewroom-core -p crewroom-runtime -p crewroom-service -- --test-threads=4` (shared target): **377 passed, 0 failed, 2 ignored**.
+- `cargo test --locked -p crewroom-desktop -- --test-threads=4`: **146 passed, 15 ignored**.
+- Clippy `-D warnings`: clean for core, runtime and service `--all-targets` and the desktop bin. `cargo fmt --check`: clean for all four crates.
+- `npm test` **334/334** and `npm run build` pass (run before `13555ab`, which changes only Rust examples and a Rust test).
+- `npm run test:e2e`: **31 passed**, with the fixture-only OMP and the Rust Mail runtime linked from the development checkout's ignored `.crewroom/`.
+- `scripts/rust/workflow-providers.test.ts`: the Jira and GitHub research-completion tests pass with the patched `github_seed`; the Bitbucket publication test timed out waiting for its container check on this machine and is unrelated to FOR-45.
+
+The live github.com evidence above remains bound to `6a0a65d`; it was not repeated on the rebased revision.
 
 ## FOR-48 — Deliver progress back to GitHub issues (2026-10-18)
 
