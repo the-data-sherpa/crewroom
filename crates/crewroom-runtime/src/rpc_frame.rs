@@ -1,5 +1,7 @@
-//! Bounded decoding of OMP 18.4.12 protocol-v2 output. Commands remain plain JSONL.
+//! Bounded decoding of OMP protocol-v2 output. Commands remain plain JSONL.
 //! Wire reference: oh-my-pi/v18.4.12/packages/coding-agent/src/modes/rpc/rpc-frame.ts.
+//! OMP 18.11.3 keeps the same chunk and error frames; its encoder only serializes a
+//! shared `message_update` snapshot once, byte-identical to `JSON.stringify`.
 use crate::conflict;
 use base64::{Engine, engine::general_purpose::STANDARD};
 use crewroom_core::Result;

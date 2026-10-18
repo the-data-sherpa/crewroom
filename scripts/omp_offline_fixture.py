@@ -21,6 +21,11 @@ import time
 import urllib.parse
 import uuid
 
+# Fixture-only OMP versions whose RPC/host-tool contract is checked with synthetic replies.
+# 18.4.12 stays the default retained fixture; select another installation's node_modules
+# with CREWROOM_OMP_FIXTURE_MODULES.
+FIXTURE_VERSIONS = ('omp/18.4.12', 'omp/18.11.3')
+
 
 def wait_until(predicate, timeout=15):
     end = time.monotonic() + timeout
@@ -182,13 +187,13 @@ class Sandbox:
             cli = modules / '@oh-my-pi/pi-coding-agent/dist/cli.js'
             bun = Path(shutil.which('bun') or Path.home() / '.bun/bin/bun').resolve()
             if not cli.is_file():
-                raise RuntimeError('Install fixture-only OMP 18.4.12 per docs/testing/mh2-runtime-acceptance.md')
+                raise RuntimeError('Install fixture-only OMP 18.4.12 (or 18.11.3) per docs/testing/mh2-runtime-acceptance.md')
             self.binary.write_text('#!/bin/sh\nexec ' + shlex.quote(str(bun)) + ' ' + shlex.quote(str(cli)) + ' "$@"\n')
             self.binary.chmod(0o700)
             self.runtime_identity = {'version': subprocess.run([str(self.binary), '--version'], capture_output=True, text=True, check=True).stdout.strip(),
                                      'cliSha256': hashlib.sha256(cli.read_bytes()).hexdigest(), 'bunSha256': hashlib.sha256(bun.read_bytes()).hexdigest()}
-            if self.runtime_identity['version'] != 'omp/18.4.12':
-                raise RuntimeError('Fixture requires OMP 18.4.12')
+            if self.runtime_identity['version'] not in FIXTURE_VERSIONS:
+                raise RuntimeError('Fixture requires one of ' + ', '.join(FIXTURE_VERSIONS))
             readonly = [modules, bun, Path(__file__).with_name('linux_offline_guard.py').resolve()]
             mail = project / '.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail'
             if mail.exists(): readonly.append(mail.resolve())

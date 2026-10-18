@@ -294,7 +294,41 @@ fn newer_listed_cli_keeps_its_models_without_an_execution_profile() {
     assert!(error.contains("No verified adapter profile"), "{error}");
     let note = snapshot.harnesses[0].execution_note().unwrap();
     assert!(note.contains("OMP omp/99.0.0 lists models"), "{note}");
-    assert!(note.contains("omp/18.4.12"), "{note}");
+    assert!(note.contains("omp/18.4.12, omp/18.11.3"), "{note}");
+}
+
+/// FOR-52: OMP 18.11.3 passed the actual-binary contract suites, so its
+/// listed models get an execution profile and carry no execution note.
+#[test]
+fn launch_verified_omp_18_11_3_offerings_are_eligible() {
+    let (root, mut config, roles) = fixture();
+    let role = roles.iter().find(|r| r["id"] == "coordinator").unwrap();
+    let path = root.path().join("catalog");
+    let mut snapshot: Snapshot =
+        serde_json::from_slice(&std::fs::read(path.join("catalog.json")).unwrap()).unwrap();
+    snapshot.harnesses[0].identity.as_mut().unwrap().version = "omp/18.11.3".into();
+    write_private(
+        &path.join("catalog.json"),
+        &serde_json::to_vec(&snapshot).unwrap(),
+    )
+    .unwrap();
+    let sources = config.discovery_sources(
+        Path::new("/fixture/process"),
+        &json!({"PATH":"/usr/bin:/bin"}),
+    );
+    config.discovery =
+        Some(crate::model_catalog::store::Catalog::open(&path, sources, || {}).unwrap());
+    let routes = config
+        .catalog_routes(
+            &config.discovery.as_ref().unwrap().snapshot().unwrap(),
+            false,
+        )
+        .unwrap();
+    assert_eq!(routes.len(), 1);
+    assert!(routes[0].offering.execution_profile.is_some());
+    let model = config.assignment_model(role).unwrap();
+    assert_eq!(model["resolved"]["adapter"], "omp");
+    assert_eq!(snapshot.harnesses[0].execution_note(), None);
 }
 
 /// A configured Codex harness whose listed model is `native-model`, with the

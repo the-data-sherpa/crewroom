@@ -12,7 +12,7 @@ fn native_catalog_external_live_selection(cx: &mut gpui::TestAppContext) {
         std::env::var_os("CREWROOM_MH4_PICKER").expect("Explicit disposable fixture required"),
     );
     let setup: Value = serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap();
-    let key = setup["selection"].as_str().unwrap();
+    let requested = setup["selection"].as_str().unwrap();
     let (h, v, e) = open_connection(cx, PathBuf::from(setup["descriptor"].as_str().unwrap()));
     wait_for(cx, h, &v, &e, Duration::from_secs(30), |v, _| v.connected);
     navigate(cx, h, "models");
@@ -24,20 +24,37 @@ fn native_catalog_external_live_selection(cx: &mut gpui::TestAppContext) {
             > 0
             && v.workspace["modelDiscovery"]["state"] != "refreshing"
     });
-    cx.read(|cx| {
+    // Since FOR-42 a choice key ends in its billing route. A request without a
+    // route selects the offering's only discovered route.
+    let key = cx.read(|cx| {
         let workspace = &v.read(cx).workspace;
-        let choice = workspace["modelDiscovery"]["choices"]
+        let routed = format!("{requested}:");
+        let matches: Vec<_> = workspace["modelDiscovery"]["choices"]
             .as_array()
             .unwrap()
             .iter()
-            .find(|row| row["key"] == key)
-            .expect("Requested live offering was not discovered");
+            .filter(|row| {
+                row["key"] == requested
+                    || row["key"].as_str().is_some_and(|k| {
+                        k.strip_prefix(&routed)
+                            .is_some_and(|route| !route.contains(':'))
+                    })
+            })
+            .collect();
+        assert_eq!(
+            matches.len(),
+            1,
+            "Requested live offering was not discovered once"
+        );
+        let choice = matches[0];
         assert_eq!(
             choice["eligibility"]["low"]["eligible"], true,
             "{}",
             choice["eligibility"]["low"]
         );
+        choice["key"].as_str().unwrap().to_owned()
     });
+    let key = key.as_str();
     click(cx, h, "budget-small");
     activate_by_keyboard(cx, h, "job-code");
     cx.update_window(h, |_, w, cx| w.input(key, cx)).unwrap();

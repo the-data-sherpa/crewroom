@@ -109,9 +109,11 @@ def main():
             host=Host(name,root,sandbox,provider,backend,model,plan,ports[i],**extra);hosts.append(host)
             if ready:host.ready()
             return host
-        original=None
+        original=None;assignment_budget=root/'budgets'/'family-0'
         for i,(selector,effort) in enumerate([('aperture-openai/openai.gpt-6-sol','low'),('aperture-anthropic/anthropic.claude-sonnet-5','medium'),('aperture-google/gemini-3.8-flash','low')]):
-            h=create(f'family-{i}',selector,effort);before=len(provider.requests)
+            # Production keys the opaque-reasoning budget by assignment, shared by its attempts
+            # (`budgetRoot` in supervisor configuration). The session-restore cases below reuse it.
+            h=create(f'family-{i}',selector,effort,**({'budgetRoot':str(assignment_budget)} if i==0 else {}));before=len(provider.requests)
             assert h.turn(provider,{'kind':'text','text':'NATIVE_HOST_TEXT'})['status']=='completed'
             assert h.turn(provider,{'kind':'tool','name':'send_message','arguments':{'to':'Coordinator','body':'NATIVE_HOST_MESSAGE'}},{'kind':'text','text':'NATIVE_HOST_TOOL_COMPLETE'})['status']=='completed'
             assert len(provider.requests)-before==3
@@ -122,13 +124,14 @@ def main():
             h.close()
             if i==0:original=h
         for name,expected in [('restore',original.identity['sessionId']),('wrong-id','wrong-id')]:
-            h=create(name,previousAttemptId=original.name,previousSessionId=expected,resumeSessionDir=original.identity['sessionDirectory'])
+            h=create(name,previousAttemptId=original.name,previousSessionId=expected,resumeSessionDir=original.identity['sessionDirectory'],budgetRoot=str(assignment_budget));sent=len(provider.requests)
             restored=name=='restore';assert h.identity['recoveryMode']==('session' if restored else 'replacement'),h.identity
             assert h.identity['sessionDirectory']==(original.identity['sessionDirectory'] if restored else str(h.root/'sessions'))
             assert (h.identity['sessionId']==original.identity['sessionId'])==restored
             assert h.turn(provider,{'kind':'text','text':'AFTER_RESTORE'})['status']=='completed'
             assert Path(h.control('state')['sessionFile']).parent==Path(h.identity['sessionDirectory'])
-            report['cases'].append({'name':name+' actual session directory and subsequent turn','identity':h.identity,'status':'passed'});h.close()
+            replayed=[i for r in provider.requests[sent:] if r['agent']==name for i in r['body'].get('input',[]) if i.get('type')=='reasoning']
+            report['cases'].append({'name':name+' actual session directory and subsequent turn','identity':h.identity,'replayedOpaqueReasoning':len(replayed),'status':'passed'});h.close()
         empty=root/'empty-sessions';empty.mkdir(mode=0o700)
         h=create('empty-history',previousAttemptId='empty',previousSessionId='empty',resumeSessionDir=str(empty));assert h.identity['recoveryMode']=='replacement' and h.identity['sessionDirectory']==str(h.root/'sessions');h.close();report['cases'].append({'name':'empty history uses new attempt session directory','status':'passed'})
         for name,action in [('denied',{'kind':'error','status':403}),('effort',{'kind':'error','status':400,'error':{'type':'invalid_request_error','param':'reasoning.effort','message':"Unsupported reasoning_effort 'low'. Supported values are 'medium'."}})]:
