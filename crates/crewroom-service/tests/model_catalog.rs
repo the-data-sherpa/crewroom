@@ -722,13 +722,8 @@ for line in sys.stdin:
     assert_eq!(view["selection"], "intent");
     let codex_view = harness(&view, "codex");
     assert_eq!(codex_view["outcome"], "success", "{codex_view}");
-    assert!(
-        codex_view["executionNote"]
-            .as_str()
-            .unwrap()
-            .contains("codex-cli 0.163.0 lists models"),
-        "{codex_view}"
-    );
+    // 0.163.0 passed live launch, so no execution caveat is shown.
+    assert!(codex_view["executionNote"].is_null(), "{codex_view}");
     assert_eq!(
         harness(&view, "claude-code")["error"],
         "Harness is not configured."

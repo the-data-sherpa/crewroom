@@ -351,6 +351,10 @@ for line in sys.stdin:
 "#).unwrap();
         std::fs::set_permissions(bin.join("codex"), std::fs::Permissions::from_mode(0o700))
             .unwrap();
+        // OMP lists no models without runner providers; this version is
+        // discovery-verified but not yet launch-verified.
+        std::fs::write(bin.join("omp"), "#!/usr/bin/python3\nimport sys\nif '--version' in sys.argv:\n print('omp/18.11.3');sys.exit(0)\nprint('{\"models\":[]}')\n").unwrap();
+        std::fs::set_permissions(bin.join("omp"), std::fs::Permissions::from_mode(0o700)).unwrap();
     }
     let mut options = configured(root);
     options.runtime = None;
@@ -383,7 +387,6 @@ fn unconfigured_runner_lists_installed_models_and_explains_each_cause(
     for expected in [
         "Runner not configured:",
         "CREWROOM_RUNTIME_CONFIG",
-        "(`omp`) was not found on the service PATH",
         "(`claude`) was not found on the service PATH",
     ] {
         assert!(
@@ -423,11 +426,21 @@ fn unconfigured_runner_lists_installed_models_and_explains_each_cause(
         assert_eq!(legacy.label, "Legacy selection: legacy/free-text");
     });
     let after = labels(cx, h);
+    for expected in [
+        "OMP omp/18.11.3 lists models, but Crewroom has verified launching agents only with",
+        "OMP lists models only from providers defined in the runner configuration",
+        "codex · success",
+    ] {
+        assert!(
+            after.iter().any(|l| l.contains(expected)),
+            "Missing {expected}: {after:?}"
+        );
+    }
     assert!(
-        after
+        !after
             .iter()
             .any(|l| l.contains("codex-cli 0.163.0 lists models")),
-        "Missing execution note: {after:?}"
+        "Launch-verified Codex carries no execution caveat"
     );
     activate_by_keyboard(cx, h, "job-code");
     cx.update_window(h, |_, w, cx| w.input("fixture-model", cx))
