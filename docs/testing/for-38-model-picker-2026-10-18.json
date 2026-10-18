@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "issue": "FOR-38",
   "recordedAt": "2026-10-18T07:56:13Z",
-  "implementationRevision": "b8f38f0243debfe6afc4c0f30fb11ed98c7fc8f1",
-  "implementationTree": "147be9f0a1b6302c18b7cffac002ad4e0f0c4a4f",
-  "baseRevision": "93ebcd6",
+  "implementationRevision": "a3c1acec471eb8e66ffd09bf32ccd2ade6bf4712",
+  "implementationTree": "737130dece58806dc076e0eb8fc4bb0eaa4f727c",
+  "baseRevision": "60be15e",
   "branch": "for-38-model-picker-linux",
   "rootCause": [
     "The operator service on Linux was started without CREWROOM_RUNTIME_CONFIG (health executionAvailable=false). The workflow, and with it the model catalog, exists only with runner configuration, so the workspace omitted modelDiscovery and Models & budget plus the role override rendered free-text fields.",
@@ -59,7 +59,7 @@
       "resultSha256": "a93e076944b3759bbc92e6bb7c8fd04e438a3ac743677b098c300945ce9efc43"
     }
   ],
-  "liveBuildBinding": "Live workflow runs used binaries built from the working tree committed as 563f075 before rustfmt and the added startup_version unit test; b8f38f0 changes only test fixtures after that.",
+  "liveBuildBinding": "Live workflow runs used pre-rebase binaries built from the working tree committed as 563f075 (rebased 31b3e52) before rustfmt and the added startup_version unit test. Live runs were not repeated after the rebase onto 60be15e.",
   "checks": [
     {
       "command": "cargo test --locked -p crewroom-runtime -- --test-threads=1",
@@ -101,5 +101,34 @@
     "One full desktop run failed without a retained failure name; two following full runs passed 133/133.",
     "Headless GPUI tests only; no rendered OS-window walkthrough on the operator desktop. npm run test:e2e is run by the integrator.",
     "The operator service on port 4318 was not restarted. It shows the picker and explanations only after a stopped restart with this build."
-  ]
+  ],
+  "preRebaseRevision": "b8f38f0243debfe6afc4c0f30fb11ed98c7fc8f1",
+  "preRebaseTree": "147be9f0a1b6302c18b7cffac002ad4e0f0c4a4f",
+  "rebasedChecks": [
+    {
+      "command": "cargo test --locked -p crewroom-core -p crewroom-runtime -p crewroom-service -- --test-threads=1",
+      "result": "308 passed, 0 failed, 2 ignored"
+    },
+    {
+      "command": "cargo test --locked -p crewroom-desktop",
+      "result": "136 passed, 0 failed, 15 ignored"
+    },
+    {
+      "command": "cargo clippy --locked -p crewroom-core -p crewroom-runtime -p crewroom-service --all-targets -- -D warnings; cargo clippy --locked -p crewroom-desktop -- -D warnings",
+      "result": "clean"
+    },
+    {
+      "command": "cargo fmt --check (four packages)",
+      "result": "clean"
+    },
+    {
+      "command": "npm test",
+      "result": "332 passed, 0 failed"
+    },
+    {
+      "command": "npm run build",
+      "result": "passed"
+    }
+  ],
+  "checksNote": "'checks' ran at pre-rebase b8f38f0 on base 93ebcd6; 'rebasedChecks' ran at implementationRevision."
 }
