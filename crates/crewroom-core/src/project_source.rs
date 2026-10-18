@@ -416,6 +416,8 @@ impl Store {
                 history.push(saved);
                 repository["ticketSourceHistory"] = json!(history);
             }
+            // The confirmed source drives this project's sync (FOR-45).
+            s.attach_github_source(id, &record)?;
             repository["ticketSource"] = record;
             s.db.execute(
                 "UPDATE repositories SET data=? WHERE id=?",

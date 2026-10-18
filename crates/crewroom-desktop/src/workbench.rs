@@ -145,7 +145,7 @@ pub struct Workbench {
     description: Entity<TextareaState>,
     import: Entity<TextareaState>,
     credential_inputs: credentials::CredentialInputs,
-    issue_inputs: github_issues::IssueSourceInputs,
+    issue_inputs: HashMap<String, github_issues::IssueSourceInputs>,
     /// Ticket-source inputs per repository, and repositories whose confirmed
     /// source the operator opened to change (FOR-47).
     source_inputs: HashMap<String, project_source::SourceInputs>,
@@ -309,7 +309,7 @@ impl Workbench {
                     .placeholder("{\"siteUrl\":\"https://example.atlassian.net\",\"issues\":[…]}")
             }),
             credential_inputs: credentials::CredentialInputs::new(window, cx),
-            issue_inputs: github_issues::IssueSourceInputs::new(window, cx),
+            issue_inputs: HashMap::new(),
             source_inputs: HashMap::new(),
             source_open: Default::default(),
             settings: settings::Settings::default(),
@@ -459,6 +459,8 @@ impl Workbench {
                             if let Some(id) = value["repository"]["id"].as_str() {
                                 self.source_open.remove(id);
                                 self.source_inputs.remove(id);
+                                // A new source brings its own filters.
+                                self.issue_inputs.remove(id);
                             }
                         }
                         if let Some(text) = credentials::github_notice(&path, &value) {

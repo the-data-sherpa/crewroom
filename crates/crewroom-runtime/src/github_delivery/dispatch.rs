@@ -153,7 +153,7 @@ impl<S: StoreAccess> GitHubDelivery<S> {
     pub(super) async fn perform_flush(&self) -> Result<()> {
         let force = self.force.swap(false, Ordering::SeqCst);
         self.derive()?;
-        let current = self.store.with_store(|s| Ok(source(s)?.map(|s| s.site)))?;
+        let current = self.store.with_store(sites)?;
         let mut clients: HashMap<String, GitHubIssueClient> = HashMap::new();
         let mut held = HashSet::new();
         for mut update in self.store.with_store(|s| s.github_updates(None))? {
@@ -186,22 +186,19 @@ impl<S: StoreAccess> GitHubDelivery<S> {
             if update["state"] == "sending" {
                 update["state"] = json!("uncertain");
             }
-            match &current {
-                None => {
-                    update["reason"] = json!(
-                        "No GitHub repository is saved as the ticket source. Save it under Settings → Integrations → GitHub Issues; the update is kept."
-                    );
-                    self.store.with_store(|s| s.save_github_update(&update))?;
-                    held.insert(lane);
-                    continue;
-                }
-                Some(site) if update["siteUrl"] != *site => {
-                    block(&mut update, "The configured GitHub repository changed.");
-                    self.store.with_store(|s| s.save_github_update(&update))?;
-                    held.insert(lane);
-                    continue;
-                }
-                _ => {}
+            if current.is_empty() {
+                update["reason"] = json!(
+                    "No project has GitHub Issues as its ticket source. Confirm it for the project under Settings → Repositories; the update is kept."
+                );
+                self.store.with_store(|s| s.save_github_update(&update))?;
+                held.insert(lane);
+                continue;
+            }
+            if !current.contains(&update["siteUrl"]) {
+                block(&mut update, "The configured GitHub repository changed.");
+                self.store.with_store(|s| s.save_github_update(&update))?;
+                held.insert(lane);
+                continue;
             }
             let waiting = update["kind"] == "done"
                 && update["reason"]

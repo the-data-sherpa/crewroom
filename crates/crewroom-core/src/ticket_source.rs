@@ -115,12 +115,15 @@ impl Store {
     /// Save observed source tickets. Imported fields are replaced; refinements
     /// and steering are kept. A title/description change after the operator
     /// accepted requirements marks the ticket for re-acceptance and holds any
-    /// open run, independent of which provider reported it.
+    /// open run, independent of which provider reported it. `project` is the
+    /// repository whose source made the observation: a ticket imported for
+    /// the first time targets it.
     pub(crate) fn import_source_rows(
         &self,
         provider: Provider,
         site: &str,
         observations: &[SourceObservation],
+        project: Option<&str>,
     ) -> Result<Vec<Value>> {
         let mut saved = vec![];
         for (rank, issue) in observations.iter().enumerate() {
@@ -193,7 +196,14 @@ impl Store {
                     |r| r.get(0),
                 )?)?
             } else {
-                json!({"revision":1,"brief":"","criteria":[],"needsReacceptance":false})
+                let mut fresh =
+                    json!({"revision":1,"brief":"","criteria":[],"needsReacceptance":false});
+                // A ticket first imported by a project's own source targets that
+                // project; the operator can still assign another repository.
+                if let Some(project) = project {
+                    fresh["repositoryId"] = json!(project);
+                }
+                fresh
             };
             if changed && !refinement["brief"].as_str().unwrap_or("").is_empty() {
                 // Keep the text the operator last accepted so re-acceptance can show what

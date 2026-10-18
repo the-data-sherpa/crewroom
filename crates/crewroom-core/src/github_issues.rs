@@ -1,8 +1,9 @@
-//! GitHub Issues as a ticket source (FOR-45).
+//! GitHub Issues as a project's ticket source (FOR-45).
 //!
-//! The operator saves one GitHub repository (`owner/name`) with optional
-//! label, assignee, milestone and state filters. A sync imports the plain
-//! repository issues that match (never pull requests) through the
+//! Each project whose confirmed ticket source (FOR-47) is a GitHub repository
+//! has its own sync record: optional label, assignee, milestone and state
+//! filters, the last sync result and optional delivery labels. A sync imports
+//! the plain repository issues that match (never pull requests) through the
 //! provider-neutral `import_source_rows`, so identity matching, re-acceptance
 //! and preserved refinements behave exactly as they do for Jira. GitHub's
 //! open/closed state is stored as the ticket's source status and nothing here
@@ -11,9 +12,10 @@
 use crate::{
     Result,
     source_time::parse as source_timestamp,
-    store::{Store, conflict, invalid, strict, trim_text},
+    store::{Store, conflict, invalid, parse, strict, trim_text},
     ticket_source::{GITHUB, SourceObservation},
 };
+use rusqlite::params;
 use serde_json::{Value, json};
 use std::collections::HashSet;
 
@@ -125,6 +127,15 @@ pub fn normalize_source(body: &Value) -> Result<Value> {
         "milestone": milestone,
         "state": state,
     }))
+}
+
+/// Validates a project's filters; the repository comes from its confirmed
+/// ticket source, so it is not accepted here.
+pub fn normalize_filters(repository: &str, body: &Value) -> Result<Value> {
+    strict(body, &["labels", "assignee", "milestone", "state"])?;
+    let mut source = body.clone();
+    source["repository"] = json!(repository);
+    normalize_source(&source)
 }
 
 /// Validates `{inProgress, inReview}` workflow label names (FOR-48). Each is
@@ -268,47 +279,204 @@ fn unreadable_tickets(value: &Value) -> Result<Vec<Value>> {
         .collect()
 }
 
-const UPSERT: &str =
-    "INSERT INTO github_sync VALUES(1,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data";
+const UPSERT: &str = "INSERT INTO github_project_sync VALUES(?,?) ON CONFLICT(repository_id) DO UPDATE SET data=excluded.data";
+
+/// The filters a newly confirmed GitHub source starts with: open issues only.
+fn default_source(repository: &str) -> Value {
+    json!({"repository":repository,"labels":[],"assignee":null,"milestone":null,"state":"open"})
+}
+
+fn fresh(source: Value, at: String) -> Value {
+    json!({"source":source,"state":"not_synced","taskIds":[],"savedAt":at})
+}
+
+fn same_repository(saved: &Value, repository: &str) -> bool {
+    saved["source"]["repository"]
+        .as_str()
+        .is_some_and(|r| r.eq_ignore_ascii_case(repository))
+}
 
 impl Store {
-    /// The saved GitHub Issues source and its last sync result, if configured.
-    pub fn github_sync_state(&self) -> Result<Option<Value>> {
+    /// Every project's GitHub Issues source and its last sync result, ordered
+    /// by project. Each record carries its `repositoryId`.
+    pub fn github_sources(&self) -> Result<Vec<Value>> {
+        let mut statement = self
+            .db
+            .prepare("SELECT repository_id,data FROM github_project_sync ORDER BY repository_id")?;
+        let rows = statement
+            .query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?)))?
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+        rows.into_iter()
+            .map(|(id, data)| {
+                let mut state = parse(data)?;
+                state["repositoryId"] = json!(id);
+                Ok(state)
+            })
+            .collect()
+    }
+    /// One project's GitHub Issues source and its last sync result, if its
+    /// confirmed ticket source is GitHub Issues.
+    pub fn github_source(&self, repository_id: &str) -> Result<Option<Value>> {
+        Ok(self
+            .record("github_project_sync", "repository_id", repository_id)?
+            .map(|mut state| {
+                state["repositoryId"] = json!(repository_id);
+                state
+            }))
+    }
+    /// The workspace-level GitHub Issues source saved before sources were set
+    /// per project (schemas 32 and 33). It is kept only until a project whose
+    /// confirmed source is the same repository adopts it; it never syncs.
+    pub fn legacy_github_source(&self) -> Result<Option<Value>> {
         self.record("github_sync", "id", "1")
     }
-    /// Saves the repository and filters. A changed source starts as not synced;
-    /// tickets imported earlier keep their source, refinements and history.
-    pub fn save_github_source(&self, body: &Value) -> Result<Value> {
-        let source = normalize_source(body)?;
+    fn put_github_source(&self, repository_id: &str, state: &Value) -> Result<()> {
+        let mut data = state.clone();
+        if let Some(fields) = data.as_object_mut() {
+            fields.remove("repositoryId");
+        }
+        self.db
+            .execute(UPSERT, params![repository_id, data.to_string()])?;
+        Ok(())
+    }
+    /// The GitHub repository a project confirmed as its ticket source.
+    fn github_project(&self, repository_id: &str) -> Result<String> {
+        let repository = self.repository_by_id(repository_id)?;
+        if repository.get("retiredAt").is_some() {
+            return Err(conflict(
+                "Retired repositories cannot use GitHub Issues as a ticket source.",
+            ));
+        }
+        let source = &repository["ticketSource"];
+        if source["tickets"] != GITHUB.kind {
+            return Err(conflict(
+                "Confirm GitHub Issues as this project's ticket source under Settings → Repositories first.",
+            ));
+        }
+        source["repository"]
+            .as_str()
+            .map(str::to_owned)
+            .ok_or_else(|| conflict("The project's GitHub source has no repository."))
+    }
+    /// Gives a project the GitHub Issues sync record its confirmed source
+    /// implies. A confirmation of the same repository keeps the filters and
+    /// last sync; a new repository adopts the matching workspace-level source
+    /// saved before sources were per project, or starts with open issues only.
+    /// A Jira source has no GitHub sync record. Imported tickets are never
+    /// rewritten.
+    pub(crate) fn attach_github_source(&self, repository_id: &str, choice: &Value) -> Result<()> {
+        let Some(repository) = choice["repository"]
+            .as_str()
+            .filter(|_| choice["tickets"] == GITHUB.kind)
+        else {
+            self.db.execute(
+                "DELETE FROM github_project_sync WHERE repository_id=?",
+                [repository_id],
+            )?;
+            return Ok(());
+        };
+        if let Some(mut saved) = self.github_source(repository_id)?
+            && same_repository(&saved, repository)
+        {
+            if saved["source"]["repository"] != repository {
+                saved["source"]["repository"] = json!(repository);
+                self.put_github_source(repository_id, &saved)?;
+            }
+            return Ok(());
+        }
+        let state = match self
+            .legacy_github_source()?
+            .filter(|legacy| same_repository(legacy, repository))
+        {
+            Some(mut legacy) => {
+                legacy["source"]["repository"] = json!(repository);
+                legacy["adoptedFrom"] = json!("workspace");
+                self.db.execute("DELETE FROM github_sync", [])?;
+                legacy
+            }
+            None => fresh(default_source(repository), self.time()),
+        };
+        self.put_github_source(repository_id, &state)
+    }
+    /// Schema 34: every project whose confirmed ticket source is GitHub Issues
+    /// gets its own sync record. Projects confirming the repository of the
+    /// former workspace-level source adopt its filters, workflow labels and
+    /// last sync result; once adopted, the workspace-level record is removed.
+    /// If no project uses it yet, it is kept for the project that confirms
+    /// that repository next.
+    pub(crate) fn migrate_github_project_sources(&self) -> Result<()> {
+        let legacy = self.legacy_github_source()?;
+        let mut statement = self
+            .db
+            .prepare("SELECT id,data FROM repositories ORDER BY rowid")?;
+        let repositories = statement
+            .query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?)))?
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+        let mut adopted = false;
+        for (id, data) in repositories {
+            let repository = parse(data)?;
+            let source = &repository["ticketSource"];
+            let Some(name) = source["repository"]
+                .as_str()
+                .filter(|_| source["tickets"] == GITHUB.kind)
+            else {
+                continue;
+            };
+            if self.github_source(&id)?.is_some() {
+                continue;
+            }
+            let state = match legacy.as_ref().filter(|l| same_repository(l, name)) {
+                Some(legacy) => {
+                    adopted = true;
+                    let mut state = legacy.clone();
+                    state["source"]["repository"] = json!(name);
+                    state["adoptedFrom"] = json!("workspace");
+                    state
+                }
+                None => fresh(default_source(name), self.time()),
+            };
+            self.put_github_source(&id, &state)?;
+        }
+        if adopted {
+            self.db.execute("DELETE FROM github_sync", [])?;
+        }
+        Ok(())
+    }
+    /// Saves a project's filters. The repository is the one its confirmed
+    /// ticket source names. Changed filters start as not synced; tickets
+    /// imported earlier keep their source, refinements and history.
+    pub fn save_github_filters(&self, repository_id: &str, body: &Value) -> Result<Value> {
         self.transaction(|s| {
-            if let Some(saved) = s.github_sync_state()?
+            let repository = s.github_project(repository_id)?;
+            let source = normalize_filters(&repository, body)?;
+            let saved = s.github_source(repository_id)?;
+            if let Some(saved) = &saved
                 && saved["source"] == source
             {
-                return Ok(saved);
+                return Ok(saved.clone());
             }
-            let mut state =
-                json!({"source":source,"state":"not_synced","taskIds":[],"savedAt":s.time()});
+            let mut state = fresh(source, s.time());
             // Delivery label settings (FOR-48) are not filters; keep them.
-            if let Some(labels) = s
-                .github_sync_state()?
-                .and_then(|v| v.get("statusLabels").cloned())
-            {
+            if let Some(labels) = saved.and_then(|v| v.get("statusLabels").cloned()) {
                 state["statusLabels"] = labels;
             }
-            s.db.execute(UPSERT, [state.to_string()])?;
+            s.put_github_source(repository_id, &state)?;
+            state["repositoryId"] = json!(repository_id);
             Ok(state)
         })
     }
-    /// Commits one complete observation of the saved source atomically. `issues`
-    /// matched the filters, in GitHub's order; `retained` are imported issues
-    /// that no longer match (they left the filter since the last sync, or have
-    /// open runs) and were re-read so their status and requirement changes are
-    /// still recorded. `unreadable` lists imported tickets GitHub no longer
-    /// serves (`{taskId, key, status}`: deleted, transferred or hidden), so the
-    /// workbench can say their source status is the last one observed. Nothing
-    /// is saved when the source changed meanwhile.
+    /// Commits one complete observation of a project's source atomically.
+    /// `issues` matched the filters, in GitHub's order; `retained` are imported
+    /// issues that no longer match (they left the filter since the last sync,
+    /// or have open runs) and were re-read so their status and requirement
+    /// changes are still recorded. `unreadable` lists imported tickets GitHub
+    /// no longer serves (`{taskId, key, status}`: deleted, transferred or
+    /// hidden), so the workbench can say their source status is the last one
+    /// observed. Tickets imported for the first time target this project.
+    /// Nothing is saved when the project's source changed meanwhile.
     pub fn commit_github_sync(
         &self,
+        repository_id: &str,
         source: &Value,
         issues: &Value,
         retained: &Value,
@@ -330,14 +498,15 @@ impl Store {
         let unreadable = unreadable_tickets(unreadable)?;
         let site = site(repository);
         self.transaction(|s| {
-            let saved = s.github_sync_state()?;
+            s.github_project(repository_id)?;
+            let saved = s.github_source(repository_id)?;
             if saved.as_ref().map(|v| &v["source"]) != Some(source) {
                 return Err(conflict(
-                    "The GitHub source changed during synchronization. Nothing was saved; sync again.",
+                    "The project's GitHub source changed during synchronization. Nothing was saved; sync again.",
                 ));
             }
-            s.import_source_rows(GITHUB, &site, &kept)?;
-            let tasks = s.import_source_rows(GITHUB, &site, &matched)?;
+            s.import_source_rows(GITHUB, &site, &kept, None)?;
+            let tasks = s.import_source_rows(GITHUB, &site, &matched, Some(repository_id))?;
             let at = s.time();
             let mut state = saved.unwrap_or_default();
             state["state"] = json!("connected");
@@ -350,18 +519,21 @@ impl Store {
                 fields.remove("error");
                 fields.remove("reason");
             }
-            s.db.execute(UPSERT, [state.to_string()])?;
+            s.put_github_source(repository_id, &state)?;
             Ok(state)
         })
     }
-    /// Saves the optional workflow labels Crewroom applies to GitHub-sourced
-    /// issues (FOR-48). Both are off unless named; an empty value turns one off.
-    /// They never change the ticket's source status or Crewroom workflow state.
-    pub fn save_github_status_labels(&self, body: &Value) -> Result<Value> {
+    /// Saves the optional workflow labels Crewroom applies to issues of a
+    /// project's GitHub source (FOR-48). Both are off unless named; an empty
+    /// value turns one off. They never change the ticket's source status or
+    /// Crewroom workflow state.
+    pub fn save_github_status_labels(&self, repository_id: &str, body: &Value) -> Result<Value> {
         let labels = normalize_status_labels(body)?;
         self.transaction(|s| {
-            let mut state = s.github_sync_state()?.ok_or_else(|| {
-                conflict("Save a GitHub repository as the ticket source before configuring labels.")
+            let mut state = s.github_source(repository_id)?.ok_or_else(|| {
+                conflict(
+                    "Confirm GitHub Issues as this project's ticket source before configuring labels.",
+                )
             })?;
             if labels["inProgress"].is_null() && labels["inReview"].is_null() {
                 if let Some(fields) = state.as_object_mut() {
@@ -370,7 +542,7 @@ impl Store {
             } else {
                 state["statusLabels"] = labels.clone();
             }
-            s.db.execute(UPSERT, [state.to_string()])?;
+            s.put_github_source(repository_id, &state)?;
             Ok(state)
         })
     }
@@ -422,11 +594,21 @@ impl Store {
             s.get_task(task_id)
         })
     }
-    /// Records why a sync could not complete. Earlier imported tickets and the
-    /// last complete sync time are kept; nothing partial is saved.
-    pub fn fail_github_sync(&self, source: &Value, reason: &str, error: &str) -> Result<()> {
+    /// Records why a project's sync could not complete. Earlier imported
+    /// tickets and the last complete sync time are kept; nothing partial is
+    /// saved.
+    pub fn fail_github_sync(
+        &self,
+        repository_id: &str,
+        source: &Value,
+        reason: &str,
+        error: &str,
+    ) -> Result<()> {
         self.transaction(|s| {
-            let Some(mut state) = s.github_sync_state()?.filter(|v| v["source"] == *source) else {
+            let Some(mut state) = s
+                .github_source(repository_id)?
+                .filter(|v| v["source"] == *source)
+            else {
                 // The operator replaced the source meanwhile; the result is stale.
                 return Ok(());
             };
@@ -434,7 +616,7 @@ impl Store {
             state["reason"] = json!(reason);
             state["error"] = json!(error);
             state["lastAttemptAt"] = json!(s.time());
-            s.db.execute(UPSERT, [state.to_string()])?;
+            s.put_github_source(repository_id, &state)?;
             Ok(())
         })
     }

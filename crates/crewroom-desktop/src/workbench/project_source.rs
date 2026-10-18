@@ -96,6 +96,10 @@ impl Workbench {
                 0xf0b45b,
             ));
         }
+        // A confirmed GitHub Issues source drives this project's sync (FOR-45).
+        if view["saved"]["tickets"] == "github" {
+            block = block.child(self.github_issues_block(&id, window, cx));
+        }
         let open = state != "confirmed" || self.source_open.contains(&id);
         if !open {
             let target = id.clone();

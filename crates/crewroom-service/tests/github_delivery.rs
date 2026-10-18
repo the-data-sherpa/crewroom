@@ -6,7 +6,7 @@
 use crewroom_runtime::providers::github::GitHubClient;
 use crewroom_service::{GitHubOptions, Service, ServiceOptions};
 use serde_json::{Value, json};
-use std::{os::unix::fs::PermissionsExt, sync::Arc};
+use std::{os::unix::fs::PermissionsExt, process::Command, sync::Arc};
 
 const TOKEN: &str = "ghp_synthetic0delivery0token";
 
@@ -55,6 +55,53 @@ async fn workspace(info: &crewroom_service::ConnectionInfo) -> Value {
     serde_json::from_str(&text).unwrap()
 }
 
+/// A configured project on a Git checkout without a remote. Returns its id.
+async fn project(info: &crewroom_service::ConnectionInfo, root: &std::path::Path) -> String {
+    let path = std::fs::canonicalize(root).unwrap().join("checkout");
+    std::fs::create_dir(&path).unwrap();
+    for args in [
+        &["init", "-b", "main"][..],
+        &[
+            "-c",
+            "user.name=Fixture",
+            "-c",
+            "user.email=fixture@example.invalid",
+            "commit",
+            "--allow-empty",
+            "-m",
+            "fixture",
+        ],
+    ] {
+        assert!(
+            Command::new("git")
+                .arg("-C")
+                .arg(&path)
+                .args(args)
+                .output()
+                .unwrap()
+                .status
+                .success()
+        );
+    }
+    let (status, saved) = post(
+        info,
+        "/repositories",
+        json!({"name":"Fixture","path":path,"targetBranch":"main","checks":[]}),
+    )
+    .await;
+    assert_eq!(status, 200, "{saved}");
+    saved["id"].as_str().unwrap().to_owned()
+}
+fn issues_of(value: &Value, id: &str) -> Value {
+    value["githubIssues"]["projects"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|p| p["repositoryId"] == id)
+        .cloned()
+        .unwrap()
+}
+
 #[tokio::test]
 async fn workflow_labels_are_opt_in_and_delivery_routes_report_the_outbox() {
     let root = tempfile::tempdir().unwrap();
@@ -67,27 +114,30 @@ async fn workflow_labels_are_opt_in_and_delivery_routes_report_the_outbox() {
         .unwrap();
     let info = service.info.clone();
 
+    let p = project(&info, root.path()).await;
+    let labels = format!("/repositories/{p}/github-issues/labels");
     let (status, _) = post(
         &info,
-        "/github/issues/labels",
+        &labels,
         json!({"inProgress":"crewroom: in progress"}),
     )
     .await;
-    assert_eq!(status, 409, "labels need a saved repository");
-    let (status, saved) = post(
+    assert_eq!(status, 409, "labels need a confirmed GitHub source");
+    let (status, confirmed) = post(
         &info,
-        "/github/issues/source",
-        json!({"repository":"fixture/issues"}),
+        &format!("/repositories/{p}/ticket-source"),
+        json!({"tickets":"github","repository":"fixture/issues"}),
     )
     .await;
-    assert_eq!(status, 200, "{saved}");
+    assert_eq!(status, 200, "{confirmed}");
+    let saved = workspace(&info).await;
     assert_eq!(
-        saved["githubIssues"]["statusLabels"],
+        issues_of(&saved, &p)["statusLabels"],
         json!({"inProgress":null,"inReview":null}),
         "off by default"
     );
     assert!(
-        saved["githubIssues"]["labelsNote"]
+        issues_of(&saved, &p)["labelsNote"]
             .as_str()
             .unwrap()
             .contains("off")
@@ -97,22 +147,22 @@ async fn workflow_labels_are_opt_in_and_delivery_routes_report_the_outbox() {
         json!({"inProgress":"same","inReview":"Same"}),
         json!({"token":TOKEN}),
     ] {
-        let (status, _) = post(&info, "/github/issues/labels", bad).await;
+        let (status, _) = post(&info, &labels, bad).await;
         assert_eq!(status, 400);
     }
     let (status, labelled) = post(
         &info,
-        "/github/issues/labels",
+        &labels,
         json!({"inProgress":"crewroom: in progress","inReview":"crewroom: in review"}),
     )
     .await;
     assert_eq!(status, 200, "{labelled}");
     assert_eq!(
-        labelled["githubIssues"]["statusLabels"]["inReview"],
+        issues_of(&labelled, &p)["statusLabels"]["inReview"],
         "crewroom: in review"
     );
     assert!(
-        labelled["githubIssues"]["labelsNote"]
+        issues_of(&labelled, &p)["labelsNote"]
             .as_str()
             .unwrap()
             .contains("never change the issue's open/closed state")
@@ -121,7 +171,7 @@ async fn workflow_labels_are_opt_in_and_delivery_routes_report_the_outbox() {
     let view = workspace(&info).await;
     assert_eq!(view["githubUpdates"], json!([]));
     assert_eq!(
-        view["githubIssues"]["statusLabels"]["inProgress"],
+        issues_of(&view, &p)["statusLabels"]["inProgress"],
         "crewroom: in progress"
     );
     let (status, updates) = post(&info, "/github/delivery/reconcile", json!({})).await;

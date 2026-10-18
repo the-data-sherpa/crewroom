@@ -183,7 +183,7 @@ fn invalid_import_rolls_back_earlier_rows_and_future_schema_is_rejected() {
     drop(store);
     let path = root.path().join("workflow.sqlite");
     let db = rusqlite::Connection::open(&path).unwrap();
-    db.execute_batch("PRAGMA user_version=34").unwrap();
+    db.execute_batch("PRAGMA user_version=35").unwrap();
     drop(db);
     assert!(Store::open(&path).is_err());
 }

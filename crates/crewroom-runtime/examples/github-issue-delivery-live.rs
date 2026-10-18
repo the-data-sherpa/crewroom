@@ -88,16 +88,6 @@ fn prepare(
     issue: &Value,
 ) -> (Shared, String, String, String) {
     let store = Store::open(&data.join("workflow.sqlite")).unwrap();
-    let saved = store
-        .save_github_source(&json!({"repository":format!("{owner}/{name}"),"state":"all"}))
-        .unwrap();
-    store
-        .commit_github_sync(&saved["source"], &json!([issue]), &json!([]), &json!([]))
-        .unwrap();
-    let task = store.snapshot().unwrap()["tasks"][0]["id"]
-        .as_str()
-        .unwrap()
-        .to_owned();
     let repo = data.join("repository");
     std::fs::create_dir(&repo).unwrap();
     git(&repo, &["init", "-q", "-b", "main"]);
@@ -118,6 +108,33 @@ fn prepare(
     let repository = store
         .create_repository(&json!({"name":"Probe","path":repo,"targetBranch":"main"}))
         .unwrap();
+    // The project's confirmed GitHub Issues source drives its sync (FOR-45).
+    let project = repository["id"].as_str().unwrap().to_owned();
+    store
+        .confirm_ticket_source(
+            &project,
+            &json!({"tickets":"github","repository":format!("{owner}/{name}")}),
+            &crewroom_core::project_source::observe(Some(&format!(
+                "https://github.com/{owner}/{name}.git"
+            ))),
+        )
+        .unwrap();
+    let saved = store
+        .save_github_filters(&project, &json!({"state":"all"}))
+        .unwrap();
+    store
+        .commit_github_sync(
+            &project,
+            &saved["source"],
+            &json!([issue]),
+            &json!([]),
+            &json!([]),
+        )
+        .unwrap();
+    let task = store.snapshot().unwrap()["tasks"][0]["id"]
+        .as_str()
+        .unwrap()
+        .to_owned();
     let revision = |s: &Store| s.get_task(&task).unwrap()["revision"].clone();
     store
         .assign_repository(

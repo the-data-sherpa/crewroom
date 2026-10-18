@@ -92,24 +92,53 @@ fn issue_number(task: &Value) -> Option<u64> {
         .filter(|n| *n > 0)
 }
 
-/// The saved GitHub Issues source: repository, site and workflow labels.
+/// A project's GitHub Issues source: repository, site and workflow labels.
 struct Source {
     repository: String,
     site: Value,
     labels: Value,
 }
-fn source(s: &Store) -> Result<Option<Source>> {
-    Ok(s.github_sync_state()?.and_then(|saved| {
-        let repository = saved["source"]["repository"].as_str()?.to_owned();
-        Some(Source {
-            site: json!(crewroom_core::github_issues::site(&repository)),
-            repository,
-            labels: saved
-                .get("statusLabels")
-                .cloned()
-                .unwrap_or(json!({"inProgress":null,"inReview":null})),
+fn sources(s: &Store) -> Result<Vec<(Value, Source)>> {
+    Ok(s.github_sources()?
+        .into_iter()
+        .filter_map(|saved| {
+            let repository = saved["source"]["repository"].as_str()?.to_owned();
+            Some((
+                saved["repositoryId"].clone(),
+                Source {
+                    site: json!(crewroom_core::github_issues::site(&repository)),
+                    repository,
+                    labels: saved
+                        .get("statusLabels")
+                        .cloned()
+                        .unwrap_or(json!({"inProgress":null,"inReview":null})),
+                },
+            ))
         })
-    }))
+        .collect())
+}
+/// The project source a GitHub-sourced ticket belongs to: one whose confirmed
+/// repository serves the ticket's site, preferring the project the ticket
+/// targets when several projects confirmed the same repository.
+fn source(s: &Store, task: &Value) -> Result<Option<Source>> {
+    let mut found = None;
+    for (project, source) in sources(s)? {
+        if !ticket_source::belongs_to(task, ticket_source::GITHUB, &source.site) {
+            continue;
+        }
+        if project == task["repositoryId"] {
+            return Ok(Some(source));
+        }
+        found.get_or_insert(source);
+    }
+    Ok(found)
+}
+/// Sites of every project's GitHub Issues source.
+fn sites(s: &Store) -> Result<Vec<Value>> {
+    Ok(sources(s)?
+        .into_iter()
+        .map(|(_, source)| source.site)
+        .collect())
 }
 
 #[derive(Clone)]
@@ -153,17 +182,12 @@ impl<S: StoreAccess> GitHubDelivery<S> {
     pub fn needs_research_summary(&self, run_id: &str, revision: u64) -> Result<bool> {
         self.store.with_store(|s| {
             let task = s.get_task(text(&s.get_run(run_id)?, "taskId")?)?;
-            let Some(source) = source(s)? else {
-                return Ok(false);
-            };
-            Ok(
-                ticket_source::belongs_to(&task, ticket_source::GITHUB, &source.site)
-                    && !s.github_updates(Some(run_id))?.iter().any(|u| {
-                        u["kind"] == "research_outcome"
-                            && u["eventKey"] == format!("research-outcome-{revision}")
-                            && u["state"] != "blocked"
-                    }),
-            )
+            Ok(source(s, &task)?.is_some()
+                && !s.github_updates(Some(run_id))?.iter().any(|u| {
+                    u["kind"] == "research_outcome"
+                        && u["eventKey"] == format!("research-outcome-{revision}")
+                        && u["state"] != "blocked"
+                }))
         })
     }
     /// Reconciles every undelivered update once. Concurrent callers share one

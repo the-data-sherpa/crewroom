@@ -220,13 +220,12 @@ fn a_change_is_blocked_by_active_runs_and_imported_tickets_keep_their_source() {
             &github,
         )
         .unwrap();
-    // Tickets imported from the confirmed source.
-    let source = store
-        .save_github_source(&json!({"repository":"fixture/issues"}))
-        .unwrap()["source"]
-        .clone();
+    // Tickets imported from the confirmed source, which now drives the sync.
+    let source = store.github_source(id(&repo)).unwrap().unwrap()["source"].clone();
+    assert_eq!(source["repository"], "fixture/issues");
     store
         .commit_github_sync(
+            id(&repo),
             &source,
             &json!([{"id":7001,"number":1,"title":"Imported","body":"Synthetic","state":"open","html_url":"https://github.com/fixture/issues/issues/1","updated_at":"2026-10-18T08:00:00Z"}]),
             &json!([]),

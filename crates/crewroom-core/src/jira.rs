@@ -166,7 +166,7 @@ impl Store {
                 }
             })
             .collect::<Vec<_>>();
-        self.import_source_rows(JIRA, site, &observations)
+        self.import_source_rows(JIRA, site, &observations, None)
     }
     pub fn jira_state(&self) -> Result<Option<Value>> {
         self.record("jira_sync", "id", "1")

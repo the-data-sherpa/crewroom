@@ -1309,18 +1309,69 @@ fn native_jira_ticket_labels_source_status_with_provider_name_apart_from_workflo
         );
     }
 }
+/// A project on a Git checkout whose confirmed ticket source is GitHub Issues
+/// `repository` (synthetic remote observation; nothing is contacted).
+fn github_project(
+    store: &crewroom_core::store::Store,
+    root: &std::path::Path,
+    repository: &str,
+) -> String {
+    let checkout = std::fs::canonicalize(root).unwrap().join("github-project");
+    std::fs::create_dir(&checkout).unwrap();
+    for args in [
+        &["init", "-b", "main"][..],
+        &[
+            "-c",
+            "user.name=Fixture",
+            "-c",
+            "user.email=fixture@example.invalid",
+            "commit",
+            "--allow-empty",
+            "-m",
+            "Seed",
+        ],
+    ] {
+        assert!(
+            std::process::Command::new("git")
+                .arg("-C")
+                .arg(&checkout)
+                .args(args)
+                .output()
+                .unwrap()
+                .status
+                .success()
+        );
+    }
+    let project = store
+        .create_repository(
+            &json!({"name":"Issues","path":checkout,"targetBranch":"main","checks":[]}),
+        )
+        .unwrap()["id"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    store
+        .confirm_ticket_source(
+            &project,
+            &json!({"tickets":"github","repository":repository}),
+            &crewroom_core::project_source::observe(Some(&format!(
+                "git@github.com:{repository}.git"
+            ))),
+        )
+        .unwrap();
+    project
+}
 #[gpui::test]
 fn native_github_issue_shows_github_open_closed_apart_from_workflow_and_activity(
     cx: &mut gpui::TestAppContext,
 ) {
     // FOR-45: a GitHub issue's open/closed state is its source status only.
     let mut task = Value::Null;
-    let f = Fixture::projected(|s, _| {
-        let source = s
-            .save_github_source(&json!({"repository":"fixture/issues"}))
-            .unwrap()["source"]
-            .clone();
+    let f = Fixture::projected(|s, root| {
+        let project = github_project(s, root, "fixture/issues");
+        let source = s.github_source(&project).unwrap().unwrap()["source"].clone();
         s.commit_github_sync(
+            &project,
             &source,
             &json!([{"id":9012,"number":12,"title":"Synthetic GitHub issue","body":"Source text","state":"open","html_url":"https://github.com/fixture/issues/issues/12","updated_at":"2026-10-18T08:00:00Z"}]),
             &json!([]),

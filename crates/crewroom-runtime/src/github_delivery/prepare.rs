@@ -38,11 +38,9 @@ impl<S: StoreAccess> GitHubDelivery<S> {
             ));
         }
         let task = s.get_task(text(&run, "taskId")?)?;
-        let source = source(s)?
-            .filter(|source| ticket_source::belongs_to(&task, ticket_source::GITHUB, &source.site));
-        let Some(source) = source else {
+        let Some(source) = source(s, &task)? else {
             return Err(conflict(
-                "This run does not belong to the configured GitHub repository.",
+                "This run does not belong to a project's configured GitHub repository.",
             ));
         };
         if issue_number(&task).is_none() {
@@ -192,17 +190,14 @@ impl<S: StoreAccess> GitHubDelivery<S> {
     /// closed state. Nothing is derived for labels the operator left off.
     pub(super) fn derive(&self) -> Result<()> {
         self.store.with_store(|s| {
-            let Some(source) = source(s)? else {
-                return Ok(());
-            };
-            let configured = |key: &str| source.labels[key].as_str().map(str::to_owned);
-            let (progress, review) = (configured("inProgress"), configured("inReview"));
             for record in s.publications()? {
                 let run = s.get_run(text(&record, "runId")?)?;
                 let task = s.get_task(text(&run, "taskId")?)?;
-                if !ticket_source::belongs_to(&task, ticket_source::GITHUB, &source.site) {
+                let Some(source) = source(s, &task)? else {
                     continue;
-                }
+                };
+                let configured = |key: &str| source.labels[key].as_str().map(str::to_owned);
+                let (progress, review) = (configured("inProgress"), configured("inReview"));
                 let Some(number) = issue_number(&task) else {
                     continue;
                 };

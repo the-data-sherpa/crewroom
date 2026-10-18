@@ -223,6 +223,7 @@ struct Setup {
     reporter: String,
     other: String,
     task: String,
+    project: String,
 }
 /// A GitHub-sourced ticket (#1 in fixture/issues) with a running coding run,
 /// an admitted delivery reporter, one implementer (`other`) and a reviewer.
@@ -259,21 +260,6 @@ fn setup_for(research: bool) -> Setup {
     let root = tempfile::tempdir().unwrap();
     let path = root.path().join("workflow.sqlite");
     let store = Store::open(&path).unwrap();
-    let saved = store
-        .save_github_source(&json!({"repository":format!("{OWNER}/{NAME}")}))
-        .unwrap();
-    store
-        .commit_github_sync(
-            &saved["source"],
-            &json!([{"id":7001,"number":1,"title":"Synthetic","body":"Synthetic body","state":"open","html_url":format!("https://github.com/{OWNER}/{NAME}/issues/1"),"updated_at":"2026-10-18T08:00:00Z"}]),
-            &json!([]),
-            &json!([]),
-        )
-        .unwrap();
-    let task = store.snapshot().unwrap()["tasks"][0]["id"]
-        .as_str()
-        .unwrap()
-        .to_owned();
     // A coding run: repository, accepted brief and accepted plan.
     let repo = root.path().join("repository");
     std::fs::create_dir(&repo).unwrap();
@@ -304,6 +290,31 @@ fn setup_for(research: bool) -> Setup {
     let repository = store
         .create_repository(&json!({"name":"Fixture","path":repo,"targetBranch":"main"}))
         .unwrap();
+    // The project's confirmed GitHub Issues source drives its sync (FOR-45).
+    let project = repository["id"].as_str().unwrap().to_owned();
+    store
+        .confirm_ticket_source(
+            &project,
+            &json!({"tickets":"github","repository":format!("{OWNER}/{NAME}")}),
+            &crewroom_core::project_source::observe(Some(&format!(
+                "git@github.com:{OWNER}/{NAME}.git"
+            ))),
+        )
+        .unwrap();
+    let saved = store.github_source(&project).unwrap().unwrap();
+    store
+        .commit_github_sync(
+            &project,
+            &saved["source"],
+            &json!([{"id":7001,"number":1,"title":"Synthetic","body":"Synthetic body","state":"open","html_url":format!("https://github.com/{OWNER}/{NAME}/issues/1"),"updated_at":"2026-10-18T08:00:00Z"}]),
+            &json!([]),
+            &json!([]),
+        )
+        .unwrap();
+    let task = store.snapshot().unwrap()["tasks"][0]["id"]
+        .as_str()
+        .unwrap()
+        .to_owned();
     let revision = |store: &Store| store.get_task(&task).unwrap()["revision"].clone();
     store
         .assign_repository(
@@ -371,6 +382,7 @@ fn setup_for(research: bool) -> Setup {
         reporter,
         other,
         task,
+        project,
     }
 }
 fn uuid_like(n: u8) -> String {
@@ -610,6 +622,7 @@ async fn labels_apply_only_when_configured_and_the_merge_closes_the_issue_as_a_s
     // Configured: in progress, then in review once the PR is confirmed open.
     with(&s.store, |st| {
         st.save_github_status_labels(
+            &s.project,
             &json!({"inProgress":"crewroom: in progress","inReview":"crewroom: in review"}),
         )
         .unwrap()

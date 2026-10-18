@@ -1,7 +1,9 @@
-//! Settings → Integrations → GitHub Issues through the real local service and a
-//! simulated GitHub API on loopback (not github.com): save a repository with
-//! filters, see the missing connection stated, connect, sync, and find the
-//! imported issues in the ticket list with GitHub open/closed as source status.
+//! GitHub Issues per project (FOR-45) through the real local service and a
+//! simulated GitHub API on loopback (not github.com): confirming GitHub Issues
+//! as a project's ticket source (FOR-47) gives it its own filters and sync in
+//! Settings → Repositories; the missing connection is stated, then a sync
+//! imports the issues with GitHub open/closed as source status, and
+//! Settings → Integrations summarises the project.
 use super::acceptance_tests::labels;
 use super::test_support::{Fixture, click, navigate, open, screen_text, wait};
 use super::*;
@@ -52,11 +54,67 @@ fn simulated_github() -> String {
     origin
 }
 
+fn git(checkout: &std::path::Path, args: &[&str]) {
+    assert!(
+        std::process::Command::new("git")
+            .arg("-C")
+            .arg(checkout)
+            .args(args)
+            .output()
+            .unwrap()
+            .status
+            .success(),
+        "{args:?}"
+    );
+}
+fn issues(v: &Workbench, id: &str) -> Value {
+    github_issues::project_view(&v.workspace, id)
+        .cloned()
+        .unwrap_or(Value::Null)
+}
+
 #[gpui::test]
-fn native_settings_save_a_github_issue_source_and_sync_truthfully(cx: &mut gpui::TestAppContext) {
+fn native_project_confirms_github_issues_sets_filters_and_syncs_truthfully(
+    cx: &mut gpui::TestAppContext,
+) {
     let origin = simulated_github();
+    let mut project = String::new();
     let f = Fixture::configured(
-        |_, _| {},
+        |store, root| {
+            let checkout = std::fs::canonicalize(root).unwrap().join("checkout");
+            std::fs::create_dir(&checkout).unwrap();
+            git(&checkout, &["init", "-b", "main"]);
+            git(
+                &checkout,
+                &[
+                    "-c",
+                    "user.name=Fixture",
+                    "-c",
+                    "user.email=fixture@example.invalid",
+                    "commit",
+                    "--allow-empty",
+                    "-m",
+                    "Seed",
+                ],
+            );
+            git(
+                &checkout,
+                &[
+                    "remote",
+                    "add",
+                    "origin",
+                    "git@github.com:fixture/issues.git",
+                ],
+            );
+            project = store
+                .create_repository(
+                    &json!({"name":"Issues","path":checkout,"targetBranch":"main","checks":[]}),
+                )
+                .unwrap()["id"]
+                .as_str()
+                .unwrap()
+                .to_owned();
+        },
         move |_| crewroom_service::ServiceOptions {
             runtime: None,
             helper: "/usr/bin/false".into(),
@@ -73,34 +131,27 @@ fn native_settings_save_a_github_issue_source_and_sync_truthfully(cx: &mut gpui:
             }),
         },
     );
+    let id = project;
     let (h, v, e) = open(cx, &f);
     wait(cx, h, &v, &e, |v, _| {
-        v.connected && v.workspace["githubIssues"]["state"] == "not_configured"
+        v.connected && v.workspace["githubIssues"]["projects"] == json!([])
     });
     navigate(cx, h, "import-jira");
     let text = screen_text(cx, h);
     assert!(text.iter().any(|l| l == "GitHub Issues"), "{text:?}");
     assert!(
-        text.iter()
-            .any(|l| l == "No GitHub repository is saved as a ticket source.")
+        text.iter().any(|l| l
+            == "No project has GitHub Issues as its ticket source. Confirm it for a project under Settings → Repositories."),
+        "{text:?}"
     );
-    let type_into = |cx: &mut gpui::TestAppContext,
-                     pick: fn(&github_issues::IssueSourceInputs) -> Entity<InputState>,
-                     value: &str| {
-        cx.update_window(h, |_, window, cx| {
-            window.render_frame(cx);
-            let input = pick(&v.read(cx).issue_inputs);
-            input.update(cx, |i, cx| i.focus(window, cx));
-            window.input(value, cx);
-        })
-        .unwrap();
-    };
-    type_into(cx, |i| i.repository.clone(), "fixture/issues");
-    type_into(cx, |i| i.labels.clone(), "crewroom");
-    type_into(cx, |i| i.state.clone(), "all");
-    click(cx, h, "save-github-source");
-    wait(cx, h, &v, &e, |v, _| {
-        !v.busy && v.workspace["githubIssues"]["state"] == "not_synced"
+
+    // Confirming the suggested GitHub source gives the project its own sync,
+    // starting with open issues only.
+    navigate(cx, h, "repositories");
+    click(cx, h, format!("confirm-github-source-{id}"));
+    let target = id.clone();
+    wait(cx, h, &v, &e, move |v, _| {
+        !v.busy && issues(v, &target)["state"] == "not_synced"
     });
     let text = screen_text(cx, h);
     assert!(
@@ -108,13 +159,35 @@ fn native_settings_save_a_github_issue_source_and_sync_truthfully(cx: &mut gpui:
             .any(|l| l == "fixture/issues: saved, not synced yet."),
         "{text:?}"
     );
+    assert!(text.iter().any(|l| l == "Filters: state open"), "{text:?}");
+    let set = |cx: &mut gpui::TestAppContext,
+               pick: fn(&github_issues::IssueSourceInputs) -> Entity<InputState>,
+               value: &'static str| {
+        let target = id.clone();
+        cx.update_window(h, |_, window, cx| {
+            window.render_frame(cx);
+            let input = pick(&v.read(cx).issue_inputs[&target]);
+            input.update(cx, |i, cx| i.set_value(value, window, cx));
+        })
+        .unwrap();
+    };
+    set(cx, |i| i.labels.clone(), "crewroom");
+    set(cx, |i| i.state.clone(), "all");
+    click(cx, h, format!("save-github-filters-{id}"));
+    let target = id.clone();
+    wait(cx, h, &v, &e, move |v, _| {
+        !v.busy && issues(v, &target)["filters"] == "state all · labels crewroom"
+    });
+    let text = screen_text(cx, h);
     assert!(
         text.iter()
-            .any(|l| l == "Filters: state all · labels crewroom")
+            .any(|l| l == "Filters: state all · labels crewroom"),
+        "{text:?}"
     );
     assert!(
         text.iter()
-            .any(|l| l == "GitHub is not connected, so sync is unavailable.")
+            .any(|l| l == "GitHub is not connected, so sync is unavailable."),
+        "{text:?}"
     );
 
     // Issue delivery (FOR-48): workflow labels are off until named.
@@ -123,10 +196,11 @@ fn native_settings_save_a_github_issue_source_and_sync_truthfully(cx: &mut gpui:
             .any(|l| l == "Workflow labels are off. Progress is reported as issue comments only."),
         "{text:?}"
     );
-    type_into(cx, |i| i.in_review.clone(), "crewroom: in review");
-    click(cx, h, "save-github-labels");
-    wait(cx, h, &v, &e, |v, _| {
-        !v.busy && v.workspace["githubIssues"]["statusLabels"]["inReview"] == "crewroom: in review"
+    set(cx, |i| i.in_review.clone(), "crewroom: in review");
+    click(cx, h, format!("save-github-labels-{id}"));
+    let target = id.clone();
+    wait(cx, h, &v, &e, move |v, _| {
+        !v.busy && issues(v, &target)["statusLabels"]["inReview"] == "crewroom: in review"
     });
     let text = screen_text(cx, h);
     assert!(
@@ -135,14 +209,15 @@ fn native_settings_save_a_github_issue_source_and_sync_truthfully(cx: &mut gpui:
         "{text:?}"
     );
     assert_eq!(
-        f.get("/workspace")["githubIssues"]["statusLabels"]["inProgress"],
+        github_issues::project_view(&f.get("/workspace"), &id).unwrap()["statusLabels"]["inProgress"],
         Value::Null
     );
 
     // Without a connection the sync is refused truthfully and imports nothing.
-    click(cx, h, "sync-github-issues");
-    wait(cx, h, &v, &e, |v, _| {
-        !v.busy && v.workspace["githubIssues"]["reason"] == "not_connected"
+    click(cx, h, format!("sync-github-issues-{id}"));
+    let target = id.clone();
+    wait(cx, h, &v, &e, move |v, _| {
+        !v.busy && issues(v, &target)["reason"] == "not_connected"
     });
     let text = screen_text(cx, h);
     assert!(
@@ -151,6 +226,7 @@ fn native_settings_save_a_github_issue_source_and_sync_truthfully(cx: &mut gpui:
         "{text:?}"
     );
 
+    navigate(cx, h, "import-jira");
     cx.update_window(h, |_, window, cx| {
         window.render_frame(cx);
         let input = v.read(cx).credential_inputs.github.clone();
@@ -162,14 +238,24 @@ fn native_settings_save_a_github_issue_source_and_sync_truthfully(cx: &mut gpui:
     wait(cx, h, &v, &e, |v, _| {
         !v.busy && v.workspace["github"]["state"] == "connected"
     });
-    click(cx, h, "sync-github-issues");
-    wait(cx, h, &v, &e, |v, _| {
-        !v.busy && v.workspace["githubIssues"]["state"] == "connected"
+    navigate(cx, h, "repositories");
+    click(cx, h, format!("sync-github-issues-{id}"));
+    let target = id.clone();
+    wait(cx, h, &v, &e, move |v, _| {
+        !v.busy && issues(v, &target)["state"] == "connected"
     });
     let text = screen_text(cx, h);
     assert!(
         text.iter()
             .any(|l| l == "fixture/issues: 2 issues imported in the last complete sync."),
+        "{text:?}"
+    );
+    // Settings → Integrations names the project beside its status.
+    navigate(cx, h, "import-jira");
+    let text = screen_text(cx, h);
+    assert!(
+        text.iter()
+            .any(|l| l == "Issues: fixture/issues: 2 issues imported in the last complete sync."),
         "{text:?}"
     );
     assert!(!text.iter().any(|l| l.contains(TOKEN)));
@@ -180,6 +266,7 @@ fn native_settings_save_a_github_issue_source_and_sync_truthfully(cx: &mut gpui:
         let task = tasks.iter().find(|t| t["key"] == key).unwrap();
         assert_eq!(task["source"], "github");
         assert_eq!(task["sourceStatus"], status);
+        assert_eq!(task["repositoryId"], json!(id), "imported for this project");
         assert_eq!(
             labels(
                 cx,

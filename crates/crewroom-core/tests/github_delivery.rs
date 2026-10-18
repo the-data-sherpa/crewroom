@@ -1,6 +1,7 @@
 //! GitHub issue delivery records (FOR-48): the schema-33 outbox table, the
 //! optional workflow labels and the issue state Crewroom observes after a
 //! merge. Transport is tested in the runtime against a simulated GitHub API.
+mod support;
 use crewroom_core::store::Store;
 use rusqlite::Connection;
 use serde_json::{Value, json};
@@ -9,12 +10,12 @@ fn issue(number: u64, state: &str, updated: &str) -> Value {
     json!({"id":7000+number,"number":number,"title":"Synthetic","body":"Synthetic body","state":state,"html_url":format!("https://github.com/fixture/issues/issues/{number}"),"updated_at":updated})
 }
 
-fn synced(store: &Store) -> Value {
-    let saved = store
-        .save_github_source(&json!({"repository":"fixture/issues"}))
-        .unwrap();
+fn synced(store: &Store, root: &std::path::Path) -> Value {
+    let project = support::github_project(store, root, "fixture/issues");
+    let saved = store.github_source(&project).unwrap().unwrap();
     store
         .commit_github_sync(
+            &project,
             &saved["source"],
             &json!([issue(1, "open", "2026-10-18T08:00:00Z")]),
             &json!([]),
@@ -34,15 +35,15 @@ fn synced(store: &Store) -> Value {
 fn workflow_labels_are_off_by_default_validated_and_kept_across_source_changes() {
     let root = tempfile::tempdir().unwrap();
     let store = Store::open(&root.path().join("workflow.sqlite")).unwrap();
+    let project = support::project(&store, root.path(), "fixture/issues");
     assert!(
         store
-            .save_github_status_labels(&json!({"inProgress":"crewroom:in-progress"}))
+            .save_github_status_labels(&project, &json!({"inProgress":"crewroom:in-progress"}))
             .is_err(),
-        "labels need a saved source"
+        "labels need a confirmed GitHub source"
     );
-    let saved = store
-        .save_github_source(&json!({"repository":"fixture/issues"}))
-        .unwrap();
+    support::confirm_github(&store, &project, "fixture/issues");
+    let saved = store.github_source(&project).unwrap().unwrap();
     assert!(saved.get("statusLabels").is_none(), "off by default");
     for bad in [
         json!({"inProgress":"a,b"}),
@@ -51,24 +52,30 @@ fn workflow_labels_are_off_by_default_validated_and_kept_across_source_changes()
         json!({"inProgress":7}),
         json!({"other":"x"}),
     ] {
-        assert!(store.save_github_status_labels(&bad).is_err(), "{bad}");
+        assert!(
+            store.save_github_status_labels(&project, &bad).is_err(),
+            "{bad}"
+        );
     }
     let state = store
-        .save_github_status_labels(&json!({"inProgress":" in progress ","inReview":""}))
+        .save_github_status_labels(
+            &project,
+            &json!({"inProgress":" in progress ","inReview":""}),
+        )
         .unwrap();
     assert_eq!(
         state["statusLabels"],
         json!({"inProgress":"in progress","inReview":null})
     );
-    // A repository change resets sync state but keeps delivery labels.
+    // A filter change resets sync state but keeps delivery labels.
     let changed = store
-        .save_github_source(&json!({"repository":"fixture/other"}))
+        .save_github_filters(&project, &json!({"state":"all"}))
         .unwrap();
     assert_eq!(changed["state"], "not_synced");
     assert_eq!(changed["statusLabels"]["inProgress"], "in progress");
     // Clearing both turns labels off again.
     let cleared = store
-        .save_github_status_labels(&json!({"inProgress":null,"inReview":" "}))
+        .save_github_status_labels(&project, &json!({"inProgress":null,"inReview":" "}))
         .unwrap();
     assert!(cleared.get("statusLabels").is_none());
 }
@@ -77,7 +84,7 @@ fn workflow_labels_are_off_by_default_validated_and_kept_across_source_changes()
 fn observed_issue_state_changes_only_the_source_status() {
     let root = tempfile::tempdir().unwrap();
     let store = Store::open(&root.path().join("workflow.sqlite")).unwrap();
-    let task = synced(&store);
+    let task = synced(&store, root.path());
     let id = task["id"].as_str().unwrap();
     let closed = store
         .record_github_issue_state(id, "closed", Some("2026-10-18T09:00:00Z"))
@@ -154,5 +161,5 @@ fn schema_33_adds_the_github_updates_table_to_a_schema_32_store() {
         .unwrap()
         .query_row("PRAGMA user_version", [], |r| r.get(0))
         .unwrap();
-    assert_eq!(version, 33);
+    assert_eq!(version, crewroom_core::store::SCHEMA_VERSION);
 }

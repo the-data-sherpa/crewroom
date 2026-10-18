@@ -800,7 +800,9 @@ async fn mutate_inner(state: AppState, path: String, body: Value) -> Result<Valu
     }
     let segments = path.split('/').collect::<Vec<_>>();
     match segments.as_slice() {
-        ["github", "issues", action] => return github::issues::mutate(&state, action, body).await,
+        ["repositories", id, "github-issues", action] => {
+            return github::issues::mutate(&state, id, action, body).await;
+        }
         ["repositories", id, "ticket-source"] => {
             return ticket_sources::confirm(&state, id, body).await;
         }
