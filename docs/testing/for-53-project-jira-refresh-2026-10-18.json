@@ -1,0 +1,30 @@
+{
+  "issue": "FOR-53",
+  "observedAt": "2026-10-18",
+  "scope": "A project's confirmed Jira site drives that project's Jira refresh with its own filters; schema 35 migrates the workspace-level Jira refresh setting into the projects that confirmed its site; not connected, rejected and unreachable shown per project.",
+  "baseRevision": "aa2d6192d2eb3e3cb02644e0c89f0100d330f2a0",
+  "implementationRevision": "2e23990450460471cfffe322afbb583a91ecc4f3",
+  "simulated": {
+    "provider": "Loopback Jira API fixtures (axum in crates/crewroom-service/tests/jira_refresh.rs and credentials.rs; std TcpListener in crates/crewroom-desktop/src/workbench/jira_refresh_tests.rs; node http in scripts/rust/jira-workflow-fixture.ts) and core store tests; not a live Jira site.",
+    "checks": [
+      "Core jira_projects: per-project filters, ranked JQL, separate records, commit/fail semantics, source changes, schema-35 adoption, unused setting reporting and later adoption",
+      "Runtime jira_sync: failure classification rejected/unavailable/unreachable/not_connected/invalid without provider detail",
+      "Service jira_refresh: per-project JQL reaches the fixture; other-site and unconnected projects shown not connected; 401 rejected, 503 unavailable, dead origin unreachable; GitHub confirmation stops Jira refresh; no token or provider body in responses",
+      "Service credentials: jira.json saved filter adopted on confirmation; stored-token refresh, restore and unreadable key per project",
+      "Desktop: confirm site, save filters, refresh, per-project and Integrations status lines",
+      "Native scripts jira-sync 4/4, jira-client and provider-config 10/10"
+    ]
+  },
+  "live": {
+    "executed": false,
+    "reason": "No Jira token on the verification machine; operator decision on FOR-53 (per FOR-39) makes live refresh not a gate this round."
+  },
+  "checksRun": {
+    "cargoTest": "534 passed, 1 failed (model_discovery cancellation timing under load; passed alone), 17 ignored",
+    "clippy": "clean with -D warnings for core, runtime, service, desktop (--all-targets)",
+    "fmt": "clean",
+    "e2e": "not executed (integrator)",
+    "npmTest": "334/334",
+    "npmBuild": "passes"
+  }
+}

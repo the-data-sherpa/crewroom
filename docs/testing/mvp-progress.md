@@ -29,6 +29,35 @@ Not executed: a live changes-requested or approving review by a second account, 
 
 `npm run test:e2e` at main `556e68b969b7ad664efe2978d2ed4877f5519bf8` (FOR-38 through FOR-48 integrated) in the development checkout: **31 passed**. The fixture-only OMP 18.4.12 installation under the ignored `.crewroom/mh2-omp-fixture` was present, so INT-03 and INT-07/EVD-08 ran instead of stopping in fixture setup. A prior run at the same revision had 6 failures, all `ENOSPC` file-watcher exhaustion caused by disposable worktrees under `.claude/worktrees`; it passed after they were removed (every worktree head was on main or patch-equivalent to commits on main). This closes the e2e criterion recorded as environmental at the FOR-38, FOR-40, FOR-41, FOR-43, FOR-45, FOR-46 and FOR-48 integrations. Simulated and live provider evidence stays as recorded in each ticket's section.
 
+## FOR-53 — Per-project Jira refresh (2026-10-18)
+
+Implementation revision `2e23990450460471cfffe322afbb583a91ecc4f3` on branch `for-53-project-jira-refresh` from main `aa2d619`. A project's confirmed Jira site (FOR-47) drives its own Jira refresh with its own filters; schema 35 (`jira_project_sync`) moves the former workspace-level setting into the projects that confirmed its site. Receipt: [for-53-project-jira-refresh-2026-10-18.json](for-53-project-jira-refresh-2026-10-18.json).
+
+**Simulated (loopback Jira fixtures and store tests, not a live Jira site):**
+- Core (`crates/crewroom-core/tests/jira_projects.rs`, unit tests in `src/jira_projects.rs`):
+  - A confirmed site starts with no filters; saving requires a project key, saved filter or JQL; a `siteUrl` in the filters and JQL with `ORDER BY` are refused. Filters combine into `filter = … AND project = "…" AND assignee = "…" AND (…) ORDER BY Rank ASC`.
+  - Two projects on one site keep separate filters; saving one leaves the other unchanged. A commit for another project's source is refused.
+  - A refresh keeps Jira rank order, targets first-imported tickets at the project, stores Jira status as source status only and queues nothing. A failure keeps the last complete refresh and task order; a stale failure is dropped.
+  - Confirming another Jira site starts over with no filters and refuses the old source's commit; re-confirming the same site keeps filters; confirming GitHub Issues removes the record; imported tickets keep source, site and status.
+  - Schema 35 copies a schema-34 workspace setting (saved filter, assignee, last refresh) into every project confirming its site, each its own copy; a project on another site and a GitHub project get none; re-offering the same setting changes nothing.
+  - An unused setting is reported, never adopted by another site, and adopted by the next project confirming its site; a later project starts empty.
+- Runtime (`src/jira_sync.rs` unit test): 401/403 classify as rejected, other HTTP as unavailable, no answer as unreachable, missing credentials as not connected, invalid responses as invalid; messages carry no provider body.
+- Service (`crates/crewroom-service/tests/jira_refresh.rs`, updated `credentials.rs`):
+  - Three projects (two on the connected site, one on another site). Refresh before filters returns 409 and sends nothing; JQL with `ORDER BY` returns 400.
+  - `POST /api/jira/sync` refreshes the two connected-site projects, each with its own JQL (`project = "CR" AND assignee = "operator-1" ORDER BY Rank ASC`, `(labels = beta) ORDER BY Rank ASC`); the other-site project is never queried and shows not connected naming the connected site.
+  - 401 shows rejected and 503 unavailable for that project only, keeping its tickets and last complete refresh. An origin with nothing listening shows unreachable; a service with no Jira connection shows not connected and `/api/jira/sync` returns 409.
+  - Confirming GitHub Issues for one project stops its Jira queries; its tickets keep source and site. No response or workspace carries the token or provider error body.
+  - `credentials.rs`: the jira.json saved filter is adopted by the project that confirms its site; refresh without a token reports not connected before any request; stored-token refresh, whole-state restore and unreadable-key handling behave as before per project.
+- Desktop (`jira_refresh_tests.rs`; ignored journey `native_journey_jira_refresh_outage_retains_operator_brief_and_never_queues` updated and run with `--ignored`): in Settings → Repositories the operator confirms the offered connected site, sees the no-filters state and another project's not-connected note, saves a project key, refreshes and sees "2 tickets matched the last complete refresh"; Settings → Integrations names the project; tickets target the project, keep rank order and show their Jira status; no run is queued.
+- Native scripts (`scripts/rust/jira-sync.test.ts`, updated for per-project refresh through the `repository-fixture` `jira_project` op): 4/4 — paginated order and reopen, retained active issues, shared driven refresh with cancelled waiters and close drain, rollback on a failed final transaction. `scripts/rust/jira-client.test.ts` and `provider-config.test.ts`: 10/10 with the optional workspace filter.
+
+**Checks at `2e23990`:**
+- `cargo test -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop --no-fail-fast -- --test-threads=4`: **534 passed, 1 failed, 17 ignored**. The failure was `model_discovery::cancellation_unavailable_version_drift_and_cursor_loops_fail_closed` (a 100 ms cancellation timing under load average ~25); it passed on rerun alone and in the preceding full run, and is unrelated to FOR-53.
+- `cargo clippy -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop --all-targets -- -D warnings`: clean. `cargo fmt --check` for the four crates: clean.
+- `npm test`: **334/334** (an earlier run under load average ~25 had one `target-refresh.test.ts` M6.3 failure from a SIGKILLed `git rev-parse` timeout in the retired TypeScript server, untouched by FOR-53; that file and `cancel-continuation.test.ts` then passed 63/63 alone and the full rerun passed). `npm run build`: passes.
+
+**Not executed:** live refresh against a real Jira site (no Jira token on this machine; operator decision recorded on FOR-53 per FOR-39, not a completion gate this round). `npm run test:e2e` (fixed port 4331; left to the integrator; the browser suite exercises the retired TypeScript server, whose Jira refresh is unchanged). The macOS ACLI credential renewal now uses a one-item JQL search when no saved filter is configured; it is untested on Linux.
+
 ## FOR-56 — Neutral source identifiers and native provider oracle (2026-10-18)
 
 Implementation revision `2832986234025ffcb90b120583ee893c4430ad85` (branch `for-56-neutral-source-identifiers`, from main `aa2d619`). Rust builds used a worktree-private `CARGO_TARGET_DIR`. All evidence is simulated: synthetic fixtures and a loopback service, with no Jira or GitHub calls. The machine was shared and heavily loaded during these runs (load average 15–30).
