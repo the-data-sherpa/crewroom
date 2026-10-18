@@ -37,6 +37,54 @@ All owned processes exited, no provider errors, and the guard denied external an
 
 Limitations: the 18.11.3 offerings keep the execution profile id `omp-18.4.12-host-tools-v2`, as Codex 0.163.0 kept its 0.162.0 id. The operator service on port 4318 shows the change only after a restart with this build.
 
+## FOR-45 — Per-project GitHub Issues source (2026-10-18)
+
+Implementation revision `6a0a65df0bbb61871ff4dffc08172044d2ee30e0` on branch `for-45-per-project-github-source` from main `3a2add0`. This closes the remaining FOR-45 gaps. Each project now has its own GitHub Issues source with label, assignee, milestone and state filters, and the project's FOR-47 confirmed ticket source drives its sync. Schema 34 (`github_project_sync`) moves the former workspace-level source into the projects that confirmed its repository. Receipt: [for-45-per-project-source-2026-10-18.json](for-45-per-project-source-2026-10-18.json).
+
+**Simulated (loopback fixtures, not github.com):**
+- Core (`crates/crewroom-core/tests/github_issues.rs`, `github_delivery.rs`, `project_source.rs`):
+  - A project needs a confirmed GitHub source before it can save filters or labels, or sync.
+  - Confirming GitHub Issues starts the project with open issues only. A `repository` key in the filters is refused.
+  - Each project keeps its own filters and sync result. Re-confirming the same repository keeps them. Confirming Jira removes the project's sync. Confirming another repository starts the sync over, and a sync of the replaced source is refused.
+  - A ticket first imported by a project's sync targets that project.
+  - Schema 34 adopts a schema-33 workspace source into the matching project (filters, milestone, workflow labels, last sync) and removes the old record. A workspace source that no project uses is kept until a project confirms its repository.
+- Service (`crates/crewroom-service/tests/github_issues.rs`, `github_delivery.rs`):
+  - The `/api/repositories/{id}/github-issues/{filters|labels|sync}` routes return 409 before confirmation and 400 for a bad filter.
+  - The paged import, pull-request exclusion, re-acceptance, rate limit, revoked token, close and reopen re-read, gone issues and secondary rate limit all behave as before.
+  - The no-access and issues-disabled cases run in their own projects and leave the first project's last sync intact.
+  - The workspace lists each project's status by id and name, and reports a workspace-level source that no project has adopted.
+- Runtime (`crates/crewroom-runtime/tests/github_delivery.rs`): issue delivery takes its source and labels from the project that confirmed the ticket's repository.
+- Desktop (`github_issues_tests.rs`, `acceptance_tests.rs`):
+  - In Settings → Repositories, the operator confirms the suggested source, saves filters and workflow labels, sees the missing connection stated, and syncs after connecting.
+  - Settings → Integrations names the project beside its status.
+  - Tickets show "GitHub open" or "GitHub closed" and target the project.
+
+**Live (github.com, at `6a0a65d`):** debug `crewroomd` (sha256 `aa9840e8…c29b`) ran on loopback port 4391 with an isolated data directory, deleted afterwards. `CREWROOM_GITHUB_TOKEN` came from the operator's gh login, a gh OAuth token rather than a fine-grained or classic PAT, and was never printed. It was absent from every response and from the daemon log. The target was the approved private sandbox `<owner>/crewroom-e2e-sandbox`. The checkout's origin pointed at the sandbox and was never fetched.
+
+The run used 101 synthetic issues, #10 to #110, labelled `for-45-pages`. They were created for this run and closed as not planned afterwards.
+- Before confirmation, sync and filters were refused with 409. Confirming GitHub Issues gave the project filters `state open`. A `repository` key in the filters was refused with 400.
+- With filters `labels for-45-pages · state open`, the sync imported **101 issues across two pages of 100**. All were "GitHub open" and all targeted the project. No pull request was imported and no run was created.
+- #10 was then closed on github.com. In the next sync, GitHub's open listing still returned #10, already marked closed, so the ticket recorded "closed" and 101 issues matched. Changing the filters to `state all` kept the same 101 tickets, with only #10 closed. Back on `state open`, the listing returned 100 issues, and #10 was re-read and stayed closed.
+- A sync without an Origin header was refused with 403.
+- After a restart with no token, the filters, the 101 tickets and the last sync time were all kept. The sync reported `not_connected`, and the summary still named the project.
+
+**Checks at `6a0a65d`:**
+- Rust tests: `cargo test --locked --no-fail-fast -p crewroom-core -p crewroom-runtime -p crewroom-service -- --test-threads=4` gave **375 passed, 0 failed, 2 ignored**. The four `model_catalog` service tests first failed because a long `TMPDIR` overflowed the tmux socket path. They passed (5/5) when rerun with a short `TMPDIR`.
+- `cargo test -p crewroom-desktop -- --test-threads=4`: **146 passed / 15 ignored**. `/tmp` had reached the per-user quota on the shared machine, so for this run only the desktop fixture root (`test_support.rs`) was pointed at a home directory. The change was reverted and is not committed.
+- `cargo clippy -D warnings` is clean for core, runtime and service (all targets) and for the desktop bin. Desktop `--all-targets` reports only the existing `feedback_tests.rs` `useless_conversion`.
+- `cargo fmt --check` is clean.
+- `npm test` gave **332/332**, and `npm run build` passes.
+- Rust ran in a target directory private to the worktree. The shared target directory compiled tests against another worktree's stale `crewroom-core`, the same failure recorded at the FOR-47 integration.
+
+**Not executed:**
+- A live migration of a real schema-33 store.
+- Two live repositories syncing in separate projects.
+- A live rate limit, a revoked token or a repository with issues disabled.
+- A fine-grained or classic PAT.
+- `npm run test:e2e`, left to the integrator.
+
+Jira refresh driven by a confirmed Jira site is not part of this change. It is tracked as follow-up FOR-53.
+
 ## FOR-48 — Deliver progress back to GitHub issues (2026-10-18)
 
 Implementation revision `966b856d80dc2ef25817e6c1e43f3cd2d981b00a`, live probe and composition tests `6a8dae3527d485a30822a62a1560d83f1306ee4e`, documentation `5fe105e11f54ce49496928a0d52a2a01c345994e`, on branch `for-48-github-issue-delivery` from main `ba3ec4c` (FOR-45). `crewroom-runtime` `github_delivery/` is the GitHub counterpart of Jira delivery: the reporter's milestone, blocker, evidence, PR-link and research-outcome updates are saved, then posted as issue comments ending in `Crewroom update <id>`; every pass re-reads the issue's comments, so an earlier write is confirmed rather than repeated, and an unknown write stays uncertain until found or retried by the operator. After a merged publication Crewroom reads the issue and records GitHub's open/closed as the ticket's source status (`record_github_issue_state`); it never closes the issue and never changes workflow state. Optional in-progress/in-review labels apply only when named. Agents on GitHub-sourced tickets get `github_report`/`github_updates`; every other ticket keeps the Jira tools. Evidence and research composition moved to the shared `delivery_evidence` module and the verified PR link now accepts a GitHub PR. Schema 33 adds the `github_updates` outbox. The service adds `POST /api/github/issues/labels`, `POST /api/github/delivery/reconcile`, `POST /api/github/delivery/{id}/retry`, `githubUpdates` in the workspace and GitHub items under Needs you; the desktop adds the labels fields and a **GitHub issue delivery** section in Results with Retry. Machine-readable receipt: [for-48-github-issue-delivery-2026-10-18.json](for-48-github-issue-delivery-2026-10-18.json).

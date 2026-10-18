@@ -1,0 +1,182 @@
+{
+  "issue": "FOR-45",
+  "observedAt": "2026-10-18",
+  "scope": "Remaining FOR-45 gaps: the GitHub Issues source and its label, assignee, milestone and state filters are per project, driven by the project's FOR-47 confirmed ticket source; schema 34 migrates the former workspace-level source into the projects that use it; live import repeated at the final revision with two pages and a closed-issue state change.",
+  "baseRevision": "3a2add0",
+  "implementationRevision": "6a0a65df0bbb61871ff4dffc08172044d2ee30e0",
+  "simulated": {
+    "provider": "Loopback GitHub API fixtures (axum in crates/crewroom-service/tests/github_issues.rs; std TcpListener in crates/crewroom-desktop/src/workbench/github_issues_tests.rs) and core/runtime store tests; not github.com.",
+    "checks": [
+      "Core: a project without a confirmed GitHub source cannot save filters, labels or commit a sync; confirming GitHub Issues starts the project with state open and no labels; the repository comes from the confirmed source and a repository key in the filters is refused",
+      "Core: two projects keep separate filters and sync results; re-confirming the same repository keeps filters and the last sync; confirming Jira removes the project's GitHub sync; confirming another repository starts over and a sync of the replaced source is refused",
+      "Core: a ticket first imported by a project's sync targets that project (repositoryId); identity matching, re-acceptance, failures and unreadable issues behave as before",
+      "Core: schema 34 copies a schema-33 workspace-level source (filters, milestone, workflow labels, last sync) into the project whose confirmed source is the same repository (case-insensitive), starts other confirmed GitHub projects with open issues only, leaves unconfirmed projects without a sync, and removes the adopted record; an unused one is kept and adopted by the next project that confirms its repository",
+      "Service: /api/repositories/{id}/github-issues/{filters|labels|sync}; sync and filters are refused (409) before confirmation; filters reach GitHub; two pages, PR exclusion, re-sync re-acceptance, rate limit, no access and issues disabled (each in its own project, leaving the first project's last sync intact), revoked token, close/reopen re-read, gone issues and secondary rate limit; workspace githubIssues lists each project by id and name and reports an unadopted workspace-level source",
+      "Runtime: issue delivery resolves the source and workflow labels per ticket from the project whose confirmed repository serves it",
+      "Desktop: Settings → Repositories confirms the suggested GitHub source, shows the project's not-synced state and default filters, saves filters and workflow labels, states the missing connection, syncs after connecting, and Settings → Integrations names the project beside its status; imported tickets show GitHub open/closed and target the project"
+    ]
+  },
+  "live": {
+    "endpoint": "https://api.github.com through a debug crewroomd built from 6a0a65d (sha256 aa9840e8840b4b7da24cb9087e1071e852a88f0c4cf88f01a45b90fff9c4c29b), loopback port 4391, isolated --data-dir in an ignored worktree path (deleted afterwards)",
+    "repository": "Operator-approved private sandbox <owner>/crewroom-e2e-sandbox. 101 synthetic issues #10-#110 titled 'FOR-45 synthetic page issue NNN' with label for-45-pages were created for this run and closed as not planned afterwards; #10 was closed during the run to observe the state change.",
+    "project": "A local Git checkout whose origin is git@github.com:<owner>/crewroom-e2e-sandbox.git (never fetched), linked as project 'Sandbox'.",
+    "credential": "CREWROOM_GITHUB_TOKEN set from the operator's gh CLI login in the daemon environment only; never printed. It is a gh OAuth token, not a fine-grained or classic PAT.",
+    "pagination": "The client requests per_page=100; 101 matching issues therefore needed a second page through Link rel=next. Individual page requests were not logged; the count proves that more than one page was read.",
+    "observation": "Immediately after #10 was closed, GitHub's state=open listing still returned it (with state closed in the payload), so that sync counted 101 matching issues; the next state=open sync listed 100 and re-read #10 as closed.",
+    "redaction": "Repository owner replaced with <owner>. No token is retained.",
+    "tokenAbsentFromResponsesAndDaemonLog": true,
+    "cases": [
+      {
+        "case": "fresh install",
+        "githubIssues": {
+          "label": "No project has GitHub Issues as its ticket source. Confirm it for a project under Settings → Repositories.",
+          "projects": [],
+          "connection": "unchecked",
+          "legacy": null
+        },
+        "github": "unchecked"
+      },
+      {
+        "case": "project linked, no confirmed source",
+        "projectSource": {
+          "state": "unconfirmed",
+          "label": "Suggested from github.com/<owner>/crewroom-e2e-sandbox: GitHub Issues (<owner>/crewroom-e2e-sandbox) for tickets and GitHub for pull requests. Confirm to save.",
+          "suggestion": {
+            "tickets": "github",
+            "repository": "<owner>/crewroom-e2e-sandbox",
+            "pullRequests": "github",
+            "needsSite": false
+          }
+        },
+        "syncHttpStatus": 409,
+        "syncError": {
+          "error": "Confirm GitHub Issues as this project's ticket source under Settings → Repositories before syncing."
+        },
+        "filtersHttpStatus": 409,
+        "filtersError": {
+          "error": "Confirm GitHub Issues as this project's ticket source under Settings → Repositories first."
+        }
+      },
+      {
+        "case": "confirm GitHub Issues as the project's ticket source",
+        "httpStatus": 200,
+        "ticketSource": {
+          "tickets": "github",
+          "repository": "<owner>/crewroom-e2e-sandbox",
+          "pullRequests": "github"
+        },
+        "githubIssues": {
+          "state": "not_synced",
+          "label": "<owner>/crewroom-e2e-sandbox: saved, not synced yet.",
+          "filters": "state open",
+          "source": {
+            "repository": "<owner>/crewroom-e2e-sandbox",
+            "labels": [],
+            "assignee": null,
+            "milestone": null,
+            "state": "open"
+          },
+          "project": "Sandbox"
+        }
+      },
+      {
+        "case": "save filters for the project",
+        "repositoryInFiltersHttpStatus": 400,
+        "repositoryInFiltersError": {
+          "error": "Unrecognized key: repository"
+        },
+        "httpStatus": 200,
+        "filters": "state open · labels for-45-pages",
+        "state": "not_synced"
+      },
+      {
+        "case": "filtered sync across two pages (labels for-45-pages, state open; 101 matching issues, 100 per page)",
+        "httpStatus": 200,
+        "state": "connected",
+        "label": "<owner>/crewroom-e2e-sandbox: 101 issues imported in the last complete sync.",
+        "issueCount": 101,
+        "ticketCount": 101,
+        "keyRange": [
+          10,
+          110
+        ],
+        "allOpen": true,
+        "allTargetThisProject": true,
+        "pullRequestsImported": [],
+        "workflowRuns": 0,
+        "sample": {
+          "key": "#110",
+          "title": "FOR-45 synthetic page issue 101",
+          "sourceStatus": "open",
+          "sourceSite": "https://github.com/<owner>/crewroom-e2e-sandbox",
+          "sourceUrl": "https://github.com/<owner>/crewroom-e2e-sandbox/issues/110",
+          "project": "<owner>/crewroom-e2e-sandbox",
+          "sourceRevision": 1,
+          "needsReacceptance": false
+        }
+      },
+      {
+        "case": "issue #10 closed on github.com, re-sync under state=open",
+        "httpStatus": 200,
+        "state": "connected",
+        "issueCount": 101,
+        "ticketCount": 101,
+        "closedTicket": {
+          "key": "#10",
+          "sourceStatus": "closed",
+          "sourceUpdatedAt": "2026-10-18T11:31:50Z",
+          "sourceRevision": 1,
+          "needsReacceptance": false
+        },
+        "workflowRuns": 0
+      },
+      {
+        "case": "filters changed to state=all, re-sync",
+        "httpStatus": 200,
+        "filters": "state all · labels for-45-pages",
+        "issueCount": 101,
+        "ticketCount": 101,
+        "closedTickets": [
+          "#10"
+        ],
+        "sameTickets": true
+      },
+      {
+        "case": "sync without Origin",
+        "httpStatus": 403
+      },
+      {
+        "case": "filters back to state=open, re-sync (#10 no longer listed, re-read)",
+        "httpStatus": 200,
+        "filters": "state open · labels for-45-pages",
+        "state": "connected",
+        "issueCount": 100,
+        "ticketCount": 101,
+        "closedTicket": {
+          "key": "#10",
+          "sourceStatus": "closed",
+          "sourceUpdatedAt": "2026-10-18T11:31:50Z"
+        }
+      },
+      {
+        "case": "restart without CREWROOM_GITHUB_TOKEN and no saved token",
+        "httpStatus": 200,
+        "filtersRetained": "state open · labels for-45-pages",
+        "state": "unavailable",
+        "reason": "not_connected",
+        "error": "GitHub is not connected. Connect GitHub under Settings → Integrations, then sync; nothing was imported.",
+        "connectionNote": "GitHub is not connected, so sync is unavailable.",
+        "lastSyncedAtRetained": true,
+        "ticketsRetained": 101,
+        "summary": "1 project imports GitHub issues; each sets its own filters under Settings → Repositories."
+      }
+    ]
+  },
+  "notExecutedLive": [
+    "The schema-33 to schema-34 migration of a real workspace-level source (simulated in core tests only)",
+    "Two projects syncing different live repositories at once (simulated)",
+    "A fine-grained or classic personal access token, a live rate limit, a revoked token and a repository with issues disabled (simulated)",
+    "Jira refresh driven by a confirmed Jira site (not part of this change; see limitations)",
+    "npm run test:e2e (left to the integrator)"
+  ]
+}
