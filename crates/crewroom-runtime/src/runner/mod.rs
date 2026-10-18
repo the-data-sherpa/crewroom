@@ -26,15 +26,15 @@ pub enum Runner {
     Claude(Arc<claude::Claude>),
 }
 
-/// `--version` outputs whose execution adapter passed acceptance against the
-/// actual CLI. A newer installed CLI may list models before it is verified to
-/// run them. OMP 18.11.3 (FOR-52) passed the actual-binary RPC, host,
-/// supervisor and gateway suites with synthetic provider replies.
+/// `--version` outputs whose execution adapter passed live acceptance. A newer
+/// installed CLI may list models before it is verified to run them. OMP
+/// 18.11.3 passed only synthetic and scripted contract checks (FOR-52); it is
+/// added here in the same commit as its passing live launch receipt.
 pub fn execution_versions(adapter: &str) -> &'static [&'static str] {
     match adapter {
         "codex" => profile::VERSIONS,
         "claude-code" => claude_profile::VERSIONS,
-        "omp" => &["omp/18.4.12", "omp/18.11.3"],
+        "omp" => &["omp/18.4.12"],
         _ => &[],
     }
 }

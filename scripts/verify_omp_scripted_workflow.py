@@ -6,6 +6,7 @@ external Rust Mail) against an actual OMP executable. The upstream provider is a
 loopback fixture that answers each operator instruction deterministically; no
 model service, operator credential or OMP login is used. This proves the launch,
 host-tool and supervision contract of that OMP version, not live inference.
+The OMP version must be in `runner::execution_versions("omp")` of the build.
 """
 import argparse
 import json
