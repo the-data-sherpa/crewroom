@@ -47,6 +47,14 @@ No binary was killed. Load fell during the series, so runs 4 and 5 ran on a quie
 
 **Limitations.** The cause sits in Claude Code, outside Crewroom. The wrapper avoids it but does not remove it. Commands started directly by an agent session still inherit the zero limit. Evidence runs must use the wrapper, or a shell that Claude Code did not start, until Claude Code stops lowering the limit. The exact kernel condition that triggers the check in processes that set no CPU timers (the `sh` canaries, test binaries) was inferred from the measurements above. Kernel sources were not available to confirm it.
 
+**Integration at `29cfadb` and `ef95cf5`** (rebased onto main `90b46ab` without code changes; only the evidence docs conflicted and both sides were kept; worktree prepared with `python3 scripts/prepare_worktree.py`; every command through `python3 scripts/system_limits.py run --`, because the integrating agent session also inherited RTTIME 0/0; 1-minute load about 1–4):
+
+- `npm test` **343/343**.
+- `npm run build` passes (existing Vite chunk-size warning).
+- `npm run test:e2e` **31/31** (port 4331, isolated data directory).
+- `cargo test --locked --no-fail-fast -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop -j6`, default test threads, private `CARGO_TARGET_DIR`: **548 passed / 0 failed / 17 ignored** over 64 test binaries, no binary killed. The two extra tests are FOR-54's service tests on main.
+- No Rust source changed in FOR-68, so Clippy and fmt were not rerun.
+
 ## FOR-54 — Usage counts only started attempts as unrecorded (2026-10-18)
 
 Implementation `96565b807f160308074ff64f766ae682881e6f8e` on branch `for-54-usage-unrecorded-started-only-rebased` from main `db0be2c`. It is `a41f46ed56f3883f92508acaeec0324e85cabd66` (branch `for-54-usage-unrecorded-started-only`, from main `aa2d619`) rebased without code changes; the original evidence commit `e10dc36` was replaced by this section. `route_total` in `crates/crewroom-service/src/views/history.rs` counted unrecorded-route attempts over every route member, including attempts still awaiting start, while `attempts` counted only started ones. It now counts started attempts only.
