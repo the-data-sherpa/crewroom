@@ -129,7 +129,8 @@ test('DEL-04/05/06: explicit feedback creates a freshly validated successor on t
     sourceIntact: true, output: evidence.artifact('Simulated passing controller receipt for feedback revision'), source: evidence.artifact('Simulated source snapshot') });
   evidence.assignReview(validation.Coordinator, 'feedback-review', { assignee: 'Reviewer', candidateId: next.id, instruction: 'Review the edge case change.' });
   evidence.review(validation.Reviewer, { candidateId: next.id, verdict: 'pass', summary: 'Feedback change verified', findings: [], coverage: [{ criterion: 0, assessment: 'Edge case verified', checkIds: [check.id] }] });
-  assert.equal((await evidence.assess(run.id)).ready, true);
+  const validated = await evidence.assess(run.id);
+  assert.equal(validated.ready, true, `Fresh check and review validate the feedback revision; blockers: ${validated.blockers.join(' | ')}`);
   const openPR = store.publication(run.id)!;
   store.savePublication({ ...openPR, pr: { ...openPR.pr, providerState: 'DECLINED' } });
   await assert.rejects(publication.prepare(validation.Coordinator, { candidateId: next.id, summary: reviewerSummary }), /not open/);
