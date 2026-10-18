@@ -2,13 +2,14 @@ import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
-import {homedir, tmpdir } from 'node:os';
+import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { test } from 'node:test';
 import { ContainerCommand } from '../server/runtime/container-command';
 import { inspectOwned, launchOwned, stopOwned } from '../server/runtime/processes';
-const engine = { socket: `${homedir()}/.docker/run/docker.sock` };
-const image = 'sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285';
+import { checkImage, requireDockerEngine } from '../scripts/rust/docker-engine';
+const engine = await requireDockerEngine();
+const image = checkImage();
 
 test('SEC-05: a separate cleanup controller survives harness loss and refuses foreign process, path and container identities', async t => {
   const root = realpathSync(mkdtempSync(join(tmpdir(),'crewroom-cleanup-')));

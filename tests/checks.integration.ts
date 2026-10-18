@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
-import {homedir, tmpdir } from 'node:os';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { test } from 'node:test';
@@ -10,6 +10,7 @@ import { RepositoryWork } from '../server/repository-work';
 import { Evidence } from '../server/evidence';
 import { Checks } from '../server/checks';
 import { ContainerCommand } from '../server/runtime/container-command';
+import { pythonCheckImage, requireDockerEngine } from '../scripts/rust/docker-engine';
 import { defaultRoles } from '../server/roles';
 import { resolveAssignment } from '../server/runtime/model-policy';
 
@@ -30,9 +31,9 @@ test('EVD-02: real container checks create controller-verified evidence for the 
   for (const [i, item] of [writer, reviewer, coordinator].entries()) { store.claimAttempt(item.attempt.id); store.recordAttemptIdentity(item.attempt.id, { hostPid: i + 1, ompPid: i + 3, sessionId: `fixture-${i}`, hostUrl: `http://127.0.0.1:${5000 + i}`, pane: `%${i}` }); }
   store.setDesiredState(run.id, 'running'); store.startExecution(run.id);
   const evidence = new Evidence(store, work, join(root, 'artifacts'));
-  const engine = { socket: `${homedir()}/.docker/run/docker.sock` };
+  const engine = await requireDockerEngine();
   const checks = new Checks(store, work, evidence, join(root, 'hosts'), engine);
-  const required = { id: 'unit', image: 'sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285', command: '/usr/local/bin/python3', args: ['-B', '-c', 'from sum import sum_values; from pathlib import Path; import subprocess; assert int(Path("/sys/fs/cgroup/memory.max").read_text()) == 4294967296; child=Path("/tmp/check-child"); child.write_text("#!/bin/sh\\nexit 0\\n"); child.chmod(0o700); assert subprocess.run([str(child)],env={}).returncode == 0; assert sum_values([]) == 0; print("empty input passed")'], timeoutMs: 5000, memoryMiB: 4096, tmpExecutable: true, required: true };
+  const required = { id: 'unit', image: pythonCheckImage(), command: '/usr/local/bin/python3', args: ['-B', '-c', 'from sum import sum_values; from pathlib import Path; import subprocess; assert int(Path("/sys/fs/cgroup/memory.max").read_text()) == 4294967296; child=Path("/tmp/check-child"); child.write_text("#!/bin/sh\\nexit 0\\n"); child.chmod(0o700); assert subprocess.run([str(child)],env={}).returncode == 0; assert sum_values([]) == 0; print("empty input passed")'], timeoutMs: 5000, memoryMiB: 4096, tmpExecutable: true, required: true };
   for (const memoryMiB of [0, 8193, 128.5]) assert.throws(() => evidence.configure(run.id, [{ ...required, memoryMiB }]));
   evidence.configure(run.id, [required]); store.recordOwnership(writer.attempt.id, true);
   const candidate = (await evidence.registerCandidate(run.id, [writer.attempt.id]));

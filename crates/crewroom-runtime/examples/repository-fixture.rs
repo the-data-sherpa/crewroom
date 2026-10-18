@@ -119,13 +119,11 @@ async fn main() -> Result<()> {
     let checks = Checks::new(
         evidence.clone(),
         Path::new(config["authority"].as_str().unwrap()).join("runtime"),
+        // Resolved by scripts/rust/docker-engine.ts (repository-adapter.ts); no platform guess here.
         config["socket"]
             .as_str()
             .map(std::path::PathBuf::from)
-            .unwrap_or_else(|| {
-                std::path::PathBuf::from(std::env::var_os("HOME").expect("Fixture requires HOME"))
-                    .join(".docker/run/docker.sock")
-            }),
+            .expect("repository-fixture requires a Docker socket path in its configuration"),
     )?;
     // Optional local HTTP provider; credentials are fixed synthetic fixture data.
     let credential_calls = Arc::new(std::sync::atomic::AtomicUsize::new(0));

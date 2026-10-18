@@ -11,6 +11,7 @@ import stat
 import subprocess
 import sys
 import time
+from docker_engine import docker_socket
 from mailbox_contract_fixture import PROJECT, RustMail, free_port
 from omp_offline_fixture import Provider, Sandbox
 from coding_fixture import enqueue_coding, tool, text, send
@@ -42,7 +43,7 @@ for selector in selectors:
  capabilities.append({'provider':m['provider'],'id':m['id'],'api':m['api'],'inputs':m['declaredInput'],'efforts':['off',*m['declaredThinkingEfforts']],'tools':True})
  providers[m['provider']]={'api':m['api'],'apiKey':'synthetic-installation-key','baseUrl':f'http://127.0.0.1:{provider.port}/{{agent}}/{m["provider"]}/v1','models':[{'id':m['id'],'name':m['id'],'reasoning':m['declaredReasoning'],'input':m['declaredInput'],'contextWindow':m['declaredContextWindow'],'maxTokens':m['declaredMaxOutputTokens'],'thinking':{'mode':m['declaredThinkingMode'],'efforts':m['declaredThinkingEfforts']}}]}
 runtime={'root':str(durable/'hosts'),'socket':str(durable/'hosts/tmux.sock'),'ompBinary':str(sandbox.binary),'launchPrefix':['/usr/bin/sandbox-exec','-f',str(sandbox.path)],'hostPorts':host_ports,
- 'mail':{'url':f'http://127.0.0.1:{mail_port}/mcp/','token':mail.token,'projectRoot':mail.project,'retentionSeconds':86400,'atcDisabled':True},'commandEngine':{'socket':str(Path.home()/'.docker/run/docker.sock')},'catalog':capabilities,'policy':{},'models':{'providers':providers}}
+ 'mail':{'url':f'http://127.0.0.1:{mail_port}/mcp/','token':mail.token,'projectRoot':mail.project,'retentionSeconds':86400,'atcDisabled':True},'commandEngine':{'socket':docker_socket()},'catalog':capabilities,'policy':{},'models':{'providers':providers}}
 roles=[[ident,selectors[index],efforts[index]] for ident,index in [('triage',0),('implementer',1),('reviewer',2),('tech-writer',1)]]
 config=root/'driver.json';config.write_text(json.dumps({'root':str(data),'control':str(control),'repository':str(repository),'rolePath':str(durable/'user/roles.json'),'serverPort':server_port,'binaryDirectory':str(binary_directory),'runtime':runtime,'roles':roles}));config.chmod(0o600)
 enqueue_coding(provider,'simple')

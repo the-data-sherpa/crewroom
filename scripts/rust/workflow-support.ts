@@ -18,6 +18,7 @@ import {seedRepository,saveRepositoryFixture} from '../../tests/fixtures/reposit
 import {inspectCheckedOwned,inspectOwned,stopOwned} from './process-adapter';
 import {until} from './host-fixture';
 import {NativeDaemon} from './daemon-client';
+import {dockerSocket} from './docker-engine';
 export {until};
 export class NativeWorkflow {
  proc:ChildProcessWithoutNullStreams;ready:Promise<void>;exit:Promise<any>;stderr='';
@@ -72,7 +73,7 @@ export async function workflowFixture(t:TestContext,purpose:'research'|'coding'|
   run=purpose==='coding'?store.queue(task.id,{revision}):purpose==='research'?store.queueResearch(task.id,{revision,requestId:randomUUID()},repository?await new RepositoryWork(store,join(root,'seed-work')).pinResearch(repository):undefined):store.queueRefinement(task.id,{revision,requestId:randomUUID(),purpose});}
  }catch(error){server.closeAllConnections();await new Promise<void>(r=>server.close(()=>r()));rmSync(root,{recursive:true,force:true});throw error;}finally{store.close();}
  const team=[{name:'Coordinator',roleId:'coordinator',coordinator:true,input:'Coordinate this isolated workflow.'},...Array.from({length:specialists},(_,i)=>({name:`Specialist${i+1}`,roleId:purpose==='coding'?(i===0?'implementer':'reviewer'):'tech-writer',coordinator:false,input:'Investigate the accepted criterion.',criteria:[{index:0,obligation:'Verify the accepted criterion',checkIds:[]}]}))];
- const config:any={authority:join(root,'data'),database,repositories:join(root,'repositories'),backend:origin,roles:join(root,'roles.json'),environment:{PATH:process.env.PATH,HOME:homedir()},runtime:{root:runtime,socket:join(runtime,'tmux.sock'),ompBinary:'/fixture/omp',launchPrefix:['/usr/bin/env','python3','-u',resolve('scripts/rust/workflow-fixture-rpc.py')],mail:{url:origin+'/mcp/',token:'synthetic-mail-token',projectRoot:join(root,'mail-projects'),retentionSeconds:86400,atcDisabled:true},catalog:[{provider:'fixture',id:'model',api:'openai-responses',inputs:['text'],efforts:['low'],tools:true}],policy:{},models:{providers:{fixture:{baseUrl:origin+'/v1',api:'openai-responses',apiKey:'synthetic-upstream-key',models:[{id:'model',contextWindow:1050000,maxTokens:128000}]}}},commandEngine:{socket:process.platform==='darwin'?join(homedir(),'.docker/run/docker.sock'):'/var/run/docker.sock'}}};
+ const config:any={authority:join(root,'data'),database,repositories:join(root,'repositories'),backend:origin,roles:join(root,'roles.json'),environment:{PATH:process.env.PATH,HOME:homedir()},runtime:{root:runtime,socket:join(runtime,'tmux.sock'),ompBinary:'/fixture/omp',launchPrefix:['/usr/bin/env','python3','-u',resolve('scripts/rust/workflow-fixture-rpc.py')],mail:{url:origin+'/mcp/',token:'synthetic-mail-token',projectRoot:join(root,'mail-projects'),retentionSeconds:86400,atcDisabled:true},catalog:[{provider:'fixture',id:'model',api:'openai-responses',inputs:['text'],efforts:['low'],tools:true}],policy:{},models:{providers:{fixture:{baseUrl:origin+'/v1',api:'openai-responses',apiKey:'synthetic-upstream-key',models:[{id:'model',contextWindow:1050000,maxTokens:128000}]}}},commandEngine:{socket:dockerSocket()}}};
  if(purpose==='coding')config.runtime.launchPrefix.push('--unique-sessions');
  if(options.jira)config.jira={source:options.jira.source,apiUrl:options.jira.apiUrl};
  if(options.github)config.github={apiUrl:options.github.apiUrl};

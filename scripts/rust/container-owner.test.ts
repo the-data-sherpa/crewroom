@@ -5,13 +5,14 @@ import {mkdirSync,mkdtempSync,readFileSync,rmSync,statSync,writeFileSync} from '
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {ContainerCommand} from './container-adapter';
+import {requireDockerEngine} from './docker-engine';
 
 test('private candidate exports are readable by the pinned local owner and read-only work stays protected', async t=>{
  const image=process.env.CREWROOM_CHECK_IMAGE;assert.ok(image,'Set a pinned local image with /bin/sh');
  const root=mkdtempSync(join(tmpdir(),'crewroom-container-owner-'));
  const workspace=join(root,'source');mkdirSync(workspace,{mode:0o700});
  writeFileSync(join(workspace,'private.txt'),'candidate content\n',{mode:0o600});
- const engine={socket:process.env.CREWROOM_DOCKER_SOCKET??'/var/run/docker.sock'};
+ const engine=await requireDockerEngine();
  const jobs:ContainerCommand[]=[];
  t.after(async()=>{for(const job of jobs){await job.stop();await job.remove();}rmSync(root,{recursive:true,force:true});});
  for(const readOnlyWorkspace of [false,true]){

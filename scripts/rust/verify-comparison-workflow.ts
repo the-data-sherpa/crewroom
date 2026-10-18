@@ -13,6 +13,7 @@ import { canonical, digest, readCasePack } from './for14-case-pack';
 import { FinalizationObserver } from './for14-finalization-observer';
 import { comparisonSettled } from './for14-stop-state';
 import { inspectCheckedOwned, inspectOwned, stopOwned } from './process-adapter';
+import { dockerSocket } from './docker-engine';
 
 const addition = 'Before reporting an assignment complete, identify the applicable required checks and the user surface affected by the change. Run the checks on the source you are handing off, inspect their results, and identify the checked revision and any limits in the handoff. Earlier passing evidence does not cover later edits. For a user-visible change, exercise the affected behavior on its actual user surface. Make routine reversible choices within the accepted scope and explain them briefly; request a decision when the requirements conflict, needed authority is missing, or the consequence is outside that scope. If verification cannot run or a required check fails, preserve the result and report the assignment as incomplete.';
 type Mode = 'preflight' | 'smoke' | 'matrix' | 'recovery';
@@ -58,7 +59,7 @@ const config: any = { authority, roles: join(root, 'roles.json'), runtime: {
     api: setup.kind === 'codex' ? 'codex-app-server' : 'claude-code-stream',
     inputs: ['text'], efforts: ['low'], tools: true }],
   policy: { default: { model: provider + '/' + setup.model, effort: 'low' } },
-  evaluationImage: setup.evaluationImage, commandEngine: { socket: setup.dockerSocket ?? '/var/run/docker.sock' },
+  evaluationImage: setup.evaluationImage, commandEngine: { socket: setup.dockerSocket ?? dockerSocket() },
   evaluationMode: inference,
 } };
 if (setup.kind === 'codex') config.runtime.codex = { binary: setup.codex, authFile: setup.authFile };

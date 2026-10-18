@@ -2,11 +2,12 @@ import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import {mkdirSync,mkdtempSync,rmSync} from 'node:fs';
 import {join} from 'node:path';
-import {homedir,tmpdir} from 'node:os';
+import {tmpdir} from 'node:os';
 import {ContainerCommand as Native} from './container-adapter';
 import {ContainerCommand as Retained} from '../../server/runtime/container-command';
-const engine={socket:`${homedir()}/.docker/run/docker.sock`};
-const image='sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285';
+import {checkImage,requireDockerEngine} from './docker-engine';
+const engine=await requireDockerEngine();
+const image=checkImage();
 async function until(check:()=>boolean){const end=Date.now()+5000;while(!check()){assert.ok(Date.now()<end,'Fixture event did not arrive');await new Promise(r=>setTimeout(r,10));}}
 test('live native logs can stop observation without stopping the Docker command',async t=>{
  const root=mkdtempSync(join(tmpdir(),'cr-native-follow-'));const workspace=join(root,'workspace');mkdirSync(workspace);const job=new Native(join(root,'job'),engine);

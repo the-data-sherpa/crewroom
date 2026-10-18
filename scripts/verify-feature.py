@@ -20,6 +20,7 @@ import time
 import uuid
 
 import test_processes as processes
+from docker_engine import DockerEngineError, docker_socket, require_docker_engine
 
 REPO = Path(__file__).resolve().parents[1]
 KEYS = ('steering-reconnect', 'pause-resume', 'readiness-invalidation')
@@ -190,7 +191,12 @@ def preflight(recipe, manifest):
         image = os.environ.get('CREWROOM_CHECK_IMAGE')
         if not image or not re.fullmatch(r'sha256:[a-f0-9]{64}', image):
             raise Problem('unavailable', 'Set CREWROOM_CHECK_IMAGE to a pinned, already-local sha256 image ID with /bin/sh.')
-        if probe(['docker', '--host', 'unix:///var/run/docker.sock', 'image', 'inspect', image, '--format', '{{.Id}}']) != image:
+        try:
+            socket = require_docker_engine()
+        except DockerEngineError as error:
+            raise Problem('unavailable', str(error))
+        facts['dockerSocket'] = socket
+        if probe(['docker', '--host', f'unix://{socket}', 'image', 'inspect', image, '--format', '{{.Id}}']) != image:
             raise Problem('unavailable', 'Local check image did not match the requested pinned ID.')
         facts['checkImage'] = image
     facts['buildReceiptSha256'] = sha(BUILD)
@@ -302,7 +308,7 @@ def owned_cleanup(path):
                 raise Problem('incomplete', 'Container helper binary identity changed.')
             def container(op):
                 return json.loads(capture([str(binary)], timeout=30, input=json.dumps(
-                    {'root': str(owned), 'socket': '/var/run/docker.sock', 'op': op})))
+                    {'root': str(owned), 'socket': receipt['preflight'].get('dockerSocket') or docker_socket(), 'op': op})))
             state = container('inspect')
             event = {'root': str(owned), 'before': state}
             if state.get('state') == 'running':
@@ -424,6 +430,9 @@ def run_recipe(recipe, manifest, directory):
                    CREWROOM_FEATURE_FIXTURE_PARENT=str(root / 'fixtures'),
                    CREWROOM_FEATURE_RESOURCE_ROOT=str(root / 'resources'),
                    CREWROOM_FEATURE_RESULT=str(root / 'journey.json'), CREWROOM_RETAIN_FIXTURE='1')
+        if receipt['preflight'].get('dockerSocket'):
+            # The journey uses the same engine the preflight reached.
+            env['CREWROOM_DOCKER_SOCKET'] = receipt['preflight']['dockerSocket']
         command = ['node', '--import', 'tsx', '--test', '--test-reporter=tap', '--test-concurrency=1',
                    '--test-name-pattern', '^' + recipe['key'] + '$', ENTRY]
         code, log = run_command(command, root, receipt, env, recipe['timeoutSeconds'], 'journey')

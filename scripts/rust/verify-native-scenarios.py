@@ -3,6 +3,7 @@
 import argparse,copy,hashlib,json,os,signal,sqlite3,subprocess,sys,traceback
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
+from docker_engine import docker_socket
 from omp_offline_fixture import Provider,Sandbox
 from mailbox_contract_fixture import RustMail,free_port
 from complex_fixture import enqueue_complex,enqueue_drift
@@ -73,7 +74,7 @@ def main():
   if m['declaredThinkingMode']:definition['thinking']={'mode':m['declaredThinkingMode'],'efforts':m['declaredThinkingEfforts']}
   providers[m['provider']]={'api':m['api'],'apiKey':'synthetic-native-scenario-key','baseUrl':f'http://127.0.0.1:{provider.port}/{{agent}}/{m["provider"]}/v1','models':[definition]}
  roles={role:selected[i] for role,i in [('triage',0),('implementer',1),('reviewer',2)]}
- runtime={'root':str(root/'hosts'),'socket':str(root/'hosts/tmux.sock'),'ompBinary':str(sandbox.binary),'launchPrefix':['/usr/bin/sandbox-exec','-f',str(sandbox.path)],'hostPorts':host_ports,'mail':{'url':f'http://127.0.0.1:{mail_port}/mcp/','token':mail.token,'projectRoot':mail.project,'retentionSeconds':86400,'atcDisabled':True},'commandEngine':{'socket':str(Path.home()/'.docker/run/docker.sock')},'catalog':capabilities,'policy':{},'models':{'providers':providers}}
+ runtime={'root':str(root/'hosts'),'socket':str(root/'hosts/tmux.sock'),'ompBinary':str(sandbox.binary),'launchPrefix':['/usr/bin/sandbox-exec','-f',str(sandbox.path)],'hostPorts':host_ports,'mail':{'url':f'http://127.0.0.1:{mail_port}/mcp/','token':mail.token,'projectRoot':mail.project,'retentionSeconds':86400,'atcDisabled':True},'commandEngine':{'socket':docker_socket()},'catalog':capabilities,'policy':{},'models':{'providers':providers}}
  config={'root':str(data),'rolePath':str(data/'roles.json'),'serverPort':server_port,'binaryDirectory':str(binary_directory),'providerFixtureBinary':str(paths.get('provider-daemon','')),'runtime':runtime,'selectedRoles':roles,'targetDrift':args.scenario=='target-drift','browserImage':args.browser_image}
  path=root/'driver.json';path.write_text(json.dumps(config));path.chmod(0o600)
  if args.scenario=='rework':enqueue_coding(provider,'rework')

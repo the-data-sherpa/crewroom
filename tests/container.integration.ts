@@ -1,17 +1,20 @@
 import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync, rmSync, mkdirSync, writeFileSync } from 'node:fs';
-import {homedir, tmpdir } from 'node:os';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { ContainerCommand } from '../server/runtime/container-command';
+import { pythonCheckImage, requireDockerEngine } from '../scripts/rust/docker-engine';
+const engine = await requireDockerEngine();
+const image = pythonCheckImage();
 
 test('LIF-04/05: stop contains a detached child with closed descriptors and an empty environment', async t => {
   const root = mkdtempSync(join(tmpdir(), 'crewroom-contained-'));
   const workspace = join(root, 'workspace'); mkdirSync(workspace);
-  const job = new ContainerCommand(join(root, 'job'), { socket: `${homedir()}/.docker/run/docker.sock` });
+  const job = new ContainerCommand(join(root, 'job'), engine);
   t.after(async () => { await job.stop(); await job.remove(); rmSync(root, { recursive: true, force: true }); });
   const writer = 'import time; from pathlib import Path; p=Path("/workspace/ticks");\nwhile True:\n with p.open("a") as f: f.write("tick\\n"); f.flush()\n time.sleep(0.03)';
-  await job.start({ image: 'sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285', workspace, command: '/usr/local/bin/python3',
+  await job.start({ image, workspace, command: '/usr/local/bin/python3',
     args: ['-c', 'import subprocess,time,sys; subprocess.Popen([sys.executable,"-c",sys.argv[1]],start_new_session=True,close_fds=True,env={}); time.sleep(60)', writer] });
   const deadline = Date.now() + 10000;
   while (Date.now() < deadline) { try { if (readFileSync(join(workspace, 'ticks'), 'utf8')) break; } catch {} await new Promise(resolve => setTimeout(resolve, 30)); }
@@ -21,16 +24,16 @@ test('LIF-04/05: stop contains a detached child with closed descriptors and an e
   await new Promise(resolve => setTimeout(resolve, 200));
   assert.equal(readFileSync(join(workspace, 'ticks'), 'utf8'), ticks);
   // A new controller uses the durable identity, without an attached client or parent process.
-  assert.equal((await new ContainerCommand(join(root, 'job'), { socket: `${homedir()}/.docker/run/docker.sock` }).inspect()).state, 'stopped');
+  assert.equal((await new ContainerCommand(join(root, 'job'), engine).inspect()).state, 'stopped');
 });
 
 test('LIF-05: unavailable containment control stays uncertain and never admits the command twice', async t => {
   const root = mkdtempSync(join(tmpdir(), 'crewroom-engine-loss-'));
   const workspace = join(root, 'workspace'); mkdirSync(workspace);
   const jobRoot = join(root, 'job');
-  const job = new ContainerCommand(jobRoot, { socket: `${homedir()}/.docker/run/docker.sock` });
+  const job = new ContainerCommand(jobRoot, engine);
   t.after(async () => { await job.stop(); await job.remove(); rmSync(root, { recursive: true, force: true }); });
-  const spec = { image: 'sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285', workspace, command: '/bin/sleep', args: ['60'] };
+  const spec = { image, workspace, command: '/bin/sleep', args: ['60'] };
   await job.start(spec);
   const disconnected = new ContainerCommand(jobRoot, { socket: join(root, 'missing.sock') });
   assert.equal((await disconnected.stop()).state, 'uncertain');
@@ -41,13 +44,12 @@ test('LIF-05: unavailable containment control stays uncertain and never admits t
 
 test('EVD-02: command receipts prove execution, output, pinned environment and timeout', async t => {
   const root = mkdtempSync(join(tmpdir(), 'crewroom-receipt-')); const workspace = join(root, 'workspace'); mkdirSync(workspace);
-  const engine = { socket: `${homedir()}/.docker/run/docker.sock` };
   const jobs: ContainerCommand[] = [];
   t.after(async () => { for (const job of jobs) { await job.stop(); await job.remove(); } rmSync(root, { recursive: true, force: true }); });
   const restrictedScratch = 'import subprocess; from pathlib import Path; p=Path("/tmp/not-admitted"); p.write_text("#!/bin/sh\\nexit 0\\n"); p.chmod(0o700)\ntry: subprocess.run([str(p)],check=True)\nexcept PermissionError: print("actual check output")\nelse: raise AssertionError("Temporary executables require explicit admission")';
   for (const [index, timeoutMs, script] of [[0, 5000, restrictedScratch], [1, 300, 'import time; print("check started", flush=True); time.sleep(30)']] as const) {
     const job = new ContainerCommand(join(root, String(index)), engine); jobs.push(job);
-    await job.start({ image: 'sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285', workspace, command: '/usr/local/bin/python3', args: ['-c', script], timeoutMs });
+    await job.start({ image, workspace, command: '/usr/local/bin/python3', args: ['-c', script], timeoutMs });
     await job.wait();
     const receipt = await job.receipt();
     assert.equal(receipt.started, true);
@@ -67,9 +69,9 @@ test('EVD-02: command receipts prove execution, output, pinned environment and t
 test('R2: an ad-hoc command reads the worktree through a read-only mount and cannot change it', async t => {
   const root = mkdtempSync(join(tmpdir(), 'crewroom-readonly-')); const workspace = join(root, 'workspace'); mkdirSync(workspace);
   writeFileSync(join(workspace, 'source.txt'), 'original\n');
-  const job = new ContainerCommand(join(root, 'job'), { socket: `${homedir()}/.docker/run/docker.sock` });
+  const job = new ContainerCommand(join(root, 'job'), engine);
   t.after(async () => { await job.stop(); await job.remove(); rmSync(root, { recursive: true, force: true }); });
-  await job.start({ image: 'sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285', workspace, command: '/bin/sh', readOnlyWorkspace: true,
+  await job.start({ image, workspace, command: '/bin/sh', readOnlyWorkspace: true,
     args: ['-c', 'cat /workspace/source.txt; echo changed > /workspace/source.txt && echo WRITE-ALLOWED; echo scratch > /tmp/x && cat /tmp/x'] });
   const state = await job.wait();
   const output = await job.logs();

@@ -7,6 +7,7 @@ from pathlib import Path
 import subprocess
 import signal
 import threading
+from docker_engine import docker_socket
 from mailbox_contract_fixture import PROJECT, RustMail, free_port
 from omp_offline_fixture import Provider, Sandbox
 
@@ -52,7 +53,7 @@ runtime = {'root': str(root / 'hosts'), 'socket': str(root / 'crewroom.sock'), '
            'launchPrefix': [] if ports else ['/usr/bin/sandbox-exec', '-f', str(sandbox.path)], 'hostPorts': host_ports,
            'mail': {'url': f'http://127.0.0.1:{mail_port}/mcp/', 'token': mail.token, 'projectRoot': mail.project, 'retentionSeconds': 86400, 'atcDisabled': True},
            'catalog': capabilities, 'policy': {}, 'models': {'providers': providers}}
-if options.coding != 'none': runtime['commandEngine'] = {'socket': str(Path.home() / '.docker/run/docker.sock')}
+if options.coding != 'none': runtime['commandEngine'] = {'socket': docker_socket()}
 proxy = None
 if options.fault == 'coordinator-send':
     from committed_send_proxy import CommittedSendProxy

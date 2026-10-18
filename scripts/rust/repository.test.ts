@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {mkdtempSync,realpathSync,mkdirSync,writeFileSync,readFileSync,rmSync,readdirSync,symlinkSync,linkSync,chmodSync,statSync,existsSync} from 'node:fs';
-import {homedir,tmpdir} from 'node:os';
+import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {DatabaseSync} from 'node:sqlite';
@@ -14,6 +14,7 @@ import {setTimeout as delay} from 'node:timers/promises';
 import {ContainerCommand} from './container-adapter';
 import {randomUUID} from 'node:crypto';
 import {inspectCheckedOwned,stopOwned} from './process-adapter';
+import {dockerSocket} from './docker-engine';
 function fixture(t:TestContext){
   const root=realpathSync(mkdtempSync(join(tmpdir(),'crewroom-native-repository-')));const seed=seedMessages(join(root,'operator'));
   const git=(...args:string[])=>execFileSync('git',['-C',seed.root,'-c','user.name=Fixture','-c','user.email=fixture@example.invalid',...args],{encoding:'utf8'}).trimEnd();
@@ -116,7 +117,7 @@ test('native ad-hoc preparation runs an actual read-only Docker command without 
   const input={command:'cat answer.txt; if echo forbidden > answer.txt; then exit 9; fi; test "$(cat answer.txt)" = original',timeoutMs:10000};
   await assert.rejects(f.c.command('shell',{target:f.seed.sender.attempt.id,input}),/delegates commands/);for(const timeoutMs of [0,999,600001,NaN])await assert.rejects(f.c.command('shell',{target:f.seed.recipient.attempt.id,input:{...input,timeoutMs}}));
   const prepared=await f.c.command('shell',{target:f.seed.recipient.attempt.id,input});assert.equal(prepared.spec.readOnlyWorkspace,true);assert.equal(prepared.spec.workspace,work.path);
-  const job=new ContainerCommand(join(f.root,'adhoc'),{socket:`${homedir()}/.docker/run/docker.sock`});try {await job.start(prepared.spec);await job.wait();const receipt=await job.receipt();assert.equal(receipt.started,true);assert.equal(receipt.completed,true);assert.equal(receipt.exitCode,0);assert.match(receipt.output,/original/);assert.match(receipt.output,/Read-only file system|read-only/i);}finally{await job.stop();await job.receipt();await job.remove();}assert.equal((await job.inspect()).state,'stopped');
+  const job=new ContainerCommand(join(f.root,'adhoc'),{socket:dockerSocket()});try {await job.start(prepared.spec);await job.wait();const receipt=await job.receipt();assert.equal(receipt.started,true);assert.equal(receipt.completed,true);assert.equal(receipt.exitCode,0);assert.match(receipt.output,/original/);assert.match(receipt.output,/Read-only file system|read-only/i);}finally{await job.stop();await job.receipt();await job.remove();}assert.equal((await job.inspect()).state,'stopped');
   assert.deepEqual((await f.c.command('record',{target:f.seed.run.id})).checks,[]);assert.equal(readFileSync(join(work.path,'answer.txt'),'utf8'),'original\n');
 });
 

@@ -6,7 +6,8 @@ import test from 'node:test';
 import {workflowFixture,until} from './workflow-support';
 import {reviewedCandidate} from './workflow-coding-fixture';
 import {ContainerCommand} from './container-adapter';
-const socket=process.platform==='darwin'?process.env.HOME+'/.docker/run/docker.sock':'/var/run/docker.sock';
+import {dockerSocket} from './docker-engine';
+const socket=dockerSocket();
 test('Pause and concurrent Close stop a real active Docker check, drain its backend work and preserve interrupted evidence',{timeout:120000},async t=>{
  const f=await workflowFixture(t,'coding',2);const {reviewer}=await reviewedCandidate(f,[{id:'slow',image:process.env.CREWROOM_CHECK_IMAGE??'sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285',command:'/bin/sh',args:['-c','echo workflow-command-started; sleep 60'],timeoutMs:90000,memoryMiB:256,tmpExecutable:false,required:false}]);
  await f.input(reviewer,{kind:'tool',name:'run_check',toolCallId:'interrupted-check',arguments:{checkId:'slow'}},'long-check');const root=join(f.runtime,reviewer,'tools',createHash('sha256').update('interrupted-check').digest('hex'));const job=new ContainerCommand(root,{socket});

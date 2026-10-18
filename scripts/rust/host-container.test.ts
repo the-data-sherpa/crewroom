@@ -4,12 +4,13 @@ import { once } from 'node:events';
 import { existsSync,mkdirSync,mkdtempSync,readFileSync,readdirSync,realpathSync,rmSync,writeFileSync } from 'node:fs';
 import { createServer,request } from 'node:http';
 import { join } from 'node:path';
-import {homedir, tmpdir } from 'node:os';
+import { tmpdir } from 'node:os';
 import test from 'node:test';
 import { NativeHost,backend,until } from './host-fixture';
 import { ContainerCommand } from './container-adapter';
-const engine={socket:`${homedir()}/.docker/run/docker.sock`};
-const image='sha256:9d2e5553305c7c7b0097999bb17187c69b921ccd6bc9d40e4bb5ebe652c00285';
+import { pythonCheckImage,requireDockerEngine } from './docker-engine';
+const engine=await requireDockerEngine();
+const image=pythonCheckImage();
 const detached="import subprocess,sys,time; subprocess.Popen([sys.executable,'-c','import time;time.sleep(60)'],start_new_session=True,stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,env={}); print('real-host-ready',flush=True);time.sleep(60)";
 
 test('native host cancels an actual Docker command with a detached child and retains its final receipt',{timeout:45000},async t=>{

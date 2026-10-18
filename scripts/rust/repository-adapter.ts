@@ -4,6 +4,7 @@ import {randomUUID} from 'node:crypto';
 import {once} from 'node:events';
 import {createInterface} from 'node:readline';
 import {setTimeout as sleep} from 'node:timers/promises';
+import {dockerSocket} from './docker-engine';
 
 export class NativeRepository {
   proc:ChildProcessWithoutNullStreams;ready:Promise<void>;exit:Promise<any>;stderr='';
@@ -19,7 +20,8 @@ export class NativeRepository {
       });
       this.proc.once('error',reject);this.proc.once('exit',()=>{const error=new Error(this.stderr||'Repository fixture exited');reject(error);for(const job of this.pending.values())job.reject(error);this.pending.clear();});
     });
-    this.proc.stdin.write(JSON.stringify(config)+'\n');
+    // The native fixture has no socket default of its own; checks use the shared resolver unless a test names a socket.
+    this.proc.stdin.write(JSON.stringify({...config,socket:config.socket??dockerSocket(env)})+'\n');
   }
   async command(op:string,args:Record<string,unknown>={},id:string=randomUUID()) {await this.ready;return new Promise<any>((resolve,reject)=>{this.pending.set(id,{resolve,reject});this.proc.stdin.write(JSON.stringify({id,op,...args})+'\n',error=>{if(error){this.pending.delete(id);reject(error);}});});}
   call(name:string,args:Record<string,unknown>) {return this.command('call',{name,args});}

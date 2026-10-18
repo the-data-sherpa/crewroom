@@ -26,6 +26,7 @@ class FeatureGuardTests(unittest.TestCase):
             (self.repo / name).mkdir(parents=True)
         shutil.copyfile(SCRIPT, self.repo / 'scripts/verify-feature.py')
         shutil.copyfile(test_processes.__file__, self.repo / 'scripts/test_processes.py')
+        shutil.copyfile(SCRIPT.with_name('docker_engine.py'), self.repo / 'scripts/docker_engine.py')
         (self.repo / 'Cargo.toml').write_text('[workspace]\n')
         (self.repo / 'Cargo.lock').write_text('guard lock\n')
         (self.repo / 'crates/guard/lib.rs').write_text('// original native source\n')
