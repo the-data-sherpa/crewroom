@@ -67,6 +67,17 @@ python3 scripts/rust/verify-omp-supervisor.py --output /tmp/mh2-omp-supervisor
 python3 scripts/rust/verify-omp-gateway.py --output /tmp/mh2-omp-gateway
 ```
 
-Linux fixtures require Bun and bubblewrap. `CREWROOM_OMP_FIXTURE_MODULES` can select another private installation's `node_modules`. The fixture guard exposes only system libraries, selected executables and disposable state, with private network/PID/mount namespaces. Allowlisted Unix relays connect allocated fixture ports to host loopback; no external IP route exists. The outer fixture wrapper retains the process ownership lease for inspection. The existing macOS sandbox remains available.
+Linux fixtures require Bun and bubblewrap. `CREWROOM_OMP_FIXTURE_MODULES` can select another private installation's `node_modules`. The fixture accepts OMP 18.4.12 (default) and 18.11.3 (FOR-52). To check 18.11.3, install it in a second ignored directory and point the suites at it. The supervisor suite needs a short `--output` path, because its tmux socket lives under it:
+
+```sh
+npm install --prefix .crewroom/omp-18.11.3-fixture --no-audit --no-fund \
+  --ignore-scripts @oh-my-pi/pi-coding-agent@18.11.3
+CREWROOM_OMP_FIXTURE_MODULES="$PWD/.crewroom/omp-18.11.3-fixture/node_modules" \
+  python3 scripts/rust/verify-omp-supervisor.py --output "$XDG_RUNTIME_DIR/omp-supervisor"
+```
+
+`scripts/verify_omp_scripted_workflow.py --omp <installed omp> --mail <mcp-agent-mail> --output <new dir>` runs an installed OMP through `verify_catalog_workflow.py` with scripted loopback provider replies. It exercises the native picker, the production daemon and real Rust Mail. It does not exercise live inference.
+
+The fixture guard exposes only system libraries, selected executables and disposable state, with private network/PID/mount namespaces. Allowlisted Unix relays connect allocated fixture ports to host loopback; no external IP route exists. The outer fixture wrapper retains the process ownership lease for inspection. The existing macOS sandbox remains available.
 
 Executed, source-bound results and limitations are recorded in [MVP progress](mvp-progress.md) and the MH2 receipt linked there. Prior failed probes remain local evidence; their corrected results do not erase them.

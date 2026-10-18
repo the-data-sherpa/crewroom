@@ -1,0 +1,169 @@
+{
+  "issue": "FOR-52",
+  "date": "2026-10-18",
+  "revision": "7466e0c1d6959fdee298f5445192271b071aa92b",
+  "machine": "operator Linux workstation (x86_64)",
+  "binaries": {
+    "build": "cargo build --locked -p crewroom-runtime --bins --examples; -p crewroom-service --bins (private target dir)",
+    "sha256": {
+      "crewroomd": "dddb2c651e87405290fc7aa8726017d7467d57e0818118a89724288fde71c85b",
+      "crewroom-host": "dc2a6b9e03d3ae58c25a55074fc97bee2b851ffb551d7d9b662133f19fd6b1c4",
+      "crewroom-process": "417d247f9159a611e175b8a7740c351ffa3a732de965ed46220464b7b1b7c303",
+      "examples/gateway-fixture": "4aa388a27eaa7623583dc7901ed1d011537b0909558545b2a66e3a363cd7876c",
+      "examples/policy-oracle": "876b4c8f849170e0dddd75233208e5c06d6e3327db650a066de3358462539101",
+      "examples/rpc-bridge": "789191d293804f6e2c00f9add1a8124920ffe2d13ef7b0c327414c00109f0453",
+      "examples/supervisor-fixture": "a6afccc928a252d4dfcd13509b0856dc1239d5b95a2dc4f6402188c36ec4a6af",
+      "examples/workflow-fixture": "bbd53649d178819c451c3f8ad3c0389a8fc71d022fc4c35566217b6c93be4e67"
+    }
+  },
+  "simulated": {
+    "class": "actual OMP npm package under bun in the offline guard; SYNTHETIC provider replies; no network route",
+    "runners": {
+      "omp/18.11.3": {
+        "cliSha256": "d89c29b82f757987f5f1e9586d98505d23117d056fa0fe9e0f8e9e8926fe2d2a",
+        "bunSha256": "9fd36f87e4b90b07632b987a2e4ec81ca15a62c81bf983190cea6d715be2ad74"
+      },
+      "omp/18.4.12": {
+        "cliSha256": "d659505080c80a091524de1335caccdb815e05367bd825048cda4a0e98d8b7a0",
+        "bunSha256": "9fd36f87e4b90b07632b987a2e4ec81ca15a62c81bf983190cea6d715be2ad74"
+      }
+    },
+    "suites": {
+      "omp/18.11.3": {
+        "rpc": {
+          "passed": true,
+          "cases": 12,
+          "casesPassed": 12,
+          "providerRequests": 8,
+          "providerErrors": [],
+          "allOwnedProcessesExited": true,
+          "offlineGuard": true
+        },
+        "host": {
+          "passed": true,
+          "cases": 11,
+          "casesPassed": 11,
+          "providerRequests": 16,
+          "providerErrors": [],
+          "allOwnedProcessesExited": true,
+          "replayedOpaqueReasoningOnRestore": {
+            "restore": 3,
+            "wrong-id": 0
+          },
+          "offlineGuard": true
+        },
+        "supervisor": {
+          "passed": true,
+          "cases": 4,
+          "casesPassed": 4,
+          "providerRequests": 10,
+          "providerErrors": [],
+          "allOwnedProcessesExited": true,
+          "offlineGuard": true
+        },
+        "gateway": {
+          "passed": true,
+          "cases": 4,
+          "casesPassed": 4,
+          "providerRequests": 7,
+          "providerErrors": [],
+          "allOwnedProcessesExited": true,
+          "offlineGuard": true
+        }
+      },
+      "omp/18.4.12": {
+        "rpc": {
+          "passed": true,
+          "cases": 12,
+          "casesPassed": 12,
+          "providerRequests": 8,
+          "providerErrors": [],
+          "allOwnedProcessesExited": true,
+          "offlineGuard": true
+        },
+        "host": {
+          "passed": true,
+          "cases": 11,
+          "casesPassed": 11,
+          "providerRequests": 16,
+          "providerErrors": [],
+          "allOwnedProcessesExited": true,
+          "replayedOpaqueReasoningOnRestore": {
+            "restore": 0,
+            "wrong-id": 0
+          },
+          "offlineGuard": true
+        },
+        "supervisor": {
+          "passed": true,
+          "cases": 4,
+          "casesPassed": 4,
+          "providerRequests": 10,
+          "providerErrors": [],
+          "allOwnedProcessesExited": true,
+          "offlineGuard": true
+        },
+        "gateway": {
+          "passed": true,
+          "cases": 4,
+          "casesPassed": 4,
+          "providerRequests": 7,
+          "providerErrors": [],
+          "allOwnedProcessesExited": true,
+          "offlineGuard": true
+        }
+      }
+    }
+  },
+  "scriptedProductionLaunch": {
+    "class": "installed OMP binary launched by the production daemon; SCRIPTED loopback provider; no live inference",
+    "command": "scripts/verify_omp_scripted_workflow.py --omp <installed omp> --mail <mcp-agent-mail> --output <new dir>",
+    "ompVersion": "omp/18.11.3",
+    "passed": true,
+    "checks": [
+      "native keyboard model picker, refresh, low effort, persisted Code job and coordinator/specialist selections",
+      "refresh and saved budget changes leave both executing assignments byte-for-byte equal",
+      "model-based route, native login, exact separately owned host/runner pairs",
+      "real addressed host tool through workflow authorization and external Rust Mail to independent recipient",
+      "controller SIGKILL and exact live-process reattachment without another Mail effect",
+      "pause verifies stopped ownership; resume uses new processes, same durable threads and original Mail effect",
+      "specialist submits addressed artifact; coordinator completion is durable after controller restart; no duplicate external Mail effect"
+    ],
+    "providerRequests": 9,
+    "providerAgents": [
+      "Coordinator",
+      "Specialist1"
+    ],
+    "providerErrors": [],
+    "finalRun": "completed",
+    "finalOwnership": [
+      "stopped"
+    ],
+    "installedBinarySha256": "01fbb5f08b0ce0d70bd0b1d6655a6ccd59cefcae0f1023e02bb30f9a70bc2d0a",
+    "assignments": [
+      {
+        "version": "omp/18.11.3",
+        "selection": "offering:omp:scripted-openai:scripted-sol:unknown",
+        "executionProfile": "omp-18.4.12-host-tools-v2",
+        "separateHostAndRunnerPids": true
+      },
+      {
+        "version": "omp/18.11.3",
+        "selection": "offering:omp:scripted-openai:scripted-sol:unknown",
+        "executionProfile": "omp-18.4.12-host-tools-v2",
+        "separateHostAndRunnerPids": true
+      }
+    ],
+    "externalMail": "received"
+  },
+  "live": {
+    "run": false,
+    "reason": "No runner provider definition with a credential exists on this machine. OMP logins in its own credential store were not copied into Crewroom configuration; that needs an operator decision."
+  },
+  "limitations": [
+    "The execution profile id stays omp-18.4.12-host-tools-v2 for 18.11.3 offerings, as Codex 0.163.0 kept the 0.162.0 profile id.",
+    "OMP 18.11.3 replays opaque reasoning on session restore (18.4.12 dropped it). Production shares the assignment budget root across attempts, so the gateway recognises it; the host suite now does the same.",
+    "Earlier failed attempts are kept as findings: the first 18.11.3 host run (before the shared budget root) failed its restore turn with input_budget/unknown_reasoning; the first supervisor runs (both versions) stopped at startup because the output path was too long for the tmux socket.",
+    "The first scripted workflow attempt failed in the native picker: verify-native-workflow.ts passes an offering key without the FOR-42 billing-route suffix. live_tests.rs now resolves it to the single route."
+  ]
+}
