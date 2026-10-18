@@ -17,7 +17,10 @@
       "404 records no_access with the not-installed/not-granted explanation; 410 records issues_disabled; a revoked token records rejected",
       "Core: closing an issue changes source status without re-acceptance; older observations, pull requests and duplicates save nothing; a sync or failure for a replaced source is refused or ignored; schema-31 stores gain the github_sync table",
       "Runtime: next-page links on another origin are refused so the token is not sent elsewhere",
-      "Desktop: Settings → Integrations → GitHub Issues saves a source, states the missing connection, connects, syncs, and the ticket list shows 'GitHub open' / 'GitHub closed'; a GitHub ticket's facts bar shows 'GITHUB STATUS' / 'open' apart from workflow and agent activity"
+      "Desktop: Settings → Integrations → GitHub Issues saves a source, states the missing connection, connects, syncs, and the ticket list shows 'GitHub open' / 'GitHub closed'; a GitHub ticket's facts bar shows 'GITHUB STATUS' / 'open' apart from workflow and agent activity",
+      "Review fix 697d86b: with the default state=open filter, #1 is imported open, closed in the fixture, and the re-sync records sourceStatus closed (it left the listing and was re-read once); reopened, it matches again",
+      "Review fix 697d86b: an imported issue answering 410 (deleted) or 301 (transferred) on re-read does not fail the sync; the sync completes, githubIssues.unreadable and the label name #1 and #4, they stay listed on the next sync, and the list clears once GitHub serves them again",
+      "Review fix 697d86b: a 403 whose message says \"secondary rate limit\" with no x-ratelimit-remaining or retry-after header records rate_limited, not no_access"
     ]
   },
   "live": {
@@ -137,6 +140,8 @@
   "notExecutedLive": [
     "Pagination across more than one page (the sandbox has fewer than 100 items); covered by the simulated fixture",
     "A GitHub rate limit, a revoked token and a repository with issues disabled; covered by the simulated fixture",
-    "A fine-grained or classic personal access token"
-  ]
+    "A fine-grained or classic personal access token",
+    "Review fix 697d86b: closing, deleting or transferring an imported issue on github.com, and a live secondary rate limit; covered by the simulated fixture"
+  ],
+  "reviewFixRevision": "697d86b701c51a9a229765e4539f880e09d2a527"
 }
