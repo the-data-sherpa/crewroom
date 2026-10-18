@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "issue": "FOR-38",
+  "recordedAt": "2026-10-18T07:56:13Z",
+  "implementationRevision": "b8f38f0243debfe6afc4c0f30fb11ed98c7fc8f1",
+  "implementationTree": "147be9f0a1b6302c18b7cffac002ad4e0f0c4a4f",
+  "baseRevision": "93ebcd6",
+  "branch": "for-38-model-picker-linux",
+  "rootCause": [
+    "The operator service on Linux was started without CREWROOM_RUNTIME_CONFIG (health executionAvailable=false). The workflow, and with it the model catalog, exists only with runner configuration, so the workspace omitted modelDiscovery and Models & budget plus the role override rendered free-text fields.",
+    "Independently, discovery accepted only the exact MH4 versions (codex-cli 0.162.0, 2.1.296 (Claude Code), omp/18.4.12). The installed codex-cli 0.163.0, 2.1.302 (Claude Code) and omp/18.11.3 would each have failed discovery with a generic version message even with a runner configured."
+  ],
+  "liveEvidence": [
+    {
+      "class": "live metadata discovery (no inference)",
+      "command": "CREWROOM_LIVE_DISCOVERY=1 cargo test -p crewroom-runtime --test model_discovery -- --include-ignored",
+      "before": "Failed: Codex reported version \"codex-cli 0.163.0\", which Crewroom has not verified for model discovery.",
+      "after": "Passed: codex-cli 0.163.0 listed 8 offerings; 2.1.302 (Claude Code) listed 5; omp/18.11.3 listed the 1 synthetic loopback provider model (provider never contacted). Isolated HOME, inferenceRequested=false, cleanup verified."
+    },
+    {
+      "class": "live disposable daemon, runner unconfigured, metadata only",
+      "command": "python3 scripts/verify_unconfigured_catalog.py --binaries <private target>/debug --port 4371 --output <new private dir>",
+      "result": "Passed twice after the hashing fix. Real PATH with installed CLIs; runner.configured=false; selection=intent; 13 choices (codex 8, claude-code 5, omp 0 with provider note); OMP executionNote names the unverified launch version; 0 runs; daemon exit 0.",
+      "reportSha256": "79c8950f4cc6bcf1ceb2ad5e82c68c0bc8edaef7e823928c703abaf7b4be7abc",
+      "latency": "Before moving executable hashing to the blocking pool a catalog read took 11.5-11.7 s during refresh (one 10 s request timeout); after: 0.005-0.029 s."
+    },
+    {
+      "class": "live inference through the full Rust workflow",
+      "command": "python3 scripts/verify_catalog_workflow.py --configuration <private codex config> --mail <Rust Mail> --output /tmp/cr38-cx2",
+      "harness": "codex-cli 0.163.0",
+      "selection": "offering:codex:codex:gpt-6-astra",
+      "passed": true,
+      "checks": 7,
+      "runStatus": "completed",
+      "resultSha256": "acba66e7f915c9f2c628cccd229906ffa7fe98a7f397ea20ed7d608bfe135293"
+    },
+    {
+      "class": "live inference through the full Rust workflow",
+      "command": "python3 scripts/verify_catalog_workflow.py --configuration <private claude config> --mail <Rust Mail> --output /tmp/cr38-cl1",
+      "harness": "2.1.302 (Claude Code)",
+      "selection": "offering:claude-code:claude-code:haiku",
+      "passed": true,
+      "checks": 7,
+      "runStatus": "completed",
+      "resultSha256": "0d3bd23b542b62b5ca6e3e4b80b118189157b5e7a670cb72fb5cefcb237a06d5"
+    },
+    {
+      "class": "control: MH4-verified version on this machine",
+      "harness": "codex-cli 0.162.0",
+      "passed": true,
+      "checks": 7,
+      "resultSha256": "d20fea0bb5b3c07b575fe7de78e83f08151b0e6270bb3aab8475f947bf14378c"
+    },
+    {
+      "class": "failed attempt retained",
+      "harness": "codex-cli 0.163.0",
+      "passed": false,
+      "detail": "First 0.163.0 attempt passed the native picker step, then the run start request exceeded the fixture's 60 s limit: the coordinator runner initialized, the specialist attempt stayed admitted, and cleanup paused the run. Daemon stderr was not retained. The immediate repeat passed every check; the cause is unknown.",
+      "resultSha256": "a93e076944b3759bbc92e6bb7c8fd04e438a3ac743677b098c300945ce9efc43"
+    }
+  ],
+  "liveBuildBinding": "Live workflow runs used binaries built from the working tree committed as 563f075 before rustfmt and the added startup_version unit test; b8f38f0 changes only test fixtures after that.",
+  "checks": [
+    {
+      "command": "cargo test --locked -p crewroom-runtime -- --test-threads=1",
+      "result": "134 passed, 0 failed, 2 ignored (opt-in live discovery and existing parent-death entry point)"
+    },
+    {
+      "command": "cargo test --locked -p crewroom-service",
+      "result": "20 passed, 0 failed"
+    },
+    {
+      "command": "cargo test --locked -p crewroom-desktop",
+      "result": "133 passed, 0 failed, 15 ignored"
+    },
+    {
+      "command": "cargo clippy -p crewroom-runtime -p crewroom-service --all-targets -- -D warnings",
+      "result": "clean"
+    },
+    {
+      "command": "cargo clippy --locked -p crewroom-desktop -- -D warnings",
+      "result": "clean"
+    },
+    {
+      "command": "cargo fmt --check -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop",
+      "result": "clean"
+    },
+    {
+      "command": "npm test",
+      "result": "332 passed, 0 failed"
+    },
+    {
+      "command": "npm run build",
+      "result": "passed (existing large-chunk warning)"
+    }
+  ],
+  "limits": [
+    "OMP 18.11.3 is discovery-verified only. Its launch was not verified: this machine has no API-key provider definitions for the runner, and the OMP RPC contract remains pinned to 18.4.12. OMP offerings stay without an execution profile and the UI says so.",
+    "Runtime parallel runs intermittently fail unrelated lease/journal tests (for example runner::codex::tests::a_lost_backend_reply_retains_unknown_effect_and_closes_admission); they pass single-threaded, matching the repository gate.",
+    "cargo clippy -p crewroom-desktop --all-targets reports one existing useless-conversion lint in feedback_tests.rs, which this change does not touch.",
+    "One full desktop run failed without a retained failure name; two following full runs passed 133/133.",
+    "Headless GPUI tests only; no rendered OS-window walkthrough on the operator desktop. npm run test:e2e is run by the integrator.",
+    "The operator service on port 4318 was not restarted. It shows the picker and explanations only after a stopped restart with this build."
+  ]
+}
