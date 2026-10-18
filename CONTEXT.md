@@ -9,7 +9,7 @@ The single person who directs work in Crewroom and reviews its results.
 _Avoid_: Team account, shared workspace member
 
 **Ticket**:
-A work item whose requirements and progress are tracked in Crewroom, whether created locally or imported from Jira.
+A work item whose requirements and progress are tracked in Crewroom, whether created locally or imported from Jira or GitHub Issues.
 _Avoid_: Run, agent assignment
 
 **Target repository**:
@@ -21,7 +21,7 @@ Where a ticket came from: its provider kind (Jira, GitHub, or local) and its ide
 _Avoid_: Jira project, target repository
 
 **Source status**:
-The status of an imported issue in its provider's own workflow, shown with the provider name (for example "Jira In Progress"). **Jira status** is the source status of a Jira ticket. A local ticket has none and shows "Not linked".
+The status of an imported issue in its provider's own workflow, shown with the provider name (for example "Jira In Progress" or "GitHub open"). **Jira status** is the source status of a Jira ticket. A local ticket has none and shows "Not linked".
 _Avoid_: Agent activity, Crewroom workflow state
 
 **Workflow state**:
