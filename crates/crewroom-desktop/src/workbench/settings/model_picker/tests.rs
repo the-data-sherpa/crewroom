@@ -332,3 +332,145 @@ fn native_catalog_refresh_and_reopen_keep_pre_catalog_history(cx: &mut gpui::Tes
         assert_eq!(runtime["attempts"].as_array().unwrap().len(), 1);
     }
 }
+
+/// FOR-38: the operator's Linux service had no runner configuration. Only a
+/// newer Codex is installed here; OMP and Claude Code are missing from PATH.
+fn unconfigured(root: &std::path::Path) -> crewroom_service::ServiceOptions {
+    let bin = root.join("bin");
+    if !bin.exists() {
+        std::fs::create_dir(&bin).unwrap();
+        std::fs::write(bin.join("codex"), r#"#!/usr/bin/python3
+import json,sys
+if '--version' in sys.argv:
+ print('codex-cli 0.163.0');sys.exit(0)
+for line in sys.stdin:
+ v=json.loads(line)
+ if 'id' not in v: continue
+ result={'data':[{'model':'fixture-model','displayName':'Fixture model','inputModalities':['text'],'supportedReasoningEfforts':[{'reasoningEffort':e} for e in ['low','medium','high','xhigh']]}],'nextCursor':None} if v['method']=='model/list' else {}
+ print(json.dumps({'id':v['id'],'result':result}),flush=True)
+"#).unwrap();
+        std::fs::set_permissions(bin.join("codex"), std::fs::Permissions::from_mode(0o700))
+            .unwrap();
+    }
+    let mut options = configured(root);
+    options.runtime = None;
+    options.environment = json!({"PATH":bin,"HOME":root});
+    options
+}
+fn labels(cx: &mut gpui::TestAppContext, h: gpui::AnyWindowHandle) -> Vec<String> {
+    cx.update_window(h, |_, w, cx| {
+        w.render_frame(cx);
+        gpui::base::test_support::snapshots(w)
+            .iter()
+            .filter_map(|s| s.label().map(str::to_owned))
+            .collect::<Vec<_>>()
+    })
+    .unwrap()
+}
+
+#[gpui::test]
+fn unconfigured_runner_lists_installed_models_and_explains_each_cause(
+    cx: &mut gpui::TestAppContext,
+) {
+    let fixture = Fixture::configured(|_, _| {}, unconfigured);
+    let mut jobs = fixture.get("/workspace")["modelJobs"].clone();
+    jobs["jobs"]["judgment"] = json!("legacy/free-text");
+    assert_eq!(fixture.post("/model-jobs", jobs).0, 200);
+    let (h, v, e) = open(cx, &fixture);
+    wait(cx, h, &v, &e, |v, _| v.connected);
+    navigate(cx, h, "models");
+    let before = labels(cx, h);
+    for expected in [
+        "Runner not configured:",
+        "CREWROOM_RUNTIME_CONFIG",
+        "(`omp`) was not found on the service PATH",
+        "(`claude`) was not found on the service PATH",
+    ] {
+        assert!(
+            before.iter().any(|l| l.contains(expected)),
+            "Missing {expected}: {before:?}"
+        );
+    }
+    activate_by_keyboard(cx, h, "refresh-model-catalog");
+    wait(cx, h, &v, &e, |v, _| {
+        v.workspace["modelDiscovery"]["generation"].as_u64() == Some(1)
+            && v.workspace["modelDiscovery"]["state"] != "refreshing"
+    });
+    let key = "offering:codex:codex:fixture-model";
+    cx.read(|cx| {
+        let pickers = &v.read(cx).settings.pickers;
+        for job in ["code", "judgment", "review", "fast"] {
+            let choice = pickers[&format!("job-{job}")]
+                .choices
+                .iter()
+                .find(|c| c.key == key)
+                .unwrap_or_else(|| panic!("{job} lacks the installed Codex model"));
+            assert!(!choice.blocked, "intent choices stay selectable");
+            assert!(
+                choice
+                    .detail
+                    .contains("checked when the runner is configured"),
+                "{}",
+                choice.detail
+            );
+        }
+        let legacy = pickers["job-judgment"]
+            .choices
+            .iter()
+            .find(|c| c.key == "legacy/free-text")
+            .unwrap();
+        assert!(legacy.blocked);
+        assert_eq!(legacy.label, "Legacy selection: legacy/free-text");
+    });
+    let after = labels(cx, h);
+    assert!(
+        after
+            .iter()
+            .any(|l| l.contains("codex-cli 0.163.0 lists models")),
+        "Missing execution note: {after:?}"
+    );
+    activate_by_keyboard(cx, h, "job-code");
+    cx.update_window(h, |_, w, cx| w.input("fixture-model", cx))
+        .unwrap();
+    cx.run_until_parked();
+    cx.update_window(h, |_, w, cx| {
+        w.press("down", cx);
+        w.press("enter", cx);
+    })
+    .unwrap();
+    wait(cx, h, &v, &e, |v, cx| {
+        v.settings.models.as_ref().unwrap().fields.text("code", cx) == key
+    });
+    click(cx, h, "save-model-jobs");
+    wait(cx, h, &v, &e, |v, _| {
+        !v.busy && v.workspace["modelJobs"]["revision"] == 2
+    });
+    let saved = fixture.get("/workspace")["modelJobs"]["jobs"].clone();
+    assert_eq!(saved["code"], key);
+    assert_eq!(saved["judgment"], "legacy/free-text");
+    navigate(cx, h, "roles");
+    click(cx, h, "edit-role-implementer");
+    cx.read(|cx| {
+        let p = &v.read(cx).settings.pickers["role-model"];
+        assert_eq!(p.choices[0].label, "Use job model");
+        assert!(p.choices.iter().any(|c| c.key == key && !c.blocked));
+        assert_eq!(
+            v.read(cx).settings.roles["implementer"]
+                .fields
+                .text("model", cx),
+            "",
+            "an empty override still inherits the job model"
+        );
+    });
+    let role = labels(cx, h);
+    assert!(
+        role.iter().any(|l| l.starts_with("Runner not configured:")),
+        "Role editor must name the cause: {role:?}"
+    );
+    assert!(
+        fixture.get("/workspace")["runs"]
+            .as_array()
+            .unwrap()
+            .is_empty()
+    );
+}

@@ -201,9 +201,8 @@ impl Execution {
                 &data.join("model-catalog"),
                 unconfigured::sources(
                     &std::fs::canonicalize(&options.helper)?,
-                    options.environment["PATH"]
-                        .as_str()
-                        .unwrap_or("/usr/bin:/bin"),
+                    // The service's own PATH; none means no harness is found.
+                    options.environment["PATH"].as_str().unwrap_or(""),
                 ),
                 move || {
                     push.send_modify(|v| {

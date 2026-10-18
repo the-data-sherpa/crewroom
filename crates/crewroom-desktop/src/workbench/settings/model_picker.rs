@@ -185,6 +185,7 @@ impl Workbench {
         let selected = input.read(cx).value().to_string();
         let menu_width = (f32::from(window.viewport_size().width) - 64.).clamp(240., 680.);
         let rows = records(&self.workspace["modelDiscovery"], "choices");
+        let intent = self.workspace["modelDiscovery"]["selection"] == "intent";
         let mut choices = Vec::new();
         if let Some(inherited) = &inherit {
             choices.push(Choice {
@@ -201,7 +202,10 @@ impl Workbench {
                 .collect::<Vec<_>>()
                 .join(" → ");
             let eligibility = &row["eligibility"][effort];
-            let blocked = eligibility["eligible"] != true;
+            let ineligible = eligibility["eligible"] != true;
+            // Without a runner the service declares choices as saved intent:
+            // selectable, still reported ineligible, re-checked at admission.
+            let blocked = ineligible && !intent;
             let reasons = eligibility["reasons"]
                 .as_array()
                 .into_iter()
@@ -212,10 +216,12 @@ impl Workbench {
             choices.push(Choice {
                 key: string(row, "key"),
                 label: format!("{} · {routes}", string(row, "displayName")),
-                detail: if blocked {
-                    format!("Unavailable · {reasons}")
-                } else {
+                detail: if !ineligible {
                     format!("Eligible · effort {effort}")
+                } else if intent {
+                    format!("Listed · saved as your choice; checked when the runner is configured · {reasons}")
+                } else {
+                    format!("Unavailable · {reasons}")
                 },
                 blocked,
             });
@@ -226,7 +232,7 @@ impl Workbench {
             choices.push(Choice {
                 key:selected.clone(),
                 label:format!("{}: {selected}", if catalog_selection {"Unavailable saved selection"} else {"Legacy selection"}),
-                detail:if catalog_selection {"Not in this catalog. Refresh or restore its configuration; your selection is retained."} else {"Uses the saved legacy policy. Choose a listed model to use catalog validation."}.into(),
+                detail:if catalog_selection {"Not in this catalog. Refresh or restore its configuration; your selection is retained."} else {"Saved text kept as-is; it matches no listed model. It uses the saved legacy policy. Choose a listed model to use catalog validation."}.into(),
                 blocked:true,
             });
         }
@@ -339,18 +345,48 @@ impl Workbench {
         }
         field
     }
+    /// Catalog-wide causes and remedies, in operator words. Empty when the
+    /// catalog is available with a configured runner.
+    pub(in crate::workbench::settings) fn catalog_status(&self) -> Vec<String> {
+        let catalog = &self.workspace["modelDiscovery"];
+        if !catalog.is_object() {
+            return vec!["Model catalog unavailable: this service does not report model discovery. Fix: stop and restart the service with this Crewroom version.".into()];
+        }
+        let mut status = Vec::new();
+        if catalog["state"] == "unavailable" {
+            status.push(format!(
+                "Model catalog unavailable: {} Fix: {}",
+                string(catalog, "reason"),
+                string(catalog, "remedy")
+            ));
+        }
+        if catalog["runner"]["configured"] == false {
+            status.push(format!(
+                "Runner not configured: {} Fix: {}",
+                string(&catalog["runner"], "reason"),
+                string(&catalog["runner"], "remedy")
+            ));
+        }
+        status
+    }
     pub(in crate::workbench::settings) fn model_refresh(&self, cx: &mut Context<Self>) -> Div {
         let catalog = &self.workspace["modelDiscovery"];
         let refreshing = catalog["state"] == "refreshing";
+        let available = catalog.is_object() && catalog["state"] != "unavailable";
         let mut panel = div().flex().flex_col().min_w_0().gap_2()
             .child(Button::new("refresh-model-catalog").label(if refreshing { "Refreshing models…" } else { "Refresh models" })
-                .disabled(self.blocked() || refreshing || !catalog.is_object())
+                .disabled(self.blocked() || refreshing || !available)
                 .on_click(cx.listener(|this,_,_,cx| this.send("/model-catalog/refresh".into(),json!({}),false,cx))))
             .child(hint("Lists models without starting work. Refresh evidence lasts one hour. Configured access does not prove inference."));
-        if !catalog.is_object() {
-            return panel.child(hint(
-                "Model discovery is unavailable. Configure a runner to browse models.",
-            ));
+        for (index, status) in self.catalog_status().into_iter().enumerate() {
+            panel = panel.child(
+                div()
+                    .id(SharedString::from(format!("models-catalog-status-{index}")))
+                    .child(hint(status)),
+            );
+        }
+        if !available {
+            return panel;
         }
         for harness in records(catalog, "harnesses") {
             let last = harness["lastSuccess"]
@@ -365,22 +401,46 @@ impl Workbench {
             } else {
                 harness["outcome"].as_str().unwrap_or("unavailable")
             };
-            panel = panel.child(hint(format!(
-                "{} · {state} · Last success: {last} · {} models",
-                string(&harness, "harness"),
-                records(&harness, "offerings").len()
-            )));
-            if let Some(error) = harness["error"].as_str() {
-                panel = panel.child(hint(error.to_owned()));
+            // Each harness row has its own identity so every row stays a
+            // separate accessible label; hints inside use distinct call sites.
+            let mut row = div()
+                .id(SharedString::from(format!(
+                    "model-harness-{}",
+                    string(&harness, "harness")
+                )))
+                .flex()
+                .flex_col()
+                .min_w_0()
+                .gap_1()
+                .child(hint(format!(
+                    "{} · {state} · Last success: {last} · {} models",
+                    string(&harness, "harness"),
+                    records(&harness, "offerings").len()
+                )));
+            // A remedy for a missing executable replaces its generic error.
+            if let Some(remedy) = harness["remedy"].as_str() {
+                row = row.child(hint(remedy.to_owned()));
+            } else if let Some(error) = harness["error"].as_str() {
+                row = row.child(hint(error.to_owned()));
             }
+            if let Some(note) = harness["note"].as_str() {
+                row = row.child(hint(note.to_owned()));
+            }
+            if let Some(note) = harness["executionNote"].as_str() {
+                row = row.child(hint(note.to_owned()));
+            }
+            panel = panel.child(row);
         }
-        for key in ["choiceError", "persistenceError"] {
-            if let Some(error) = catalog[key].as_str() {
-                panel = panel.child(hint(error.to_owned()));
-            }
+        if let Some(error) = catalog["choiceError"].as_str() {
+            panel = panel.child(hint(error.to_owned()));
+        }
+        if let Some(error) = catalog["persistenceError"].as_str() {
+            panel = panel.child(hint(error.to_owned()));
         }
         if records(catalog, "choices").is_empty() {
-            panel=panel.child(hint("No selectable models yet. Refresh the catalog or check the unavailable harness configuration."));
+            panel = panel.child(hint(
+                "No models listed yet. Refresh models, or follow the harness fixes above.",
+            ));
         }
         panel
     }

@@ -49,7 +49,10 @@ impl Workbench {
                 "Legacy defaults remain active until you save models and a budget.",
             ));
         }
-        if self.workspace["capabilities"]["execution"] != true {
+        // The catalog panel explains an unconfigured runner with its remedy.
+        if self.workspace["capabilities"]["execution"] != true
+            && self.workspace["modelDiscovery"]["runner"]["configured"] != false
+        {
             form = form.child(hint("Runner unavailable. You can save selections; model availability cannot be verified until the runner is configured."));
         }
         if self.workspace["modelJobs"]["revision"]
@@ -87,25 +90,17 @@ impl Workbench {
             ("fast", "Fast model"),
         ] {
             let effort = crewroom_core::model_jobs::effort(&budget, job).unwrap_or("unknown");
-            let field = if self.workspace["modelDiscovery"].is_object() {
-                self.model_picker(
-                    &format!("job-{job}"),
-                    label,
-                    fields[job].clone(),
-                    effort,
-                    None,
-                    window,
-                    cx,
-                )
-            } else {
-                self.settings
-                    .models
-                    .as_ref()
-                    .unwrap()
-                    .fields
-                    .render("job", job, label, self.busy)
-                    .child(hint(format!("Effort: {effort}")))
-            };
+            // Always the catalog picker: an unavailable catalog is explained
+            // in the refresh panel, and saved values stay selected as-is.
+            let field = self.model_picker(
+                &format!("job-{job}"),
+                label,
+                fields[job].clone(),
+                effort,
+                None,
+                window,
+                cx,
+            );
             form = form.child(
                 div()
                     .id(SharedString::from(format!("model-job-{job}")))

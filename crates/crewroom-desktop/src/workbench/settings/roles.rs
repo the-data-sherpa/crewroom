@@ -339,8 +339,8 @@ impl Workbench {
             .as_str()
             .unwrap_or("unconfigured")
             .to_owned();
-        let picker = if self.workspace["modelDiscovery"].is_object() {
-            self.model_picker(
+        let mut picker = self
+            .model_picker(
                 "role-model",
                 "Model override (optional)",
                 model_input,
@@ -349,12 +349,14 @@ impl Workbench {
                 window,
                 cx,
             )
-        } else {
-            draft
-                .fields
-                .render("role", "model", "Model override (optional)", self.busy)
-                .child(hint("Leave blank to inherit the job model."))
-        };
+            .child(hint("Choose \"Use job model\" to inherit the job model."));
+        for (index, status) in self.catalog_status().into_iter().enumerate() {
+            picker = picker.child(
+                div()
+                    .id(SharedString::from(format!("role-catalog-status-{index}")))
+                    .child(hint(status)),
+            );
+        }
         let draft = &self.settings.roles[&id];
         let mut form = section("Role editor").child(
             Button::new("close-role-editor")

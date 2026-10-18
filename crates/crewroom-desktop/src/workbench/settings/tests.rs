@@ -28,6 +28,36 @@ fn role_text(
     })
     .unwrap();
 }
+/// Model fields are catalog pickers with no free-text entry. This stands in
+/// for a value saved before the picker, which must be kept verbatim.
+fn saved_model(
+    cx: &mut gpui::TestAppContext,
+    handle: AnyWindowHandle,
+    view: &Entity<Workbench>,
+    input: impl FnOnce(&Workbench) -> Entity<InputState>,
+    text: &str,
+) {
+    cx.update_window(handle, |_, window, cx| {
+        let input = input(view.read(cx));
+        input.update(cx, |i, cx| i.set_value(text.to_owned(), window, cx));
+        window.render_frame(cx);
+    })
+    .unwrap();
+}
+fn role_model(
+    cx: &mut gpui::TestAppContext,
+    handle: AnyWindowHandle,
+    view: &Entity<Workbench>,
+    text: &str,
+) {
+    saved_model(
+        cx,
+        handle,
+        view,
+        |w| w.settings.roles[&w.settings.role].fields.inputs["model"].clone(),
+        text,
+    );
+}
 #[gpui::test]
 fn native_role_editor_persists_preserves_drafts_and_rejects_stale_revisions(
     cx: &mut gpui::TestAppContext,
@@ -43,30 +73,50 @@ fn native_role_editor_persists_preserves_drafts_and_rejects_stale_revisions(
         ("category", "Quality"),
         ("purpose", "Inspect regressions"),
         ("instructions", "Measure 日本語 before changing code."),
-        ("model", "fixture/model"),
     ] {
         role_text(cx, handle, &view, key, value);
     }
+    role_model(cx, handle, &view, "fixture/model");
     cx.update_window(handle, |_, window, cx| {
         let input = view.read(cx).settings.roles[&view.read(cx).settings.role]
             .fields
             .areas["instructions"]
             .clone();
         input.update(cx, |i, cx| i.focus(window, cx));
+        window.render_frame(cx);
+        // The model override is the catalog picker, next in keyboard order.
         window.press("tab", cx);
-        window.press(crate::SELECT_ALL_SHORTCUT, cx);
-        window.input("fixture/keyboard", cx);
+        window.render_frame(cx);
+        assert_eq!(window.find("role-model").focused(), Some(true));
         let form = &view.read(cx).settings.roles[&view.read(cx).settings.role];
         assert_eq!(
             form.fields.text("instructions", cx),
             "Measure 日本語 before changing code."
         );
-        assert_eq!(form.fields.text("model", cx), "fixture/keyboard");
-        window.press("shift-tab", cx);
-        window.press(crate::SELECT_ALL_SHORTCUT, cx);
-        window.input("Measure 日本語 before changing code.", cx);
+        assert_eq!(form.fields.text("model", cx), "fixture/model");
     })
     .unwrap();
+    let labels = cx
+        .update_window(handle, |_, w, cx| {
+            w.render_frame(cx);
+            gpui::base::test_support::snapshots(w)
+                .iter()
+                .filter_map(|n| n.label().map(str::to_owned))
+                .collect::<Vec<_>>()
+        })
+        .unwrap();
+    assert!(
+        labels
+            .iter()
+            .any(|s| s.contains("Saved text kept as-is; it matches no listed model")),
+        "saved free text is shown as-is and flagged: {labels:?}"
+    );
+    assert!(
+        labels
+            .iter()
+            .any(|s| s.starts_with("Model catalog unavailable:") && s.contains("Fix:")),
+        "the unavailable catalog is explained in the role editor: {labels:?}"
+    );
     click(cx, handle, "effort-high");
     click(cx, handle, "save-role");
     wait(cx, handle, &view, &events, |v, _| {
@@ -77,7 +127,7 @@ fn native_role_editor_persists_preserves_drafts_and_rejects_stale_revisions(
         assert_eq!(d.revision, Some(1));
         assert!(!d.dirty(cx));
     });
-    role_text(cx, handle, &view, "model", "fixture/draft");
+    role_model(cx, handle, &view, "fixture/draft");
     activate_by_keyboard(cx, handle, "edit-role-coordinator");
     activate_by_keyboard(cx, handle, "edit-role-performance-checker");
     navigate(cx, handle, "repositories");
@@ -565,17 +615,26 @@ fn model_job_settings_keep_drafts_conflicts_and_role_overrides(cx: &mut gpui::Te
     let (h, v, e) = open(cx, &fixture);
     wait(cx, h, &v, &e, |v, _| v.connected);
     navigate(cx, h, "models");
+    // FOR-38: every job renders the catalog picker, even with no catalog.
     cx.update_window(h, |_, w, cx| {
-        let input = v.read(cx).settings.models.as_ref().unwrap().fields.inputs["code"].clone();
-        input.update(cx, |i, cx| i.focus(w, cx));
-        w.input("fixture/code", cx);
+        w.render_frame(cx);
+        for job in ["code", "judgment", "review", "fast"] {
+            assert!(w.find(SharedString::from(format!("job-{job}"))).visible());
+        }
     })
     .unwrap();
+    saved_model(
+        cx,
+        h,
+        &v,
+        |w| w.settings.models.as_ref().unwrap().fields.inputs["code"].clone(),
+        "fixture/code",
+    );
     click(cx, h, "budget-small");
     navigate(cx, h, "roles");
     click(cx, h, "edit-role-implementer");
     click(cx, h, "role-job-review");
-    role_text(cx, h, &v, "model", "fixture/override");
+    role_model(cx, h, &v, "fixture/override");
     click(cx, h, "effort-off");
     click(cx, h, "save-role");
     wait(cx, h, &v, &e, |v, _| {
