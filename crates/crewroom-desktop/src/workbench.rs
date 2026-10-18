@@ -12,6 +12,9 @@ mod collaboration;
 mod comparisons;
 #[cfg(test)]
 mod composition_tests;
+mod credentials;
+#[cfg(test)]
+mod credentials_tests;
 #[cfg(test)]
 mod delivery_wording_tests;
 #[cfg(test)]
@@ -134,6 +137,7 @@ pub struct Workbench {
     title: Entity<InputState>,
     description: Entity<TextareaState>,
     import: Entity<TextareaState>,
+    credential_inputs: credentials::CredentialInputs,
     steering: HashMap<String, Entity<TextareaState>>,
     settings: settings::Settings,
     comparisons: comparisons::Comparisons,
@@ -292,6 +296,7 @@ impl Workbench {
                 TextareaState::new(window, cx)
                     .placeholder("{\"siteUrl\":\"https://example.atlassian.net\",\"issues\":[…]}")
             }),
+            credential_inputs: credentials::CredentialInputs::new(window, cx),
             settings: settings::Settings::default(),
             comparisons: comparisons::Comparisons::default(),
             planning: planning::Planning::default(),
@@ -421,6 +426,12 @@ impl Workbench {
                         }
                         .into();
                         self.error.clear();
+                        if let Some(text) = credentials::saved_notice(&path) {
+                            self.notice = text.into();
+                            if let Some(facts) = value.get("credentials") {
+                                self.workspace["credentials"] = facts.clone();
+                            }
+                        }
                         if path.starts_with("/implementation-plans/") && path.ends_with("/decision")
                         {
                             self.notice = self.plan_decision_notice(&value);
@@ -681,7 +692,13 @@ impl Workbench {
             })))
     }
     fn import_panel(&self, cx: &mut Context<Self>) -> Div {
-        section("Jira").child(hint(if self.workspace["capabilities"]["liveJira"]==true {"Refresh the configured source. Imported fields remain separate from your accepted brief."}else{"Live Jira is not configured. You can import a snapshot and retain source fields separately."}))
+        let unreadable = self.workspace["credentials"]["jira"]["source"] == "unreadable";
+        let jira = section("Jira")
+            .child(hint(if unreadable {
+                "Jira: Credentials unreadable — reconnect under Credentials below."
+            } else {
+                ""
+            })).child(hint(if self.workspace["capabilities"]["liveJira"]==true {"Refresh the configured source. Imported fields remain separate from your accepted brief."}else{"Live Jira is not configured. You can import a snapshot and retain source fields separately."}))
             .child(hint(format!("{} · {}",self.workspace["jira"]["source"]["name"].as_str().unwrap_or("No saved source"),self.workspace["jira"]["state"].as_str().unwrap_or("not configured"))))
             .child(hint(format!("Last complete refresh: {}",self.workspace["jira"]["lastSyncedAt"].as_str().unwrap_or("not yet recorded"))))
             .child(hint(self.workspace["jira"]["error"].as_str().unwrap_or("")))
@@ -690,7 +707,13 @@ impl Workbench {
             .child(Textarea::new(&self.import).accessibility_id("jira-json").aria_label("Jira JSON").h(px(320.)).disabled(self.blocked()))
             .child(Button::new("save-import").primary().label("Import snapshot").disabled(self.blocked()).on_click(cx.listener(|this,_,_,cx| {
                 match serde_json::from_str(&this.import.read(cx).value()) {Ok(body)=>this.send("/import/jira".into(),body,false,cx),Err(_)=>{this.fail_at("Enter valid JSON with siteUrl and issues.", feedback::Place::Top);cx.notify();}}
-            })))
+            })));
+        div()
+            .flex()
+            .flex_col()
+            .gap_4()
+            .child(jira)
+            .child(self.credentials_section(cx))
     }
     /// The session column and, when a details tab is open, the drawer beside it.
     fn ticket(

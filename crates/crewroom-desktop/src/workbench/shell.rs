@@ -430,7 +430,7 @@ impl Workbench {
             ("playbooks", "Playbooks", Panel::Playbooks),
             ("repositories", "Repositories", Panel::Repositories),
             ("learning", "Learning", Panel::Learning),
-            ("import-jira", "Jira", Panel::Import),
+            ("import-jira", "Integrations", Panel::Import),
         ] {
             nav = nav.child(
                 Button::new(id)

@@ -98,10 +98,20 @@ The launcher requires explicit absolute data and role paths. The checkout wrappe
 | `CREWROOM_TMUX` | Optional trusted tmux executable; otherwise discovered on daemon PATH |
 | `<data>/jira.json` | Jira source/account metadata read by the native daemon |
 | `<data>/bitbucket.json` | Repository publication/hosted-check metadata read by the native daemon |
-| `CREWROOM_JIRA_TOKEN` | Optional OAuth bearer access token for the configured Jira cloud, read server-side; required credential route on Linux |
-| `CREWROOM_BITBUCKET_TOKEN` | Optional OAuth bearer token, read server-side |
+| `<data>/crewroom.secret` | Install key: 32 random bytes, mode 0600, created once on first start. Never regenerated while encrypted values exist. See [stored credentials](#stored-credentials) |
+| `<data>/credentials.json` | Jira/Bitbucket tokens saved in **Settings → Integrations**, only as `$crewroom$v1$…` encrypted values |
+| `CREWROOM_JIRA_TOKEN` | Optional OAuth bearer access token for the configured Jira cloud, read server-side; overrides the saved Jira token |
+| `CREWROOM_BITBUCKET_TOKEN` | Optional OAuth bearer token, read server-side; overrides the saved Bitbucket token |
 
 Legacy `CREWROOM_DATA_DIR`, `CREWROOM_PORT`, `CREWROOM_JIRA_CONFIG` and `CREWROOM_PUBLICATION_CONFIG` do not select these native settings. Changing the selected paths opens a different installation; it does not move or import existing data. Reopening a live daemon does not reload its environment.
+
+### Stored credentials
+
+**Settings → Integrations** saves a Jira or Bitbucket bearer token through the local service. The service encrypts each token with XChaCha20-Poly1305 under the install key in `crewroom.secret`, binds it to its integration, and writes only the `$crewroom$v1$…` value to `credentials.json`. It decrypts tokens in memory only when it authenticates a provider request. Workspace responses, the desktop client and agent environments report only the source: `environment`, `stored`, `unreadable` or `none`. They never receive the token. A saved token takes effect on the next provider request without a restart. A non-empty `CREWROOM_*_TOKEN` in the service environment still wins and is shown as the active source.
+
+If `crewroom.secret` is missing, is not a private (0600, owner-only) file, or does not match the stored values, the integration shows **Credentials unreadable — reconnect**. No provider request is sent. Crewroom does not create a replacement key while encrypted values exist. Restore the secret from the same backup, or use **Reconnect**. Reconnect saves the new token and drops other unreadable values; those integrations must also be reconnected.
+
+Threat model: the install key protects tokens in copied configuration, backups, sync folders and accidentally shared files that do not also include `crewroom.secret`. It does **not** protect against processes running as the same OS user, because they can read both files. A backup that contains both files contains usable credentials.
 
 Keep private configuration, backups and logs in operator-only directories. Runtime JSON contains provider/Mail credentials. It must not be committed or copied to the browser. A missing integration remains unavailable; saving a plan does not start an agent.
 
@@ -171,7 +181,7 @@ Only the current active coordinator can call `record_playbook_step`. It supplies
 ## Backup and same-path restore
 
 1. Pause all admitted work and verify stopped ownership. Resolve any unknown surviving child before treating a backup as consistent. Stop Crewroom and then its separately managed Mail service. Stop editing the configured repositories during capture.
-2. Record the application commit, runtime versions, absolute paths and repository identities. Copy the complete Crewroom data directory, runtime root, role file and adjacent `model-jobs.json`, `principles.json` and `playbooks.json`, private integration metadata, Mail database **and** archive, and the configured repositories with their Git common directories. Keep any remaining SQLite `-wal`/`-shm` files with their database. Preserve permissions. Keep a private copy of required pinned image identities and a reproducible way to obtain those exact local images.
+2. Record the application commit, runtime versions, absolute paths and repository identities. Copy the complete Crewroom data directory, runtime root, role file and adjacent `model-jobs.json`, `principles.json` and `playbooks.json`, private integration metadata (the data directory's `crewroom.secret` **with** `credentials.json`; neither is usable without the other), Mail database **and** archive, and the configured repositories with their Git common directories. Keep any remaining SQLite `-wal`/`-shm` files with their database. Preserve permissions. Keep a private copy of required pinned image identities and a reproducible way to obtain those exact local images.
 3. Verify a file/hash inventory of the backup. Store it outside the live paths with operator-only access. Credentials and ticket/repository content may be present; keep it out of source control and public artifacts.
 4. To restore, first stop all relevant services. Preserve the failed state separately for diagnosis. Restore every captured component to its original absolute path with the matching application/runtime versions. Do not start a second controller against a copied database. Linked worktree `.git` files refer to the original Git common directory; moving the backup to arbitrary new paths is not a supported restore.
 5. Start Mail with its retained state, then Crewroom. Inspect recovery holds, requirements, queue, steering, message outcomes, candidate revisions and evidence. Confirm owned worktree identity and unchanged user checkouts. Reconciliation may require attention; a restored snapshot must not silently restart uncertain external writes. Resume only the explicitly selected paused run after its ownership/evidence checks pass.
