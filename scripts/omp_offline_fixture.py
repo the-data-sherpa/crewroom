@@ -187,7 +187,10 @@ class Sandbox:
             cli = modules / '@oh-my-pi/pi-coding-agent/dist/cli.js'
             bun = Path(shutil.which('bun') or Path.home() / '.bun/bin/bun').resolve()
             if not cli.is_file():
-                raise RuntimeError('Install fixture-only OMP 18.4.12 (or 18.11.3) per docs/testing/mh2-runtime-acceptance.md')
+                if 'CREWROOM_OMP_FIXTURE_MODULES' in os.environ:
+                    raise RuntimeError(f'CREWROOM_OMP_FIXTURE_MODULES has no OMP CLI at {cli}; install fixture-only OMP 18.4.12 (or 18.11.3) there per docs/testing/mh2-runtime-acceptance.md')
+                from prepare_worktree import fixture, missing_message
+                raise RuntimeError(missing_message(fixture('fixture-only OMP')))
             self.binary.write_text('#!/bin/sh\nexec ' + shlex.quote(str(bun)) + ' ' + shlex.quote(str(cli)) + ' "$@"\n')
             self.binary.chmod(0o700)
             self.runtime_identity = {'version': subprocess.run([str(self.binary), '--version'], capture_output=True, text=True, check=True).stdout.strip(),

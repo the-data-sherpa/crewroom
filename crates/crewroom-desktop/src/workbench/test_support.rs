@@ -44,6 +44,11 @@ impl Fixture {
         seed: impl FnOnce(&crewroom_core::store::Store, &std::path::Path),
         options: impl Fn(&std::path::Path) -> crewroom_service::ServiceOptions + Send + Sync + 'static,
     ) -> Self {
+        // Configured services usually reference the production helpers; build them before the
+        // timed service start rather than inside it (FOR-59).
+        crewroom_runtime::test_binaries::ensure(
+            &crewroom_runtime::test_binaries::profile_dir_of_current_test(),
+        );
         Self::seeded_custom(false, true, seed, Some(std::sync::Arc::new(options)))
     }
     fn seeded_custom(
@@ -52,10 +57,7 @@ impl Fixture {
         seed: impl FnOnce(&crewroom_core::store::Store, &std::path::Path),
         options: Option<OptionsFactory>,
     ) -> Self {
-        let root = tempfile::Builder::new()
-            .prefix("crewroom-native-")
-            .tempdir_in("/tmp")
-            .unwrap();
+        let root = temp_root();
         let data = root.path().join("data");
         std::fs::create_dir(&data).unwrap();
         {
@@ -129,6 +131,34 @@ impl Fixture {
         (response.status().as_u16(), response.json().unwrap())
     }
 }
+/// A private per-fixture root under the configured temporary directory (`TMPDIR`), never a fixed system path.
+pub(super) fn temp_root() -> tempfile::TempDir {
+    use std::os::unix::fs::PermissionsExt;
+    // The root holds the fixture service's connection token, so keep it owner-only.
+    tempfile::Builder::new()
+        .prefix("crewroom-native-")
+        .permissions(std::fs::Permissions::from_mode(0o700))
+        .tempdir_in(std::env::temp_dir())
+        .unwrap()
+}
+
+#[test]
+fn fixture_roots_are_private_and_honour_the_configured_temp_directory() {
+    use std::os::unix::fs::PermissionsExt;
+    let (first, second) = (temp_root(), temp_root());
+    assert!(first.path().starts_with(std::env::temp_dir()));
+    assert_ne!(first.path(), second.path());
+    let mode = std::fs::metadata(first.path())
+        .unwrap()
+        .permissions()
+        .mode();
+    assert_eq!(
+        mode & 0o077,
+        0,
+        "fixture root must not be group/world accessible"
+    );
+}
+
 fn service(
     root: &std::path::Path,
     execution: bool,

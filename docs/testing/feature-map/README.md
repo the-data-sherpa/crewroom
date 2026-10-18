@@ -48,6 +48,19 @@ Keep run directory names short: the absolute path plus `fixtures/cr-wf-XXXXXX/ru
 
 Run recipes sequentially. Preflight must find the documented source entry point, exactly one Node recipe and exactly one native driver, verify source/binary binding and confirm selected prerequisites before admitting the journey. Each UI action additionally checks authenticated health, selected fixture task/run and fresh native observations. Silence or a zero-test exit is not readiness.
 
+## Fresh worktrees
+
+A new checkout or disposable worktree is self-sufficient after one idempotent step:
+
+```sh
+python3 scripts/prepare_worktree.py
+export CARGO_TARGET_DIR="$PWD/target"
+```
+
+It runs `npm ci` when `node_modules` is absent and links the fixture-only OMP (`.crewroom/mh2-omp-fixture`, Linux only) and the pinned Rust Mail test runtime (`.crewroom/experiments/rust-mail-prep`) from the main Git worktree, or from `--source <checkout>`. The links live under the ignored `.crewroom/`; the step refuses to create them anywhere Git would track. It copies nothing and never touches provider logins, raw sessions or stores. Without an installed source, `--install-missing` installs the pinned fixtures (network). `--check` changes nothing and exits 1 with one message per missing fixture. `--remove` deletes only the links. A missing fixture stops `npm run test:e2e` once in its global setup, and the Python fixtures raise the same message naming this step.
+
+Give every worktree its own Cargo build directory. Sharing one `CARGO_TARGET_DIR` across parallel worktrees mixes artifacts built from different revisions and produces stale compile and test failures. A private directory inside the worktree (`$PWD/target`, ignored) avoids this. Tests that start `crewroomd` or the native service build `crewroom-process` and `crewroom-host` into their own build directory on first use (`crewroom_runtime::test_binaries`), so a fresh build directory needs no manual `cargo build -p crewroom-runtime --bins`; `--build-helpers` builds them up front. Native fixtures create private per-test roots under the configured temporary directory (`TMPDIR`). The dev-mode UI watcher ignores `.claude/`, `.crewroom/`, `target/`, `dist/`, `crates/` and `vendor/`, so nested worktrees cannot exhaust the file-watcher limit.
+
 ## Evidence, cleanup and reruns
 
 Each invocation records recipe/manifest/helper hashes, source commit and dirty patch hash, native source and executable fingerprints, OS/architecture/toolchain, exact arguments and timing, selection/assertion counts, journey result and cleanup. Native action artifacts retain input plans, rendered labels, durable observations and test output. The isolated Git identities (target, candidate head/base/tree) differ from the application's source/build identity.

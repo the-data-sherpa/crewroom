@@ -32,6 +32,8 @@ pub mod runner;
 mod spec;
 pub mod supervisor;
 pub mod target_refresh;
+#[doc(hidden)]
+pub mod test_binaries;
 use crewroom_core::{Error, Result};
 pub use inspect::{
     Ownership, ProcessIdentity, inspect_checked, inspect_owned, inspect_settled, seal_checked,

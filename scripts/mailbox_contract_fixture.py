@@ -40,7 +40,8 @@ class RustMail:
     def __init__(self, root, guard, port, binary=None, retention=86400):
         self.root, self.guard, self.port = Path(root).resolve(), guard, port
         self.root.mkdir(parents=True, exist_ok=True)
-        self.binary = Path(binary or PROJECT / '.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail').resolve()
+        self.default_binary = (PROJECT / '.crewroom/experiments/rust-mail-prep/runtime/mcp-agent-mail').resolve()
+        self.binary = Path(binary).resolve() if binary else self.default_binary
         self.retention = retention
         self.token = 'synthetic-' + uuid.uuid4().hex
         self.proc = None
@@ -50,6 +51,10 @@ class RustMail:
         self.session = None
 
     def start(self):
+        if not self.binary.is_file():
+            from prepare_worktree import fixture, missing_message
+            raise RuntimeError(missing_message(fixture('Rust Mail')) if self.binary == self.default_binary
+                               else f'Rust Mail binary {self.binary} does not exist.')
         for folder in ('tmp', 'config', 'data', 'cache', 'archive'):
             (self.root / folder).mkdir(exist_ok=True)
         env = {k: os.environ[k] for k in ('PATH', 'HOME', 'LANG') if k in os.environ}

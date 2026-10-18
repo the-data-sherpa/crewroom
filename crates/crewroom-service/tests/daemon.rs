@@ -1,6 +1,13 @@
 use crewroom_service::ConnectionInfo;
 use std::{path::Path, process::Command, time::Duration};
 
+/// The daemon under test, after building the runtime helpers it resolves beside itself (FOR-59).
+fn crewroomd() -> &'static Path {
+    let daemon = Path::new(env!("CARGO_BIN_EXE_crewroomd"));
+    crewroom_runtime::test_binaries::ensure(daemon.parent().unwrap());
+    daemon
+}
+
 struct OwnedDaemon(u32);
 impl Drop for OwnedDaemon {
     fn drop(&mut self) {
@@ -34,7 +41,7 @@ async fn connect(path: &Path) -> ConnectionInfo {
 async fn detached_service_survives_launcher_and_stops_cleanly() {
     let root = tempfile::tempdir().unwrap();
     let descriptor = root.path().join("native-connection.json");
-    let result = Command::new(env!("CARGO_BIN_EXE_crewroomd"))
+    let result = Command::new(crewroomd())
         .arg("--background")
         .arg("--port")
         .arg("0")
@@ -49,7 +56,7 @@ async fn detached_service_survives_launcher_and_stops_cleanly() {
     let daemon = OwnedDaemon(info.pid);
     assert_ne!(info.pid, std::process::id());
     assert!(
-        Command::new(env!("CARGO_BIN_EXE_crewroomd"))
+        Command::new(crewroomd())
             .arg("--data-dir")
             .arg(root.path())
             .arg("--status")
@@ -117,7 +124,7 @@ async fn repository_edit_preflight_keeps_observation_responsive_and_replays_afte
     .unwrap();
     let start = || {
         assert!(
-            Command::new(env!("CARGO_BIN_EXE_crewroomd"))
+            Command::new(crewroomd())
                 .env("PATH", &daemon_path)
                 .args(["--background", "--port", "0", "--data-dir"])
                 .arg(&data)
@@ -276,7 +283,7 @@ async fn creation_and_research_release_workflow_lock_and_recheck_after_git() {
     .unwrap();
     let start = || {
         assert!(
-            Command::new(env!("CARGO_BIN_EXE_crewroomd"))
+            Command::new(crewroomd())
                 .env("PATH", &daemon_path)
                 .args(["--background", "--port", "0", "--data-dir"])
                 .arg(&data)
@@ -477,7 +484,7 @@ async fn signals_after_descriptor_publication_stop_cleanly_even_when_startup_out
         }
         output.set_nonblocking(false).unwrap();
         let output: OwnedFd = output.into();
-        let mut child = Command::new(env!("CARGO_BIN_EXE_crewroomd"))
+        let mut child = Command::new(crewroomd())
             .args(["--port", "0", "--data-dir"])
             .arg(root.path())
             .arg("--roles")

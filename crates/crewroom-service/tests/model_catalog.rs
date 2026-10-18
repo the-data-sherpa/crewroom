@@ -55,17 +55,8 @@ print(json.dumps({'models':[{'provider':'fixture','id':'model','selector':'fixtu
 "#).unwrap();
         std::fs::set_permissions(&binary, std::fs::Permissions::from_mode(0o700)).unwrap();
     }
-    let target = std::env::current_exe()
-        .unwrap()
-        .parent()
-        .unwrap()
-        .parent()
-        .unwrap()
-        .to_path_buf();
-    let helper = target.join("crewroom-process");
-    assert!(
-        helper.is_file(),
-        "Build the production helper first: cargo build --locked -p crewroom-runtime --bins"
+    let helpers = crewroom_runtime::test_binaries::ensure(
+        &crewroom_runtime::test_binaries::profile_dir_of_current_test(),
     );
     ServiceOptions {
         runtime: Some(
@@ -74,8 +65,8 @@ print(json.dumps({'models':[{'provider':'fixture','id':'model','selector':'fixtu
         "catalog":[{"provider":"fixture","id":"model","api":"openai-responses","tools":true,"inputs":["text"],"efforts":["low","high","xhigh"]}],
         "policy":{"default":{"model":"fixture/model","effort":"high"}},"models":{"providers":{"fixture":{"baseUrl":"http://127.0.0.1:5555","apiKey":"credential-canary"}}}}),
         ),
-        helper,
-        host: target.join("crewroom-host"),
+        helper: helpers.process,
+        host: helpers.host,
         tmux: "/usr/bin/tmux".into(),
         jira: None,
         publication: vec![],

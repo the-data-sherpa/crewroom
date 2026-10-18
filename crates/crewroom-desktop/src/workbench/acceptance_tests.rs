@@ -514,15 +514,12 @@ fn native_acceptance_retired_repository_keeps_captured_settings_in_results_and_h
         task = t;
         run = r;
         let root = root.canonicalize().unwrap();
-        let helper = std::env::current_exe()
-            .unwrap()
-            .parent()
-            .unwrap()
-            .parent()
-            .unwrap()
-            .join("crewroom-process")
-            .canonicalize()
-            .unwrap();
+        let helper = crewroom_runtime::test_binaries::ensure(
+            &crewroom_runtime::test_binaries::profile_dir_of_current_test(),
+        )
+        .process
+        .canonicalize()
+        .unwrap();
         let authority = std::sync::Arc::new(
             crewroom_core::authority::Authority::acquire_for_execution(&root.join("data")).unwrap(),
         );

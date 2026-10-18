@@ -18,18 +18,12 @@ fn id(v: &Value) -> String {
     string(v, "id")
 }
 fn helper() -> PathBuf {
-    let path = std::env::current_exe()
-        .unwrap()
-        .parent()
-        .unwrap()
-        .parent()
-        .unwrap()
-        .join("crewroom-process");
-    assert!(
-        path.is_file(),
-        "Build the workspace binaries before running native journeys."
-    );
-    path.canonicalize().unwrap()
+    crewroom_runtime::test_binaries::ensure(
+        &crewroom_runtime::test_binaries::profile_dir_of_current_test(),
+    )
+    .process
+    .canonicalize()
+    .unwrap()
 }
 fn git(root: &Path, args: &[&str]) -> String {
     let out = std::process::Command::new("git")
