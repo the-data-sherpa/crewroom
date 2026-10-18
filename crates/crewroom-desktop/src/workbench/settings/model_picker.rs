@@ -184,6 +184,36 @@ fn route_label(route: &Value) -> String {
         billing_label(&route["billing"])
     )
 }
+/// Catalog rows a saved selection names, resolved as the service resolves
+/// it: an exact key, or a key saved before billing routes existed that names
+/// harness, provider and model and matches each routed offering of that
+/// model. One row means the selection resolves; several need a route choice.
+fn saved_rows<'a>(selected: &str, rows: &'a [Value]) -> Vec<&'a Value> {
+    if selected.is_empty() {
+        return vec![];
+    }
+    if let Some(row) = rows.iter().find(|row| row["key"] == selected) {
+        return vec![row];
+    }
+    rows.iter()
+        .filter(|row| {
+            row["billingRoute"]
+                .as_str()
+                .is_some_and(|route| row["key"] == format!("{selected}:{route}"))
+        })
+        .collect()
+}
+/// A pre-billing selection several billing routes offer: never pick one.
+fn route_choice_required(rows: &[&Value]) -> String {
+    format!(
+        "{} is reachable through {} billing. Choose one billing route explicitly; your selection is retained.",
+        string(rows[0], "displayName"),
+        rows.iter()
+            .map(|row| billing_label(&row["billingRoute"]))
+            .collect::<Vec<_>>()
+            .join(" and ")
+    )
+}
 impl Workbench {
     #[allow(clippy::too_many_arguments)] // Shared editor fields plus GPUI window/context.
     pub(in crate::workbench::settings) fn model_picker(
@@ -248,7 +278,24 @@ impl Workbench {
                 blocked,
             });
         }
-        if !selected.is_empty() && !choices.iter().any(|c| c.key == selected) {
+        // A saved key resolving to exactly one row shows as that choice.
+        let saved = saved_rows(&selected, &rows);
+        let shown = match saved.as_slice() {
+            [row] => string(row, "key"),
+            _ => selected.clone(),
+        };
+        if saved.len() > 1 {
+            choices.push(Choice {
+                key: selected.clone(),
+                routes: String::new(),
+                label: format!(
+                    "Choose a billing route: {}",
+                    string(saved[0], "displayName")
+                ),
+                detail: route_choice_required(&saved),
+                blocked: true,
+            });
+        } else if !selected.is_empty() && !choices.iter().any(|c| c.key == shown) {
             let catalog_selection =
                 selected.starts_with("offering:") || selected.starts_with("equivalent:");
             choices.push(Choice {
@@ -294,17 +341,17 @@ impl Workbench {
             );
         }
         let picker = self.settings.pickers.get_mut(id).unwrap();
-        if picker.choices != choices || picker.selected != selected || picker.width != menu_width {
+        if picker.choices != choices || picker.selected != shown || picker.width != menu_width {
             picker.state.update(cx, |state, cx| {
                 state.set_items(
                     Choices::new(choices.clone(), menu_width, window, cx),
                     window,
                     cx,
                 );
-                state.set_selected_value(&selected, window, cx);
+                state.set_selected_value(&shown, window, cx);
             });
             picker.choices = choices;
-            picker.selected = selected.clone();
+            picker.selected = shown.clone();
             picker.width = menu_width;
         }
         let mut field = div()
@@ -332,10 +379,20 @@ impl Workbench {
         } else {
             &selected
         };
-        if let Some(choice) = picker.choices.iter().find(|c| c.key == effective) {
+        let resolved = saved_rows(effective, &rows);
+        let effective_key = match resolved.as_slice() {
+            [row] => string(row, "key"),
+            _ => effective.to_owned(),
+        };
+        if let Some(choice) = picker.choices.iter().find(|c| c.key == effective_key) {
             field = field.child(hint(choice.detail.clone()));
         }
-        if let Some(row) = rows.iter().find(|row| row["key"] == effective) {
+        if effective_key != effective {
+            field = field.child(hint(format!(
+                "Saved before billing routes: {effective}. It resolves to the only listed route; choose it again to record the route."
+            )));
+        }
+        if let [row] = resolved.as_slice() {
             for route in records(row, "routes") {
                 let caps = &route["capabilities"];
                 field = field.child(hint(format!(
@@ -362,6 +419,11 @@ impl Workbench {
                 .is_some_and(|key| key.starts_with("equivalent:"))
             {
                 field = field.child(hint("Uses the first eligible route in the displayed preference order. Capability and access differences remain separate."));
+            }
+        } else if resolved.len() > 1 {
+            // A selected ambiguous key already shows this as its row detail.
+            if selected.is_empty() {
+                field = field.child(hint(route_choice_required(&resolved)));
             }
         } else if !effective.is_empty() {
             field = field.child(hint(format!("Retained selection: {effective}. Availability is checked by the service before admission.")));

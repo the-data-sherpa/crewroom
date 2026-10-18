@@ -523,3 +523,121 @@ fn unconfigured_runner_lists_installed_models_and_explains_each_cause(
             .is_empty()
     );
 }
+
+/// Selections saved before billing routes name harness, provider and model
+/// only. The service resolves them to the single route, so the picker shows
+/// that routed choice instead of an unavailable saved selection.
+#[gpui::test]
+fn pre_billing_selections_show_their_only_route(cx: &mut gpui::TestAppContext) {
+    let fixture = Fixture::configured(
+        |_, root| {
+            let roles = crewroom_core::roles::Roles::new(root.join("roles.json"));
+            let mut role = roles
+                .read()
+                .unwrap()
+                .into_iter()
+                .find(|r| r["id"] == "implementer")
+                .unwrap();
+            role["model"] = json!("offering:omp:fixture:first");
+            role["revision"] = role["revision"].as_u64().map_or(json!(1), |r| json!(r));
+            roles.update("implementer", &role).unwrap();
+        },
+        configured,
+    );
+    let mut jobs = fixture.get("/workspace")["modelJobs"].clone();
+    jobs["jobs"]["code"] = json!("offering:omp:fixture:second");
+    assert_eq!(fixture.post("/model-jobs", jobs).0, 200);
+    let (h, v, e) = open(cx, &fixture);
+    wait(cx, h, &v, &e, |v, _| v.connected);
+    assert_eq!(fixture.post("/model-catalog/refresh", json!({})).0, 200);
+    wait(cx, h, &v, &e, |v, _| {
+        v.workspace["modelDiscovery"]["state"] == "partial"
+            && v.workspace["modelJobs"]["revision"] == 1
+    });
+    navigate(cx, h, "models");
+    let routed = "offering:omp:fixture:second:unknown";
+    cx.read(|cx| {
+        let v = v.read(cx);
+        assert_eq!(
+            v.settings.models.as_ref().unwrap().fields.text("code", cx),
+            "offering:omp:fixture:second",
+            "the saved text is retained until the operator chooses again"
+        );
+        let p = &v.settings.pickers["job-code"];
+        assert!(
+            !p.choices
+                .iter()
+                .any(|c| c.blocked && !c.key.ends_with(":unsupported:unknown")),
+            "no unavailable saved selection: {:?}",
+            p.choices.iter().map(|c| &c.label).collect::<Vec<_>>()
+        );
+        assert_eq!(p.selected, routed);
+        assert_eq!(
+            p.state.read(cx).selected_value().map(String::as_str),
+            Some(routed)
+        );
+        let shown = p.choices.iter().find(|c| c.key == routed).unwrap();
+        assert_eq!(shown.label, "OMP · Shared label · unknown billing");
+    });
+    let models = labels(cx, h);
+    assert!(
+        !models
+            .iter()
+            .any(|l| l.contains("Unavailable saved selection")
+                || l.contains("Not in this catalog")
+                || l.starts_with("Retained selection: offering:")),
+        "{models:?}"
+    );
+    for expected in [
+        "Saved before billing routes: offering:omp:fixture:second.",
+        "omp / fixture / second · unknown billing · Access:",
+    ] {
+        assert!(
+            models.iter().any(|l| l.contains(expected)),
+            "Missing {expected}: {models:?}"
+        );
+    }
+    navigate(cx, h, "roles");
+    click(cx, h, "edit-role-implementer");
+    cx.read(|cx| {
+        let p = &v.read(cx).settings.pickers["role-model"];
+        assert_eq!(p.selected, "offering:omp:fixture:first:unknown");
+        assert!(!p.choices.iter().any(|c| c.label.starts_with("Unavailable")));
+    });
+    let role = labels(cx, h);
+    assert!(
+        role.iter()
+            .any(|l| l.contains("Saved before billing routes: offering:omp:fixture:first.")),
+        "{role:?}"
+    );
+    assert!(
+        !role.iter().any(|l| l.contains("Not in this catalog")),
+        "{role:?}"
+    );
+}
+
+#[test]
+fn pre_billing_selection_with_several_routes_needs_a_route_choice() {
+    let rows = vec![
+        json!({"key":"offering:claude-code:claude-code:sonnet:subscription","billingRoute":"subscription","displayName":"Sonnet"}),
+        json!({"key":"offering:claude-code:claude-code:sonnet:api","billingRoute":"api","displayName":"Sonnet"}),
+        json!({"key":"offering:codex:codex:fixture:subscription","billingRoute":"subscription","displayName":"Fixture"}),
+    ];
+    let several = saved_rows("offering:claude-code:claude-code:sonnet", &rows);
+    assert_eq!(several.len(), 2);
+    assert_eq!(
+        route_choice_required(&several),
+        "Sonnet is reachable through subscription and API billing. Choose one billing route explicitly; your selection is retained."
+    );
+    assert_eq!(
+        saved_rows("offering:codex:codex:fixture", &rows),
+        vec![&rows[2]]
+    );
+    assert_eq!(
+        saved_rows("offering:codex:codex:fixture:subscription", &rows),
+        vec![&rows[2]]
+    );
+    assert!(saved_rows("offering:codex:codex:fixture:api", &rows).is_empty());
+    assert!(saved_rows("offering:codex:codex:fix", &rows).is_empty());
+    assert!(saved_rows("", &rows).is_empty());
+}
