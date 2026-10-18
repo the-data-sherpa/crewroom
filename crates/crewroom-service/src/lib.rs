@@ -624,6 +624,7 @@ async fn workspace_value(state: &AppState) -> Result<Value, ApiError> {
     let mut value = operation(state, |s| snapshot(s)).await?;
     value["credentials"] = credentials_view(state);
     value["github"] = state.github.view();
+    value["githubIssues"] = github::issues::workspace_view(state).await?;
     if let Some(e) = &state.execution {
         if let Some(runs) = value["runs"].as_array_mut() {
             runs.retain(|r| r["purpose"] != "evaluation");
@@ -791,6 +792,7 @@ async fn mutate_inner(state: AppState, path: String, body: Value) -> Result<Valu
     }
     let segments = path.split('/').collect::<Vec<_>>();
     match segments.as_slice() {
+        ["github", "issues", action] => return github::issues::mutate(&state, action, body).await,
         ["github", action] => return github_mutation(&state, action, body).await,
         // A GitHub token is saved only after GitHub accepts it.
         ["credentials", "github"] => {

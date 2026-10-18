@@ -550,9 +550,8 @@ impl Workbench {
             .bg(rgb(0x17212a))
             .child(cell(
                 "jira",
-                // Local tickets keep their pre-FOR-40 caption until a second
-                // provider can be configured (FOR-45).
-                &format!("{} status", provider.map_or("Jira", |p| p.name)),
+                // "Jira status" / "GitHub status"; a local ticket has no provider.
+                &format!("{} status", provider.map_or("Source", |p| p.name)),
                 ticket_source::status_value(task),
                 match provider {
                     Some(p) => format!("Imported {} field", p.name),

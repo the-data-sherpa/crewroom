@@ -25,6 +25,9 @@ mod feedback_tests;
 #[cfg(test)]
 mod focus_tests;
 mod forms;
+mod github_issues;
+#[cfg(test)]
+mod github_issues_tests;
 mod history;
 mod intake;
 #[cfg(test)]
@@ -139,6 +142,7 @@ pub struct Workbench {
     description: Entity<TextareaState>,
     import: Entity<TextareaState>,
     credential_inputs: credentials::CredentialInputs,
+    issue_inputs: github_issues::IssueSourceInputs,
     steering: HashMap<String, Entity<TextareaState>>,
     settings: settings::Settings,
     comparisons: comparisons::Comparisons,
@@ -298,6 +302,7 @@ impl Workbench {
                     .placeholder("{\"siteUrl\":\"https://example.atlassian.net\",\"issues\":[…]}")
             }),
             credential_inputs: credentials::CredentialInputs::new(window, cx),
+            issue_inputs: github_issues::IssueSourceInputs::new(window, cx),
             settings: settings::Settings::default(),
             comparisons: comparisons::Comparisons::default(),
             planning: planning::Planning::default(),
@@ -431,6 +436,12 @@ impl Workbench {
                             self.notice = text.into();
                             if let Some(facts) = value.get("credentials") {
                                 self.workspace["credentials"] = facts.clone();
+                            }
+                        }
+                        if let Some(text) = github_issues::notice(&path, &value) {
+                            self.notice = text;
+                            if let Some(facts) = value.get("githubIssues") {
+                                self.workspace["githubIssues"] = facts.clone();
                             }
                         }
                         if let Some(text) = credentials::github_notice(&path, &value) {
@@ -723,6 +734,7 @@ impl Workbench {
             .gap_4()
             .child(jira)
             .child(self.github_section(cx))
+            .child(self.github_issues_section(cx))
             .child(self.credentials_section(cx))
     }
     /// The session column and, when a details tab is open, the drawer beside it.

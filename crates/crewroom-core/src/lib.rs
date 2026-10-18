@@ -12,6 +12,7 @@ mod continuations;
 mod dependencies;
 mod feedback_resume;
 pub use feedback_resume::feedback_awaits_resume;
+pub mod github_issues;
 pub mod intake;
 pub mod jira;
 mod launch;

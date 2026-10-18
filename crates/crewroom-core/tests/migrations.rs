@@ -55,7 +55,7 @@ fn earliest_schema_retains_local_requirements_and_unknown_accepted_source() {
     assert_eq!(
         db.query_row("PRAGMA user_version", [], |r| r.get::<_, u32>(0))
             .unwrap(),
-        31
+        32
     );
 }
 #[test]
@@ -268,7 +268,7 @@ fn transferred_history_does_not_claim_the_current_branch_after_upgrade() {
 }
 #[test]
 fn newer_and_nonempty_unversioned_databases_are_refused_without_adopting_tables() {
-    for version in [0, 32] {
+    for version in [0, 33] {
         let root = tempfile::tempdir().unwrap();
         let path = root.path().join("workflow.sqlite");
         let db = Connection::open(&path).unwrap();

@@ -157,7 +157,7 @@ fn schema_31_migrates_tickets_losslessly_and_whole_state_restore_reproduces_it()
         .map(|id| store.get_task(id).unwrap())
         .collect();
     drop(store);
-    assert_eq!(version(&path), 31);
+    assert_eq!(version(&path), 32);
     let after = rows(&path);
 
     // Jira: renamed in place, every other field and the refinement unchanged.

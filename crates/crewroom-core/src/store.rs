@@ -7,7 +7,7 @@ use std::{collections::HashSet, path::Path};
 use uuid::Uuid;
 /// Current workflow store schema. Version 31 moves ticket source status to the
 /// provider-neutral `sourceStatus`/`sourceStatusId` fields (FOR-40).
-pub const SCHEMA_VERSION: u32 = 31;
+pub const SCHEMA_VERSION: u32 = 32;
 
 pub struct Store {
     pub(crate) db: Connection,

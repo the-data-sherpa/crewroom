@@ -6,6 +6,8 @@
 //! bound to a SHA-256 fingerprint of the token it checked, so a replaced or
 //! overridden token is shown as "not checked" instead of inheriting an older
 //! result. No view, response or log carries the token or its fingerprint.
+pub(crate) mod issues;
+
 use crewroom_core::{Error, Result};
 use crewroom_runtime::providers::{
     config::TokenEnvironment,
@@ -58,6 +60,8 @@ pub(crate) struct GitHub {
     environment: TokenEnvironment,
     secrets: SecretStore,
     last: Mutex<Option<Check>>,
+    /// Serializes GitHub Issues syncs (FOR-45).
+    issue_sync: tokio::sync::Mutex<()>,
 }
 
 enum Active {
@@ -80,6 +84,7 @@ impl GitHub {
             environment: options.environment,
             secrets,
             last: Mutex::new(None),
+            issue_sync: tokio::sync::Mutex::new(()),
         }
     }
     pub(crate) fn environment(&self) -> Option<String> {

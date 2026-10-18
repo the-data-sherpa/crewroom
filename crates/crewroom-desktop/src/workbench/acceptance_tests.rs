@@ -900,7 +900,7 @@ fn native_session_repeated_slots_have_distinct_accessibility_paths(cx: &mut gpui
     select(cx, h, &v, &e, &task);
     navigate(cx, h, "Conversation");
     let header = labels(cx, h, None);
-    for caption in ["JIRA STATUS", "WORKFLOW", "AGENT ACTIVITY", "READINESS"] {
+    for caption in ["SOURCE STATUS", "WORKFLOW", "AGENT ACTIVITY", "READINESS"] {
         contains(&header, caption);
     }
     cx.update_window(h, |_, window, cx| {
@@ -1297,5 +1297,59 @@ fn native_jira_ticket_labels_source_status_with_provider_name_apart_from_workflo
                 .iter()
                 .any(|l| l.contains("Backlog"))
         );
+    }
+}
+#[gpui::test]
+fn native_github_issue_shows_github_open_closed_apart_from_workflow_and_activity(
+    cx: &mut gpui::TestAppContext,
+) {
+    // FOR-45: a GitHub issue's open/closed state is its source status only.
+    let mut task = Value::Null;
+    let f = Fixture::projected(|s, _| {
+        let source = s
+            .save_github_source(&json!({"repository":"fixture/issues"}))
+            .unwrap()["source"]
+            .clone();
+        s.commit_github_sync(
+            &source,
+            &json!([{"id":9012,"number":12,"title":"Synthetic GitHub issue","body":"Source text","state":"open","html_url":"https://github.com/fixture/issues/issues/12","updated_at":"2026-10-18T08:00:00Z"}]),
+            &json!([]),
+        )
+        .unwrap();
+        task = s.snapshot().unwrap()["tasks"][0].clone();
+        s.queue_refinement(&id(&task), &json!({"revision":1,"purpose":"explore"}))
+            .unwrap();
+    });
+    assert_eq!(task["sourceStatus"], "open");
+    let (h, v, e) = open(cx, &f);
+    select(cx, h, &v, &e, &task);
+    let row = |cx: &mut gpui::TestAppContext, kind: &str| {
+        labels(cx, h, Some(&format!("row-{kind}-{}", id(&task))))
+    };
+    assert_eq!(row(cx, "jira"), ["GitHub open"]);
+    assert_eq!(
+        labels(cx, h, Some(&format!("row-key-{}", id(&task)))),
+        ["#12 · github"]
+    );
+    let workflow = row(cx, "workflow");
+    let activity = row(cx, "activity");
+    assert!(!workflow.is_empty() && !activity.is_empty());
+    assert!(
+        !workflow
+            .iter()
+            .chain(&activity)
+            .any(|l| l.contains("GitHub"))
+    );
+    assert_eq!(labels(cx, h, Some("fact-jira")), ["open"]);
+    let header = labels(cx, h, None);
+    for caption in [
+        "GITHUB STATUS",
+        "Imported GitHub field",
+        "#12  /  GitHub ticket",
+    ] {
+        contains(&header, caption);
+    }
+    for fact in ["fact-workflow", "fact-activity"] {
+        assert!(!labels(cx, h, Some(fact)).iter().any(|l| l == "open"));
     }
 }

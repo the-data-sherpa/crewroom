@@ -4,6 +4,7 @@
 //! serialized or returned. Results distinguish a token GitHub rejected
 //! (invalid, expired or revoked) from GitHub being unreachable, so Settings can
 //! say which one happened instead of treating every failure as "disconnected".
+pub mod issues;
 use super::transport::fixture_origin;
 use futures_util::StreamExt;
 use reqwest::header::{ACCEPT, AUTHORIZATION, HeaderMap, HeaderValue, USER_AGENT};
