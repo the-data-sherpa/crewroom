@@ -4,6 +4,54 @@ The operator requested that each work item pass its checks before the next start
 
 Historical revision IDs and source hashes below refer to the original private snapshots before the FOR-17 history rewrite. Sanitized copies are not byte-identical evidence for rewritten revisions; replay requires the private archive. New validation is recorded separately.
 
+## FOR-58 — Runtime and desktop suites in parallel (2026-10-18)
+
+Code revision `58580c3` (branch `for-58-reliable-parallel-tests`, from main `aa2d619`), built in a private target directory in the worktree. All results are local tests with simulated providers; nothing contacted a live service. Other agents were running builds and tests on the same 16-core machine throughout, so each result records the 1/5/15-minute load average.
+
+**Root causes.** Each flaky test was reproduced by running 8–16 copies of its test binary at once. That is heavier than a normal suite run, but it shows the same failures.
+
+| Test(s) | Failure | Cause | Fix |
+|---|---|---|---|
+| `runner::codex::tests::a_lost_backend_reply_retains_unknown_effect_and_closes_admission`, `…terminal_before_steering_reply_does_not_acknowledge_rejected_or_unknown_input`, `runner::journal::tests::restart_reconciles_original_call_receipt_and_never_readmits_unknown_effect` | `Host journal already has a writer.` on reopen | The test drops its journal and reopens it in the same process. Every `fork` by another test thread copies all open descriptors, `O_CLOEXEC` included, and a `flock` belongs to the shared open file description. Until that child execs or exits, it keeps the dropped journal locked. | `crewroom_core::authority::try_lock_settled` retries for up to `INHERITED_LOCK_WINDOW` (1 s) before reporting a writer. `Journal::open` uses it. |
+| `repository::git::lifecycle::tests::driven_ticket_retains_actual_controller_lease_after_caller_drops` (the runtime lease test) | final `Authority::acquire_for_execution(..).is_ok()` fails | Same mechanism, on the controller `lease.lock`/`dispatch.lock` | `Authority` locks use the same settle |
+| Desktop workbench-ownership race | `Another controller owns this workbench.` after a service restart in a test | The desktop fixtures close and reopen the in-process service, which runs the same `Authority::acquire` after a drop | Same settle. This failure was not reproduced in this session: the desktop runs that failed were killed by an outside SIGKILL instead (below). The new core test reproduces the mechanism deterministically. |
+| `model_discovery::cancellation_unavailable_version_drift_and_cursor_loops_fail_closed` (also found) | `Discovery process ownership needs inspection.` instead of `cancelled` | Cancellation can kill the `crewroom-process` helper before it writes `owner.json`. `stop_owned` cannot read an owner and reports `uncertain`. This is a product bug: a cancelled refresh reported a cleanup problem. | `inspect::stopped_before_owner`: the helper writes `owner.json` durably before exec, so a reaped helper with no receipt, a free lease and an empty process group launched nothing, and `close()` reports it stopped. Every other case still goes through `stop_owned`. |
+| same test, cursor-loop check (found under 16× stress) | discovery timed out before the repeated cursor arrived | The 3 s bound covered two Python starts on a loaded machine | The bound is now 20 s; it only guards a hung fixture. The assertion still requires the cursor error and prints the actual error. |
+| `runner::auth::tests::refresh_child_retains_source_lease_after_parent_death` (also found) | `ParseIntError { kind: Empty }` | The test polled for the PID file's existence, and Python's `open('w')` creates the file before writing the PID | The fixture writes `ready.tmp` and renames it |
+
+The settle changes one product behaviour: a genuine second journal writer or second controller is now refused after 1 s instead of at once. It is still refused. New tests: `authority::tests::a_released_lease_still_held_by_an_inherited_copy_is_acquired_once_it_closes` (core) holds the lease through a child that inherited it and checks that a plain `try_lock` is refused. It fails without the settle and passes with it. `inspect::tests::a_helper_reaped_before_its_owner_receipt_launched_nothing` and `…an_owner_receipt_a_held_lease_or_a_live_member_needs_inspection` (runtime) cover the new stop check. No assertion was removed or relaxed, and no test was skipped. The other changes are the fixture rename and the longer guard on the hung-fixture bound.
+
+**Stress before and after** (same binaries, concurrent copies × rounds):
+
+| Binary | Before | After |
+|---|---|---|
+| `crewroom_runtime` unit tests, 8 × 5 / 8 × 6 | 7 of 40 failed (journal reopen 4, controller lease 2, auth PID file 1) | 0 of 48 (load 27) |
+| `model_discovery` `cancellation…`, 12 × 5 then 16 × 15 | 34 of 60 failed (`ownership needs inspection`) | 0 of 120 at 12 ×; 1 of 240 at 16 ×, the cursor-check timeout fixed above |
+
+**Clippy.** `cargo clippy -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop --all-targets -- -D warnings` is clean at `58580c3`. The desktop `useless_conversion` in `feedback_tests.rs` named in the ticket had already been fixed on main in `1eae08e` (FOR-45). `cargo fmt --check` is clean for all four crates.
+
+**Repeated suite runs at `58580c3`** (`cargo test --no-fail-fast -p crewroom-core -p crewroom-service -p crewroom-runtime -p crewroom-desktop -j6`, default test threads):
+
+| Run | Core + service + runtime | Desktop | Load |
+|---|---|---|---|
+| 1 | 380 passed, 0 failed, 2 ignored | test binary SIGKILLed after ~60 s, no test failure reported | 6.3 / 10.4 / 11.4 |
+| 2 | 380 / 0 / 2 | 146 passed, 0 failed, 15 ignored | 2.8 / 8.4 / 10.6 |
+| 3 | 380 / 0 / 2 | 146 / 0 / 15 | 4.2 / 8.2 / 10.2 |
+| 4 | 380 / 0 / 2 | 146 / 0 / 15 | 3.7 / 7.9 / 9.8 |
+| 5 | 380 / 0 / 2 | 146 / 0 / 15 | 6.1 / 10.1 / 10.6 |
+| 6 | 380 / 0 / 2 | test binary SIGKILLed, no test failure reported | 7.2 / 10.0 / 10.6 |
+
+Core, service and runtime passed 6 consecutive times, as they did in 5 earlier runs of the same code before the core test was added. The desktop suite passed 4 consecutive times (runs 2–5) with every test passing, but the 5-consecutive criterion is **not met** for desktop, because of the kill below.
+
+**Desktop SIGKILL (open; found in this work, not caused by it).** The `crewroom-desktop` test binary sometimes dies from SIGKILL partway through a full run. No test has failed at that point, and the death came 2 s to 100 s after start. It happened in 2 of 6 runs at `58580c3` and in 2 of 5 runs before the core test was added. It also happened in all 5 full runs made while the load was about 30, and 2 of those were built from main `aa2d619` sources. What it is not:
+- Memory: `oom_kill` is 0 in every cgroup up to `user.slice` and in `/proc/vmstat`, and peak RSS of a full run is 0.54 GB.
+- A kill by process name: a `sleep` copy named `crewroom-5ec9a2ddeb755075` ran for 40 minutes untouched, and no `pkill`/`killall`/`kill -9` command line appeared during the runs.
+- A kill from the test's own process tree: run as PID 1 of a private PID namespace (`unshare -Upf --mount-proc`), where init ignores SIGKILL sent from inside, the binary was still killed after 58 s.
+
+So the signal comes from outside the test's process tree, or from the kernel. An `LD_PRELOAD` `kill`/`killpg` logger and a gdb syscall trace saw no self-kill. The gdb run is not a valid suite result, because 7 tests timed out under it. Every desktop module passes when run alone. The in-flight tests at one 2 s kill were the first 16 started (mostly `acceptance_tests`). The same machine-level kill would explain the FOR-52 record of `git` subprocesses SIGKILLed under load. It would also explain this session's first `npm test` run: 328/329, where the `tests/feedback-continuation.test.ts` process ended with no failing subtest. That file passed alone, and the full rerun passed 334/334. Finding the sender needs signal tracing with privileges (`perf`/bpftrace `signal:signal_generate`), which was not used on the operator's machine without approval. Follow-up: Linear FOR-68.
+
+**Other checks at `58580c3`.** `npm test` **334/334** on rerun; the first run is described above. `npm run build` passes. `npm run test:e2e` is left to the integrator.
+
 ## FOR-57 — Docker-backed verification finds the Docker socket on Linux (2026-10-18)
 
 Branch `for-57-docker-socket-resolver` from main `aa2d619`. Code `6c754fa` (resolver and consumers), `46c4765` (resolver bound into feature-recipe source hashes). Checks below ran on `6c754fa` on Linux x86_64, Docker Engine 29.7.2 (rootful, `default` context only), Node 26. `46c4765` changes only `scripts/verify-feature.py`; its guard tests passed again there.
