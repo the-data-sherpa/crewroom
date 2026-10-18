@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "issue": "FOR-44",
+  "recordedAt": "2026-10-18T10:30:00Z",
+  "implementationRevision": "33503db",
+  "baseRevision": "8967496",
+  "branch": "for-44-usage-by-billing-route",
+  "change": "The run usage projection groups attempts by the billing route frozen in each model selection (api, subscription, unknown) and removes the cross-route total. Only API use carries a list-price dollar estimate; subscription and unknown use show runs and tokens; assignments admitted before routes were recorded read as unknown and are counted as unrecorded. The Results usage panel and attempt history render per-route sections.",
+  "simulatedEvidence": [
+    {
+      "class": "service unit tests over a real SQLite store with synthetic native usage events (no OS processes, no provider)",
+      "command": "cargo test -p crewroom-service --lib native_usage_tests",
+      "tests": [
+        "usage_groups_by_billing_route_without_cross_route_totals",
+        "historical_assignment_without_a_recorded_route_is_unknown",
+        "cumulative_replay_across_replacement_counts_each_token_once_and_stays_partial"
+      ],
+      "result": "3 passed"
+    },
+    {
+      "class": "GPUI render test with a synthetic usage projection",
+      "command": "cargo test -p crewroom-desktop usage",
+      "tests": [
+        "usage_is_grouped_by_billing_route_without_a_dollar_figure_for_subscription",
+        "route_headings_name_each_billing_route"
+      ],
+      "result": "passed; exactly two rendered labels contain a dollar sign, both the API estimate"
+    }
+  ],
+  "liveEvidence": [],
+  "liveEvidenceNote": "No live run was made. Recording real per-route usage needs agent inference on a subscription or API login; the projection reads stored events only, so the simulated store covers the same code path. No API-billed login exists on this machine.",
+  "checks": [
+    {"command": "cargo test -p crewroom-service", "result": "all suites pass (lib 7)"},
+    {"command": "cargo test -p crewroom-desktop", "result": "144 passed, 15 ignored"},
+    {"command": "cargo clippy -p crewroom-service --all-targets -- -D warnings", "result": "clean"},
+    {"command": "cargo clippy -p crewroom-desktop -p crewroom-service -- -D warnings", "result": "clean; desktop --all-targets reports only the pre-existing useless_conversion in untouched feedback_tests.rs"},
+    {"command": "cargo fmt -p crewroom-service -p crewroom-desktop --check", "result": "clean"},
+    {"command": "npm test", "result": "332/332 (one earlier full run failed tests/repository-http.test.ts under machine load; it passed 9/9 alone and on the full rerun)"},
+    {"command": "npm run build", "result": "passes"},
+    {"command": "npm run test:e2e", "result": "not run; the integrator runs it serially"}
+  ]
+}
