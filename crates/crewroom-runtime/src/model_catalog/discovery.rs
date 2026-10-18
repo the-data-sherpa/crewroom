@@ -98,6 +98,14 @@ pub struct Receipt {
     pub cleanup_verified: bool,
 }
 
+/// Hashing a large CLI blocks for seconds in debug builds. Keep it off async
+/// workers so service reads stay responsive while discovery runs.
+async fn binary_digest_blocking(path: &Path) -> Result<(PathBuf, String)> {
+    let path = path.to_owned();
+    tokio::task::spawn_blocking(move || binary_digest(&path))
+        .await
+        .map_err(|_| conflict("Harness executable hashing did not finish."))?
+}
 pub fn binary_digest(path: &Path) -> Result<(PathBuf, String)> {
     if !path.is_absolute() {
         return Err(conflict("Discovery requires an absolute executable path."));
@@ -501,7 +509,7 @@ pub async fn discover(
     if cancel.is_cancelled() {
         return Err(conflict("Discovery was cancelled."));
     }
-    let (canonical_binary, binary_sha256) = binary_digest(&config.binary)?;
+    let (canonical_binary, binary_sha256) = binary_digest_blocking(&config.binary).await?;
     let stamp = binary_stamp(&config.binary)?;
     private_dir(root)?;
     for child in ["home", "config", "data", "cache", "omp-root"] {
@@ -608,7 +616,8 @@ pub async fn discover(
     .await;
     process.close().await?;
     let offerings = result?;
-    if binary_digest(&config.binary)? != (canonical_binary.clone(), binary_sha256.clone())
+    if binary_digest_blocking(&config.binary).await?
+        != (canonical_binary.clone(), binary_sha256.clone())
         || binary_stamp(&config.binary)? != stamp
     {
         return Err(conflict("Harness executable changed during discovery."));
