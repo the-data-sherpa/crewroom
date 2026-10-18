@@ -61,14 +61,7 @@ It runs `npm ci` when `node_modules` is absent and links the fixture-only OMP (`
 
 Give every worktree its own Cargo build directory. Sharing one `CARGO_TARGET_DIR` across parallel worktrees mixes artifacts built from different revisions and produces stale compile and test failures. A private directory inside the worktree (`$PWD/target`, ignored) avoids this. Tests that start `crewroomd` or the native service build `crewroom-process` and `crewroom-host` into their own build directory on first use (`crewroom_runtime::test_binaries`), so a fresh build directory needs no manual `cargo build -p crewroom-runtime --bins`; `--build-helpers` builds them up front. Native fixtures create private per-test roots under the configured temporary directory (`TMPDIR`). On Linux, record repeated-run evidence only from a shell whose hard `RLIMIT_RTTIME` is not 0: under a zero limit the kernel SIGKILLs test binaries, `node --test` file processes and Git children with no failing test (FOR-68). Agent sessions started by Claude Code inherit that limit, and the preparation step warns about it. Start such runs with `python3 scripts/system_limits.py run -- <command>`, which uses a transient `systemd --user` service only when the limit is unsafe ([operations](../../operations.md#tests-killed-by-sigkill-with-no-failing-test-linux)). The dev-mode UI watcher ignores `.claude/`, `.crewroom/`, `target/`, `dist/`, `crates/` and `vendor/`, so nested worktrees cannot exhaust the file-watcher limit.
 
-On the operator's Linux machine, processes started from inside an AI-agent session's process tree are sometimes SIGKILLed from outside that tree (FOR-60, FOR-68). Whole `node --test` file processes and single Git children die with `signal: 'SIGKILL'` and no failing assertion, and the Git callers then fail closed (`Repository configuration is unavailable.`, `Git could not complete …`). To record repeated-run evidence from an agent session, start the run as its own user service so that it is not a descendant of the agent:
-
-```sh
-systemd-run --user --collect --unit=crewroom-npm-test -p WorkingDirectory="$PWD" -E PATH="$PATH" -E HOME="$HOME" npm test
-journalctl --user -u crewroom-npm-test -f
-```
-
-A `systemd-run --scope` run is still a descendant of the agent process and is still affected.
+Under that inherited zero limit, whole `node --test` file processes and single Git, `ps` or lease-helper children die with `signal: 'SIGKILL'` and no failing assertion (FOR-60, FOR-68). Their callers then fail closed: `Repository configuration is unavailable.`, `Git could not complete …`, `Target branch must resolve to a commit …`, a readiness blocker, `Publication process ownership is unresolved.` or `Controller lock failed.`. The [FOR-60 record](../mvp-progress.md#for-60--npm-test-under-machine-load-closed-2026-10-18) attributes each named failure to this kill. From an agent session, run the suite as `python3 scripts/system_limits.py run -- npm test`. A `systemd-run --scope` run is still a descendant of the agent process and still inherits the limit.
 
 ## Evidence, cleanup and reruns
 
