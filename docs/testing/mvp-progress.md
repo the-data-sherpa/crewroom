@@ -4,6 +4,28 @@ The operator requested that each work item pass its checks before the next start
 
 Historical revision IDs and source hashes below refer to the original private snapshots before the FOR-17 history rewrite. Sanitized copies are not byte-identical evidence for rewritten revisions; replay requires the private archive. New validation is recorded separately.
 
+## FOR-64 — Model discovery cancellation under load (2026-10-18)
+
+Code revision `d3247fb` (branch `for-64-discovery-cancel-flake`, from main `2b1b5e7`), built in a private target directory in the worktree. All results are local tests with Python fixture harnesses; nothing contacted a live service. Other agents were building and testing on the same 16-core machine throughout.
+
+**Root cause.** Recorded by FOR-58 (`8f39564`). Cancellation killed the `crewroom-process` helper before it published `owner.json`. Inspection cannot read an owner, so it reported uncertain ownership. `close()` now treats a reaped helper with no receipt, a free lease and an empty process group as stopped. One window remained: the helper creates `owner.json` and then writes it, so a kill between those two steps left a torn receipt, and inspection reports that as uncertain. At `d3247fb` the helper writes `owner.json.partial` and hard-links it to `owner.json`, which fails if a receipt already exists. A torn file can no longer be read as a receipt. A missing receipt still proves the command never ran. A held lease, a surviving group member or a complete receipt still goes through `stop_owned` and fails closed. Unit tests cover both outcomes, including a leftover partial file.
+
+**Tests.** New: cancellation before start returns "cancelled" and creates nothing. Cancellation after the harness writes a readiness file returns "cancelled", leaves no member of the group alive and inspects as `stopped`. Because it waits for that file, this case does not depend on scheduler speed. The existing 100 ms cancel-anywhere step now has a 20 s bound instead of 3 s, so the timeout cannot win first. `failures_are_sanitized_and_children_are_reaped` used a 200 ms bound for every body, so at a load average near 60 it timed out in the version step: 112 of 958 suite runs failed before this change. Only the hung-harness body keeps a short bound (5 s). The assertions are unchanged.
+
+**Repeated runs at `d3247fb`.** Each of the three cancellation tests ran 20 consecutive times as a separate process while 16 copies of the same test looped beside it. Load average was 24–29.
+
+| Test | Consecutive | Concurrent load copies |
+| --- | --- | --- |
+| `cancellation_unavailable_version_drift_and_cursor_loops_fail_closed` | **20/20** | 413 pass / 0 fail |
+| `cancellation_after_the_harness_starts_stops_its_group_and_reports_cancelled` | **20/20** | 468 pass / 0 fail |
+| `cancellation_before_start_launches_nothing` | **20/20** | 4941 pass / 0 fail |
+
+A 180 s soak then ran 16 concurrent copies of the full `model_discovery` binary (`--test-threads=4`): **425 pass / 0 fail**, load 34/31/33. On the uncommitted working tree, without the bound change, the cancel-anywhere test passed 100/100 consecutive runs under 16 load copies at load average 37.
+
+**Remaining external kills (FOR-68).** In earlier soaks at load average near 60, about 1 suite run in 400 failed with "Harness rejected the discovery command". Temporary diagnostics, removed before the commit, reported `CLD_KILLED`/`SIGKILL` for the helper or its `ps` child, about 25 ms after spawn. A log of every signal that discovery and `stop_owned` sent showed none sent to those processes. During the same soaks these processes stayed alive: 35 long-lived sleepers named like Crewroom processes, 300 other long-lived sleepers, and 117k short-lived unrelated sleepers. No OOM events were recorded. The sender is still unknown, which matches FOR-68. In that case discovery failed closed with an error and returned no partial catalog.
+
+**Checks at `d3247fb`.** `cargo test -p crewroom-runtime` (`--test-threads=4`): all pass, including `model_discovery` 7 / 1 ignored. `cargo test -p crewroom-service`: all pass. `cargo clippy -p crewroom-runtime --all-targets -- -D warnings` and `cargo fmt --check` pass. `npm test` **340/340**. `npm run build` passes. The integrator runs `npm run test:e2e`; it was not run here.
+
 ## FOR-61 — evidence journey without the TypeScript oracle, re-verified on main (2026-10-18)
 
 Revision: main `2b1b5e7` (after FOR-58), unchanged source; branch `for-61-evidence-journey-oracle` adds only this record. The oracle replacement itself is `c944b9e` (rebased from `a9ca1b4`); see the FOR-57 review fix below.
