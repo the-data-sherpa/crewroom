@@ -4,6 +4,49 @@ The operator requested that each work item pass its checks before the next start
 
 Historical revision IDs and source hashes below refer to the original private snapshots before the FOR-17 history rewrite. Sanitized copies are not byte-identical evidence for rewritten revisions; replay requires the private archive. New validation is recorded separately.
 
+## FOR-68 — The outside SIGKILL is the kernel's RLIMIT_RTTIME check (2026-10-18)
+
+Code `54102f6` and `320ea14` (branch `for-68-desktop-test-sigkill`, from main `c9b9a31`). These change only Python scripts, one TypeScript test and docs. The Rust sources in the cargo runs below are those of `c9b9a31`. All runs are local tests with simulated providers and fixture Git remotes. Nothing contacted a live service. The machine has 16 cores and is shared with other agents. No privileged tracing was used.
+
+**Sender.** No process sends the signal. The kernel sends it. The Claude Code 2.1.302 process that runs the agent sessions has `RLIMIT_RTTIME` soft = hard = 0 (`Max realtime timeout 0 0 us` in `/proc/<pid>/limits`). Its parent shell, `herdr`, the terminal, Hyprland and `systemd --user` all have `unlimited`. A plain Bun 1.3.14 started from a clean service keeps `unlimited`, so Claude Code itself lowers the limit. The code path that does this was not found. Every command an agent starts inherits the limit, including `systemd-run --user --scope` and `setsid` children. An unprivileged process cannot raise a hard limit. When the kernel's CPU-timer check evaluates a thread, a zero hard limit leads to SIGKILL ("at the hard limit, send SIGKILL"). This explains every earlier observation: no sender in the process tree or PID namespace, no OOM, kills at random points in a run, and none in `systemd --user` services, which get systemd's default limits.
+
+| Check | Placement | Result |
+|---|---|---|
+| Arm a 10 ms `CLOCK_THREAD_CPUTIME_ID` timer and busy-loop (`scripts/system_limits.py probe`) | Agent shell (RTTIME 0/0) | SIGKILL (exit 137), every time |
+| Same | `systemd-run --user` service (unlimited) | SIGALRM delivered, exit 0 |
+| Same | `systemd-run --user -p LimitRTTIME=0` service | `Result=signal`, status 9 |
+| Canary that forks short `sh -c` loops and logs each child that ends with SIGKILL (it sends no signals itself) | Agent tree; agent tree with minimal environment; `setsid` orphan reparented to `systemd --user` | 11 children SIGKILLed 3–19 ms after spawn in about 30 min |
+| Same canary | `systemd-run --user` service, with and without the agent's full environment | 0 of about 10 million children in 40–50 min each |
+| Same canary | `systemd-run --user -p LimitRTTIME=0` service | 1 child SIGKILLed (6 ms) in 25 min |
+
+So the limit alone decides. Process ancestry, cgroup, session and environment do not. A process logger that recorded every new process system-wide was itself SIGKILLed after about 790 s in the agent tree. In that time no `kill`, `pkill`, `killall` or `fuser` process started, including around two canary kills it covered.
+
+**Desktop and four-crate runs, default test threads.**
+
+| Placement | Runs | Result | Load (1 min) |
+|---|---|---|---|
+| Agent tree, `cargo test -p crewroom-desktop` | 3 + 6 | 3 of 3 passed at load 4–7. Then 3 passed, and runs 4–6 lost the test binary to SIGKILL after 48 s, 77 s and 134 s | 4–40 |
+| Agent tree, four crates | 1 | desktop binary SIGKILLed 9.4 s into its run; the other binaries passed (397 / 0 / 2) | 7–14 |
+| A/B beside 12 CPU burners, desktop binary, alternating | 2 + 2 | agent tree: 2 of 2 SIGKILLed (125 s, 161 s). `system_limits.py run`: 2 of 2 passed, 149 / 0 / 15 each | 14–24 |
+
+**Five consecutive four-crate runs through `python3 scripts/system_limits.py run -- cargo test --locked --no-fail-fast -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop -j6`** (a transient `systemd --user` service, default test threads, private `CARGO_TARGET_DIR`):
+
+| Run | Result (64 test binaries) | Duration | Load (1/5/15 min) start → end |
+|---|---|---|---|
+| 1 | 546 passed, 0 failed, 17 ignored | 481 s | 27.2 / 26.8 / 23.9 → 16.0 / 20.9 / 22.6 |
+| 2 | 546 / 0 / 17 | 459 s | 16.0 / 20.9 / 22.6 → 11.5 / 17.9 / 21.2 |
+| 3 | 546 / 0 / 17 | 408 s | 11.5 / 17.9 / 21.2 → 10.4 / 15.5 / 19.4 |
+| 4 | 546 / 0 / 17 | 341 s | 10.4 / 15.5 / 19.4 → 3.1 / 10.6 / 16.4 |
+| 5 | 546 / 0 / 17 | 304 s | 3.1 / 10.6 / 16.4 → 1.5 / 6.9 / 13.4 |
+
+No binary was killed. Load fell during the series, so runs 4 and 5 ran on a quieter machine than the agent-tree runs that failed. The A/B pair above compares the two placements at the same load.
+
+**Change.** `scripts/system_limits.py` has three commands. `check` reports the limit and exits 1 when it is unsafe. `probe` reproduces the kill in the current process. `run -- <command>` runs the command directly when the limit is safe and as a transient `systemd --user` service otherwise. The environment goes to the service through a private 0600 file that is deleted before the command starts, so no value appears on a command line. Without a user manager the command is refused with the reason. `prepare_worktree.py` warns about the limit. The operations guide and testing guide record the cause. Nine unit and live kernel tests (`scripts/test_system_limits.py`) run inside `npm test`. No test assertion was weakened or skipped, and no timeout changed.
+
+**Other checks at `320ea14`.** `npm test` **341/341** through `system_limits.py run` and **341/341** directly in the agent tree (load about 2). An earlier wrapped run at `54102f6` failed only `prepare-worktree.test.ts`, which pinned the old Python test count of 6; `320ea14` fixes it. `npm run build` passes (existing Vite chunk-size warning). No Rust source changed, so Clippy and fmt were not rerun. `npm run test:e2e` is left to the integrator.
+
+**Limitations.** The cause sits in Claude Code, outside Crewroom. The wrapper avoids it but does not remove it. Commands started directly by an agent session still inherit the zero limit. Evidence runs must use the wrapper, or a shell that Claude Code did not start, until Claude Code stops lowering the limit. The exact kernel condition that triggers the check in processes that set no CPU timers (the `sh` canaries, test binaries) was inferred from the measurements above. Kernel sources were not available to confirm it.
+
 ## FOR-54 — Usage counts only started attempts as unrecorded (2026-10-18)
 
 Implementation `96565b807f160308074ff64f766ae682881e6f8e` on branch `for-54-usage-unrecorded-started-only-rebased` from main `db0be2c`. It is `a41f46ed56f3883f92508acaeec0324e85cabd66` (branch `for-54-usage-unrecorded-started-only`, from main `aa2d619`) rebased without code changes; the original evidence commit `e10dc36` was replaced by this section. `route_total` in `crates/crewroom-service/src/views/history.rs` counted unrecorded-route attempts over every route member, including attempts still awaiting start, while `attempts` counted only started ones. It now counts started attempts only.
