@@ -1,0 +1,359 @@
+{
+  "issue": "FOR-48",
+  "observedAt": "2026-10-18",
+  "branch": "for-48-github-delivery-live",
+  "baseRevision": "3a2add0",
+  "revision": "4eb7111",
+  "scope": "Closes the live and supervisor-level gaps left at the FOR-48 integration: a merged PR whose body says Closes #N closes the issue on GitHub and Crewroom records that state separately from workflow state; evidence, PR-link and research-outcome comments delivered live exactly once across a restart; optional workflow labels applied live when configured and not applied when off; the research-completion gate exercised through the supervisor transition.",
+  "simulated": {
+    "provider": "Loopback GitHub REST fixture (node:http in scripts/rust/workflow-providers.test.ts); not github.com.",
+    "checks": [
+      "scripts/rust/workflow-providers.test.ts 'native research completion holds a GitHub-sourced run until its outcome comment is queued, then posts it exactly once after stop': the full native Workflow (workflow-fixture example, real crewroom-host processes under tmux with the scripted runner) imports a GitHub issue as a pinned research ticket. After research/submit and research/complete with the team idle and an extra supervisor notify, the run stays running with researchCompletion set and nothing is posted. Once the coordinator (reporter fallback) queues research_outcome through github/report, the supervisor stops every host and completes research; nothing is posted before completion; the ticket's source status stays open; two flushes post exactly one comment labelled verified evidence and the update is confirmed.",
+      "Mutation check: replacing the GitHub needs_research_summary condition in supervisor/workflow/transitions.rs with false makes this test fail (the run completes before an outcome is queued); the source was restored before commit.",
+      "The Jira counterpart test in the same file still passes, as do 'agent tool authorization enforces ...' and 'pinned research verifies source citations ...' in scripts/rust/workflow-transitions.test.ts."
+    ]
+  },
+  "live": {
+    "endpoint": "https://api.github.com through the production GitHubDelivery outbox, GitHubIssueClient and the FOR-46 GitHubPullClient, driven by crates/crewroom-runtime/examples/github-issue-delivery-verified-live.rs. The binary that ran (sha256 62eea11d0f7ca96b2cbcec9c4c38ec35a6c640bb89f47d05f9f06849bc5dec9d) was built from the committed source before rustfmt; the committed file differs only in formatting (rebuilt sha256 69d64ad9398b6be486d1755ec460929e577863010c232e62c1850eacd80a3643).",
+    "repository": "Private disposable sandbox <owner>/crewroom-e2e-sandbox, approved by the operator for this work. Issues #7 and #8 and PR #9 are synthetic. Issue #6 was an aborted first attempt: the probe posted one evidence comment, then its restart step failed to reacquire the local controller lock (fixed in the probe before the recorded run); #6 was closed as not planned and is not part of this evidence.",
+    "credential": "The operator's gh login token passed as CREWROOM_GITHUB_TOKEN, read per request and never printed; each stage asserts its receipt does not contain it.",
+    "agents": "No agent process ran in the live probe. The coding run's attempts carry recorded (never probed) identities; the candidate is a real commit on the sandbox's default branch in a Crewroom run worktree (crewroom-process helper), but its required-check and passing-review receipts are recorded directly, without a container runtime, and readiness is then assessed by Evidence::assess. The research artifact was submitted through Research::submit with a citation verified against the pinned sandbox commit.",
+    "merge": "PR #9 was created by the probe through GitHubPullClient with 'Closes #8' in its body; GitHub reported closingIssuesReferences [8]. The PR was merged on github.com with gh (merge commit) between the publish and merged stages; GitHub then closed #8 itself: the issue's ClosedEvent closer is PullRequest #9, stateReason COMPLETED, closedAt 2026-10-18T10:59:13Z, one second after mergedAt 10:59:12Z. Neither Crewroom nor the probe closed the issue.",
+    "stages": {
+      "candidate": {
+        "stage": "candidate",
+        "issue": 8,
+        "observedAt": "2026-10-18T10:58:52.703Z",
+        "result": {
+          "run": "97395491-2fb1-4528-92cc-f77477bee9da",
+          "candidate": {
+            "id": "89a7fa1d-9c9b-4f82-8715-148a45429a19",
+            "head": "5375ff1093ef50f935b5170d2a5f5f3b8dcf8dad"
+          },
+          "assessmentReady": true,
+          "labelsOff": "GitHub workflow labels are off. Name an in-progress label under Settings → Integrations → GitHub Issues to use it.",
+          "evidenceQueued": {
+            "state": "pending",
+            "firstLine": "Revision 5375ff1093ef50f935b5170d2a5f5f3b8dcf8dad"
+          },
+          "firstPass": [
+            {
+              "kind": "evidence",
+              "eventKey": "evidence-ready",
+              "state": "confirmed",
+              "externalId": 6249018155,
+              "issueState": null,
+              "closesOnMerge": null,
+              "reason": null
+            }
+          ],
+          "commentsAfterFirstPass": 1,
+          "afterRestart": [
+            {
+              "kind": "evidence",
+              "eventKey": "evidence-ready",
+              "state": "confirmed",
+              "externalId": 6249018155,
+              "issueState": null,
+              "closesOnMerge": null,
+              "reason": null
+            }
+          ],
+          "commentsAfterRestart": [
+            {
+              "id": 6249018155,
+              "firstLine": "**Crewroom verified evidence**"
+            }
+          ],
+          "issueLabels": []
+        }
+      },
+      "publish": {
+        "stage": "publish",
+        "issue": 8,
+        "observedAt": "2026-10-18T10:58:58.559Z",
+        "result": {
+          "pr": {
+            "id": 9,
+            "state": "OPEN",
+            "head": "5375ff1093ef50f935b5170d2a5f5f3b8dcf8dad",
+            "url": "https://github.com/<owner>/crewroom-e2e-sandbox/pull/9",
+            "target": "main"
+          },
+          "expectedHead": "5375ff1093ef50f935b5170d2a5f5f3b8dcf8dad",
+          "labelsOff": {
+            "labelUpdates": 0,
+            "issueLabels": []
+          },
+          "prLinkQueued": {
+            "state": "pending",
+            "lines": [
+              "Pull request: https://github.com/<owner>/crewroom-e2e-sandbox/pull/9",
+              "The pull request description closes this issue when the PR merges into the default branch."
+            ]
+          },
+          "labelsOn": {
+            "updates": [
+              {
+                "kind": "evidence",
+                "eventKey": "evidence-ready",
+                "state": "confirmed",
+                "externalId": 6249018155,
+                "issueState": null,
+                "closesOnMerge": null,
+                "reason": null
+              },
+              {
+                "kind": "pr_link",
+                "eventKey": "pr-opened",
+                "state": "confirmed",
+                "externalId": 6249019279,
+                "issueState": null,
+                "closesOnMerge": null,
+                "reason": null
+              },
+              {
+                "kind": "in_progress",
+                "eventKey": "execution-started",
+                "state": "confirmed",
+                "externalId": [
+                  "crewroom: in progress"
+                ],
+                "issueState": null,
+                "closesOnMerge": null,
+                "reason": null
+              },
+              {
+                "kind": "in_review",
+                "eventKey": "review-c508e427-f091-46e7-82f1-30d005ecfd1a",
+                "state": "confirmed",
+                "externalId": [
+                  "crewroom: in review"
+                ],
+                "issueState": null,
+                "closesOnMerge": null,
+                "reason": null
+              }
+            ],
+            "issueLabels": [
+              "crewroom: in review"
+            ]
+          },
+          "afterRestart": [
+            {
+              "kind": "evidence",
+              "eventKey": "evidence-ready",
+              "state": "confirmed",
+              "externalId": 6249018155,
+              "issueState": null,
+              "closesOnMerge": null,
+              "reason": null
+            },
+            {
+              "kind": "pr_link",
+              "eventKey": "pr-opened",
+              "state": "confirmed",
+              "externalId": 6249019279,
+              "issueState": null,
+              "closesOnMerge": null,
+              "reason": null
+            },
+            {
+              "kind": "in_progress",
+              "eventKey": "execution-started",
+              "state": "confirmed",
+              "externalId": [
+                "crewroom: in progress"
+              ],
+              "issueState": null,
+              "closesOnMerge": null,
+              "reason": null
+            },
+            {
+              "kind": "in_review",
+              "eventKey": "review-c508e427-f091-46e7-82f1-30d005ecfd1a",
+              "state": "confirmed",
+              "externalId": [
+                "crewroom: in review"
+              ],
+              "issueState": null,
+              "closesOnMerge": null,
+              "reason": null
+            }
+          ],
+          "crewroomComments": [
+            {
+              "id": 6249018155,
+              "firstLine": "**Crewroom verified evidence**"
+            },
+            {
+              "id": 6249019279,
+              "firstLine": "**Crewroom verified evidence**"
+            }
+          ]
+        }
+      },
+      "merged": {
+        "stage": "merged",
+        "issue": 8,
+        "observedAt": "2026-10-18T10:59:24.624Z",
+        "result": {
+          "pr": {
+            "id": 9,
+            "state": "MERGED",
+            "mergeCommit": {
+              "hash": "c94f06f27dcfcbda4e16667e2c7508521a6c594f"
+            }
+          },
+          "before": {
+            "ticketSourceStatus": "open",
+            "sourceUpdatedAt": "2026-10-18T10:58:50Z",
+            "runStatus": "running",
+            "runDesiredState": "running",
+            "runPurpose": "coding"
+          },
+          "updates": [
+            {
+              "kind": "evidence",
+              "eventKey": "evidence-ready",
+              "state": "confirmed",
+              "externalId": 6249018155,
+              "issueState": null,
+              "closesOnMerge": null,
+              "reason": null
+            },
+            {
+              "kind": "pr_link",
+              "eventKey": "pr-opened",
+              "state": "confirmed",
+              "externalId": 6249019279,
+              "issueState": null,
+              "closesOnMerge": null,
+              "reason": null
+            },
+            {
+              "kind": "in_progress",
+              "eventKey": "execution-started",
+              "state": "confirmed",
+              "externalId": [
+                "crewroom: in progress"
+              ],
+              "issueState": null,
+              "closesOnMerge": null,
+              "reason": null
+            },
+            {
+              "kind": "in_review",
+              "eventKey": "review-c508e427-f091-46e7-82f1-30d005ecfd1a",
+              "state": "confirmed",
+              "externalId": [
+                "crewroom: in review"
+              ],
+              "issueState": null,
+              "closesOnMerge": null,
+              "reason": null
+            },
+            {
+              "kind": "done",
+              "eventKey": "merged-c508e427-f091-46e7-82f1-30d005ecfd1a",
+              "state": "confirmed",
+              "externalId": "closed",
+              "issueState": "closed",
+              "closesOnMerge": true,
+              "reason": null
+            }
+          ],
+          "after": {
+            "ticketSourceStatus": "closed",
+            "sourceUpdatedAt": "2026-10-18T10:59:25Z",
+            "runStatus": "running",
+            "runDesiredState": "running",
+            "runPurpose": "coding"
+          },
+          "issueLabels": [],
+          "issueState": "closed",
+          "crewroomComments": 2
+        }
+      },
+      "research": {
+        "stage": "research",
+        "issue": 7,
+        "observedAt": "2026-10-18T10:59:29.295Z",
+        "result": {
+          "run": "5e64fade-6c8f-4ccd-8dec-e9e6d56888be",
+          "taskRevision": 3,
+          "researchSourceCommit": "c94f06f27dcfcbda4e16667e2c7508521a6c594f",
+          "artifact": {
+            "state": "verified",
+            "title": "Sandbox README heading"
+          },
+          "beforeCompletionRequest": "A requested, fully verified research outcome is required before reporting to GitHub.",
+          "gateBeforeQueue": true,
+          "gateAfterQueue": false,
+          "queued": {
+            "state": "pending"
+          },
+          "whileRunning": [
+            {
+              "kind": "research_outcome",
+              "eventKey": "research-outcome-3",
+              "state": "pending",
+              "externalId": null,
+              "issueState": null,
+              "closesOnMerge": null,
+              "reason": "Waiting for confirmed research completion."
+            }
+          ],
+          "commentsWhileRunning": 0,
+          "completed": "completed",
+          "firstPass": [
+            {
+              "kind": "research_outcome",
+              "eventKey": "research-outcome-3",
+              "state": "confirmed",
+              "externalId": 6249023269,
+              "issueState": null,
+              "closesOnMerge": null,
+              "reason": null
+            }
+          ],
+          "commentsAfterFirstPass": 1,
+          "afterRestart": [
+            {
+              "kind": "research_outcome",
+              "eventKey": "research-outcome-3",
+              "state": "confirmed",
+              "externalId": 6249023269,
+              "issueState": null,
+              "closesOnMerge": null,
+              "reason": null
+            }
+          ],
+          "crewroomComments": [
+            {
+              "id": 6249023269,
+              "firstLine": "**Crewroom verified evidence**"
+            }
+          ],
+          "issueLabels": [],
+          "ticketSourceStatus": "open"
+        }
+      }
+    }
+  },
+  "commands": [
+    "node node_modules/tsx/dist/cli.mjs --test --test-name-pattern='research completion|research verifies|authorization enforces' scripts/rust/workflow-providers.test.ts scripts/rust/workflow-transitions.test.ts: 4 passed (binaries from cargo build -p crewroom-runtime --bins --example workflow-fixture at this revision)",
+    "cargo test -p crewroom-runtime --test github_delivery --test supervisor_tasks -- --test-threads=4: 7 + 4 passed",
+    "cargo clippy --locked -p crewroom-runtime --all-targets -- -D warnings: clean",
+    "cargo fmt -p crewroom-runtime --check: clean",
+    "npm test: 332/332",
+    "npm run build: pass"
+  ],
+  "limitations": [
+    "The live verified comments come from a ready candidate whose check and review receipts were recorded directly, not from an agent-driven run with a container check; no agent process called github_report live (the probe calls the same prepare path the host tool routes to).",
+    "The live PR was created by the probe through the FOR-46 client and merged with gh, not by Crewroom's publication flow end to end.",
+    "The restart is a store reopen with rebuilt services in a new process, with confirmed writes rewound to uncertain (evidence, research outcome) or sending (PR link); it is not a SIGKILL of crewroomd mid-request.",
+    "The supervisor-level gate test uses the loopback GitHub fixture, not github.com; the live research stage drives the gate predicate and completion directly, not the supervisor loop.",
+    "npm run test:e2e was not run by this branch (integrator only)."
+  ]
+}
