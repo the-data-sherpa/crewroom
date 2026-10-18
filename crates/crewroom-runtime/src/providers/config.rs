@@ -82,6 +82,9 @@ fn credential_error(provider: Provider) -> Error {
         Provider::Bitbucket => {
             "Bitbucket credentials are unavailable to the Crewroom server. Configure server access before publication."
         }
+        Provider::GitHub => {
+            "GitHub credentials are unavailable. Connect GitHub in Settings → Integrations, or set CREWROOM_GITHUB_TOKEN for the server."
+        }
     })
 }
 fn command() -> Command {

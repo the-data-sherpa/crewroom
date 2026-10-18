@@ -73,6 +73,7 @@ async fn main() -> anyhow::Result<()> {
         publication,
         publication_unavailable: vec![],
         environment: config["environment"].clone(),
+        github: None,
     };
     let server = Service::start_with_options(
         Path::new(config["authority"].as_str().unwrap()),

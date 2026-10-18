@@ -61,6 +61,7 @@ fn options(_root: &Path) -> crewroom_service::ServiceOptions {
         publication: vec![],
         publication_unavailable: vec![],
         environment: json!({}),
+        github: None,
     }
 }
 struct Coding {

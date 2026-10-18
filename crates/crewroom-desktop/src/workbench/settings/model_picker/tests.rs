@@ -34,6 +34,7 @@ print(json.dumps({'models':[{'provider':'fixture','id':k,'selector':'fixture/'+k
         publication: vec![],
         publication_unavailable: vec![],
         environment: json!({"PATH":"/usr/bin:/bin","HOME":root}),
+        github: None,
         runtime: Some(
             json!({"root":runtime,"socket":runtime.join("tmux.sock"),"ompBinary":binary,
             "mail":{"atcDisabled":true,"retentionSeconds":600,"projectRoot":root.join("mail"),"url":"http://127.0.0.1:4123/mcp/","token":"native-picker-secret"},

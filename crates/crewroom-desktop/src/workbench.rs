@@ -433,6 +433,14 @@ impl Workbench {
                                 self.workspace["credentials"] = facts.clone();
                             }
                         }
+                        if let Some(text) = credentials::github_notice(&path, &value) {
+                            self.notice = text;
+                            for key in ["credentials", "github"] {
+                                if let Some(facts) = value.get(key) {
+                                    self.workspace[key] = facts.clone();
+                                }
+                            }
+                        }
                         if path.starts_with("/implementation-plans/") && path.ends_with("/decision")
                         {
                             self.notice = self.plan_decision_notice(&value);
@@ -714,6 +722,7 @@ impl Workbench {
             .flex_col()
             .gap_4()
             .child(jira)
+            .child(self.github_section(cx))
             .child(self.credentials_section(cx))
     }
     /// The session column and, when a details tab is open, the drawer beside it.

@@ -80,6 +80,9 @@ pub(super) fn pending(path: &str, body: &Value) -> String {
         ("/model-catalog/refresh", "Requesting model refresh…"),
         ("/comparisons/preflight", "Preparing preflight…"),
         ("/comparisons", "Saving comparison…"),
+        ("/github/connect", "Checking the token with GitHub…"),
+        ("/github/check", "Checking with GitHub…"),
+        ("/github/disconnect", "Disconnecting GitHub…"),
     ];
     if let Some((_, text)) = exact.iter().find(|(p, _)| *p == path) {
         return (*text).into();

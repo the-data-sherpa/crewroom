@@ -108,6 +108,7 @@ impl Transport {
                     let retained = match self.provider {
                         Provider::Jira => "Saved work is retained.",
                         Provider::Bitbucket => "Saved delivery intents are retained.",
+                        Provider::GitHub => "Saved work is retained.",
                     };
                     return Err(Error::Unavailable(Unavailable {
                         message: format!(

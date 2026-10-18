@@ -1,4 +1,5 @@
 mod execution;
+mod github;
 mod intake;
 mod role_catalog;
 mod routes;
@@ -8,6 +9,7 @@ use crewroom_runtime::messaging::StoreAccess;
 use crewroom_runtime::providers::secrets::{Integration, SecretStore};
 use execution::Execution;
 pub use execution::ServiceOptions;
+pub use github::GitHubOptions;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use axum::{
@@ -60,6 +62,8 @@ struct AppState {
     changes: watch::Sender<u64>,
     /// Encrypted provider tokens; plaintext never leaves the service.
     secrets: SecretStore,
+    /// GitHub personal-access-token connection and its last observed check.
+    github: Arc<github::GitHub>,
 }
 #[derive(Clone)]
 struct Access(Arc<Mutex<Option<AuthorityState>>>);
@@ -195,7 +199,7 @@ impl Service {
         data: &FilePath,
         role_path: &FilePath,
         port: u16,
-        options: Option<ServiceOptions>,
+        mut options: Option<ServiceOptions>,
     ) -> anyhow::Result<Self> {
         let authority = Arc::new(if options.is_some() {
             Authority::acquire_for_execution(data)?
@@ -205,6 +209,13 @@ impl Service {
         let data = std::fs::canonicalize(data)?;
         // First run creates the install key; existing encrypted values keep theirs.
         let secrets = SecretStore::open(&data)?;
+        let github = Arc::new(github::GitHub::new(
+            match options.as_mut().and_then(|o| o.github.take()) {
+                Some(github) => github,
+                None => GitHubOptions::production()?,
+            },
+            secrets.clone(),
+        ));
         let store = Store::open(&data.join("workflow.sqlite"))?;
         let roles = Roles::new(role_path);
         Learning::new(&store, &roles).reconcile()?;
@@ -245,6 +256,7 @@ impl Service {
             execution,
             stopping: Arc::new(AtomicBool::new(false)),
             secrets,
+            github,
         };
         let app = Router::new()
             .route("/api/health", get(health))
@@ -538,13 +550,27 @@ async fn health(State(state): State<AppState>) -> Result<Json<Value>, ApiError> 
     operation(&state, move |_| Ok(json!({"service":"crewroom-rust","protocol":1,"executionAvailable":available,"schedulingError":scheduling}))).await.map(Json)
 }
 /// Where each integration's credential comes from. Never the value itself.
-fn credentials_view(secrets: &SecretStore) -> Value {
+fn credentials_view(state: &AppState) -> Value {
     let mut view = json!({});
     for integration in Integration::ALL {
-        let environment = std::env::var(integration.environment()).ok();
-        view[integration.id()] = secrets.status(integration, environment.as_deref());
+        let environment = match integration {
+            Integration::GitHub => state.github.environment(),
+            _ => std::env::var(integration.environment()).ok(),
+        };
+        view[integration.id()] = state.secrets.status(integration, environment.as_deref());
     }
     view
+}
+/// Connects, checks or disconnects GitHub. Responses carry status only.
+async fn github_mutation(state: &AppState, action: &str, body: Value) -> Result<Value, ApiError> {
+    match action {
+        "connect" => state.github.connect(body).await?,
+        "check" => state.github.check(body).await?,
+        "disconnect" => state.github.disconnect(body).await?,
+        _ => return Err(Error::NotFound("Unknown GitHub operation.".into()).into()),
+    }
+    state.changes.send_modify(|v| *v += 1);
+    Ok(json!({"github": state.github.view(), "credentials": credentials_view(state)}))
 }
 /// Saves or clears one integration's token in the encrypted install store.
 async fn credentials_mutation(
@@ -592,11 +618,12 @@ async fn credentials_mutation(
     .map_err(|_| ApiError::from(Error::Conflict("Credential update was interrupted.".into())))?;
     result?;
     state.changes.send_modify(|v| *v += 1);
-    Ok(json!({"credentials": credentials_view(&state.secrets)}))
+    Ok(json!({"credentials": credentials_view(state)}))
 }
 async fn workspace_value(state: &AppState) -> Result<Value, ApiError> {
     let mut value = operation(state, |s| snapshot(s)).await?;
-    value["credentials"] = credentials_view(&state.secrets);
+    value["credentials"] = credentials_view(state);
+    value["github"] = state.github.view();
     if let Some(e) = &state.execution {
         if let Some(runs) = value["runs"].as_array_mut() {
             runs.retain(|r| r["purpose"] != "evaluation");
@@ -737,6 +764,17 @@ async fn mutate_inner(state: AppState, path: String, body: Value) -> Result<Valu
     }
     let segments = path.split('/').collect::<Vec<_>>();
     match segments.as_slice() {
+        ["github", action] => return github_mutation(&state, action, body).await,
+        // A GitHub token is saved only after GitHub accepts it.
+        ["credentials", "github"] => {
+            return Err(Error::Invalid(
+                "Use Connect GitHub so the token is validated before it is saved.".into(),
+            )
+            .into());
+        }
+        ["credentials", "github", "clear"] => {
+            return github_mutation(&state, "disconnect", body).await;
+        }
         ["credentials", integration] => {
             return credentials_mutation(&state, integration, false, body).await;
         }

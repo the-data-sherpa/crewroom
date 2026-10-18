@@ -80,6 +80,7 @@ fn options(data: &Path, origin: &str) -> ServiceOptions {
         publication: vec![],
         publication_unavailable: vec![],
         environment: json!({}),
+        github: None,
     }
 }
 

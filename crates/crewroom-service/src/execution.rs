@@ -39,6 +39,9 @@ pub struct ServiceOptions {
     /// Configured repositories whose publish remote has no publication provider.
     pub publication_unavailable: Vec<UnavailablePublication>,
     pub environment: Value,
+    /// GitHub API origin and token override; `None` uses github.com and
+    /// `CREWROOM_GITHUB_TOKEN`.
+    pub github: Option<crate::GitHubOptions>,
 }
 impl ServiceOptions {
     pub fn from_environment(data: &Path) -> anyhow::Result<Self> {
@@ -93,6 +96,7 @@ impl ServiceOptions {
             publication,
             publication_unavailable: configured.unavailable,
             environment: json!(std::env::vars().collect::<std::collections::BTreeMap<_, _>>()),
+            github: None,
         })
     }
 }

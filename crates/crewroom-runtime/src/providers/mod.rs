@@ -3,6 +3,7 @@
 pub mod bitbucket;
 mod bitbucket_schema;
 pub mod config;
+pub mod github;
 pub mod jira;
 pub mod remote;
 mod schema;
@@ -16,12 +17,14 @@ pub use transport::{BeforeDispatch, Credential, Credentials};
 pub enum Provider {
     Jira,
     Bitbucket,
+    GitHub,
 }
 impl Provider {
     pub fn name(self) -> &'static str {
         match self {
             Self::Jira => "Jira",
             Self::Bitbucket => "Bitbucket",
+            Self::GitHub => "GitHub",
         }
     }
     fn unavailable(self) -> &'static str {
@@ -30,6 +33,7 @@ impl Provider {
                 "Jira is unavailable. Check the server connection and credentials; saved work is retained."
             }
             Self::Bitbucket => "Bitbucket is unavailable. Saved delivery intents are retained.",
+            Self::GitHub => "GitHub is unavailable. Check the network and the saved token.",
         }
     }
 }

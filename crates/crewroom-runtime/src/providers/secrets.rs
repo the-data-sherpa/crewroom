@@ -41,19 +41,22 @@ static WRITES: Mutex<()> = Mutex::new(());
 pub enum Integration {
     Jira,
     Bitbucket,
+    GitHub,
 }
 impl Integration {
-    pub const ALL: [Self; 2] = [Self::Jira, Self::Bitbucket];
+    pub const ALL: [Self; 3] = [Self::Jira, Self::Bitbucket, Self::GitHub];
     pub fn id(self) -> &'static str {
         match self {
             Self::Jira => "jira",
             Self::Bitbucket => "bitbucket",
+            Self::GitHub => "github",
         }
     }
     pub fn environment(self) -> &'static str {
         match self {
             Self::Jira => "CREWROOM_JIRA_TOKEN",
             Self::Bitbucket => "CREWROOM_BITBUCKET_TOKEN",
+            Self::GitHub => "CREWROOM_GITHUB_TOKEN",
         }
     }
     pub fn parse(value: &str) -> Result<Self> {
