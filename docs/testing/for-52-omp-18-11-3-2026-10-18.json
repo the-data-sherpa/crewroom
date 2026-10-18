@@ -157,13 +157,86 @@
     "externalMail": "received"
   },
   "live": {
-    "run": false,
-    "reason": "No runner provider definition with a credential exists on this machine. OMP logins in its own credential store were not copied into Crewroom configuration; that needs an operator decision."
+    "run": true,
+    "passed": true,
+    "class": "LIVE inference: installed OMP binary launched by the production daemon against a real model service",
+    "revision": "2c5d05359f5855e0fd7dfa675294decab9663ce9",
+    "date": "2026-10-18",
+    "authorization": "Operator approved one live OMP 18.11.3 workflow launch using the existing OMP login (2026-10-18).",
+    "command": "scripts/verify_catalog_workflow.py --configuration <private 0600 file> --output <new isolated tmpfs dir> --mail <mcp-agent-mail>",
+    "ompVersion": "omp/18.11.3",
+    "installedBinarySha256": "01fbb5f08b0ce0d70bd0b1d6655a6ccd59cefcae0f1023e02bb30f9a70bc2d0a",
+    "binaries": {
+      "build": "cargo build --locked -j6 -p crewroom-service -p crewroom-runtime --bins --examples (private worktree target dir, tree of the named revision)",
+      "sha256": {
+        "crewroomd": "19295903e542affe99ef4449b56796324bab4fc85efe6161b61d7d67857ecd0e",
+        "crewroom-host": "542e575212d8f1f3b16e8e62cee05947977880464b061174bba5a951fff58dc1",
+        "crewroom-process": "525831d08e35fa7b35f166aca891e233a3786b6c8dd413d4426190ee34107bd1",
+        "examples/workflow-fixture": "3b80013a80b8d00710a6b242cd928c36ae2c3a663d5c3a80c714dff2d9acd972"
+      }
+    },
+    "provider": {
+      "source": "API-key credential from the operator's existing OMP login store, copied only into a private 0600 runtime configuration outside the repository and deleted after the run; never printed or committed",
+      "provider": "zai",
+      "model": "glm-4.7",
+      "api": "anthropic-messages",
+      "effort": "low",
+      "gatewayWire": {
+        "model": "glm-4.7",
+        "thinking": "enabled",
+        "budget": 2048
+      }
+    },
+    "isolation": "Fresh data directory and runtime root under a new tmpfs directory; daemon bound to an ephemeral loopback port (--port 0), not 4318. The operator crewroomd on 4318 was not stopped or contacted.",
+    "preflight": "One direct 8-token API request confirmed the credential before the launch; it is not a workflow launch and is not counted as evidence.",
+    "checks": [
+      "native keyboard model picker, refresh, low effort, persisted Code job and coordinator/specialist selections",
+      "refresh and saved budget changes leave both executing assignments byte-for-byte equal",
+      "model-based route, native login, exact separately owned host/runner pairs",
+      "real addressed host tool through workflow authorization and external Rust Mail to independent recipient",
+      "controller SIGKILL and exact live-process reattachment without another Mail effect",
+      "pause verifies stopped ownership; resume uses new processes, same durable threads and original Mail effect",
+      "specialist submits addressed artifact; coordinator completion is durable after controller restart; no duplicate external Mail effect"
+    ],
+    "picker": "native_catalog_external_live_selection 1 passed; selection offering:omp:zai:glm-4.7:unknown, access configured, execution profile omp-18.4.12-host-tools-v2",
+    "assignments": [
+      {
+        "version": "omp/18.11.3",
+        "selection": "offering:omp:zai:glm-4.7:unknown",
+        "executionProfile": "omp-18.4.12-host-tools-v2",
+        "separateHostAndRunnerPids": true
+      },
+      {
+        "version": "omp/18.11.3",
+        "selection": "offering:omp:zai:glm-4.7:unknown",
+        "executionProfile": "omp-18.4.12-host-tools-v2",
+        "separateHostAndRunnerPids": true
+      }
+    ],
+    "inference": {
+      "assistantTurns": 9,
+      "model": "glm-4.7",
+      "provider": "zai",
+      "sessions": 4,
+      "outputTokens": 1521
+    },
+    "externalMail": "received (one message, no duplicate)",
+    "finalRun": "completed",
+    "finalOwnership": [
+      "stopped",
+      "stopped",
+      "stopped",
+      "stopped"
+    ],
+    "exitCode": 0,
+    "retention": "Non-secret receipts (workflow result, picker receipt and log, Mail identity, driver log) kept in ignored local state; every runtime file that held the credential was deleted with the run directory."
   },
   "limitations": [
     "The execution profile id stays omp-18.4.12-host-tools-v2 for 18.11.3 offerings, as Codex 0.163.0 kept the 0.162.0 profile id.",
     "OMP 18.11.3 replays opaque reasoning on session restore (18.4.12 dropped it). Production shares the assignment budget root across attempts, so the gateway recognises it; the host suite now does the same.",
     "Earlier failed attempts are kept as findings: the first 18.11.3 host run (before the shared budget root) failed its restore turn with input_budget/unknown_reasoning; the first supervisor runs (both versions) stopped at startup because the output path was too long for the tmux socket.",
-    "The first scripted workflow attempt failed in the native picker: verify-native-workflow.ts passes an offering key without the FOR-42 billing-route suffix. live_tests.rs now resolves it to the single route."
+    "The first scripted workflow attempt failed in the native picker: verify-native-workflow.ts passes an offering key without the FOR-42 billing-route suffix. live_tests.rs now resolves it to the single route.",
+    "The live launch used one provider and model (zai glm-4.7, anthropic-messages, low effort). Other OMP providers and APIs on 18.11.3 are covered only by the synthetic suites.",
+    "The binaries for the live launch were built from the working tree before the admission commit was created; the commit records exactly that tree."
   ]
 }
