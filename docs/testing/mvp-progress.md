@@ -4,6 +4,20 @@ The operator requested that each work item pass its checks before the next start
 
 Historical revision IDs and source hashes below refer to the original private snapshots before the FOR-17 history rewrite. Sanitized copies are not byte-identical evidence for rewritten revisions; replay requires the private archive. New validation is recorded separately.
 
+## FOR-61 — evidence journey without the TypeScript oracle, re-verified on main (2026-10-18)
+
+Revision: main `2b1b5e7` (after FOR-58), unchanged source; branch `for-61-evidence-journey-oracle` adds only this record. The oracle replacement itself is `c944b9e` (rebased from `a9ca1b4`); see the FOR-57 review fix below.
+
+**Oracle decision (recorded):** the retained TypeScript parity oracle is replaced by native-only assertions, not kept against a pre-migration copy or a fixed snapshot. The TypeScript `Workbench` stops at schema 26, a pre-migration copy does not hold the native checks, reviews and research under test, and later native migrations rewrite data the oracle would read (schema 31 rewrites ticket sources). The native assertions keep the coverage: the whole assessment (`ready`, exact candidate, ordered blockers in the retained `server/evidence.ts` wording, `confirmedInvalidation`) and the whole research artifact and `research_read` result. The TypeScript `Workbench` is still used only to seed the store before the native fixture migrates it.
+
+**Checks at `2b1b5e7`** (Linux x86_64, Docker Engine 29.7.2 rootful, real Docker and Git; Rust binaries built from this revision in a target directory private to the worktree, worktree prepared with `python3 scripts/prepare_worktree.py --build-helpers`):
+- `scripts/rust/evidence.test.ts` **15/15**, run twice. Live Docker: the check-executing cases ran real containers. No provider, Jira or GitHub service was contacted.
+- No check container left behind: `docker ps -a --filter label=io.crewroom.command` empty before and after each run and after the Rust suite.
+- `cargo test --locked -p crewroom-runtime -- --test-threads=4` **191 passed, 0 failed, 2 ignored**; `cargo clippy --locked -p crewroom-runtime --all-targets -- -D warnings` and `cargo fmt -p crewroom-runtime -- --check` clean.
+- `npm test` **340/340** (simulated providers); `npm run build` passes. `npm run test:e2e` was not run here (the integrator runs it).
+
+Not re-run: rootless Docker, macOS. FOR-62 (other fixtures pinning the macOS image) remains open.
+
 ## FOR-58 — Runtime and desktop suites in parallel (2026-10-18)
 
 Code revision `58580c3` (branch `for-58-reliable-parallel-tests`, from main `aa2d619`), built in a private target directory in the worktree. All results are local tests with simulated providers; nothing contacted a live service. Other agents were running builds and tests on the same 16-core machine throughout, so each result records the 1/5/15-minute load average.
