@@ -18,6 +18,8 @@ Revision: main `2b1b5e7` (after FOR-58), unchanged source; branch `for-61-eviden
 
 Not re-run: rootless Docker, macOS. FOR-62 (other fixtures pinning the macOS image) remains open.
 
+**Integration at `e650e8e`** (fast-forward onto main `2b1b5e7`, no rebase, docs only; worktree prepared with `python3 scripts/prepare_worktree.py`; 1-minute load average 22–46 from other agents' runs): `npm run build` passes. `npm run test:e2e` **31/31** in one complete run. An earlier run passed 30 and lost one worker to an external SIGKILL; that spec then passed 2/2 on its own. Two full `npm test` runs had no single clean pass: 323/325 and then 322/326. A different Git- or process-timing case failed in each run, in files this change does not touch (`processes`, `supervision-load`, `repository-work`, `target-refresh`). Run alone, `processes` + `target-refresh` passed 74/74, and two more `target-refresh` runs gave 54/55 (a different case) and 55/55. These load-dependent flakes are tracked in FOR-60 and FOR-66; no single clean `npm test` run is claimed for this integration. Simulated providers only.
+
 ## FOR-58 — Runtime and desktop suites in parallel (2026-10-18)
 
 Code revision `58580c3` (branch `for-58-reliable-parallel-tests`, from main `aa2d619`), built in a private target directory in the worktree. All results are local tests with simulated providers; nothing contacted a live service. Other agents were running builds and tests on the same 16-core machine throughout, so each result records the 1/5/15-minute load average.
