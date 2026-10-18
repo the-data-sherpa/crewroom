@@ -197,19 +197,80 @@ for line in sys.stdin:
         .is_err()
     );
     std::fs::write(&c.binary, "#!/bin/sh\necho 1.2.3\n").unwrap();
-    assert!(
-        discover(
+    let drift = discover(
+        &c,
+        &root.path().join("version"),
+        100,
+        &CancellationToken::new(),
+        Duration::from_secs(3),
+    )
+    .await
+    .unwrap_err()
+    .to_string();
+    // The operator sees which harness drifted, what it reported, what is
+    // verified and how to recover.
+    assert!(drift.contains("OMP reported version \"1.2.3\""), "{drift}");
+    assert!(drift.contains("omp/18.4.12"), "{drift}");
+    assert!(drift.contains("then refresh"), "{drift}");
+}
+
+/// Opt-in metadata exchange with the CLIs installed on this machine. It runs
+/// the production discovery path with an isolated HOME and requests no
+/// inference. Set CREWROOM_LIVE_DISCOVERY=1 and keep the harnesses on PATH.
+#[tokio::test]
+#[ignore = "Requires CREWROOM_LIVE_DISCOVERY=1 and installed codex, claude and omp"]
+async fn installed_harnesses_list_models_without_inference() {
+    assert_eq!(
+        std::env::var("CREWROOM_LIVE_DISCOVERY").as_deref(),
+        Ok("1"),
+        "explicit opt-in required"
+    );
+    let path = std::env::var("PATH").unwrap();
+    let root = tempfile::tempdir().unwrap();
+    for (harness, name) in [
+        (Harness::Codex, "codex"),
+        (Harness::ClaudeCode, "claude"),
+        (Harness::Omp, "omp"),
+    ] {
+        let binary = std::env::split_paths(&path)
+            .map(|p| p.join(name))
+            .find(|p| p.is_file())
+            .unwrap_or_else(|| panic!("{name} is not on PATH"));
+        let c = Config {
+            harness: harness.clone(),
+            binary,
+            helper: env!("CARGO_BIN_EXE_crewroom-process").into(),
+            path: path.clone(),
+            // OMP lists configured providers only. A synthetic loopback
+            // provider proves the exchange; it is never contacted.
+            omp_models: json!({"providers":{"crewroom-fixture":{"api":"openai-responses","apiKey":"synthetic-offline-key",
+                "baseUrl":"http://127.0.0.1:9/v1","models":[{"id":"synthetic-model","name":"Synthetic model",
+                "reasoning":true,"input":["text"],"contextWindow":128000,"maxTokens":8192}]}}}),
+        };
+        let receipt = discover(
             &c,
-            &root.path().join("version"),
+            &root.path().join(name),
             100,
             &CancellationToken::new(),
-            Duration::from_secs(3)
+            Duration::from_secs(60),
         )
         .await
-        .unwrap_err()
-        .to_string()
-        .contains("version")
-    );
+        .unwrap_or_else(|e| panic!("{name}: {e}"));
+        assert!(receipt.cleanup_verified && !receipt.inference_requested);
+        assert!(!receipt.offerings.is_empty(), "{name} listed no models");
+        println!(
+            "LIVE {} version={:?} offerings={} sample={:?}",
+            harness.as_str(),
+            receipt.identity.version,
+            receipt.offerings.len(),
+            receipt
+                .offerings
+                .iter()
+                .take(3)
+                .map(|o| o.key.as_str())
+                .collect::<Vec<_>>()
+        );
+    }
 }
 
 #[tokio::test]

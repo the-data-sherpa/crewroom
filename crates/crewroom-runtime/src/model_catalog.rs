@@ -9,6 +9,7 @@ use std::collections::HashSet;
 pub mod discovery;
 pub mod policy;
 pub mod store;
+pub mod unconfigured;
 
 pub const SCHEMA_VERSION: u32 = 1;
 pub const FRESH_FOR_SECONDS: u64 = 3600;
@@ -26,6 +27,14 @@ impl Harness {
             Self::Omp => "omp",
             Self::Codex => "codex",
             Self::ClaudeCode => "claude-code",
+        }
+    }
+    /// Product name for operator-facing explanations.
+    pub fn label(&self) -> &'static str {
+        match self {
+            Self::Omp => "OMP",
+            Self::Codex => "Codex",
+            Self::ClaudeCode => "Claude Code",
         }
     }
 }

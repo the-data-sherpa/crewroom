@@ -26,6 +26,17 @@ pub enum Runner {
     Claude(Arc<claude::Claude>),
 }
 
+/// `--version` outputs whose execution adapter passed live acceptance. A newer
+/// installed CLI may list models before it is verified to run them.
+pub fn execution_versions(adapter: &str) -> &'static [&'static str] {
+    match adapter {
+        "codex" => &[profile::VERSION],
+        "claude-code" => &[claude_profile::VERSION],
+        "omp" => &["omp/18.4.12"],
+        _ => &[],
+    }
+}
+
 /// An absent tag is the retained OMP format. Never infer a new adapter from a model name.
 pub fn kind(model: &Value) -> Result<&str> {
     crewroom_core::runner_kind(model)

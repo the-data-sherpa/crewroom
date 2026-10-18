@@ -42,6 +42,36 @@ pub struct Identity {
     pub profile: String,
 }
 
+/// `--version` outputs whose metadata exchange was executed against the real
+/// CLI. Discovery only lists models; execution keeps its own pinned profile.
+pub fn verified_versions(harness: &Harness) -> &'static [&'static str] {
+    match harness {
+        // FOR-9 verified the first entries; FOR-38 the installed Linux CLIs.
+        Harness::Codex => &["codex-cli 0.162.0", "codex-cli 0.163.0"],
+        Harness::ClaudeCode => &["2.1.296 (Claude Code)", "2.1.302 (Claude Code)"],
+        Harness::Omp => &["omp/18.4.12", "omp/18.11.3"],
+    }
+}
+/// Operator-facing drift explanation. The reported version is bounded,
+/// printable harness output, never configuration.
+pub fn version_message(harness: &Harness, reported: &str) -> String {
+    let reported: String = reported
+        .chars()
+        .filter(|c| !c.is_control())
+        .take(80)
+        .collect();
+    format!(
+        "{} reported version \"{}\", which Crewroom has not verified for model discovery (verified: {}). Install a verified version or update Crewroom, then refresh.",
+        harness.label(),
+        if reported.is_empty() {
+            "unknown"
+        } else {
+            &reported
+        },
+        verified_versions(harness).join(", ")
+    )
+}
+
 /// Cheap freshness observation for UI reads. Admission also compares SHA-256.
 pub fn binary_stamp(path: &Path) -> Result<String> {
     use std::os::unix::fs::MetadataExt;
@@ -525,19 +555,15 @@ pub async fn discover(
     .await;
     process.close().await?;
     let raw = result?;
-    let expected = match config.harness {
-        Harness::Codex => "codex-cli 0.162.0",
-        Harness::ClaudeCode => "2.1.296 (Claude Code)",
-        Harness::Omp => "omp/18.4.12",
-    };
     let version = std::str::from_utf8(&raw)
         .map_err(|_| conflict("Invalid harness version."))?
         .trim();
-    if version != expected {
-        return Err(conflict(
-            "Harness version differs from its verified discovery/execution profile.",
-        ));
-    }
+    let Some(expected) = verified_versions(&config.harness)
+        .iter()
+        .find(|v| **v == version)
+    else {
+        return Err(conflict(&version_message(&config.harness, version)));
+    };
     let args: Vec<String> = match config.harness {
         Harness::Codex => vec![
             "app-server",

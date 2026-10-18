@@ -60,6 +60,19 @@ impl HarnessSnapshot {
                 .last_success
                 .is_some_and(|t| now >= t && now - t < FRESH_FOR_SECONDS)
     }
+    /// Listing models and running them are separate verifications. Explain a
+    /// discovered version whose execution adapter has not passed live launch.
+    pub fn execution_note(&self) -> Option<String> {
+        let version = &self.identity.as_ref()?.version;
+        let verified = crate::runner::execution_versions(self.harness.as_str());
+        (!verified.contains(&version.as_str())).then(|| {
+            format!(
+                "{} {version} lists models, but Crewroom has verified launching agents only with {}. Its models stay unavailable for new work until this version is verified.",
+                self.harness.label(),
+                verified.join(", ")
+            )
+        })
+    }
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]

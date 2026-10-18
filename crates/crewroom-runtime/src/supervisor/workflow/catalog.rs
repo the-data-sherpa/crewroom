@@ -130,8 +130,18 @@ impl RuntimeConfig {
                 } else {
                     Access::Unavailable
                 };
+                // A verified profile describes a specific CLI version. Newer
+                // listed versions stay without an execution profile.
+                let executable = entry.identity.as_ref().is_some_and(|i| {
+                    crate::runner::execution_versions(entry.harness.as_str())
+                        .contains(&i.version.as_str())
+                });
                 routes.push(Route {
-                    offering: policy::with_profile(discovered, matches.first().copied(), access),
+                    offering: policy::with_profile(
+                        discovered,
+                        matches.first().copied().filter(|_| executable),
+                        access,
+                    ),
                     advertised: discovered.capabilities.clone(),
                     fresh,
                     identity: entry.identity.clone(),
@@ -234,6 +244,7 @@ impl<S: StoreAccess> Workflow<S> {
                         .iter()
                         .find(|h| json!(h.harness) == entry["harness"])
                     {
+                        entry["executionNote"] = json!(saved.execution_note());
                         entry["fresh"] = json!(
                             saved.fresh(
                                 crate::model_catalog::store::now(),
