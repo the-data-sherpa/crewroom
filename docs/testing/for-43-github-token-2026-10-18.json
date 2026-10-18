@@ -1,0 +1,58 @@
+{
+  "issue": "FOR-43",
+  "observedAt": "2026-10-18",
+  "implementationRevision": "07f2086c7984dc29d1cb09390f437aeff2b85032",
+  "documentationRevision": "2e8a50082d8232637d759dc65a8eea930e33b32a",
+  "baseRevision": "ec08de4874efd0cfc8c6be2d33e9495bb9f09ed2",
+  "scope": "Connect github.com with a personal access token: validation with GET /user before an encrypted save, status-only projection, repository visibility check, disconnect, CREWROOM_GITHUB_TOKEN override, same-origin mutations. GitHub App device sign-in is deferred to FOR-51; GitHub Enterprise Server to FOR-50.",
+  "simulated": {
+    "provider": "Loopback GitHub API fixtures (axum in crates/crewroom-service/tests/github.rs; std TcpListener in crates/crewroom-desktop/src/workbench/credentials_tests.rs); not github.com.",
+    "checks": [
+      "Fresh install reports disconnected; credentials.github.environment names CREWROOM_GITHUB_TOKEN",
+      "A token the fixture answers with 401 is refused (400) with GitHub's reason and credentials.json is not created",
+      "POST /api/credentials/github (unvalidated save) is refused; malformed connect bodies are refused",
+      "A valid classic token connects: account login, scopes and expiry shown; only a $crewroom$v1$ value is written (0600); no response or workspace contains the token",
+      "Repository check: fixture/visible reports granted with push; fixture/hidden reports 'No access to fixture/hidden (HTTP 404)'; a malformed name is refused",
+      "Token revoked at the fixture: the next check reports 'Expired or revoked' and keeps the saved token",
+      "Mutations with a foreign Origin, no Origin, or no bearer token are refused (403)",
+      "CREWROOM_GITHUB_TOKEN set: source environment, state unchecked until checked, then connected as a fine-grained token with the permissions note; Disconnect removes the saved token while the override stays active",
+      "Restart: a saved token is shown as not checked since the service started, then connected after Check connection",
+      "Install key removed: state unreadable, check sends no request, plain connect refused (409), replaceUnreadable reconnects; /credentials/github/clear disconnects",
+      "Unreachable GitHub: connect refused (409, 'could not be validated'), nothing saved; an override check reports 'Connection not confirmed', not revoked",
+      "Desktop Settings → Integrations → GitHub: rejected token shows the reason and clears the field; valid token shows account and kind without rendering the token; repository no-access line; Disconnect"
+    ]
+  },
+  "live": {
+    "endpoint": "https://api.github.com through a debug crewroomd built from the implementation revision 07f2086 (sha256 1ffa1430874de0577974a4f3d440e36d30ef86f3b87bbe147b3a217b153b6cbd); an identical receipt was first observed on the pre-rebase revision 772cc5a (base d08fc59, binary sha256 95ce0d24fc96e429f332efd2670609656fcf2bf0c1625c57e99817742d3eaffc), loopback port 4347, isolated temporary --data-dir (deleted afterwards)",
+    "credential": "The operator's gh CLI login token, read in-process and never printed. It is a gh OAuth token (reported kind 'other'), not a fine-grained or classic personal access token.",
+    "redaction": "Account login replaced with <login>; no token, scopes list or account id retained.",
+    "cases": [
+      {"case": "fresh install", "httpStatus": 200, "state": "disconnected"},
+      {"case": "invalid synthetic token rejected by github.com", "httpStatus": 400, "error": "Token not saved. GitHub rejected the token (HTTP 401): it is invalid, expired or revoked. GitHub said: \"Bad credentials\".", "credentialsFileExists": false},
+      {"case": "connect with operator token", "httpStatus": 200, "state": "connected", "label": "Connected as @<login>.", "source": "stored", "tokenKind": "other", "repoScopePresent": true},
+      {"case": "public Crewroom repository visible", "httpStatus": 200, "repositoryAccess": "granted", "label": "This token can see <login>/crewroom (your account can push)."},
+      {"case": "synthetic nonexistent repository", "httpStatus": 200, "repositoryAccess": "none", "label": "No access to crewroom-synthetic-owner-0/does-not-exist (HTTP 404). The repository does not exist or this token cannot see it; for a fine-grained token, add it under Repository access."},
+      {"case": "mutation without Origin", "httpStatus": 403, "error": "Mutations require the Crewroom origin."},
+      {"case": "disconnect", "httpStatus": 200, "state": "disconnected", "stored": "none", "credentialsHasGithubEntry": false},
+      {"case": "restart with CREWROOM_GITHUB_TOKEN, before check", "httpStatus": 200, "state": "unchecked", "source": "environment"},
+      {"case": "CREWROOM_GITHUB_TOKEN checked", "httpStatus": 200, "state": "connected", "source": "environment"}
+    ],
+    "storedEncrypted": true,
+    "credentialsMode": "0600",
+    "tokenAbsentFromResponsesReceiptAndDaemonLog": true
+  },
+  "commands": {
+    "cargo test --locked -p crewroom-runtime -p crewroom-service -p crewroom-desktop --no-fail-fast": "pass on 2e8a500 (desktop 135 passed / 15 ignored; runtime lib 56 passed / 1 ignored plus integration suites; service lib 4 plus integration suites including github 2/2 and credentials 1/1)",
+    "cargo clippy --locked -p crewroom-runtime -p crewroom-service --all-targets -- -D warnings": "clean",
+    "cargo clippy --locked -p crewroom-desktop -- -D warnings": "clean (with --all-targets, the pre-existing useless_conversion in untouched feedback_tests.rs remains)",
+    "cargo fmt -p crewroom-runtime -p crewroom-service -p crewroom-desktop --check": "clean",
+    "npm test": "332/332 pass",
+    "npm run build": "pass"
+  },
+  "limitations": [
+    "Live github.com validation used a gh OAuth token; no fine-grained or classic personal access token was exercised live, and the live revoked/expired transition was exercised only as a 401 for an invalid token.",
+    "A repository check confirms visibility and the account's role permissions; GitHub does not report a fine-grained token's permission grant, so issue/PR/contents writes are confirmed only when FOR-45/FOR-46 use them.",
+    "Check results are in memory only; after a restart Settings shows 'not checked' until Check connection.",
+    "npm run test:e2e was not run (the integrator runs it serially)."
+  ]
+}
