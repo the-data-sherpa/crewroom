@@ -27,6 +27,7 @@ pub use observations::compact_observation;
 mod outcomes;
 pub mod playbooks;
 pub mod principles;
+pub mod project_source;
 mod provider_records;
 pub mod repositories;
 mod repository_work;

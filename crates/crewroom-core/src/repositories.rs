@@ -349,12 +349,12 @@ impl Store {
         self.record("repositories", "id", id)?
             .ok_or_else(|| Error::NotFound("Repository not found.".into()))
     }
-    fn referencing_runs(&self, repository_id: &str) -> Result<Vec<Value>> {
+    pub(crate) fn referencing_runs(&self, repository_id: &str) -> Result<Vec<Value>> {
         let mut statement=self.db.prepare("SELECT data FROM runs WHERE status NOT IN ('cancelled','closed','completed') AND json_extract(data,'$.taskSnapshot.repositoryId')=?")?;
         let rows = statement.query_map([repository_id], |r| r.get::<_, String>(0))?;
         rows.map(|row| crate::store::parse(row?)).collect()
     }
-    fn refuse_referenced(&self, references: &[Value], action: &str) -> Result<()> {
+    pub(crate) fn refuse_referenced(&self, references: &[Value], action: &str) -> Result<()> {
         if references.is_empty() {
             return Ok(());
         }
@@ -402,7 +402,7 @@ impl Store {
             let removed:Vec<_>=before.iter().filter(|c|!after.iter().any(|n|n["id"]==c["id"])).map(|c|&c["id"]).collect();
             let referenced=references.iter().any(|r|r["launch"]["team"].as_array().is_some_and(|team|team.iter().any(|member|member["criteria"].as_array().is_some_and(|criteria|criteria.iter().any(|c|c["checkIds"].as_array().is_some_and(|checks|checks.iter().any(|id|removed.contains(&id))))))));
             if current["path"]!=validated["path"] || current["targetBranch"]!=validated["targetBranch"] || referenced {s.refuse_referenced(&references,"change checkout, target branch or referenced checks")?;}
-            let mut saved=json!({"id":current["id"]});for field in ["requestId","guidance"] {if let Some(v)=current.get(field) {saved[field]=v.clone();}}
+            let mut saved=json!({"id":current["id"]});for field in ["requestId","guidance","ticketSource","ticketSourceHistory"] {if let Some(v)=current.get(field) {saved[field]=v.clone();}}
             for (field,v) in validated.as_object().unwrap() {if field!="requestId" {saved[field]=v.clone();}}
             saved["revision"]=json!(current["revision"].as_u64().unwrap_or(1)+1);
             s.db.execute("UPDATE repositories SET data=? WHERE id=?",params![saved.to_string(),id])?;s.receipt(key,"repository-update",&payload,&saved)?;Ok(saved)
@@ -431,7 +431,14 @@ impl Store {
                 continue;
             }
             let original = prior.clone();
-            for field in ["id", "guidance", "revision", "retiredAt"] {
+            for field in [
+                "id",
+                "guidance",
+                "revision",
+                "retiredAt",
+                "ticketSource",
+                "ticketSourceHistory",
+            ] {
                 prior.as_object_mut().unwrap().remove(field);
             }
             if !crate::repository_work::same(Some(&prior), Some(value)) {

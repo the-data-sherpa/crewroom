@@ -64,68 +64,12 @@ impl UnavailablePublication {
     }
 }
 
-fn valid_host(host: &str) -> bool {
-    !host.is_empty()
-        && host.len() <= 253
-        && host
-            .bytes()
-            .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'.' || b == b'-')
-        && !host.starts_with(['.', '-'])
-        && !host.ends_with(['.', '-'])
-}
-
 /// Splits a publish remote into its lowercase host and repository path. Remotes
 /// carrying credentials, queries or fragments are rejected so that metadata
-/// never holds a secret.
+/// never holds a secret. Shared with the project ticket-source suggestion
+/// (FOR-47), so both read a remote the same way.
 fn split(remote: &str) -> Option<(String, String)> {
-    if remote.is_empty()
-        || remote.len() > 2048
-        || remote.chars().any(|c| c.is_control() || c.is_whitespace())
-    {
-        return None;
-    }
-    let (host, path) = if remote.contains("://") {
-        let url = url::Url::parse(remote).ok()?;
-        let https = match url.scheme() {
-            "https" => true,
-            "ssh" => false,
-            _ => return None,
-        };
-        if url.password().is_some()
-            || (https && !url.username().is_empty())
-            || url.query().is_some()
-            || url.fragment().is_some()
-        {
-            return None;
-        }
-        let host = match url.host()? {
-            url::Host::Domain(host) => host.to_ascii_lowercase(),
-            _ => return None,
-        };
-        (host, url.path().to_owned())
-    } else {
-        // scp-like `user@host:owner/name`; a `/` before `:` is a local path.
-        let (authority, path) = remote.split_once(':')?;
-        if authority.contains('/') || path.starts_with('/') {
-            return None;
-        }
-        let (user, host) = authority.split_once('@')?;
-        if user.is_empty() || user.contains('@') {
-            return None;
-        }
-        (host.to_ascii_lowercase(), path.to_owned())
-    };
-    let path = path.trim_matches('/');
-    let path = path.strip_suffix(".git").unwrap_or(path);
-    if !valid_host(&host)
-        || path.is_empty()
-        || path
-            .split('/')
-            .any(|s| s.is_empty() || s == "." || s == "..")
-    {
-        return None;
-    }
-    Some((host, path.into()))
+    crewroom_core::project_source::split_remote(remote)
 }
 
 /// Resolves the publication provider for a configured publish remote.
