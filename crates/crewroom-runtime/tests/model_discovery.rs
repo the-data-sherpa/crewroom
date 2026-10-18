@@ -270,6 +270,27 @@ async fn installed_harnesses_list_models_without_inference() {
                 .map(|o| o.key.as_str())
                 .collect::<Vec<_>>()
         );
+        // FOR-42: billing route from the logins in this machine's HOME (Codex,
+        // Claude Code) and the runner provider definition (OMP). Prints kinds
+        // and file names only, never credential values.
+        let sources = crewroom_runtime::model_catalog::billing::Sources {
+            omp_providers: c.omp_models["providers"].clone(),
+            ..crewroom_runtime::model_catalog::billing::Sources::native(&json!({
+                "HOME": std::env::var("HOME").ok(),
+                "CODEX_HOME": std::env::var("CODEX_HOME").ok(),
+            }))
+        };
+        let detection = sources.detect(&harness, &receipt.offerings[0].provider);
+        println!(
+            "LIVE {} billing={:?} basis={:?}",
+            harness.as_str(),
+            detection
+                .routes
+                .iter()
+                .map(|r| r.as_str())
+                .collect::<Vec<_>>(),
+            detection.basis
+        );
     }
 }
 

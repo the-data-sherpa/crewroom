@@ -6,6 +6,9 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::collections::HashSet;
 
+pub use billing::BillingRoute;
+
+pub mod billing;
 pub mod discovery;
 pub mod policy;
 pub mod store;
@@ -48,6 +51,21 @@ pub fn offering_key(harness: &Harness, provider: &str, selector: &str) -> String
         harness.as_str(),
         encode(provider),
         encode(selector)
+    )
+}
+
+/// An offering bound to one billing route. The route is part of the identity,
+/// so a selection can never fall back to the same model on another route.
+pub fn routed_key(
+    harness: &Harness,
+    provider: &str,
+    selector: &str,
+    billing: BillingRoute,
+) -> String {
+    format!(
+        "{}:{}",
+        offering_key(harness, provider, selector),
+        billing.as_str()
     )
 }
 
@@ -95,14 +113,44 @@ pub struct Offering {
     /// Requires an accepted execution profile, separately from discovery.
     pub execution_profile: Option<String>,
     pub inference: Option<Observation>,
+    /// Detected from the harness's authentication configuration. Discovery
+    /// metadata alone carries none; catalog routes and frozen selections do.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub billing: Option<BillingRoute>,
 }
 
 fn valid_text(value: &str) -> bool {
     !value.trim().is_empty() && value.len() <= 1000 && !value.chars().any(char::is_control)
 }
 impl Offering {
+    /// Pre-billing identity: harness, provider and selector only.
+    pub fn legacy_key(&self) -> String {
+        offering_key(&self.harness, &self.provider, &self.selector)
+    }
+    fn expected_key(&self) -> String {
+        match self.billing {
+            Some(billing) => routed_key(&self.harness, &self.provider, &self.selector, billing),
+            None => self.legacy_key(),
+        }
+    }
+    /// This discovered offering bound to one detected billing route.
+    pub fn with_billing(&self, billing: BillingRoute) -> Self {
+        let mut routed = self.clone();
+        routed.billing = Some(billing);
+        routed.key = routed.expected_key();
+        routed
+    }
+    /// Picker label: harness, model and billing route.
+    pub fn label(&self) -> String {
+        format!(
+            "{} · {} · {}",
+            self.harness.label(),
+            self.display_name,
+            self.billing.unwrap_or(BillingRoute::Unknown).label()
+        )
+    }
     pub fn validate(&self) -> Result<()> {
-        if self.key != offering_key(&self.harness, &self.provider, &self.selector)
+        if self.key != self.expected_key()
             || !valid_text(&self.key)
             || ![&self.provider, &self.selector, &self.display_name]
                 .into_iter()
@@ -144,6 +192,11 @@ impl Offering {
         if self.execution_profile.is_none() || self.api.is_none() {
             reasons.push("No verified adapter profile supports this offering.".into());
         }
+        if self.harness == Harness::Codex && self.billing == Some(BillingRoute::Api) {
+            reasons.push(
+                "Crewroom starts Codex only with its ChatGPT subscription login; the API key route cannot start agents.".into(),
+            );
+        }
         if self
             .capabilities
             .efforts
@@ -170,10 +223,10 @@ impl Offering {
         }
         if let Some(allowed) = requirements.get("allowedModels") {
             let legacy = format!("{}/{}", self.provider, self.selector);
-            if !allowed
-                .as_array()
-                .is_some_and(|a| a.iter().any(|m| m == &self.key || m == &legacy))
-            {
+            if !allowed.as_array().is_some_and(|a| {
+                a.iter()
+                    .any(|m| m == &self.key || m == &self.legacy_key() || m == &legacy)
+            }) {
                 reasons.push("Project disallows this model.".into());
             }
         }
@@ -211,7 +264,7 @@ pub fn validate_contract(offerings: &[Offering], groups: &[Equivalence]) -> Resu
         }
     }
     let mut group_keys = HashSet::new();
-    let mut grouped = HashSet::new();
+    let mut grouped: HashSet<String> = HashSet::new();
     for group in groups {
         let members: HashSet<_> = group.members.iter().collect();
         let preferences: HashSet<_> = group.preference.iter().collect();
@@ -224,10 +277,9 @@ pub fn validate_contract(offerings: &[Offering], groups: &[Equivalence]) -> Resu
             || members.len() != group.members.len()
             || preferences != members
             || group.preference.len() != members.len()
-            || group
-                .members
-                .iter()
-                .any(|m| !keys.contains(m.as_str()) || !grouped.insert(m))
+            || group.members.iter().any(|m| {
+                !find(m, offerings).is_ok_and(|o| o.is_some_and(|o| grouped.insert(o.key.clone())))
+            })
         {
             return Err(conflict(
                 "Invalid equivalence mapping or unresolved route preference.",
@@ -243,17 +295,43 @@ pub fn candidates<'a>(
     groups: &[Equivalence],
 ) -> Result<Vec<&'a Offering>> {
     validate_contract(offerings, groups)?;
-    if let Some(offering) = offerings.iter().find(|o| o.key == selection) {
+    if let Some(offering) = find(selection, offerings)? {
         return Ok(vec![offering]);
     }
     if let Some(group) = groups.iter().find(|g| g.key == selection) {
-        return Ok(group
+        return group
             .preference
             .iter()
-            .map(|k| offerings.iter().find(|o| &o.key == k).unwrap())
-            .collect());
+            .map(|k| find(k, offerings).map(Option::unwrap))
+            .collect();
     }
     Err(conflict(
         "Saved model selection is unavailable. Refresh or choose an available model.",
     ))
+}
+
+/// Resolve a selection to one offering. A selection saved before billing
+/// routes existed names harness, provider and model only; it resolves when
+/// exactly one route offers that model, and otherwise asks for an explicit
+/// choice instead of picking a route.
+pub fn find<'a>(selection: &str, offerings: &'a [Offering]) -> Result<Option<&'a Offering>> {
+    if let Some(offering) = offerings.iter().find(|o| o.key == selection) {
+        return Ok(Some(offering));
+    }
+    let legacy: Vec<_> = offerings
+        .iter()
+        .filter(|o| o.billing.is_some() && o.legacy_key() == selection)
+        .collect();
+    match legacy.as_slice() {
+        [] => Ok(None),
+        [only] => Ok(Some(only)),
+        many => Err(conflict(&format!(
+            "{} is reachable through {} billing. Choose one billing route explicitly.",
+            many[0].display_name,
+            many.iter()
+                .map(|o| o.billing.unwrap().label())
+                .collect::<Vec<_>>()
+                .join(" and ")
+        ))),
+    }
 }

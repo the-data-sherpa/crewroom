@@ -1,6 +1,6 @@
 use super::*;
 use crate::model_catalog::{
-    Capabilities, Offering, offering_key,
+    Capabilities, Offering, offering_key, routed_key,
     store::{HarnessSnapshot, Outcome},
 };
 use crewroom_core::{authority::write_private, store::Store};
@@ -59,6 +59,7 @@ fn fixture() -> (tempfile::TempDir, RuntimeConfig, Vec<Value>) {
             access: Access::Unknown,
             execution_profile: None,
             inference: None,
+            billing: None,
         }],
         error: None,
     };
@@ -247,7 +248,17 @@ fn native_account_profile_and_capability_drift_require_readmission() {
     config.catalog[0]["tools"] = json!(false);
     assert!(config.assignment_model(role).is_err());
     assert!(config.verify_frozen_catalog_route(&model).is_err());
-    assert_eq!(model["selection"]["offering"]["key"], key);
+    // A selection saved before billing routes resolves to the only route.
+    assert_eq!(
+        model["selection"]["offering"]["key"],
+        routed_key(
+            &Harness::Codex,
+            "codex",
+            "native-model",
+            BillingRoute::Subscription
+        )
+    );
+    assert_eq!(model["selection"]["billingRoute"], "subscription");
     assert_eq!(model["resolved"]["adapter"], "codex");
 }
 
@@ -284,4 +295,203 @@ fn newer_listed_cli_keeps_its_models_without_an_execution_profile() {
     let note = snapshot.harnesses[0].execution_note().unwrap();
     assert!(note.contains("OMP omp/99.0.0 lists models"), "{note}");
     assert!(note.contains("omp/18.4.12"), "{note}");
+}
+
+/// A configured Codex harness whose listed model is `native-model`, with the
+/// given login file contents. Returns the config with its catalog reopened.
+fn codex_catalog(login: &str) -> (tempfile::TempDir, RuntimeConfig, Vec<Value>) {
+    let (root, mut config, roles) = fixture();
+    let auth = root.path().join("auth.json");
+    write_private(&auth, login.as_bytes()).unwrap();
+    config.codex = json!({"binary":root.path().join("omp"),"authFile":auth});
+    config.catalog = vec![
+        json!({"adapter":"codex","provider":"codex","id":"native-model","api":"codex-app-server","tools":true,"inputs":["text"],"efforts":["high","xhigh","low"]}),
+    ];
+    let mut snapshot = config.discovery.as_ref().unwrap().snapshot().unwrap();
+    let mut native = snapshot.harnesses[0].clone();
+    native.harness = Harness::Codex;
+    native.identity.as_mut().unwrap().version = "codex-cli 0.162.0".into();
+    native.configuration_revision = Some(config.catalog_configuration(&Harness::Codex));
+    let offering = &mut native.offerings[0];
+    offering.harness = Harness::Codex;
+    offering.provider = "codex".into();
+    offering.selector = "native-model".into();
+    offering.key = offering_key(&Harness::Codex, "codex", "native-model");
+    snapshot.harnesses[1] = native;
+    let path = root.path().join("native-catalog");
+    std::fs::DirBuilder::new()
+        .mode(0o700)
+        .create(&path)
+        .unwrap();
+    write_private(
+        &path.join("catalog.json"),
+        &serde_json::to_vec(&snapshot).unwrap(),
+    )
+    .unwrap();
+    config.discovery = Some(
+        crate::model_catalog::store::Catalog::open(
+            &path,
+            config.discovery_sources(Path::new("/fixture/process"), &json!({})),
+            || {},
+        )
+        .unwrap(),
+    );
+    (root, config, roles)
+}
+fn select(config: &mut RuntimeConfig, key: &str) {
+    for job in ["code", "judgment", "review", "fast"] {
+        config.policy["jobs"][job] = json!(key);
+    }
+}
+const SUBSCRIPTION_AND_KEY: &str = r#"{"auth_mode":"chatgpt","OPENAI_API_KEY":"api-secret-canary","tokens":{"access_token":"account-secret-canary","account_id":"account-one"}}"#;
+
+#[test]
+fn a_model_on_both_billing_routes_is_two_offerings_and_needs_an_explicit_choice() {
+    let (_root, mut config, roles) = codex_catalog(SUBSCRIPTION_AND_KEY);
+    let role = roles.iter().find(|r| r["id"] == "coordinator").unwrap();
+    let subscription = routed_key(
+        &Harness::Codex,
+        "codex",
+        "native-model",
+        BillingRoute::Subscription,
+    );
+    let api = routed_key(&Harness::Codex, "codex", "native-model", BillingRoute::Api);
+    let snapshot = config.discovery.as_ref().unwrap().snapshot().unwrap();
+    let routes = config.catalog_routes(&snapshot, false).unwrap();
+    let codex: Vec<_> = routes
+        .iter()
+        .filter(|r| r.offering.harness == Harness::Codex)
+        .map(|r| (r.offering.key.clone(), r.offering.billing))
+        .collect();
+    assert_eq!(
+        codex,
+        [
+            (subscription.clone(), Some(BillingRoute::Subscription)),
+            (api.clone(), Some(BillingRoute::Api))
+        ]
+    );
+    let choices = policy::choices(&routes, &[], &config.requirements).unwrap();
+    let labels: Vec<_> = choices
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|c| c["label"].as_str().unwrap().to_owned())
+        .collect();
+    for expected in [
+        "Codex · Example · subscription",
+        "Codex · Example · API",
+        "OMP · Example · unknown billing",
+    ] {
+        assert!(labels.iter().any(|l| l == expected), "{labels:?}");
+    }
+    assert!(!choices.to_string().contains("secret-canary"));
+
+    // A selection saved without a route cannot pick one of the two.
+    select(
+        &mut config,
+        &offering_key(&Harness::Codex, "codex", "native-model"),
+    );
+    let error = config.assignment_model(role).unwrap_err().to_string();
+    assert!(
+        error.contains("Choose one billing route explicitly"),
+        "{error}"
+    );
+
+    // The API route is listed but never admitted, and never replaced by the
+    // subscription route of the same model.
+    select(&mut config, &api);
+    let error = config.assignment_model(role).unwrap_err().to_string();
+    assert!(
+        error.contains("only with its ChatGPT subscription login"),
+        "{error}"
+    );
+
+    select(&mut config, &subscription);
+    let model = config.assignment_model(role).unwrap();
+    assert_eq!(model["selection"]["billingRoute"], "subscription");
+    assert_eq!(model["selection"]["offering"]["billing"], "subscription");
+    assert_eq!(model["selection"]["offering"]["key"], subscription);
+    config.verify_frozen_catalog_route(&model).unwrap();
+    assert!(!model.to_string().contains("secret-canary"));
+}
+
+#[test]
+fn admitted_billing_route_survives_restart_and_never_falls_back_at_launch() {
+    let (root, mut config, roles) = codex_catalog(SUBSCRIPTION_AND_KEY);
+    let role = roles.iter().find(|r| r["id"] == "coordinator").unwrap();
+    let subscription = routed_key(
+        &Harness::Codex,
+        "codex",
+        "native-model",
+        BillingRoute::Subscription,
+    );
+    select(&mut config, &subscription);
+    let preview = config.preview_model(role).unwrap();
+    assert_eq!(preview["selection"]["billingRoute"], "subscription");
+    let model = config.assignment_model(role).unwrap();
+    let store = Store::open(&root.path().join("store.sqlite")).unwrap();
+    let task = store
+        .create_task(&json!({"title":"Billing fixture","description":""}))
+        .unwrap();
+    let run = store
+        .queue_refinement(
+            task["id"].as_str().unwrap(),
+            &json!({"revision":1,"purpose":"explore"}),
+        )
+        .unwrap();
+    let admitted = store.admit_assignment(run["id"].as_str().unwrap(),&json!({"name":"Coordinator","coordinator":true,"role":role,"model":model,"input":"Inspect"})).unwrap();
+    drop(store);
+    let store = Store::open(&root.path().join("store.sqlite")).unwrap();
+    let restored = store
+        .get_assignment(admitted["assignment"]["id"].as_str().unwrap())
+        .unwrap();
+    assert_eq!(
+        restored["model"]["selection"]["billingRoute"],
+        "subscription"
+    );
+    assert_eq!(
+        restored["model"]["selection"]["offering"]["billing"],
+        "subscription"
+    );
+    config
+        .verify_frozen_catalog_route(&restored["model"])
+        .unwrap();
+
+    // The login switches to API-key billing: the frozen subscription route is
+    // refused at launch and the saved choice does not move to another route.
+    let auth = root.path().join("auth.json");
+    std::fs::remove_file(&auth).unwrap();
+    write_private(
+        &auth,
+        br#"{"auth_mode":"apikey","OPENAI_API_KEY":"api-secret-canary"}"#,
+    )
+    .unwrap();
+    let error = config
+        .verify_frozen_catalog_route(&restored["model"])
+        .unwrap_err()
+        .to_string();
+    assert!(
+        error.contains("Admitted billing route (subscription)"),
+        "{error}"
+    );
+    assert!(error.contains("Re-admission is required"), "{error}");
+    assert!(!error.contains("secret-canary"));
+    assert!(config.assignment_model(role).is_err());
+}
+
+#[test]
+fn omp_gateway_provider_billing_is_unknown_and_recorded() {
+    let (_root, config, roles) = fixture();
+    let role = roles.iter().find(|r| r["id"] == "coordinator").unwrap();
+    // Saved before billing routes existed; the only route is unknown.
+    let model = config.assignment_model(role).unwrap();
+    assert_eq!(model["selection"]["billingRoute"], "unknown");
+    assert_eq!(
+        model["selection"]["offering"]["key"],
+        routed_key(&Harness::Omp, "fixture", "model", BillingRoute::Unknown)
+    );
+    let summary = config.billing_sources().summary(&Harness::Omp);
+    assert_eq!(summary[0]["provider"], "fixture");
+    assert_eq!(summary[0]["detection"]["routes"], json!(["unknown"]));
+    assert!(!summary.to_string().contains("secret-canary"));
 }

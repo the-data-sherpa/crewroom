@@ -4,6 +4,7 @@ use super::*;
 use gpui_kit::component::checkbox::Checkbox;
 mod learning;
 mod model_picker;
+pub(super) use model_picker::billing_label;
 mod models;
 mod playbooks;
 mod principles;

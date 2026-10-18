@@ -24,6 +24,7 @@ fn route(harness: Harness, selector: &str) -> Route {
             access: Access::Configured,
             execution_profile: Some("fixture".into()),
             inference: None,
+            billing: None,
         },
         advertised: capabilities,
         fresh: true,

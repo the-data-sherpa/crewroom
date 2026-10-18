@@ -124,7 +124,7 @@ pub fn resolve(
         let mut selection = json!({"schemaVersion":SCHEMA_VERSION,"intendedModel":intent.model,
             "modelSource":if role["model"].as_str().is_some_and(|s|!s.is_empty()) {"role_override"}else{"job"},
             "effortSource":if role["effort"].as_str().is_some_and(|s|!["","default"].contains(&s)){"role_override"}else{"job_budget"},
-            "requestedEffort":intent.effort,"offering":choice,"advertisedCapabilities":route.advertised,
+            "requestedEffort":intent.effort,"billingRoute":choice.billing,"offering":choice,"advertisedCapabilities":route.advertised,
             "identity":route.identity,"configurationRevision":route.configuration_revision,"catalogRevision":catalog_revision,
             "policyRevision":policy_revision,"roleRevision":role_revision,"reason":reason});
         selection["previewRevision"] = json!(digest(&selection));
@@ -155,25 +155,32 @@ pub fn verify_preview(model: &Value, expected: &Value) -> Result<()> {
 pub fn choices(routes: &[Route], groups: &[Equivalence], requirements: &Value) -> Result<Value> {
     let offerings: Vec<_> = routes.iter().map(|r| r.offering.clone()).collect();
     validate_contract(&offerings, groups)?;
-    let by_key: std::collections::HashMap<_, _> =
-        routes.iter().map(|r| (&r.offering.key, r)).collect();
-    let selections = routes
+    let route_for = |key: &String| -> Result<&Route> {
+        let offering = find(key, &offerings)?.unwrap();
+        Ok(routes
+            .iter()
+            .find(|r| r.offering.key == offering.key)
+            .unwrap())
+    };
+    // Each selection: its public header plus routes in preference order.
+    let mut selections: Vec<(Value, Vec<&Route>)> = routes
         .iter()
         .map(|r| {
+            let billing = r.offering.billing.unwrap_or(BillingRoute::Unknown);
             (
-                r.offering.key.clone(),
-                r.offering.display_name.clone(),
+                json!({"key":r.offering.key,"displayName":r.offering.display_name,
+                    "label":r.offering.label(),"billingRoute":billing}),
                 vec![r],
             )
         })
-        .chain(groups.iter().map(|g| {
-            (
-                g.key.clone(),
-                g.display_name.clone(),
-                g.preference.iter().map(|key| by_key[key]).collect(),
-            )
-        }));
-    Ok(json!(selections.map(|(key, label, candidates)| {
+        .collect();
+    for g in groups {
+        selections.push((
+            json!({"key":g.key,"displayName":g.display_name,"label":g.display_name,"billingRoute":null}),
+            g.preference.iter().map(route_for).collect::<Result<_>>()?,
+        ));
+    }
+    Ok(json!(selections.into_iter().map(|(mut choice, candidates)| {
         let mut eligibility = json!({});
         for effort in ["off", "minimal", "low", "medium", "high", "xhigh", "max"] {
             let mut reasons = Vec::new();
@@ -181,10 +188,12 @@ pub fn choices(routes: &[Route], groups: &[Equivalence], requirements: &Value) -
             for route in &candidates {
                 let blocked = route.offering.blockers(route.fresh, effort, requirements);
                 if blocked.is_empty() { selected = Some(route.offering.key.clone()); break; }
-                reasons.extend(blocked.into_iter().map(|reason| format!("{} / {}: {reason}", route.offering.harness.as_str(), route.offering.provider)));
+                reasons.extend(blocked.into_iter().map(|reason| format!("{} / {} / {}: {reason}", route.offering.harness.as_str(), route.offering.provider, route.offering.billing.unwrap_or(BillingRoute::Unknown).as_str())));
             }
             eligibility[effort] = json!({"eligible":selected.is_some(),"routeKey":selected,"reasons":if selected.is_some() { vec![] } else { reasons }});
         }
-        json!({"key":key,"displayName":label,"routes":candidates.iter().map(|r| &r.offering).collect::<Vec<_>>(),"eligibility":eligibility})
+        choice["routes"] = json!(candidates.iter().map(|r| &r.offering).collect::<Vec<_>>());
+        choice["eligibility"] = eligibility;
+        choice
     }).collect::<Vec<_>>()))
 }

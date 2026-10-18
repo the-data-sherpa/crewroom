@@ -21,6 +21,7 @@ fn offering(harness: Harness, provider: &str, selector: &str) -> Offering {
         access: Access::Configured,
         execution_profile: Some("fixture-v1".into()),
         inference: None,
+        billing: None,
     }
 }
 
@@ -142,4 +143,58 @@ fn legacy_selectors_remain_omp_and_catalog_intent_cannot_fallback() {
     let role = json!({"enabled":true,"model":selection,"effort":"high"});
     let policy = json!({"fallbacks":{selection:[{"model":"codex/looks-native","effort":"high"}]}});
     assert!(resolve_assignment(&role, &[old], &policy, &json!({})).is_err());
+}
+
+#[test]
+fn billing_route_is_part_of_offering_identity() {
+    let base = offering(Harness::Codex, "codex", "same");
+    let subscription = base.with_billing(BillingRoute::Subscription);
+    let api = base.with_billing(BillingRoute::Api);
+    assert_eq!(
+        subscription.key,
+        routed_key(&Harness::Codex, "codex", "same", BillingRoute::Subscription)
+    );
+    assert_ne!(subscription.key, api.key);
+    subscription.validate().unwrap();
+    let mut forged = subscription.clone();
+    forged.billing = Some(BillingRoute::Api);
+    assert!(
+        forged.validate().is_err(),
+        "key must name its billing route"
+    );
+    assert_eq!(subscription.label(), "Codex · Same label · subscription");
+    assert_eq!(api.label(), "Codex · Same label · API");
+    assert_eq!(base.label(), "Codex · Same label · unknown billing");
+
+    // Frozen selections written before billing routes deserialize unchanged.
+    let legacy: Offering = serde_json::from_value(serde_json::to_value(&base).unwrap()).unwrap();
+    assert_eq!(legacy.billing, None);
+    assert!(!serde_json::to_string(&base).unwrap().contains("billing"));
+    legacy.validate().unwrap();
+
+    let both = vec![subscription.clone(), api.clone()];
+    validate_contract(&both, &[]).unwrap();
+    assert_eq!(candidates(&api.key, &both, &[]).unwrap(), vec![&api]);
+    let error = candidates(&base.key, &both, &[]).unwrap_err().to_string();
+    assert!(error.contains("subscription and API"), "{error}");
+    let only = vec![subscription.clone()];
+    assert_eq!(
+        candidates(&base.key, &only, &[]).unwrap(),
+        vec![&subscription],
+        "a pre-billing selection resolves to the only route"
+    );
+    // An equivalence member named before billing routes resolves the same way.
+    let other = offering(Harness::Omp, "provider", "same").with_billing(BillingRoute::Api);
+    let group = Equivalence {
+        key: "equivalent:same".into(),
+        display_name: "Same".into(),
+        members: vec![base.key.clone(), other.key.clone()],
+        preference: vec![base.key.clone(), other.key.clone()],
+    };
+    validate_contract(
+        &[subscription.clone(), other.clone()],
+        std::slice::from_ref(&group),
+    )
+    .unwrap();
+    assert!(validate_contract(&[subscription, api, other], &[group]).is_err());
 }

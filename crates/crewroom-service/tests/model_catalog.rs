@@ -213,7 +213,16 @@ async fn authenticated_refresh_and_preview_are_responsive_credential_free_and_re
     )
     .unwrap();
     assert_eq!(stored["revision"], catalog["revision"]);
-    assert_eq!(stored["harnesses"][0]["offerings"][0]["key"], selection);
+    // Discovery stores metadata; the billing route is detected per view.
+    assert_eq!(
+        format!(
+            "{}:unknown",
+            stored["harnesses"][0]["offerings"][0]["key"]
+                .as_str()
+                .unwrap()
+        ),
+        selection
+    );
     let reopened = Service::start_with_options(root.path(), &roles, 0, options(root.path()))
         .await
         .unwrap();
@@ -728,10 +737,19 @@ for line in sys.stdin:
         harness(&view, "claude-code")["error"],
         "Harness is not configured."
     );
-    let key = "offering:codex:codex:fixture-model";
+    // No Codex login in the service HOME: the billing route is unknown.
+    let key = "offering:codex:codex:fixture-model:unknown";
     let choices = view["choices"].as_array().unwrap();
     assert_eq!(choices.len(), 1);
     assert_eq!(choices[0]["key"], key);
+    assert_eq!(
+        choices[0]["label"],
+        "Codex · Fixture model · unknown billing"
+    );
+    assert_eq!(
+        codex_view["billing"][0]["detection"]["routes"],
+        json!(["unknown"])
+    );
     assert_eq!(choices[0]["eligibility"]["low"]["eligible"], false);
     assert!(!view.to_string().contains("credential-canary"));
     // Saving records intent; legacy free text and catalog keys stay verbatim.

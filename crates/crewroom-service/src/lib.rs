@@ -682,6 +682,7 @@ fn model_discovery(state: &AppState) -> Value {
     match &e.discovery {
         Some(catalog) => crewroom_runtime::model_catalog::unconfigured::view(
             catalog,
+            &e.billing,
             crewroom_runtime::model_catalog::store::now(),
         ),
         None => unavailable_catalog(

@@ -3,7 +3,7 @@
 //! Nothing here grants access, verifies an execution profile or admits work;
 //! the configured runner re-checks every saved selection before admission.
 use super::{
-    discovery,
+    billing, discovery,
     policy::{self, Route},
     store::{Catalog, Source},
     *,
@@ -67,7 +67,9 @@ fn executable(harness: &Harness) -> &'static str {
 /// eligibility is computed by the admission predicate. Every choice remains
 /// ineligible because access and execution profiles are unverified; the
 /// `selection` field tells clients that saving records intent only.
-pub fn view(catalog: &Catalog, now: u64) -> Value {
+/// `billing` names the native logins found in the service environment; they
+/// are what a runner configured from the defaults would launch with.
+pub fn view(catalog: &Catalog, billing: &billing::Sources, now: u64) -> Value {
     let mut view = catalog.view(now);
     view["runner"] = json!({"configured":false,"reason":REASON,"remedy":REMEDY});
     view["selection"] = json!("intent");
@@ -89,12 +91,22 @@ pub fn view(catalog: &Catalog, now: u64) -> Value {
                 .harnesses
                 .iter()
                 .flat_map(|entry| {
-                    entry.offerings.iter().map(|discovered| Route {
-                        offering: policy::with_profile(discovered, None, Access::Unknown),
-                        advertised: discovered.capabilities.clone(),
-                        fresh: fresh.get(entry.harness.as_str()).copied().unwrap_or(false),
-                        identity: entry.identity.clone(),
-                        configuration_revision: entry.configuration_revision.clone(),
+                    entry.offerings.iter().flat_map(|discovered| {
+                        billing
+                            .detect(&discovered.harness, &discovered.provider)
+                            .routes
+                            .into_iter()
+                            .map(|route| Route {
+                                offering: policy::with_profile(
+                                    &discovered.with_billing(route),
+                                    None,
+                                    Access::Unknown,
+                                ),
+                                advertised: discovered.capabilities.clone(),
+                                fresh: fresh.get(entry.harness.as_str()).copied().unwrap_or(false),
+                                identity: entry.identity.clone(),
+                                configuration_revision: entry.configuration_revision.clone(),
+                            })
                     })
                 })
                 .collect();
@@ -124,7 +136,10 @@ pub fn view(catalog: &Catalog, now: u64) -> Value {
                         saved.harness.label(),
                         executable(&saved.harness)
                     ));
-                } else if saved.harness == Harness::Omp {
+                } else {
+                    entry["billing"] = billing.summary(&saved.harness);
+                }
+                if catalog.source(&saved.harness).is_some() && saved.harness == Harness::Omp {
                     entry["note"] = json!(
                         "OMP lists models only from providers defined in the runner configuration. Configure the runner to list OMP models."
                     );
@@ -167,7 +182,7 @@ mod tests {
     fn view_names_missing_harnesses_and_the_runner_remedy() {
         let root = tempfile::tempdir().unwrap();
         let catalog = Catalog::open(&root.path().join("catalog"), vec![], || {}).unwrap();
-        let view = view(&catalog, 100);
+        let view = view(&catalog, &billing::Sources::default(), 100);
         assert_eq!(view["runner"]["configured"], false);
         assert!(
             view["runner"]["remedy"]

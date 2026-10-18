@@ -32,6 +32,14 @@ pub(super) fn details(model: &Value) -> Div {
                 string(selected, "modelSource").replace('_', " "),
                 string(selected, "effortSource").replace('_', " ")
             )))
+            .child(hint(format!(
+                "Billing: {}",
+                if selected["offering"]["billing"].is_string() {
+                    super::settings::billing_label(&selected["offering"]["billing"])
+                } else {
+                    "not recorded (selected before billing routes were detected)"
+                }
+            )))
             .child(hint(string(selected, "reason")))
             .child(hint(format!(
                 "Executable: {} · {} · Profile: {}",

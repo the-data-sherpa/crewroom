@@ -7,7 +7,7 @@ use crewroom_runtime::{
     jira_delivery::JiraDelivery,
     jira_sync::JiraSync,
     messaging::StoreAccess,
-    model_catalog::{store::Catalog, unconfigured},
+    model_catalog::{billing, store::Catalog, unconfigured},
     providers::{
         bitbucket::BitbucketClient,
         config,
@@ -127,6 +127,8 @@ pub(crate) struct Execution {
     pub workflow: Option<Workflow<Access>>,
     /// Discovery-only model catalog, present exactly when no runner is configured.
     pub discovery: Option<Catalog>,
+    /// Native login locations for billing detection without a runner.
+    pub billing: billing::Sources,
     pub scheduler: Option<Scheduler>,
     pub checks: bool,
     pub operations: RunTasks,
@@ -227,6 +229,7 @@ impl Execution {
         } else {
             None
         };
+        let billing = billing::Sources::native(&options.environment);
         let workflow = options
             .runtime
             .map(|runtime| {
@@ -283,6 +286,7 @@ impl Execution {
             target,
             workflow,
             discovery,
+            billing,
             scheduler,
             checks: checks.is_some(),
             operations: RunTasks::default(),

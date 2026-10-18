@@ -17,6 +17,8 @@ struct Choice {
     key: String,
     label: String,
     detail: String,
+    /// Route identities, searchable but not repeated in the row title.
+    routes: String,
     blocked: bool,
 }
 impl SelectItem for Choice {
@@ -31,9 +33,12 @@ impl SelectItem for Choice {
         self.blocked
     }
     fn matches(&self, query: &str) -> bool {
-        format!("{} {} {}", self.label, self.detail, self.key)
-            .to_lowercase()
-            .contains(&query.to_lowercase())
+        format!(
+            "{} {} {} {}",
+            self.label, self.detail, self.routes, self.key
+        )
+        .to_lowercase()
+        .contains(&query.to_lowercase())
     }
     fn render(&self, _: &mut Window, _: &mut App) -> impl IntoElement {
         let body = div()
@@ -162,12 +167,21 @@ impl SelectDelegate for Choices {
         )
     }
 }
+/// Billing route as the service detected it; absent means not detected.
+pub(in crate::workbench) fn billing_label(billing: &Value) -> &'static str {
+    match billing.as_str() {
+        Some("subscription") => "subscription",
+        Some("api") => "API",
+        _ => "unknown billing",
+    }
+}
 fn route_label(route: &Value) -> String {
     format!(
-        "{} / {} / {}",
+        "{} / {} / {} · {}",
         string(route, "harness"),
         string(route, "provider"),
-        string(route, "selector")
+        string(route, "selector"),
+        billing_label(&route["billing"])
     )
 }
 impl Workbench {
@@ -192,6 +206,7 @@ impl Workbench {
                 key: String::new(),
                 label: "Use job model".into(),
                 detail: format!("Inherited selection: {inherited}"),
+                routes: String::new(),
                 blocked: false,
             });
         }
@@ -213,9 +228,16 @@ impl Workbench {
                 .filter_map(Value::as_str)
                 .collect::<Vec<_>>()
                 .join(" ");
+            // Single offerings carry the service label "Harness · model ·
+            // billing"; equivalence groups list their ordered routes.
+            let label = match row["label"].as_str() {
+                Some(label) if row["billingRoute"].is_string() => label.to_owned(),
+                _ => format!("{} · {routes}", string(row, "displayName")),
+            };
             choices.push(Choice {
                 key: string(row, "key"),
-                label: format!("{} · {routes}", string(row, "displayName")),
+                label,
+                routes,
                 detail: if !ineligible {
                     format!("Eligible · effort {effort}")
                 } else if intent {
@@ -231,6 +253,7 @@ impl Workbench {
                 selected.starts_with("offering:") || selected.starts_with("equivalent:");
             choices.push(Choice {
                 key:selected.clone(),
+                routes:String::new(),
                 label:format!("{}: {selected}", if catalog_selection {"Unavailable saved selection"} else {"Legacy selection"}),
                 detail:if catalog_selection {"Not in this catalog. Refresh or restore its configuration; your selection is retained."} else {"Saved text kept as-is; it matches no listed model. It uses the saved legacy policy. Choose a listed model to use catalog validation."}.into(),
                 blocked:true,
@@ -428,6 +451,31 @@ impl Workbench {
             }
             if let Some(note) = harness["executionNote"].as_str() {
                 row = row.child(hint(note.to_owned()));
+            }
+            // Detected from the login each harness is launched with; kinds
+            // only, never credential values.
+            for billing in records(&harness, "billing") {
+                let detection = &billing["detection"];
+                let routes = detection["routes"]
+                    .as_array()
+                    .into_iter()
+                    .flatten()
+                    .map(billing_label)
+                    .collect::<Vec<_>>()
+                    .join(" and ");
+                row = row.child(
+                    div()
+                        .id(SharedString::from(format!(
+                            "model-billing-{}-{}",
+                            string(&harness, "harness"),
+                            string(&billing, "provider")
+                        )))
+                        .child(hint(format!(
+                            "Billing ({}): {routes} · {}",
+                            string(&billing, "provider"),
+                            string(detection, "basis")
+                        ))),
+                );
             }
             panel = panel.child(row);
         }

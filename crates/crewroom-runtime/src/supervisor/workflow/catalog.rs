@@ -1,7 +1,7 @@
 //! Connect discovered metadata to the existing runtime's verified profiles.
 use super::*;
 use crate::model_catalog::{
-    Access, Equivalence, Harness, discovery,
+    Access, BillingRoute, Equivalence, Harness, billing, discovery,
     policy::{self, Route},
     store::{Snapshot, Source},
 };
@@ -36,6 +36,14 @@ impl RuntimeConfig {
             _ => self.native_config(harness)["binary"]
                 .as_str()
                 .map(PathBuf::from),
+        }
+    }
+    /// The logins Crewroom launches each harness with, for billing detection.
+    pub(crate) fn billing_sources(&self) -> billing::Sources {
+        billing::Sources {
+            codex_auth: self.codex["authFile"].as_str().map(PathBuf::from),
+            claude_home: self.claude_code["home"].as_str().map(PathBuf::from),
+            omp_providers: self.models["providers"].clone(),
         }
     }
     pub(crate) fn catalog_configuration(&self, harness: &Harness) -> String {
@@ -86,6 +94,7 @@ impl RuntimeConfig {
         verify_binary: bool,
     ) -> Result<Vec<Route>> {
         let mut routes = Vec::new();
+        let sources = self.billing_sources();
         for entry in &snapshot.harnesses {
             let current = self.catalog_configuration(&entry.harness);
             let fresh = entry.fresh(crate::model_catalog::store::now(), &current)
@@ -136,17 +145,23 @@ impl RuntimeConfig {
                     crate::runner::execution_versions(entry.harness.as_str())
                         .contains(&i.version.as_str())
                 });
-                routes.push(Route {
-                    offering: policy::with_profile(
-                        discovered,
-                        matches.first().copied().filter(|_| executable),
-                        access,
-                    ),
-                    advertised: discovered.capabilities.clone(),
-                    fresh,
-                    identity: entry.identity.clone(),
-                    configuration_revision: entry.configuration_revision.clone(),
-                });
+                // One offering per reachable billing route; never merged.
+                for route in sources
+                    .detect(&discovered.harness, &discovered.provider)
+                    .routes
+                {
+                    routes.push(Route {
+                        offering: policy::with_profile(
+                            &discovered.with_billing(route),
+                            matches.first().copied().filter(|_| executable),
+                            access.clone(),
+                        ),
+                        advertised: discovered.capabilities.clone(),
+                        fresh,
+                        identity: entry.identity.clone(),
+                        configuration_revision: entry.configuration_revision.clone(),
+                    });
+                }
             }
         }
         Ok(routes)
@@ -174,6 +189,26 @@ impl RuntimeConfig {
             serde_json::from_value(selection["offering"].clone())
                 .map_err(|_| conflict("Invalid frozen offering."))?;
         offering.validate()?;
+        // The admitted billing route is part of the frozen identity. A login
+        // that no longer offers it never falls back to another route.
+        if let Some(admitted) = offering.billing {
+            let current = self
+                .billing_sources()
+                .detect(&offering.harness, &offering.provider);
+            if !current.routes.contains(&admitted) {
+                return Err(conflict(&format!(
+                    "Admitted billing route ({}) is no longer available from the {} login (now {}). Re-admission is required.",
+                    admitted.label(),
+                    offering.harness.label(),
+                    current
+                        .routes
+                        .iter()
+                        .map(BillingRoute::label)
+                        .collect::<Vec<_>>()
+                        .join(" and ")
+                )));
+            }
+        }
         if model["resolved"]
             != offering.resolved(selection["requestedEffort"].as_str().unwrap_or(""))
         {
@@ -227,6 +262,7 @@ impl<S: StoreAccess> Workflow<S> {
         let mut view = catalog.view(crate::model_catalog::store::now());
         let groups = self.0.config.equivalences()?;
         if let Ok(snapshot) = catalog.snapshot() {
+            let sources = self.0.config.billing_sources();
             let routes = self.0.config.catalog_routes(&snapshot, false)?;
             match policy::choices(&routes, &groups, &self.0.config.requirements) {
                 Ok(choices) => view["choices"] = choices,
@@ -245,6 +281,9 @@ impl<S: StoreAccess> Workflow<S> {
                         .find(|h| json!(h.harness) == entry["harness"])
                     {
                         entry["executionNote"] = json!(saved.execution_note());
+                        if entry["configured"] == true {
+                            entry["billing"] = sources.summary(&saved.harness);
+                        }
                         entry["fresh"] = json!(
                             saved.fresh(
                                 crate::model_catalog::store::now(),

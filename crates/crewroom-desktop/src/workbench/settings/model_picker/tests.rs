@@ -60,14 +60,15 @@ fn native_catalog_search_disabled_routes_drafts_and_restart(cx: &mut gpui::TestA
         assert_eq!(
             p.choices
                 .iter()
-                .filter(|c| c.label.contains("Shared label"))
+                .filter(|c| c.label == "OMP · Shared label · unknown billing")
                 .count(),
-            3
+            3,
+            "harness, model and billing route; a gateway provider is unknown"
         );
         let unavailable = p
             .choices
             .iter()
-            .find(|c| c.key.ends_with(":unsupported"))
+            .find(|c| c.key.ends_with(":unsupported:unknown"))
             .unwrap();
         assert!(unavailable.blocked);
         assert!(unavailable.detail.contains("verified adapter"));
@@ -121,7 +122,7 @@ fn native_catalog_search_disabled_routes_drafts_and_restart(cx: &mut gpui::TestA
     })
     .unwrap();
     cx.run_until_parked();
-    let key = "offering:omp:fixture:second";
+    let key = "offering:omp:fixture:second:unknown";
     wait(cx, h, &v, &e, |v, cx| {
         v.settings.models.as_ref().unwrap().fields.text("code", cx) == key
     });
@@ -151,6 +152,11 @@ fn native_catalog_search_disabled_routes_drafts_and_restart(cx: &mut gpui::TestA
     wait(cx, h, &v, &e, |v, _| {
         !v.busy && v.settings.roles["implementer"].revision == Some(2)
     });
+    // The assignment preview records the billing route of the chosen offering.
+    assert_eq!(
+        fixture.get("/workspace")["roleCatalog"]["implementer"]["model"]["selection"]["billingRoute"],
+        "unknown"
+    );
     navigate(cx, h, "models");
     cx.read(|cx| assert_eq!(v.read(cx).settings.models.as_ref().unwrap().budget, "small"));
     click(cx, h, "save-model-jobs");
@@ -188,10 +194,12 @@ fn native_catalog_search_disabled_routes_drafts_and_restart(cx: &mut gpui::TestA
         measured = cx
             .update_window(h, |_, w, cx| {
                 w.render_frame(cx);
-                let Some(first) = w.try_find("model-choice-offering:omp:fixture:first") else {
+                let Some(first) = w.try_find("model-choice-offering:omp:fixture:first:unknown")
+                else {
                     return false;
                 };
-                let Some(second) = w.try_find("model-choice-offering:omp:fixture:second") else {
+                let Some(second) = w.try_find("model-choice-offering:omp:fixture:second:unknown")
+                else {
                     return false;
                 };
                 let (first, second) = (first.bounds(), second.bounds());
@@ -260,6 +268,12 @@ fn native_catalog_refresh_and_reopen_keep_pre_catalog_history(cx: &mut gpui::Tes
                 if kind == "claude-code" {
                     model["resolved"]["resolvedModel"] = json!(observed);
                 }
+                // An admitted catalog selection carries its billing route.
+                if kind == "codex" {
+                    model["selection"] = json!({"intendedModel":"offering:codex:codex:native-old:subscription",
+                        "modelSource":"job","effortSource":"job_budget","reason":"Exact offering selected.",
+                        "billingRoute":"subscription","offering":{"billing":"subscription","displayName":"Native old","selector":"native-old"}});
+                }
                 let admitted=store.admit_assignment(run["id"].as_str().unwrap(),&json!({"coordinator":true,"name":"Retained coordinator","role":role,"model":model,"input":"Seeded, not executed"})).unwrap();
                 store
                     .set_desired_state(run["id"].as_str().unwrap(), "paused")
@@ -325,6 +339,8 @@ fn native_catalog_refresh_and_reopen_keep_pre_catalog_history(cx: &mut gpui::Tes
                 labels.iter().any(|l| l.contains(&observed)),
                 "Missing observed identity: {labels:?}"
             );
+            let billing = labels.iter().any(|l| l == "Billing: subscription");
+            assert_eq!(billing, route.contains("codex / codex"), "{labels:?}");
         })
         .unwrap();
         let runtime = fixture.get(&format!("/runs/{}/runtime", run["id"].as_str().unwrap()));
@@ -355,6 +371,18 @@ for line in sys.stdin:
         // discovery-verified but not yet launch-verified.
         std::fs::write(bin.join("omp"), "#!/usr/bin/python3\nimport sys\nif '--version' in sys.argv:\n print('omp/18.11.3');sys.exit(0)\nprint('{\"models\":[]}')\n").unwrap();
         std::fs::set_permissions(bin.join("omp"), std::fs::Permissions::from_mode(0o700)).unwrap();
+        // Synthetic ChatGPT login in the service HOME: subscription billing.
+        std::fs::create_dir(root.join(".codex")).unwrap();
+        std::fs::write(
+            root.join(".codex/auth.json"),
+            r#"{"auth_mode":"chatgpt","OPENAI_API_KEY":null,"tokens":{"access_token":"picker-login-secret","account_id":"fixture"}}"#,
+        )
+        .unwrap();
+        std::fs::set_permissions(
+            root.join(".codex/auth.json"),
+            std::fs::Permissions::from_mode(0o600),
+        )
+        .unwrap();
     }
     let mut options = configured(root);
     options.runtime = None;
@@ -399,9 +427,15 @@ fn unconfigured_runner_lists_installed_models_and_explains_each_cause(
         v.workspace["modelDiscovery"]["generation"].as_u64() == Some(1)
             && v.workspace["modelDiscovery"]["state"] != "refreshing"
     });
-    let key = "offering:codex:codex:fixture-model";
+    let key = "offering:codex:codex:fixture-model:subscription";
     cx.read(|cx| {
         let pickers = &v.read(cx).settings.pickers;
+        assert!(
+            !v.read(cx)
+                .workspace
+                .to_string()
+                .contains("picker-login-secret")
+        );
         for job in ["code", "judgment", "review", "fast"] {
             let choice = pickers[&format!("job-{job}")]
                 .choices
@@ -409,6 +443,7 @@ fn unconfigured_runner_lists_installed_models_and_explains_each_cause(
                 .find(|c| c.key == key)
                 .unwrap_or_else(|| panic!("{job} lacks the installed Codex model"));
             assert!(!choice.blocked, "intent choices stay selectable");
+            assert_eq!(choice.label, "Codex · Fixture model · subscription");
             assert!(
                 choice
                     .detail
@@ -430,6 +465,7 @@ fn unconfigured_runner_lists_installed_models_and_explains_each_cause(
         "OMP omp/18.11.3 lists models, but Crewroom has verified launching agents only with",
         "OMP lists models only from providers defined in the runner configuration",
         "codex · success",
+        "Billing (codex): subscription · Codex auth.json has a ChatGPT login",
     ] {
         assert!(
             after.iter().any(|l| l.contains(expected)),

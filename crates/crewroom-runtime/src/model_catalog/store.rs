@@ -506,6 +506,7 @@ mod tests {
                 access: Access::Unknown,
                 execution_profile: None,
                 inference: None,
+                billing: None,
             }],
             inference_requested: false,
             cleanup_verified: true,

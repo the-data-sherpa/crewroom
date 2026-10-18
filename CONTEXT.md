@@ -112,6 +112,10 @@ _Avoid_: Model assignment
 The choice of model that performs a selected role's work.
 _Avoid_: Specialist selection
 
+**Billing route**:
+Which account pays for a model offering's inference: subscription, API, or unknown when the harness login does not establish one. It is part of the offering's identity.
+_Avoid_: Plan, tier, provider
+
 **Delivery reporter**:
 A specialist responsible for Jira progress, decisions, blockers, and evidence summaries.
 _Avoid_: Technical writer

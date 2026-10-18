@@ -418,6 +418,7 @@ pub fn normalize(harness: &Harness, values: &Value, observed_at: u64) -> Result<
             access: Access::Unknown,
             execution_profile: None,
             inference: None,
+            billing: None,
         });
     }
     validate_contract(&offerings, &[])?;
