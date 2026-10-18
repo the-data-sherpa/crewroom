@@ -198,6 +198,16 @@ test('checked preparation binds the exact spec and duplicate helpers execute at 
   assert.equal(readFileSync(join(job, 'stderr.log'), 'utf8'), 'winner-error\n');
   assert.equal((await inspectCheckedOwned(descriptor)).state, 'stopped');
   assert.throws(() => launchCheckedOwned(descriptor, authority));
+  // A duplicate helper delayed until the winner has exited finds the lock free; it must
+  // still refuse with the lease message instead of failing on the existing owner record.
+  const late = spawn('python3', [resolve('server/runtime/process-lease.py'), 'checked-exec', job, descriptor.token, descriptor.specSha256, descriptor.epoch, descriptor.controllerRoot], { detached: true, stdio: ['ignore', 'ignore', 'pipe'] });
+  let lateDiagnostics = '';
+  late.stderr.on('data', chunk => { lateDiagnostics += chunk; });
+  assert.notEqual((await once(late, 'close'))[0], 0);
+  assert.match(lateDiagnostics, /Process lease already held\./);
+  assert.doesNotMatch(lateDiagnostics, /FileExistsError|Traceback/);
+  assert.equal(readFileSync(output, 'utf8'), 'once\n');
+  assert.equal(readFileSync(join(job, 'stdout.log'), 'utf8'), 'winner-output\n');
 });
 
 test('a prior controller cannot launch a checked intent after takeover', async t => {

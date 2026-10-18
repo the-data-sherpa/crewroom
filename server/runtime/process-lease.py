@@ -90,6 +90,10 @@ if operation == 'checked-exec':
         fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except BlockingIOError:
         sys.exit('Process lease already held.')
+    # The lease is one-shot: a helper delayed until the winner has exited acquires the
+    # free lock afterwards, so the durable owner record, not the lock, proves prior use.
+    if (root / 'owner.json').exists():
+        sys.exit('Process lease already held.')
 else:
     fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
 if operation in ('checked-exec', 'seal'):
