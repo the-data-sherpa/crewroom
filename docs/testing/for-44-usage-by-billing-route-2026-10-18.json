@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "issue": "FOR-44",
   "recordedAt": "2026-10-18T10:30:00Z",
-  "implementationRevision": "33503db",
-  "baseRevision": "8967496",
+  "implementationRevision": "45b76ce",
+  "baseRevision": "67a2b67",
   "branch": "for-44-usage-by-billing-route",
   "change": "The run usage projection groups attempts by the billing route frozen in each model selection (api, subscription, unknown) and removes the cross-route total. Only API use carries a list-price dollar estimate; subscription and unknown use show runs and tokens; assignments admitted before routes were recorded read as unknown and are counted as unrecorded. The Results usage panel and attempt history render per-route sections.",
   "simulatedEvidence": [
@@ -30,13 +30,73 @@
   "liveEvidence": [],
   "liveEvidenceNote": "No live run was made. Recording real per-route usage needs agent inference on a subscription or API login; the projection reads stored events only, so the simulated store covers the same code path. No API-billed login exists on this machine.",
   "checks": [
-    {"command": "cargo test -p crewroom-service", "result": "all suites pass (lib 7)"},
-    {"command": "cargo test -p crewroom-desktop", "result": "144 passed, 15 ignored"},
-    {"command": "cargo clippy -p crewroom-service --all-targets -- -D warnings", "result": "clean"},
-    {"command": "cargo clippy -p crewroom-desktop -p crewroom-service -- -D warnings", "result": "clean; desktop --all-targets reports only the pre-existing useless_conversion in untouched feedback_tests.rs"},
-    {"command": "cargo fmt -p crewroom-service -p crewroom-desktop --check", "result": "clean"},
-    {"command": "npm test", "result": "332/332 (one earlier full run failed tests/repository-http.test.ts under machine load; it passed 9/9 alone and on the full rerun)"},
-    {"command": "npm run build", "result": "passes"},
-    {"command": "npm run test:e2e", "result": "not run; the integrator runs it serially"}
-  ]
+    {
+      "command": "cargo test -p crewroom-service",
+      "result": "all suites pass (lib 7)"
+    },
+    {
+      "command": "cargo test -p crewroom-desktop",
+      "result": "144 passed, 15 ignored"
+    },
+    {
+      "command": "cargo clippy -p crewroom-service --all-targets -- -D warnings",
+      "result": "clean"
+    },
+    {
+      "command": "cargo clippy -p crewroom-desktop -p crewroom-service -- -D warnings",
+      "result": "clean; desktop --all-targets reports only the pre-existing useless_conversion in untouched feedback_tests.rs"
+    },
+    {
+      "command": "cargo fmt -p crewroom-service -p crewroom-desktop --check",
+      "result": "clean"
+    },
+    {
+      "command": "npm test",
+      "result": "332/332 (one earlier full run failed tests/repository-http.test.ts under machine load; it passed 9/9 alone and on the full rerun)"
+    },
+    {
+      "command": "npm run build",
+      "result": "passes"
+    },
+    {
+      "command": "npm run test:e2e",
+      "result": "not run; the integrator runs it serially"
+    }
+  ],
+  "preRebaseImplementationRevision": "33503db",
+  "preRebaseBaseRevision": "8967496",
+  "integration": {
+    "base": "67a2b67",
+    "implementationRevision": "45b76ce",
+    "checks": [
+      {
+        "command": "cargo test --locked --no-fail-fast -p crewroom-core -p crewroom-runtime -p crewroom-service -- --test-threads=1",
+        "result": "351 passed, 0 failed, 2 ignored"
+      },
+      {
+        "command": "cargo test --locked --no-fail-fast -p crewroom-desktop -- --test-threads=4",
+        "result": "145 passed, 0 failed, 15 ignored"
+      },
+      {
+        "command": "cargo clippy --locked -p crewroom-service --all-targets -- -D warnings; cargo clippy --locked -p crewroom-desktop -- -D warnings",
+        "result": "clean"
+      },
+      {
+        "command": "cargo fmt --check -p crewroom-service -p crewroom-desktop",
+        "result": "clean"
+      },
+      {
+        "command": "npm test",
+        "result": "332/332"
+      },
+      {
+        "command": "npm run build",
+        "result": "pass"
+      },
+      {
+        "command": "npm run test:e2e",
+        "result": "28 passed, 3 failed; INT-03 and INT-07/EVD-08 stop in fixture setup (fixture-only OMP 18.4.12 not installed), as at earlier integrations; RTE-09 failed under shared-machine load and passed on rerun of history.spec.ts (3/3). FOR-44 changes no TS or e2e code."
+      }
+    ]
+  }
 }
