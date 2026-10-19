@@ -4,6 +4,27 @@ The operator requested that each work item pass its checks before the next start
 
 Historical revision IDs and source hashes below refer to the original private snapshots before the FOR-17 history rewrite. Sanitized copies are not byte-identical evidence for rewritten revisions; replay requires the private archive. New validation is recorded separately.
 
+## FOR-78 — Snooze and settle tickets in the project sidebar (2026-10-19)
+
+Implementation `14df3af` (branch `for-78-work`, from main `e8b86de`). Shelf logic is in `crates/crewroom-desktop/src/workbench/shelves.rs`; the shelves extend the private per-dataset `native-ui-state.json` (`navigation.rs`, `Shelves`); the sidebar groups in `projects.rs` keep shelved tickets out of the four sections; the service's workspace view adds a read-only `publicationWatch` per run (`crates/crewroom-service/src/views.rs`) with the PR's recorded feedback ids and hosted-check state, so PR events can be watched without a provider call.
+
+Desktop, GPUI test platform, injected synthetic workspace, no window on the operator's desktop and no service or agent (`shelves_tests.rs`, `navigation.rs`):
+
+- `snooze_and_settle_shelve_tickets_without_changing_run_workflow_or_source`: Snooze… offers 1 hour, 4 hours, Tomorrow 09:00 and the three events; on a local ticket without a PR the events are disabled with "PR events need a confirmed PR; source status needs a linked ticket source." and pressing them changes nothing. Snoozing and settling move tickets to collapsed per-project shelves ("Expand Snoozed · 1", "Expand Settled · 2"); the project still says "● 2 running"; the source, workflow and activity chips of a settled running and queued ticket are identical to before; no command is sent and the workspace projection is byte-for-byte unchanged. Un-settle and Wake now return tickets to their sections. Shelves and their open state read back after a restart.
+- `undo_is_offered_for_five_seconds_after_each_shelf_action`: Undo after settle, snooze, un-settle and Wake now restores the prior shelf entry exactly; on the test clock Undo is still offered at 4.9 s and gone at 5.1 s.
+- `snoozed_tickets_wake_with_their_reason_and_survive_a_restart`: time, PR review and event snoozes survive a restart with their baselines; an unchanged refresh wakes nothing; the ticket wakes with "Snooze ended …", "PR review submitted", "CI finished · passed" and "Source status changed to GitHub closed"; a ticket snoozed for 48 hours wakes at once with "Needs you · Coordinator asks a question" when a pending decision appears and is listed under Needs you, with its workflow chip unchanged; wake reasons survive a restart until dismissed.
+- `shelves_read_back_and_a_malformed_snooze_keeps_the_file_out`: a pre-FOR-78 file reads with empty shelves; a snooze with neither time nor event and duplicate or empty ids are dropped; an unparseable time keeps the file out.
+- Service unit test `publication_watch_reports_recorded_feedback_and_hosted_check_state`: null without a confirmed PR; feedback ids keep their kind; running, finished (passed or failed) and none states; only the policy's status keys count.
+
+Checks at `14df3af` (private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, tests through `scripts/system_limits.py run`):
+
+- `npm test`: **345/345**. `npm run build`: passes.
+- `cargo test -p crewroom-desktop`: **161 passed, 0 failed, 15 ignored**. `cargo test -p crewroom-service`: **41 passed, 0 failed**. Core and runtime are unchanged and were not rerun.
+- `cargo clippy -p crewroom-desktop -p crewroom-service --all-targets -- -D warnings` and `cargo fmt --check` for core, runtime, service and desktop: clean.
+- `npm run test:e2e`: not run (integrator). The browser suite exercises the legacy TypeScript UI, which this change does not touch.
+
+*Simulated only:* no live PR, CI or source status was watched; event wakes ran over injected `publicationWatch` and source status values. Pinning does not exist in the native workbench, so there is no unpin to undo. Not yet verified: the operator's on-screen check.
+
 ## FOR-72 — Recorded harness transcripts for version-stamped replay tests (2026-10-19)
 
 Code `1816139` (branch `for-72-work`, from main `20a6149`). Every check below ran at `1816139` on Linux x86_64 in a worktree with a private `CARGO_TARGET_DIR`. Tests ran through `scripts/system_limits.py run` with `-j6` and `--test-threads=4`. No Jira, GitHub or real model provider was contacted.
