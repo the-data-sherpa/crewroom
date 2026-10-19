@@ -18,6 +18,8 @@ Code `49f245b` (branch `for-84-work`, from main `3f05023`; test files only). Eve
 
 **Other checks at `49f245b`:** `npm test` **346/346** (simulated providers); `npm run build` passes (existing chunk-size warning); no Rust source changed, `cargo fmt -p crewroom-runtime -- --check` clean. `npm run test:e2e` was not run here (the integrator runs it). Not re-run: rootless Docker, macOS.
 
+**Integration on main `ef26863`:** rebased with only `docs/status.md` and this file in conflict (both entries kept); the code commit `49f245b` became `07c0d8c` with identical test changes. At `07c0d8c`, all through `system_limits.py run` in a worktree prepared with `--build-helpers` and a private `CARGO_TARGET_DIR`: `npm test` **346/346**, `npm run build` passes, `npm run test:e2e` **31/31**, `target-refresh.test.ts` and `retained-work.test.ts` **25/25** (`docker ps -a --filter label=io.crewroom.command` empty before and after), `cargo fmt -p crewroom-core -p crewroom-runtime -p crewroom-service -- --check` clean. No Rust changed, so `cargo test` and Clippy were not run.
+
 ## FOR-85 — Daemon-scheduling restart usage test (2026-10-19)
 
 Simulated checks only (fixture daemon, seeded agent events, private `CARGO_TARGET_DIR`, Linux x86_64); no live provider or delivery.
