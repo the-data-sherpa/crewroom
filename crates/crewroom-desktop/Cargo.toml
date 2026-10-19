@@ -31,6 +31,7 @@ accesskit_macos = "=0.26.3"
 gpui-pre-apple = { version = "=0.3.7", features = ["runtime_shaders"] }
 
 [dev-dependencies]
+crewroom-test-support = { path = "../crewroom-test-support" }
 rusqlite.workspace = true
 crewroom-runtime = { path = "../crewroom-runtime" }
 crewroom-service = { path = "../crewroom-service" }

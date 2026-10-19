@@ -1,27 +1,10 @@
 //! Deterministic production-adapter faults. The subprocess is explicitly a fake
 //! protocol peer and all account metadata is fake; live checks are separate.
 use crewroom_runtime::runner;
+use crewroom_test_support::install_executable;
 use serde_json::{Value, json};
 use std::{os::unix::fs::PermissionsExt, path::Path, sync::Arc};
 use tokio::time::{Duration, timeout};
-
-/// Writes a fake CLI without this process ever holding a writer to it (FOR-86).
-/// Every fork by a sibling test thread copies all open descriptors until its
-/// child execs. If one copy is a writer of the script, exec of the script fails
-/// with `Text file busy` (ETXTBSY), so admission failed for a load-dependent
-/// reason. The only writer now lives in a separate `cp`, which exits first.
-fn install_executable(path: &Path, content: &str) {
-    let staged = path.with_extension("source");
-    std::fs::write(&staged, content).unwrap();
-    let copied = std::process::Command::new("cp")
-        .arg(&staged)
-        .arg(path)
-        .status()
-        .unwrap();
-    assert!(copied.success(), "cp {}: {copied}", path.display());
-    std::fs::remove_file(&staged).unwrap();
-    std::fs::set_permissions(path, std::fs::Permissions::from_mode(0o700)).unwrap();
-}
 
 struct Fixture {
     _temp: tempfile::TempDir,
@@ -447,49 +430,5 @@ async fn fast_terminal_waits_for_result_delivery_and_unknown_effect_never_comple
             assert_eq!(runner.state().await.unwrap()["isStreaming"], false);
         }
         runner.close().await.unwrap();
-    }
-}
-
-/// FOR-86: while sibling threads keep spawning children, every installed
-/// fixture must start. A script written with `std::fs::write` in this process
-/// fails here with `Text file busy` within a few hundred installs.
-#[test]
-fn fixture_executables_start_while_sibling_threads_spawn() {
-    use std::sync::atomic::{AtomicBool, Ordering};
-    let temp = tempfile::tempdir().unwrap();
-    let stop = Arc::new(AtomicBool::new(false));
-    let spawners: Vec<_> = (0..4)
-        .map(|_| {
-            let stop = stop.clone();
-            std::thread::spawn(move || {
-                while !stop.load(Ordering::Relaxed) {
-                    let _ = std::process::Command::new("/bin/true").status();
-                }
-            })
-        })
-        .collect();
-    let installers: Vec<_> = (0..4)
-        .map(|w| {
-            let root = temp.path().to_owned();
-            std::thread::spawn(move || {
-                for i in 0..150 {
-                    let path = root.join(format!("fixture-{w}-{i}"));
-                    install_executable(&path, "#!/bin/sh\nexit 0\n");
-                    let status = std::process::Command::new(&path).status();
-                    assert!(
-                        status.as_ref().is_ok_and(|s| s.success()),
-                        "{i}: {status:?}"
-                    );
-                }
-            })
-        })
-        .collect();
-    let installed: Vec<_> = installers.into_iter().map(|t| t.join()).collect();
-    stop.store(true, Ordering::Relaxed);
-    for spawner in spawners {
-        spawner.join().unwrap();
-    }
-    for result in installed {
-        result.unwrap();
     }
 }

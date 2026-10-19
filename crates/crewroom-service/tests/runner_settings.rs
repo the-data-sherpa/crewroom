@@ -336,7 +336,7 @@ async fn an_embedded_service_saves_but_states_that_a_restart_is_needed() {
 /// runs a model; discovery metadata only.
 fn fixture_omp(root: &Path) -> std::path::PathBuf {
     let binary = root.join("omp.py");
-    std::fs::write(
+    crewroom_test_support::install_executable(
         &binary,
         r#"#!/usr/bin/python3
 import json,sys
@@ -345,9 +345,7 @@ if '--version' in sys.argv:
 assert sys.argv[1:]==['models','--json','--no-extensions']
 print(json.dumps({'models':[{'provider':'fixture','id':'model','selector':'fixture/model','name':'Example','thinking':['low','high','xhigh'],'input':['text']}]}))
 "#,
-    )
-    .unwrap();
-    std::fs::set_permissions(&binary, std::fs::Permissions::from_mode(0o700)).unwrap();
+    );
     binary
 }
 async fn refreshed(info: &ConnectionInfo) {

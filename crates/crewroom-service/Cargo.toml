@@ -26,5 +26,6 @@ zeroize = "1"
 daemonize = "0.5"
 
 [dev-dependencies]
+crewroom-test-support = { path = "../crewroom-test-support" }
 tempfile.workspace = true
 tokio-tungstenite = "0.29"

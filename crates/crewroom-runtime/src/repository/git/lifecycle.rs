@@ -202,16 +202,13 @@ mod tests {
     #[tokio::test]
     async fn stop_during_actual_configuration_read_fences_dispatch_without_orphan_roots() {
         use super::super::{Git, Records};
-        use std::os::unix::fs::PermissionsExt;
         let (root, authority, _) = setup();
         let path = std::fs::canonicalize(root.path()).unwrap();
         let shim = path.join("config-probe");
-        std::fs::write(
+        crewroom_test_support::install_executable(
             &shim,
             "#!/bin/sh\n: > blocked\nwhile [ ! -f release ]; do sleep 0.01; done\nexit 1\n",
-        )
-        .unwrap();
-        std::fs::set_permissions(&shim, std::fs::Permissions::from_mode(0o700)).unwrap();
+        );
         let mut git = Git::new(&path, std::env::current_exe().unwrap(), authority).unwrap();
         git.executable = shim;
         let run = Uuid::new_v4().to_string();

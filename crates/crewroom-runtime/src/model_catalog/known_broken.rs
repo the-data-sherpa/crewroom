@@ -105,10 +105,9 @@ mod tests {
     /// executable passes the full probe when the list does not name it.
     #[tokio::test]
     async fn a_listed_version_is_refused_even_when_its_probe_passes() {
-        use std::os::unix::fs::PermissionsExt;
         let root = tempfile::tempdir().unwrap();
         let binary = root.path().join("omp");
-        std::fs::write(
+        crewroom_test_support::install_executable(
             &binary,
             r#"#!/usr/bin/python3
 import json,sys,os
@@ -124,9 +123,7 @@ for line in sys.stdin:
  data={'negotiate_protocol':{'protocolVersion':2},'get_state':{'sessionFile':os.path.join(sessions,'s.jsonl')},'set_host_tools':{'toolNames':[]}}[v['type']]
  print(json.dumps({'id':v['id'],'type':'response','command':v['type'],'success':True,'data':data}),flush=True)
 "#,
-        )
-        .unwrap();
-        std::fs::set_permissions(&binary, std::fs::Permissions::from_mode(0o700)).unwrap();
+        );
         let helpers =
             crate::test_binaries::ensure(&crate::test_binaries::profile_dir_of_current_test());
         let config = discovery::Config {

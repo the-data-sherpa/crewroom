@@ -78,7 +78,7 @@ async fn detached_service_survives_launcher_and_stops_cleanly() {
 #[tokio::test]
 async fn repository_edit_preflight_keeps_observation_responsive_and_replays_after_restart() {
     use serde_json::{Value, json};
-    use std::os::unix::fs::{PermissionsExt, symlink};
+    use std::os::unix::fs::symlink;
     let root = tempfile::tempdir().unwrap();
     let data = root.path().join("data");
     let checkout = root.path().join("repo");
@@ -116,8 +116,10 @@ async fn repository_edit_preflight_keeps_observation_responsive_and_replays_afte
         .find(|p| p.is_file())
         .unwrap();
     symlink(git, bin.join("real-git")).unwrap();
-    std::fs::write(bin.join("git"),"#!/bin/sh\ndir=${0%/*}\nif [ -f \"$dir/armed\" ]; then\n  for arg; do\n    if [ \"$arg\" = rev-parse ]; then\n      touch \"$dir/blocked\"\n      while [ -f \"$dir/armed\" ]; do sleep 0.02; done\n      break\n    fi\n  done\nfi\nexec \"$dir/real-git\" \"$@\"\n").unwrap();
-    std::fs::set_permissions(bin.join("git"), std::fs::Permissions::from_mode(0o700)).unwrap();
+    crewroom_test_support::install_executable(
+        bin.join("git"),
+        "#!/bin/sh\ndir=${0%/*}\nif [ -f \"$dir/armed\" ]; then\n  for arg; do\n    if [ \"$arg\" = rev-parse ]; then\n      touch \"$dir/blocked\"\n      while [ -f \"$dir/armed\" ]; do sleep 0.02; done\n      break\n    fi\n  done\nfi\nexec \"$dir/real-git\" \"$@\"\n",
+    );
     let daemon_path = std::env::join_paths(
         std::iter::once(bin.clone()).chain(std::env::split_paths(&original_path)),
     )
@@ -237,7 +239,7 @@ async fn repository_edit_preflight_keeps_observation_responsive_and_replays_afte
 #[tokio::test]
 async fn creation_and_research_release_workflow_lock_and_recheck_after_git() {
     use serde_json::{Value, json};
-    use std::os::unix::fs::{PermissionsExt, symlink};
+    use std::os::unix::fs::symlink;
     let root = tempfile::tempdir().unwrap();
     let data = root.path().join("data");
     let checkout = std::fs::canonicalize(root.path()).unwrap().join("repo");
@@ -275,8 +277,10 @@ async fn creation_and_research_release_workflow_lock_and_recheck_after_git() {
         .unwrap();
     symlink(git, bin.join("real-git")).unwrap();
     // Block the first real Git child only; competing configuration preflight must still run.
-    std::fs::write(bin.join("git"),"#!/bin/sh\ndir=${0%/*}\nif [ -f \"$dir/armed\" ]; then\n  for arg; do\n    if [ \"$arg\" = rev-parse ] && mkdir \"$dir/claimed\" 2>/dev/null; then\n      touch \"$dir/blocked\"\n      while [ -f \"$dir/armed\" ]; do sleep 0.02; done\n      break\n    fi\n  done\nfi\nexec \"$dir/real-git\" \"$@\"\n").unwrap();
-    std::fs::set_permissions(bin.join("git"), std::fs::Permissions::from_mode(0o700)).unwrap();
+    crewroom_test_support::install_executable(
+        bin.join("git"),
+        "#!/bin/sh\ndir=${0%/*}\nif [ -f \"$dir/armed\" ]; then\n  for arg; do\n    if [ \"$arg\" = rev-parse ] && mkdir \"$dir/claimed\" 2>/dev/null; then\n      touch \"$dir/blocked\"\n      while [ -f \"$dir/armed\" ]; do sleep 0.02; done\n      break\n    fi\n  done\nfi\nexec \"$dir/real-git\" \"$@\"\n",
+    );
     let daemon_path = std::env::join_paths(
         std::iter::once(bin.clone()).chain(std::env::split_paths(&original_path)),
     )

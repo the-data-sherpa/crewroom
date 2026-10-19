@@ -430,7 +430,6 @@ async fn probed_newer_versions_are_offered_and_changed_executables_hold_launch()
 /// A simulated OMP that reports `version`, lists `listed` models from the
 /// `fixture` provider and answers the protocol-v2 RPC handshake.
 fn simulated_omp(path: &Path, version: &str, listed: &str) {
-    use std::os::unix::fs::PermissionsExt;
     let script = format!(
         r#"#!/usr/bin/python3
 import json,sys,os
@@ -448,11 +447,9 @@ for line in sys.stdin:
  print(json.dumps({{'id':v['id'],'type':'response','command':v['type'],'success':True,'data':data}}),flush=True)
 "#
     );
-    // Replace atomically so the path never names a half-written executable.
-    let next = path.with_extension("next");
-    std::fs::write(&next, script).unwrap();
-    std::fs::set_permissions(&next, std::fs::Permissions::from_mode(0o700)).unwrap();
-    std::fs::rename(&next, path).unwrap();
+    // The install replaces atomically, so the path never names a
+    // half-written executable, and this process never holds its writer.
+    crewroom_test_support::install_executable(path, script);
 }
 
 /// FOR-69: when the harness self-updates between admission and launch and
@@ -653,7 +650,7 @@ async fn replacement_attempts_reprobe_changed_executables_and_stale_receipts() {
     // The harness updated itself while the run was paused and the new
     // executable fails its re-probe: the replacement is held with the reason.
     let binary = root.path().join("omp");
-    std::fs::write(&binary, "#!/bin/sh\nexit 3\n").unwrap();
+    crewroom_test_support::install_executable(&binary, "#!/bin/sh\nexit 3\n");
     let held = config
         .hold_changed_executable(&replacement["model"])
         .await

@@ -7,15 +7,17 @@ use std::os::unix::fs::PermissionsExt;
 pub(in crate::workbench) fn configured(root: &std::path::Path) -> crewroom_service::ServiceOptions {
     let binary = root.join("models.py");
     if !binary.exists() {
-        std::fs::write(&binary,r#"#!/usr/bin/python3
+        crewroom_test_support::install_executable(
+            &binary,
+            r#"#!/usr/bin/python3
 import sys,json,time
 if '--version' in sys.argv:
  print('omp/18.4.12');sys.exit()
 assert sys.argv[1:]==['models','--json','--no-extensions']
 time.sleep(.1)
 print(json.dumps({'models':[{'provider':'fixture','id':k,'selector':'fixture/'+k,'name':'Shared label','thinking':['low','medium','high','xhigh'],'input':['text']} for k in ['first','second','unsupported']]}))
-"#).unwrap();
-        std::fs::set_permissions(&binary, std::fs::Permissions::from_mode(0o700)).unwrap();
+"#,
+        );
     }
     let helpers = crewroom_runtime::test_binaries::ensure(
         &crewroom_runtime::test_binaries::profile_dir_of_current_test(),
@@ -356,7 +358,9 @@ fn unconfigured(root: &std::path::Path) -> crewroom_service::ServiceOptions {
     let bin = root.join("bin");
     if !bin.exists() {
         std::fs::create_dir(&bin).unwrap();
-        std::fs::write(bin.join("codex"), r#"#!/usr/bin/python3
+        crewroom_test_support::install_executable(
+            bin.join("codex"),
+            r#"#!/usr/bin/python3
 import json,sys
 if '--version' in sys.argv:
  print('codex-cli 0.163.0');sys.exit(0)
@@ -365,13 +369,14 @@ for line in sys.stdin:
  if 'id' not in v: continue
  result={'data':[{'model':'fixture-model','displayName':'Fixture model','inputModalities':['text'],'supportedReasoningEfforts':[{'reasoningEffort':e} for e in ['low','medium','high','xhigh']]}],'nextCursor':None} if v['method']=='model/list' else {}
  print(json.dumps({'id':v['id'],'result':result}),flush=True)
-"#).unwrap();
-        std::fs::set_permissions(bin.join("codex"), std::fs::Permissions::from_mode(0o700))
-            .unwrap();
+"#,
+        );
         // OMP lists no models without runner providers; FOR-52 verified
         // launching this version, so it carries no execution note.
-        std::fs::write(bin.join("omp"), "#!/usr/bin/python3\nimport sys\nif '--version' in sys.argv:\n print('omp/18.11.3');sys.exit(0)\nprint('{\"models\":[]}')\n").unwrap();
-        std::fs::set_permissions(bin.join("omp"), std::fs::Permissions::from_mode(0o700)).unwrap();
+        crewroom_test_support::install_executable(
+            bin.join("omp"),
+            "#!/usr/bin/python3\nimport sys\nif '--version' in sys.argv:\n print('omp/18.11.3');sys.exit(0)\nprint('{\"models\":[]}')\n",
+        );
         // Synthetic ChatGPT login in the service HOME: subscription billing.
         std::fs::create_dir(root.join(".codex")).unwrap();
         std::fs::write(

@@ -1,10 +1,6 @@
 use crewroom_service::{ConnectionInfo, Service, ServiceOptions};
 use serde_json::{Value, json};
-use std::{
-    os::unix::fs::{DirBuilderExt, PermissionsExt},
-    path::Path,
-    time::Duration,
-};
+use std::{os::unix::fs::DirBuilderExt, path::Path, time::Duration};
 
 async fn post(info: &ConnectionInfo, path: &str, body: Value) -> reqwest::Response {
     reqwest::Client::new()
@@ -38,7 +34,9 @@ fn options(root: &Path) -> ServiceOptions {
         .unwrap();
     let binary = root.join("omp.py");
     if !binary.exists() {
-        std::fs::write(&binary,r#"#!/usr/bin/python3
+        crewroom_test_support::install_executable(
+            &binary,
+            r#"#!/usr/bin/python3
 import json,sys,time,pathlib,os
 if '--version' in sys.argv:
  print('omp/18.4.12');sys.exit(0)
@@ -52,8 +50,8 @@ if scenario.get('fail'):
 if scenario.get('empty'):
  print('{"models":[]}');sys.exit(0)
 print(json.dumps({'models':[{'provider':'fixture','id':'model','selector':'fixture/model','name':'Example','thinking':['low','high','xhigh'],'input':['text'],'apiKey':'credential-canary'}],'account':'account-canary'}))
-"#).unwrap();
-        std::fs::set_permissions(&binary, std::fs::Permissions::from_mode(0o700)).unwrap();
+"#,
+        );
     }
     let helpers = crewroom_runtime::test_binaries::ensure(
         &crewroom_runtime::test_binaries::profile_dir_of_current_test(),
@@ -327,7 +325,9 @@ async fn lost_refresh_retry_concurrent_saves_drift_and_disappearance_never_admit
             .contains("Refresh this harness")
     );
     assert!(blocked["model"].is_null());
-    std::fs::write(&binary, original).unwrap();
+    // Restore through the shared install, so this process holds no writer of
+    // the file the refresh executes (FOR-89).
+    crewroom_test_support::install_executable(&binary, original);
     refresh(info).await;
 
     scenario(root.path(), json!({"fail":true}));
@@ -671,7 +671,9 @@ async fn unconfigured_runner_still_lists_installed_models_and_names_each_cause()
     let bin = root.path().join("bin");
     std::fs::DirBuilder::new().mode(0o700).create(&bin).unwrap();
     let codex = bin.join("codex");
-    std::fs::write(&codex, r#"#!/usr/bin/python3
+    crewroom_test_support::install_executable(
+        &codex,
+        r#"#!/usr/bin/python3
 import json,sys
 if '--version' in sys.argv:
  print('codex-cli 0.163.0');sys.exit(0)
@@ -681,8 +683,8 @@ for line in sys.stdin:
  if 'id' not in v: continue
  result={'data':[{'model':'fixture-model','displayName':'Fixture model','inputModalities':['text'],'supportedReasoningEfforts':[{'reasoningEffort':'low'}],'apiKey':'credential-canary'}],'nextCursor':None} if v['method']=='model/list' else {}
  print(json.dumps({'id':v['id'],'result':result}),flush=True)
-"#).unwrap();
-    std::fs::set_permissions(&codex, std::fs::Permissions::from_mode(0o700)).unwrap();
+"#,
+    );
     let mut setup = options(root.path());
     setup.runtime = None;
     setup.environment = json!({"PATH":bin,"HOME":root.path()});
@@ -785,7 +787,9 @@ async fn allowance_refresh_reads_subscription_logins_and_explains_missing_ones()
     let bin = root.path().join("bin");
     std::fs::DirBuilder::new().mode(0o700).create(&bin).unwrap();
     let codex = bin.join("codex");
-    std::fs::write(&codex, r#"#!/usr/bin/python3
+    crewroom_test_support::install_executable(
+        &codex,
+        r#"#!/usr/bin/python3
 import json,sys,os
 if '--version' in sys.argv:
  print('codex-cli 0.163.0');sys.exit(0)
@@ -800,8 +804,8 @@ for line in sys.stdin:
   result={'accountId':'account-canary','rateLimits':{'limitId':'codex','planType':'plus','credits':{'balance':'credential-canary'},
    'primary':{'usedPercent':30,'windowDurationMins':300,'resetsAt':1792800000},'secondary':{'usedPercent':70,'windowDurationMins':10080,'resetsAt':1793000000}}}
  print(json.dumps({'id':v['id'],'result':result}),flush=True)
-"#).unwrap();
-    std::fs::set_permissions(&codex, std::fs::Permissions::from_mode(0o700)).unwrap();
+"#,
+    );
     let login = root.path().join(".codex");
     std::fs::DirBuilder::new()
         .mode(0o700)

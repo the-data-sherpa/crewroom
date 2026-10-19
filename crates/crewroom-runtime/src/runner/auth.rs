@@ -242,8 +242,7 @@ for line in sys.stdin:
 "#,
             counter = root.join("refreshes").to_string_lossy()
         );
-        durable_new(&executable, script.as_bytes()).unwrap();
-        std::fs::set_permissions(&executable, std::fs::Permissions::from_mode(0o700)).unwrap();
+        crewroom_test_support::install_executable(&executable, script);
         let config =
             json!({"codex":{"binary":executable,"authFile":source,"authRoot":root.join("owner")}});
         let mut other = config.clone();
@@ -295,8 +294,13 @@ for line in sys.stdin:
         let ready = root.join("ready");
         // Publish the PID by rename: the test polls for the path, and a plain
         // open('w') makes it visible before the PID is written.
-        durable_new(&executable, format!("#!/usr/bin/python3\nimport os,time\nopen({0:?}+'.tmp','w').write(str(os.getpid()))\nos.rename({0:?}+'.tmp',{0:?})\ntime.sleep(60)\n", ready.to_str().unwrap()).as_bytes()).unwrap();
-        std::fs::set_permissions(&executable, std::fs::Permissions::from_mode(0o700)).unwrap();
+        crewroom_test_support::install_executable(
+            &executable,
+            format!(
+                "#!/usr/bin/python3\nimport os,time\nopen({0:?}+'.tmp','w').write(str(os.getpid()))\nos.rename({0:?}+'.tmp',{0:?})\ntime.sleep(60)\n",
+                ready.to_str().unwrap()
+            ),
+        );
         let config = root.join("config.json");
         durable_new(&config, stringify(&json!({"codex":{"binary":executable,"authFile":source,"authRoot":root.join("first-runtime")}})).as_bytes()).unwrap();
         let mut parent = Command::new(std::env::current_exe().unwrap())

@@ -1,7 +1,7 @@
 [workspace]
-members = ["crates/crewroom-core", "crates/crewroom-service", "crates/crewroom-desktop", "crates/crewroom-runtime"]
+members = ["crates/crewroom-core", "crates/crewroom-service", "crates/crewroom-desktop", "crates/crewroom-runtime", "crates/crewroom-test-support"]
 exclude = ["vendor/gpui-libghostty", "vendor/gpui-component", "vendor/gpui-pre"]
-default-members = ["crates/crewroom-core", "crates/crewroom-service"]
+default-members = ["crates/crewroom-core", "crates/crewroom-service", "crates/crewroom-test-support"]
 resolver = "3"
 
 [workspace.package]

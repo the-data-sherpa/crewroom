@@ -8,8 +8,9 @@ use crewroom_runtime::model_catalog::{
     compatibility::{Basis, ProbeReceipt},
     discovery::{Config, Receipt, discover_with, probe_installed},
 };
+use crewroom_test_support::install_executable;
 use serde_json::json;
-use std::{os::unix::fs::PermissionsExt, path::Path, time::Duration};
+use std::{path::Path, time::Duration};
 use tokio_util::sync::CancellationToken;
 
 /// A Python harness reporting `version`. Every launch-protocol handshake
@@ -77,15 +78,13 @@ for line in sys.stdin:
 "#
         }
     };
-    std::fs::write(
+    install_executable(
         &binary,
         format!(
             "#!/usr/bin/python3\nimport json,sys,os,time\nFAIL={}\nHERE=os.path.dirname(os.path.realpath(__file__))\ndef mark():\n open(os.path.join(HERE,'handshakes'),'a').write('x\\n')\nif '--version' in sys.argv:\n print({version:?});sys.exit(0)\n{body}\n",
             if fail { "True" } else { "False" }
         ),
-    )
-    .unwrap();
-    std::fs::set_permissions(&binary, std::fs::Permissions::from_mode(0o700)).unwrap();
+    );
     if !root.join("protocol.json").exists() {
         protocol(root, Some((&[], &[])));
     }
@@ -432,15 +431,13 @@ async fn installed_harnesses_pass_the_compatibility_probe() {
         }
         assert!(receipt.cleanup_verified && !receipt.inference_requested);
         let wrapper = root.path().join(format!("{name}-major"));
-        std::fs::write(
+        install_executable(
             &wrapper,
             format!(
                 "#!/bin/sh\nif [ \"$1\" = --version ]; then echo '{major}'; exit 0; fi\nexec '{}' \"$@\"\n",
                 binary.display()
             ),
-        )
-        .unwrap();
-        std::fs::set_permissions(&wrapper, std::fs::Permissions::from_mode(0o700)).unwrap();
+        );
         let wrapped = Config {
             binary: wrapper,
             ..installed

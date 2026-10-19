@@ -8,20 +8,19 @@ use crewroom_runtime::model_catalog::{
     billing::Sources,
     discovery::Config,
 };
+use crewroom_test_support::install_executable;
 use serde_json::{Value, json};
-use std::{os::unix::fs::PermissionsExt, path::Path, time::Duration};
+use std::{path::Path, time::Duration};
 use tokio_util::sync::CancellationToken;
 
 const CANARY: &str = "allowance-secret-canary";
 
 fn target(root: &Path, harness: Harness, body: &str) -> Target {
     let binary = root.join("harness.py");
-    std::fs::write(
+    install_executable(
         &binary,
         format!("#!/usr/bin/python3\nimport json,sys,os,time\n{body}\n"),
-    )
-    .unwrap();
-    std::fs::set_permissions(&binary, std::fs::Permissions::from_mode(0o700)).unwrap();
+    );
     let auth = root.join("codex/auth.json");
     std::fs::create_dir_all(auth.parent().unwrap()).unwrap();
     write_private(

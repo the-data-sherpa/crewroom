@@ -14,6 +14,7 @@ use crewroom_runtime::{
     },
     runner,
 };
+use crewroom_test_support::install_executable;
 use serde_json::{Map, Value, json};
 use sha2::{Digest, Sha256};
 use std::{
@@ -173,8 +174,7 @@ pub async fn replay_within(lines: &[Value], wait_limit: Duration) -> Replay {
         private(&root.join(dir));
     }
     let binary = root.join(header["binaryName"].as_str().unwrap());
-    std::fs::write(&binary, PEER).unwrap();
-    std::fs::set_permissions(&binary, std::fs::Permissions::from_mode(0o700)).unwrap();
+    install_executable(&binary, PEER);
     let body: String = lines.iter().map(|l| format!("{l}\n")).collect();
     let peer = |suffix: &str| PathBuf::from(format!("{}{suffix}", binary.display()));
     std::fs::write(peer(".transcript.jsonl"), body).unwrap();

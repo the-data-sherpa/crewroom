@@ -3,8 +3,9 @@ use crewroom_runtime::model_catalog::{
     Harness,
     discovery::{Config, discover},
 };
+use crewroom_test_support::install_executable;
 use serde_json::{Value, json};
-use std::{os::unix::fs::PermissionsExt, path::Path, time::Duration};
+use std::{path::Path, time::Duration};
 use tokio_util::sync::CancellationToken;
 
 fn config(root: &Path, harness: Harness, body: &str) -> Config {
@@ -14,8 +15,12 @@ fn config(root: &Path, harness: Harness, body: &str) -> Config {
         Harness::ClaudeCode => "2.1.296 (Claude Code)",
         Harness::Omp => "omp/18.4.12",
     };
-    std::fs::write(&binary,format!("#!/usr/bin/python3\nimport json,sys,os,time\nif '--version' in sys.argv:\n print({version:?});sys.exit(0)\n{body}\n")).unwrap();
-    std::fs::set_permissions(&binary, std::fs::Permissions::from_mode(0o700)).unwrap();
+    install_executable(
+        &binary,
+        format!(
+            "#!/usr/bin/python3\nimport json,sys,os,time\nif '--version' in sys.argv:\n print({version:?});sys.exit(0)\n{body}\n"
+        ),
+    );
     Config {
         harness,
         binary,

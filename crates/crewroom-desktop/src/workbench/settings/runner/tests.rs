@@ -146,14 +146,16 @@ fn runner_page_lists_prerequisites_and_saves_the_configuration_privately(
 fn discovering(root: &std::path::Path) -> crewroom_service::ServiceOptions {
     let binary = root.join("omp.py");
     if !binary.exists() {
-        std::fs::write(&binary, r#"#!/usr/bin/python3
+        crewroom_test_support::install_executable(
+            &binary,
+            r#"#!/usr/bin/python3
 import sys,json
 if '--version' in sys.argv:
  print('omp/18.4.12');sys.exit()
 assert sys.argv[1:]==['models','--json','--no-extensions']
 print(json.dumps({'models':[{'provider':'fixture','id':'model','selector':'fixture/model','name':'Example','thinking':['low','high'],'input':['text']}]}))
-"#).unwrap();
-        std::fs::set_permissions(&binary, std::fs::Permissions::from_mode(0o700)).unwrap();
+"#,
+        );
     }
     let helpers = crewroom_runtime::test_binaries::ensure(
         &crewroom_runtime::test_binaries::profile_dir_of_current_test(),
