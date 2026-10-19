@@ -281,6 +281,16 @@ async fn an_embedded_service_saves_but_states_that_a_restart_is_needed() {
     assert_eq!(view["source"]["kind"], "settings");
     assert_eq!(view["pending"], true, "saved but not applied: {view}");
     assert_eq!(view["active"], false);
+    // A configuration without OMP providers (for example Codex only) saves
+    // without inventing an empty models section.
+    let mut codex_only = settings(&root);
+    codex_only["advanced"] = json!({"catalog": [], "policy": {}});
+    codex_only["secrets"] = json!({});
+    let (status, saved) = post(&info, "/runner/settings", codex_only).await;
+    assert_eq!(status, 200, "{saved}");
+    let written: Value =
+        serde_json::from_slice(&std::fs::read(root.join("data/runtime.json")).unwrap()).unwrap();
+    assert_eq!(written.get("models"), None, "{written}");
     // Cross-origin mutations are refused like every other mutation.
     let response = reqwest::Client::new()
         .post(format!("{}/api/runner/apply", info.origin))

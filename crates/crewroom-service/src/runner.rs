@@ -1053,7 +1053,11 @@ pub(crate) fn save(data: &Path, body: &Value) -> Result<()> {
         };
         cleared.push(id);
     }
-    if let Some(providers) = config["models"]["providers"].as_object_mut() {
+    if let Some(providers) = config
+        .get_mut("models")
+        .and_then(|m| m.get_mut("providers"))
+        .and_then(Value::as_object_mut)
+    {
         for (name, provider) in providers.iter_mut() {
             provider_name(name)?;
             let id = format!("runner-provider-{name}");
