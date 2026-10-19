@@ -4,6 +4,22 @@ The operator requested that each work item pass its checks before the next start
 
 Historical revision IDs and source hashes below refer to the original private snapshots before the FOR-17 history rewrite. Sanitized copies are not byte-identical evidence for rewritten revisions; replay requires the private archive. New validation is recorded separately.
 
+## FOR-82 — Workflow and repository journeys without the TypeScript oracle (2026-10-19)
+
+Code `0ef395d` (branch `for-82-work`, from main `9d409b5`). Every check below ran at `0ef395d` on Linux x86_64 with Docker Engine 29.7.2 (rootful) and Node 26, with Rust binaries built from this revision in a target directory private to the worktree (worktree prepared with `python3 scripts/prepare_worktree.py --build-helpers`). Docker and Git are real; no provider, Jira or GitHub service was contacted. The machine was shared with parallel agents (load average 9–21).
+
+**Before.** At main `9d409b5` `scripts/rust/repository.test.ts` was **16/19**: "native admission preserves operator changes…", "dirty manifests and bounded literal, regex and pinned searches…" and "provider merge records require actual ancestry…" stopped with "Workflow database is newer than this application." `workflow-transitions.test.ts` and `workflow-interruption.test.ts` passed and contain no TypeScript oracle.
+
+**Oracle decision (consistent with FOR-61):** native-only expectations, not a pre-migration copy or fixed snapshot. The TypeScript `Workbench` stops at schema 26, and a pre-migration copy holds no native worktree record, so the retained `RepositoryWork` could not observe the state under test.
+- The two oracle cases now compare the native file list and revision with values derived from the owned worktree using the retained contract in `server/repository-work.ts`: Git's tracked and non-ignored names in UTF-16 sort order, `lstat` mode, SHA-256 of content or link target, `deleted` entries, the worktree hash of that manifest, base/head/tree from Git, the dirty flag from porcelain status, the instruction hash of `AGENTS.md`/`CLAUDE.md`, and the seeded requirements through the shared `requirementsHash`. The four searches the oracle compared are asserted as exact results.
+- The provider-merge case used the `Workbench` to seed, not as an oracle. It now seeds the upstream ticket, accepted implementation plan, coding run, dependency and merged publication through native fixture operations. The native queue creates a coding run only after an accepted plan. `repository-fixture` gains a `set_dependencies` operation for this.
+
+**Live journeys (real engine):** `repository.test.ts`, `workflow-transitions.test.ts` and `workflow-interruption.test.ts` **26/26**, run twice. The Docker-backed cases (ad-hoc read-only preparation, coding handoff with actual checks) ran real containers. `docker ps -a --filter label=io.crewroom.command` was empty before and after each run.
+
+**Other checks at `0ef395d`:** `npm test` **345/345** (simulated providers); `npm run build` passes (existing chunk-size warning); `cargo test --locked -p crewroom-runtime -- --test-threads=4` **205 passed, 0 failed, 3 ignored**; `cargo clippy --locked -p crewroom-runtime --all-targets -- -D warnings` and `cargo fmt -p crewroom-runtime -- --check` clean. `npm run test:e2e` was not run here (the integrator runs it).
+
+**Found, not fixed here:** `scripts/rust/target-refresh.test.ts` (8/9, the same oracle failure) and `retained-work.test.ts` (1/10, mostly "Needs an accepted implementation plan.") fail at `9d409b5`; tracked in FOR-84. Not re-run: rootless Docker, macOS.
+
 ## FOR-69 — Newer harness versions run after a compatibility probe (2026-10-19)
 
 Implementation `5d15a5f` on branch `for-69-probed-harness-versions` from main `a1faa87`. All checks below ran at `5d15a5f` in a fresh worktree with a private `CARGO_TARGET_DIR`, `-j6`, wrapped by `scripts/system_limits.py` (FOR-68).
