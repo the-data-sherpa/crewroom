@@ -4,6 +4,17 @@ The operator requested that each work item pass its checks before the next start
 
 Historical revision IDs and source hashes below refer to the original private snapshots before the FOR-17 history rewrite. Sanitized copies are not byte-identical evidence for rewritten revisions; replay requires the private archive. New validation is recorded separately.
 
+## FOR-85 — Daemon-scheduling restart usage test (2026-10-19)
+
+Simulated checks only (fixture daemon, seeded agent events, private `CARGO_TARGET_DIR`, Linux x86_64); no live provider or delivery.
+
+- Baseline on main `3f05023`: `npx tsx --test --test-name-pattern="provider usage" scripts/rust/daemon-scheduling.test.ts` (wrapped by `scripts/system_limits.py`) **failed** at `assert.ok(JSON.stringify(got.usage).includes('0.2'))`. The projected usage showed one `unknown` billing route with `costUsd: null`, `costResponses: 0`, `estimateWithheld: true`, `unrecordedAttempts: 2`; the seeded attempt had 3 provider requests, 1 actual receipt, 1 deduplicated response and 20 tokens.
+- Cause: the FOR-44 billing-route contract (`45b76ce`) withholds cost for unknown routes, and the fixture model records no route. FOR-54 (`96565b8`) only changed the unrecorded count and is not involved. Decision: correct the test, not the projection.
+- At `2552e35`: `scripts/rust/daemon-scheduling.test.ts` **3 passed / 0 failed** (after building `crewroomd` and the `provider-daemon` example).
+- `npm test`: **346 passed / 0 failed**. `npm run build`: passes.
+- No Rust source changed. `cargo test -p crewroom-service --lib usage`: 5 passed; `cargo clippy -p crewroom-service --all-targets -- -D warnings`: clean; `cargo fmt -p crewroom-service -p crewroom-core --check`: clean.
+- Not run: `npm run test:e2e` (integrator runs it serially).
+
 ## FOR-79 — Per-project setting overrides (2026-10-19)
 
 Implementation `58032ad` on branch `for-79-work` from main `096a6de`. All checks below ran at `58032ad` (the evidence commit changes only documentation) in a fresh worktree prepared with `python3 scripts/prepare_worktree.py --build-helpers`, a private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, `TMPDIR` on a disk-backed directory outside any Git checkout (the shared `/tmp` quota was exhausted during the run), and every test command wrapped by `scripts/system_limits.py`. Linux x86_64.
