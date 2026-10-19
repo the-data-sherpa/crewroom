@@ -5,6 +5,7 @@ use context::{host_input, session_needs_replacement};
 impl<S: StoreAccess> Workflow<S> {
     pub fn preflight_start(&self, run: &str, input: &Value, roles: &[Value]) -> Result<Vec<Value>> {
         self.check_open()?;
+        let roles = &self.project_roles(run, roles)?;
         let runtime = self.store(|s| s.runtime(run))?;
         if active(&runtime).iter().any(|a| {
             self.0
@@ -41,7 +42,7 @@ impl<S: StoreAccess> Workflow<S> {
         })
     }
     pub fn start_refinement(&self, run: &str) -> Result<Task> {
-        let roles = self.0.roles.read()?;
+        let roles = self.project_roles(run, &self.0.roles.read()?)?;
         let input = self
             .0
             .config
@@ -95,6 +96,7 @@ impl<S: StoreAccess> Workflow<S> {
         })
     }
     async fn start_run(&self, run: &str, input: &Value, roles: &[Value]) -> Result<Value> {
+        let roles = &self.project_roles(run, roles)?;
         let current = self.store(|s| s.get_run(run))?;
         if current["implementationPlan"].is_object()
             && array(&self.store(|s| s.runtime(run))?["assignments"]).is_empty()

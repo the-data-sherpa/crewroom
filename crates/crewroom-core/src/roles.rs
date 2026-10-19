@@ -50,6 +50,9 @@ impl Roles {
         let mut normalized = Vec::new();
         for value in roles {
             let mut role = validate_role(value)?;
+            if let Some(role) = role.as_object_mut() {
+                role.remove("projectSettings");
+            }
             if !seen.insert(role["id"].clone().to_string()) {
                 return Err(Error::Invalid("Role IDs must be unique.".into()));
             }
@@ -238,6 +241,14 @@ pub fn validate_role(v: &Value) -> Result<Value> {
     );
     if v.get("revision").is_some() {
         role["revision"] = json!(integer(v, "revision", 1, u64::MAX)?);
+    }
+    // FOR-79: the project settings resolved at admission travel with the
+    // assignment's role snapshot. The saved catalog never stores them.
+    if let Some(settings) = v.get("projectSettings") {
+        if !settings.is_object() || settings.to_string().chars().count() > 16000 {
+            return Err(Error::Invalid("Invalid project settings on role.".into()));
+        }
+        role["projectSettings"] = settings.clone();
     }
     Ok(role)
 }

@@ -111,6 +111,19 @@ impl<S: StoreAccess> Drop for Reservation<S> {
     }
 }
 impl<S: StoreAccess> Workflow<S> {
+    /// FOR-79: roles as admitted in the run's project, with the project's
+    /// overrides resolved (project → workspace → default). Assignments
+    /// capture these roles, so a later override never alters them.
+    pub(crate) fn project_roles(&self, run: &str, roles: &[Value]) -> Result<Vec<Value>> {
+        self.store(|s| {
+            let project = crewroom_core::capacity::run_project(&s.get_run(run)?);
+            Ok(crewroom_core::project_settings::effective_roles(
+                roles,
+                &s.project_settings()?,
+                &project,
+            ))
+        })
+    }
     /// Resolve only public model metadata; never project provider configuration.
     pub fn role_model(&self, role: &Value) -> Result<Value> {
         self.0.config.preview_model(role)

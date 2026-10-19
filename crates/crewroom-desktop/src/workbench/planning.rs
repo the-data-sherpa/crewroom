@@ -73,7 +73,11 @@ impl Workbench {
     /// The default launch: one coordinator with the ticket's brief, in a new worktree.
     pub(super) fn coordinator_launch(&self, snapshot: &Value, role: &str) -> Value {
         let mut member = json!({"name":"Coordinator","roleId":role,"coordinator":true,"input":json!({"brief":snapshot["brief"],"criteria":snapshot["criteria"]}).to_string()});
-        self.capture_model_preview(&mut member, role);
+        self.capture_model_preview(
+            &mut member,
+            role,
+            snapshot["repositoryId"].as_str().unwrap_or(""),
+        );
         json!({"team":[member],"repository":{"mode":"new"}})
     }
     pub(super) fn plan_controls(
@@ -270,7 +274,11 @@ impl Workbench {
             }
             for member in team {
                 let role = string(member, "roleId");
-                self.capture_model_preview(member, &role);
+                self.capture_model_preview(
+                    member,
+                    &role,
+                    snapshot["repositoryId"].as_str().unwrap_or(""),
+                );
             }
         }
         let path = current

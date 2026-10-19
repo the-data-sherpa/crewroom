@@ -7,6 +7,7 @@ mod learning;
 mod model_picker;
 pub(super) use model_picker::billing_label;
 mod models;
+pub(super) mod overrides;
 mod playbooks;
 mod principles;
 pub(super) mod repository_folder;
@@ -39,6 +40,11 @@ pub(super) struct Settings {
     submitted_role: String,
     saved: Option<(String, Value)>,
     pub(super) runner: runner::RunnerPage,
+    /// FOR-79: the project chosen at the top of Settings; `None` is All projects.
+    pub(super) scope: Option<String>,
+    pub(super) scope_drafts: overrides::ScopeDrafts,
+    /// The last project-settings change sent, to clear its drafts once saved.
+    pub(super) scope_pending: Option<Value>,
 }
 struct RoleDraft {
     fields: Fields,
@@ -522,7 +528,7 @@ impl Workbench {
                 .insert(id.clone(), RepositoryDraft::new(&value, window, cx));
         }
         self.apply_folder(window, cx);
-        let mut panel=section("Projects").child(hint("A project is one local checkout with its ticket source, checks and branch prefix. Choose the checkout folder; the local service inspects it and verifies it again on save. Existing runs keep their captured configuration.")).child(self.ceiling_block(cx));
+        let mut panel=section("Projects").child(hint("A project is one local checkout with its ticket source, checks and branch prefix. Choose the checkout folder; the local service inspects it and verifies it again on save. Existing runs keep their captured configuration.")).child(self.read_only_workspace(self.ceiling_block(cx)));
         for repo in records(&self.workspace, "repositories") {
             let target = string(&repo, "id");
             let edit = target.clone();

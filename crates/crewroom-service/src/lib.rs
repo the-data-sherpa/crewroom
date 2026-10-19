@@ -675,6 +675,7 @@ async fn workspace_value(state: &AppState) -> Result<Value, ApiError> {
                     Err(error) => value["roleCatalog"][id]["modelError"] = json!(error.to_string()),
                 }
             }
+            project_role_models(workflow, &mut value)?;
         }
     }
     value["modelDiscovery"] = model_discovery(state);
@@ -682,6 +683,38 @@ async fn workspace_value(state: &AppState) -> Result<Value, ApiError> {
     value["allowance"] = allowance_view(state);
     ticket_sources::project(&mut value, &runs).await?;
     Ok(value)
+}
+/// FOR-79: where a project's settings change a role as admitted there, the
+/// model preview for that project, so a launch captures the preview its
+/// admission will verify. Roles a project leaves unchanged use the
+/// workspace preview.
+fn project_role_models(
+    workflow: &crewroom_runtime::supervisor::workflow::Workflow<Access>,
+    value: &mut Value,
+) -> Result<(), ApiError> {
+    let roles = array(&value["roles"]).to_vec();
+    for repo in array(&value["repositories"]).to_vec() {
+        if !repo["retiredAt"].is_null() {
+            continue;
+        }
+        let project = text(&repo, "id")?;
+        let resolved = crewroom_core::project_settings::effective_roles(
+            &roles,
+            &value["projectSettings"],
+            project,
+        );
+        for (role, original) in resolved.iter().zip(&roles) {
+            if role == original {
+                continue;
+            }
+            let id = text(role, "id")?;
+            value["roleCatalog"][id]["projects"][project] = match workflow.role_model(role) {
+                Ok(model) => json!({"model":model,"modelError":null}),
+                Err(error) => json!({"modelError":error.to_string()}),
+            };
+        }
+    }
+    Ok(())
 }
 /// FOR-74: always projected, so every harness shows a reading or the reason
 /// it has none.
@@ -1127,6 +1160,11 @@ async fn mutate_inner(state: AppState, path: String, body: Value) -> Result<Valu
             ["runs", id, "steering"] => s.store.steer(id, &body),
             ["queue", "order"] => s.store.reorder_queue(&body),
             ["execution-capacity"] => s.store.set_execution_capacity(&body),
+            ["project-settings"] => s.store.save_project_settings(
+                &body,
+                &s.roles.read()?,
+                &crewroom_core::principles::Principles::beside_roles(s.roles.path()).read()?,
+            ),
             ["queue", id, "remove"] => s.store.cancel_queued(id, &body),
             ["queue", id, "launch"] | ["runs", id, "launch"] => {
                 s.store.set_queue_launch(id, &body, &s.roles.read()?)

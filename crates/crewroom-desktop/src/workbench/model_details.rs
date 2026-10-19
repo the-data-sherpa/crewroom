@@ -73,8 +73,15 @@ impl Workbench {
         }
         details(&facts["model"])
     }
-    pub(super) fn capture_model_preview(&self, input: &mut Value, role: &str) {
-        let preview = &self.workspace["roleCatalog"][role]["model"]["selection"]["previewRevision"];
+    /// FOR-79: where the project's settings change the role, admission
+    /// verifies the project's preview, so capture that one.
+    pub(super) fn capture_model_preview(&self, input: &mut Value, role: &str, project: &str) {
+        let facts = &self.workspace["roleCatalog"][role];
+        let model = match facts["projects"].get(project) {
+            Some(scoped) => &scoped["model"],
+            None => &facts["model"],
+        };
+        let preview = &model["selection"]["previewRevision"];
         input.as_object_mut().unwrap().remove("modelPreview");
         if preview.is_string() {
             input["modelPreview"] = preview.clone();

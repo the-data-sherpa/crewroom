@@ -917,3 +917,106 @@ fn omp_gateway_provider_billing_is_unknown_and_recorded() {
     assert_eq!(summary[0]["detection"]["routes"], json!(["unknown"]));
     assert!(!summary.to_string().contains("secret-canary"));
 }
+
+/// FOR-79: a project's model override replaces the workspace budget at
+/// admission, the preview must match the project's resolution, and an
+/// admitted assignment keeps its captured model after the override changes.
+#[test]
+fn project_model_overrides_resolve_at_admission_and_never_alter_captured_models() {
+    use crewroom_core::project_settings::effective_roles;
+    let (root, config, roles) = fixture();
+    let implementer = roles.iter().find(|r| r["id"] == "implementer").unwrap();
+    let workspace = config.assignment_model(implementer).unwrap();
+    assert_eq!(workspace["selection"]["requestedEffort"], "high");
+
+    let settings = json!({"workspace":{},"projects":{"alpha":{"models.budget":"small"}}});
+    let resolved = effective_roles(&roles, &settings, "alpha");
+    let role = resolved.iter().find(|r| r["id"] == "implementer").unwrap();
+    let model = config.assignment_model(role).unwrap();
+    assert_eq!(model["selection"]["requestedEffort"], "low");
+    assert_eq!(model["projectOverrides"], json!({"budget":"small"}));
+    // A workspace preview does not admit a project-resolved assignment.
+    assert!(
+        crate::model_catalog::policy::verify_preview(
+            &model,
+            &workspace["selection"]["previewRevision"]
+        )
+        .is_err()
+    );
+    crate::model_catalog::policy::verify_preview(&model, &model["selection"]["previewRevision"])
+        .unwrap();
+    // Another project inherits the workspace budget.
+    let other = effective_roles(&roles, &settings, "beta");
+    let inherited = other.iter().find(|r| r["id"] == "implementer").unwrap();
+    assert_eq!(
+        config.assignment_model(inherited).unwrap()["selection"]["requestedEffort"],
+        "high"
+    );
+
+    let store = Store::open(&root.path().join("store.sqlite")).unwrap();
+    let task = store
+        .create_task(&json!({"title":"Captured model","description":""}))
+        .unwrap();
+    let run = store
+        .queue_refinement(
+            task["id"].as_str().unwrap(),
+            &json!({"revision":1,"purpose":"explore"}),
+        )
+        .unwrap();
+    let admitted = store
+        .admit_assignment(
+            run["id"].as_str().unwrap(),
+            &json!({"name":"Implementer","coordinator":true,"role":role,"model":model,"input":"Inspect"}),
+        )
+        .unwrap();
+    // The override changes; the next admission resolves the new value, the
+    // admitted assignment keeps what it captured.
+    let changed = json!({"workspace":{},"projects":{"alpha":{"models.budget":"large"}}});
+    let next = effective_roles(&roles, &changed, "alpha");
+    let next = next.iter().find(|r| r["id"] == "implementer").unwrap();
+    assert_eq!(
+        config.assignment_model(next).unwrap()["selection"]["requestedEffort"],
+        "high"
+    );
+    let saved = store
+        .get_assignment(admitted["assignment"]["id"].as_str().unwrap())
+        .unwrap();
+    assert_eq!(saved["model"]["selection"]["requestedEffort"], "low");
+    assert_eq!(
+        saved["role"]["projectSettings"]["models"]["budget"],
+        "small"
+    );
+}
+
+/// FOR-79: operator instructions resolved for the project reach the prompt
+/// from the captured role, labelled with their source.
+#[test]
+fn captured_project_instructions_reach_the_assignment_prompt() {
+    let (_root, _config, roles) = fixture();
+    let settings = json!({"workspace":{"instructions":"Workspace rule."},"projects":{"alpha":{"instructions":"Alpha rule."}}});
+    for (project, expected) in [
+        (
+            "alpha",
+            "Operator project instructions (Settings): Alpha rule.",
+        ),
+        (
+            "beta",
+            "Operator workspace instructions (Settings): Workspace rule.",
+        ),
+    ] {
+        let resolved = crewroom_core::project_settings::effective_roles(&roles, &settings, project);
+        let role = resolved.iter().find(|r| r["id"] == "coordinator").unwrap();
+        let assignment = json!({"name":"Coordinator","coordinator":true,"role":role,"input":"Inspect","brief":{"criteria":[],"dependsOn":[]}});
+        let run = json!({"purpose":"coding","taskSnapshot":{"criteria":[]},"taskRevision":1});
+        let prompt = configuration::assignment_prompt(
+            &run,
+            &assignment,
+            &assignment,
+            std::slice::from_ref(&assignment),
+            None,
+            false,
+        )
+        .unwrap();
+        assert!(prompt.contains(expected), "{prompt}");
+    }
+}

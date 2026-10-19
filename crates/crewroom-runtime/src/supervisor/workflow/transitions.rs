@@ -102,7 +102,7 @@ impl<S: StoreAccess> Workflow<S> {
             return Ok(());
         };
         let result = async {
-            let roles = self.0.roles.read()?;
+            let roles = self.project_roles(run, &self.0.roles.read()?)?;
             if self
                 .store(|s| s.reject_unavailable_team_proposal(text(&proposal, "id")?, &roles))?
                 .is_some()
@@ -137,7 +137,7 @@ impl<S: StoreAccess> Workflow<S> {
         }
         self.current(run, control)?;
         self.reconcile_deliveries(run, &self.messages(run)?).await?;
-        let roles = self.0.roles.read()?;
+        let roles = self.project_roles(run, &self.0.roles.read()?)?;
         let principles = self.0.config.principles()?;
         self.store(|s| {
             let proposed = s.get_team_proposal(proposal)?;

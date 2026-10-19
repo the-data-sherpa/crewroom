@@ -224,8 +224,33 @@ impl RuntimeConfig {
     pub(crate) fn preview_model(&self, role: &Value) -> Result<Value> {
         self.resolve_model(role, false)
     }
+    /// FOR-79: a role resolved for a project carries that project's model
+    /// overrides; they replace the workspace budget and job models.
+    pub(crate) fn role_policy(&self, role: &Value) -> Result<Value> {
+        let mut policy = self.effective_policy()?;
+        let overrides = &role["projectSettings"]["models"];
+        if !overrides.is_object() {
+            return Ok(policy);
+        }
+        if !policy["jobs"].is_object() {
+            // A legacy single default model becomes per-job values first.
+            let base = crewroom_core::model_jobs::defaults(&policy);
+            policy["jobs"] = base["jobs"].clone();
+            if policy["budget"].is_null() {
+                policy["budget"] = base["budget"].clone();
+            }
+        }
+        if let Some(budget) = overrides["budget"].as_str() {
+            policy["budget"] = json!(budget);
+        }
+        for (job, model) in overrides["jobs"].as_object().into_iter().flatten() {
+            policy["jobs"][job] = model.clone();
+        }
+        policy["projectOverrides"] = overrides.clone();
+        Ok(policy)
+    }
     fn resolve_model(&self, role: &Value, verify_binary: bool) -> Result<Value> {
-        let policy = self.effective_policy()?;
+        let policy = self.role_policy(role)?;
         let mut model = if crate::model_catalog::is_selection(
             crate::model_policy::intent(role, &policy)?.model,
         ) {
@@ -246,6 +271,9 @@ impl RuntimeConfig {
             resolve_assignment(role, &self.catalog, &policy, &self.requirements)?
         };
         model["settingsRevision"] = policy["revision"].clone();
+        if policy["projectOverrides"].is_object() {
+            model["projectOverrides"] = policy["projectOverrides"].clone();
+        }
         Ok(model)
     }
     pub fn refinement_team(&self, run: &Value, roles: &[Value]) -> Result<Value> {
@@ -264,8 +292,10 @@ impl RuntimeConfig {
                 _ => return Err(conflict("This is not a refinement run.")),
             }
         };
-        let policy = self.effective_policy()?;
         let configured = |r: &&Value| {
+            let Ok(policy) = self.role_policy(r) else {
+                return false;
+            };
             let (job, _) = crewroom_core::model_jobs::job(r);
             let inherited = if policy["jobs"].is_object() {
                 &policy["jobs"][job]
@@ -290,7 +320,9 @@ impl RuntimeConfig {
             .or_else(|| roles.iter().find(configured))
             .ok_or_else(|| conflict("No coordinator role is configured."))?;
         let mut member = json!({"name":"Coordinator","roleId":role["id"],"coordinator":true,"input":instruction});
-        if crate::model_catalog::is_selection(crate::model_policy::intent(role, &policy)?.model) {
+        if crate::model_catalog::is_selection(
+            crate::model_policy::intent(role, &self.role_policy(role)?)?.model,
+        ) {
             member["modelPreview"] =
                 self.assignment_model(role)?["selection"]["previewRevision"].clone();
         }
@@ -640,6 +672,20 @@ pub fn assignment_prompt(
     } else {
         String::new()
     };
+    // FOR-79: operator instructions from Settings, resolved for the project
+    // at admission and captured with the role.
+    let settings = &assignment["role"]["projectSettings"]["instructions"];
+    let operator_instructions = match settings["text"].as_str().filter(|t| !t.is_empty()) {
+        Some(text) => format!(
+            "Operator {} instructions (Settings): {text}\n",
+            if settings["source"] == "project" {
+                "project"
+            } else {
+                "workspace"
+            }
+        ),
+        None => String::new(),
+    };
     let names = active
         .iter()
         .map(|a| text(a, "name"))
@@ -677,7 +723,7 @@ pub fn assignment_prompt(
         ""
     };
     Ok(format!(
-        "{}\nAssignment: {}\n{}\nAccepted task data: {}\n{repository}{research_prompt}{reporter_prompt}{guidance}{intake_context}{choreography_context}You may communicate only with: {}.{ending}",
+        "{}\nAssignment: {}\n{}\nAccepted task data: {}\n{repository}{research_prompt}{reporter_prompt}{guidance}{operator_instructions}{intake_context}{choreography_context}You may communicate only with: {}.{ending}",
         text(&assignment["role"], "instructions")?,
         text(attempt, "input")?,
         super::context::present_briefs(assignment, team)?,

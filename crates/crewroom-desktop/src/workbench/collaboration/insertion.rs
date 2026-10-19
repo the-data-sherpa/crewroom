@@ -152,7 +152,11 @@ impl Workbench {
             .collect();
         let mut body =
             json!({"roleId":selected,"input":input,"dependsOn":dependencies,"criteria":criteria});
-        self.capture_model_preview(&mut body, &selected);
+        self.capture_model_preview(
+            &mut body,
+            &selected,
+            run["taskSnapshot"]["repositoryId"].as_str().unwrap_or(""),
+        );
         panel = panel.child(
             Button::new("propose-specialist")
                 .primary()

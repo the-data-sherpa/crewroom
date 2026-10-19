@@ -30,6 +30,7 @@ A fresh workbench can save local tickets, briefs, roles and repositories. Agents
 | Open agent wall | Observe separate agent terminals and retained output |
 | Agent roles | Create and edit reusable agent specialties, instructions and models |
 | Projects and Learning | Configure future work and review proposed guidance |
+| Settings for | The selector at the top of Settings. **All projects** edits workspace values and shows how many projects override each setting, with links. Choosing a project overrides, for that project only, the budget and job models, which roles may be assigned, instructions and principles added to every assignment, and run capacity. Each setting shows its source (built-in default, workspace or project override), **Where this comes from** for the full chain, and **Reset** to inherit again. Workspace-only settings stay visible but read-only while a project is selected. Existing runs keep the values they captured |
 
 On a narrow window, use **Tickets & settings** to reach navigation. Jira status, workflow state and agent activity are independent. A queued plan has not necessarily started, and observed idle output does not prove validation passed. The agent wall is read-only; send direction through Conversation.
 

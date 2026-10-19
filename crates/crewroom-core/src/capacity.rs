@@ -27,7 +27,7 @@ use serde_json::{Value, json};
 /// Largest accepted per-project capacity and workspace ceiling.
 pub const MAX_CAPACITY: u64 = 16;
 
-pub(crate) fn run_project(run: &Value) -> String {
+pub fn run_project(run: &Value) -> String {
     run["taskSnapshot"]["repositoryId"]
         .as_str()
         .unwrap_or("")
@@ -58,17 +58,28 @@ impl Store {
         }
         Ok(value)
     }
+    /// FOR-79: the project's override, else the workspace default, else 1.
     pub fn project_capacity(&self, project: &str) -> Result<u64> {
-        Ok(self.execution_settings()?["projects"][project]
+        let settings = self.execution_settings()?;
+        Ok(settings["projects"][project]
             .as_u64()
+            .or_else(|| settings["defaultCapacity"].as_u64())
             .unwrap_or(1))
+    }
+    pub(crate) fn write_execution_settings(&self, settings: &Value) -> Result<()> {
+        self.db.execute(
+            "INSERT INTO execution_settings(id,data) VALUES(1,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data",
+            [settings.to_string()],
+        )?;
+        Ok(())
     }
     pub fn workspace_ceiling(&self) -> Result<Option<u64>> {
         Ok(self.execution_settings()?["workspaceCeiling"].as_u64())
     }
-    /// Sets one project's capacity (`repositoryId` + `capacity`) and/or the
-    /// workspace ceiling (`workspaceCeiling`, `null` removes it). Lowering a
-    /// value never stops running work; it only delays new admissions.
+    /// Sets one project's capacity (`repositoryId` + `capacity`; `null`
+    /// inherits the workspace default again) and/or the workspace ceiling
+    /// (`workspaceCeiling`, `null` removes it). Lowering a value never stops
+    /// running work; it only delays new admissions.
     pub fn set_execution_capacity(&self, body: &Value) -> Result<Value> {
         strict(body, &["repositoryId", "capacity", "workspaceCeiling"])?;
         if body.get("repositoryId").is_some() != body.get("capacity").is_some() {
@@ -83,17 +94,15 @@ impl Store {
                 let repo = repo
                     .as_str()
                     .ok_or_else(|| invalid("repositoryId must be a string."))?;
-                if s
-                    .record("repositories", "id", repo)?
+                if s.record("repositories", "id", repo)?
                     .is_none_or(|r| r.get("retiredAt").is_some())
                 {
                     return Err(crate::Error::NotFound("Repository not found.".into()));
                 }
-                let capacity = integer(body, "capacity", 1, MAX_CAPACITY)?;
-                if capacity == 1 {
+                if body["capacity"].is_null() {
                     settings["projects"].as_object_mut().unwrap().remove(repo);
                 } else {
-                    settings["projects"][repo] = json!(capacity);
+                    settings["projects"][repo] = json!(integer(body, "capacity", 1, MAX_CAPACITY)?);
                 }
             }
             if let Some(ceiling) = body.get("workspaceCeiling") {
@@ -103,10 +112,7 @@ impl Store {
                     json!(integer(body, "workspaceCeiling", 1, MAX_CAPACITY)?)
                 };
             }
-            s.db.execute(
-                "INSERT INTO execution_settings(id,data) VALUES(1,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data",
-                [settings.to_string()],
-            )?;
+            s.write_execution_settings(&settings)?;
             s.execution_settings()
         })
     }

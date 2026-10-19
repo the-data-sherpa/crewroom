@@ -501,6 +501,7 @@ impl Workbench {
                     .font_weight(FontWeight::SEMIBOLD)
                     .child(crate::accessibility::text("Settings")),
             )
+            .child(self.scope_bar(cx))
             .child(nav)
     }
 

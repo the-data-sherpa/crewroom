@@ -660,7 +660,7 @@ impl Store {
         Ok(
             json!({"tasks":tasks,"runs":runs,"repositories":repositories,"requirementRevisions":self.all("requirement_revisions")?,
             "notes":self.all("notes")?,"messages":self.all("steering")?,"refinementProposals":self.all("refinement_proposals")?,"learning":self.all("learning_proposals")?,
-            "queue":self.queue_view()?,"activity":activity,"connections":{"jira":false,"runner":false},"dependencyStates":self.dependency_states()?,"repositorySnapshots":repository_snapshots,"continuations":continuations,
+            "queue":self.queue_view()?,"projectSettings":self.project_settings()?,"activity":activity,"connections":{"jira":false,"runner":false},"dependencyStates":self.dependency_states()?,"repositorySnapshots":repository_snapshots,"continuations":continuations,
             "capabilities":{"execution":false,"publication":false,"liveJira":false,"nativePersistence":true}}),
         )
     }

@@ -480,6 +480,13 @@ impl Workbench {
                         }
                         .into();
                         self.error.clear();
+                        if path == settings::overrides::SCOPE_PATH {
+                            self.workspace["projectSettings"] = value.clone();
+                            if let Some(body) = self.settings.scope_pending.take() {
+                                self.scope_saved(&body);
+                            }
+                            self.notice = "Settings saved. New assignments use them; existing runs keep the values they captured.".into();
+                        }
                         if path.starts_with("/runner/") {
                             self.settings.runner.saved();
                             if let Some(text) = value["notice"].as_str() {
@@ -687,6 +694,13 @@ impl Workbench {
         {
             return;
         }
+        if let Some(reason) = self.scope_refusal(&path, &body) {
+            self.error = reason;
+            self.notice.clear();
+            self.feedback_origin = Some(self.origin(&path));
+            cx.notify();
+            return;
+        }
         if keyed {
             let key = self
                 .pending_keys
@@ -722,6 +736,28 @@ impl Workbench {
         self.command_origins.insert(path.clone(), origin);
         self.pending_commands.insert(path);
         self.busy = true;
+    }
+    /// FOR-79: Settings navigation, the scope's overrides for this page, and
+    /// the page's own content, read-only when it is workspace-only and a
+    /// project is selected. The Projects page edits the project itself, so
+    /// only its workspace ceiling is read-only there.
+    fn settings_page(&mut self, content: Div, window: &mut Window, cx: &mut Context<Self>) -> Div {
+        let nav = self.settings_nav(cx);
+        let scoped = self.scope_section(window, cx);
+        let project = self.settings_scope().is_some();
+        let content = if self.panel == Panel::Repositories {
+            content
+        } else {
+            self.read_only_workspace(content)
+        };
+        // A project's overrides lead its pages; with All projects the
+        // workspace editors come first and the override summary follows.
+        let page = div().flex().flex_col().gap_4().child(nav);
+        if project {
+            page.children(scoped).child(content)
+        } else {
+            page.child(content).children(scoped)
+        }
     }
     fn blocked(&self) -> bool {
         self.busy || !self.connected
@@ -1191,45 +1227,46 @@ impl Render for Workbench {
             .gap_4()
             .p_6();
         self.feedback_placed.set(false);
-        let settings =
-            |nav: Div, content: Div| div().flex().flex_col().gap_4().child(nav).child(content);
         let (content, drawer) = if self.comparisons.open {
             (self.comparison_panel(cx), None)
         } else {
             match self.panel {
                 Panel::New => (self.new_ticket(cx), None),
-                Panel::Import => (settings(self.settings_nav(cx), self.import_panel(cx)), None),
-                Panel::Repositories => (
-                    settings(self.settings_nav(cx), self.repositories(window, cx)),
-                    None,
-                ),
-                Panel::Playbooks => (
-                    settings(self.settings_nav(cx), self.playbooks(window, cx)),
-                    None,
-                ),
-                Panel::Principles => (
-                    settings(self.settings_nav(cx), self.principles(window, cx)),
-                    None,
-                ),
-                Panel::Models => (
-                    settings(self.settings_nav(cx), self.models(window, cx)),
-                    None,
-                ),
-                Panel::Runner => (
-                    settings(self.settings_nav(cx), self.runner_panel(window, cx)),
-                    None,
-                ),
-                Panel::Roles => (
-                    settings(self.settings_nav(cx), self.roles(window, cx)),
-                    None,
-                ),
+                Panel::Import => {
+                    let content = self.import_panel(cx);
+                    (self.settings_page(content, window, cx), None)
+                }
+                Panel::Repositories => {
+                    let content = self.repositories(window, cx);
+                    (self.settings_page(content, window, cx), None)
+                }
+                Panel::Playbooks => {
+                    let content = self.playbooks(window, cx);
+                    (self.settings_page(content, window, cx), None)
+                }
+                Panel::Principles => {
+                    let content = self.principles(window, cx);
+                    (self.settings_page(content, window, cx), None)
+                }
+                Panel::Models => {
+                    let content = self.models(window, cx);
+                    (self.settings_page(content, window, cx), None)
+                }
+                Panel::Runner => {
+                    let content = self.runner_panel(window, cx);
+                    (self.settings_page(content, window, cx), None)
+                }
+                Panel::Roles => {
+                    let content = self.roles(window, cx);
+                    (self.settings_page(content, window, cx), None)
+                }
                 Panel::Queue => (self.queue_panel(cx), None),
                 Panel::NeedsYou => (self.needs_panel(window, cx), None),
                 Panel::Overview => (self.overview_panel(cx), None),
-                Panel::Learning => (
-                    settings(self.settings_nav(cx), self.learning_panel(window, cx)),
-                    None,
-                ),
+                Panel::Learning => {
+                    let content = self.learning_panel(window, cx);
+                    (self.settings_page(content, window, cx), None)
+                }
                 Panel::Ticket => {
                     let task = records(&self.workspace, "tasks")
                         .into_iter()

@@ -418,7 +418,7 @@ impl<S: StoreAccess> Workflow<S> {
             &checks,
             array(&runtime["assignments"]),
         )?;
-        let roles = self.0.roles.read()?;
+        let roles = self.project_roles(run, &self.0.roles.read()?)?;
         let specialists=members.iter().map(|m|{
             let role=roles.iter().find(|r|r["id"]==m["roleId"]&&r["enabled"]==true).ok_or_else(||conflict("Selected specialist role is unavailable."))?;
             preparation::validate_research_role(c.run["purpose"].as_str().unwrap_or("coding"),role,m)?;
@@ -432,7 +432,7 @@ impl<S: StoreAccess> Workflow<S> {
         if let Some(previous) = self.store(|s| s.insertion_replay(run, &input))? {
             return Ok(previous);
         }
-        let roles = self.0.roles.read()?;
+        let roles = self.project_roles(run, &self.0.roles.read()?)?;
         let role = roles
             .iter()
             .find(|r| r["id"] == input["roleId"] && r["enabled"] == true)

@@ -181,10 +181,16 @@ fn capacity_settings_are_validated() {
         .unwrap();
     assert_eq!(saved["projects"][&alpha], 3);
     assert_eq!(saved["workspaceCeiling"], 4);
-    // Capacity 1 is the default and is not stored.
-    let reset = f
+    // FOR-79: an explicit capacity is a project override, even at 1; null
+    // inherits the workspace default again.
+    let one = f
         .store
         .set_execution_capacity(&json!({"repositoryId":alpha,"capacity":1}))
+        .unwrap();
+    assert_eq!(one["projects"][&alpha], 1);
+    let reset = f
+        .store
+        .set_execution_capacity(&json!({"repositoryId":alpha,"capacity":null}))
         .unwrap();
     assert!(reset["projects"].get(&alpha).is_none());
     assert_eq!(f.store.project_capacity(&alpha).unwrap(), 1);

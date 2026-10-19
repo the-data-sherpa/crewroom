@@ -13,7 +13,7 @@ impl<S: StoreAccess> Workflow<S> {
                 }))
             }),
             "coding/choreography-propose" => {
-                let roles = self.0.roles.read()?;
+                let roles = self.project_roles(run, &self.0.roles.read()?)?;
                 for member in array(&c.args["schedule"]["assignments"]) {
                     if !roles
                         .iter()
