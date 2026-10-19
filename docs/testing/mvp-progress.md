@@ -6,7 +6,7 @@ Historical revision IDs and source hashes below refer to the original private sn
 
 ## FOR-83 — Configure the agent runner from Settings (2026-10-19)
 
-Code `45d58a1`, `66cc86b` and `145acfb` on branch `for-83-work` from main `9d409b5`. Checks ran in a fresh worktree with a private `CARGO_TARGET_DIR`, `-j6`, wrapped by `scripts/system_limits.py`.
+Code `a1ce41b`, `bf62c79` and `88bb6c9` on main (rebased without code changes from `45d58a1`, `66cc86b` and `145acfb`, written on main `9d409b5`, onto main `beb340c`). Checks below cite the pre-rebase revisions they ran at, except the integration checks at the end. Checks ran in a fresh worktree with a private `CARGO_TARGET_DIR`, `-j6`, wrapped by `scripts/system_limits.py`.
 
 Simulated (real `crewroomd`, SQLite and encrypted store; the Mail endpoint is an unused loopback port; no agent runs):
 
@@ -27,6 +27,8 @@ Checks:
 - At `45d58a1`: `npm test` **345/345** (an earlier run under machine load timed out in `tests/target-refresh.test.ts`; that file passed 55/55 alone, then the full rerun passed); `npm run build` passes; `cargo test -p crewroom-desktop -- --test-threads=4` **153 passed / 0 failed / 15 ignored** (two earlier runs failed only on setup: `/tmp` was full, then an over-long `TMPDIR` broke tmux socket paths).
 - At `145acfb`: `cargo test -p crewroom-core -p crewroom-runtime -p crewroom-service -- --test-threads=4` **425 passed / 0 failed / 3 ignored**; `cargo test -p crewroom-desktop -- --test-threads=4` **153 passed / 0 failed / 15 ignored**; `cargo clippy -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop --all-targets -- -D warnings` and `cargo fmt --check` for those crates are clean.
 - `npm run test:e2e`: not run (integrator).
+
+**Integration at `88bb6c9` on main `beb340c`** (documentation conflicts only), all through `scripts/system_limits.py run` with a private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4` and the worktree prepared with `--build-helpers`: `npm test` **345/345**; `npm run build` passes; `npm run test:e2e` **31/31**; `cargo test --locked -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop` **611 passed / 0 failed / 18 ignored** over 68 test binaries; Clippy `--all-targets -D warnings` and fmt clean for those crates. The isolated live launch was not rerun. The operator check in the 4318 app remains pending.
 
 ## FOR-73 — Model catalog: typed capabilities, bundled model facts and a readable picker (2026-10-19)
 
