@@ -26,7 +26,23 @@ fn count(v: &Value) -> u64 {
 }
 
 impl Workbench {
+    /// Recorded usage, then the remaining subscription allowance (FOR-74).
     pub(in crate::workbench) fn usage_panel(&self, usage: &Value) -> Div {
+        div()
+            .flex()
+            .flex_col()
+            .gap_3()
+            .child(self.recorded_usage(usage))
+            .child(
+                section("Remaining allowance")
+                    .child(crate::workbench::allowance::summary(
+                        &self.workspace["allowance"],
+                        "usage",
+                    ))
+                    .child(hint("Refresh it in Settings · Models & budget.")),
+            )
+    }
+    fn recorded_usage(&self, usage: &Value) -> Div {
         let mut panel = section("Recorded usage");
         if usage.is_null() {
             return panel.child(hint(

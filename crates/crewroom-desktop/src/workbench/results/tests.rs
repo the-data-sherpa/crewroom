@@ -400,3 +400,39 @@ fn github_issue_delivery_is_listed_with_reasons_and_retry(cx: &mut gpui::TestApp
     assert!(has(&shown, "Retry"), "{shown:#?}");
     assert!(!has(&shown, "Another run"), "{shown:#?}");
 }
+
+/// FOR-74: remaining allowance is shown beside recorded usage with its
+/// observation time; an unavailable harness or window names its reason and
+/// never reads as zero.
+#[gpui::test]
+fn remaining_allowance_is_shown_beside_usage_and_unavailable_is_never_zero(
+    cx: &mut gpui::TestAppContext,
+) {
+    let h = open(cx, |view| {
+        let mut fixture = result(NEW, false);
+        fixture["usage"] = usage_by_route();
+        view.observation.result = fixture;
+        view.observation.result_fresh = true;
+        view.workspace["allowance"] = json!({"state":"idle","note":"Visibility only.","harnesses":[
+            {"harness":"codex","label":"Codex","state":"partial","plan":"pro","observedAt":1792401599,
+             "source":"Codex app-server account/rateLimits/read","inferenceRequested":false,
+             "reason":"Some windows were not reported in full; see each window.",
+             "windows":[{"id":"codex:primary","label":"5-hour","usedPercent":36.0,"remainingPercent":64.0,"resetsAt":1792401599},
+                        {"id":"codex:secondary","label":"Weekly","usedPercent":null,"remainingPercent":null,"resetsAt":null,"reason":"Codex did not report the used share of this window."}]},
+            {"harness":"claude-code","label":"Claude Code","state":"unavailable","observedAt":1792401599,"inferenceRequested":false,
+             "reason":"Claude Code uses API billing, which has no plan allowance.","windows":[]}]});
+    });
+    let shown = labels(cx, h);
+    for expected in [
+        "Subscription allowance",
+        "Codex allowance · partial · plan pro",
+        "5-hour · 64% left · resets 2026-10-19 09:19 UTC",
+        "Weekly · remaining unavailable · reset time unavailable · Codex did not report the used share of this window.",
+        "Observed 2026-10-19 09:19 UTC · Codex app-server account/rateLimits/read",
+        "Claude Code allowance · unavailable",
+        "Claude Code uses API billing, which has no plan allowance.",
+    ] {
+        assert!(has(&shown, expected), "missing {expected:?}: {shown:#?}");
+    }
+    assert!(!shown.iter().any(|l| l.contains(" 0% left")), "{shown:#?}");
+}

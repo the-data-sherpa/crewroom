@@ -124,6 +124,10 @@ _Avoid_: Specialist selection
 Which account pays for a model offering's inference: subscription, API, or unknown when the harness login does not establish one. It is part of the offering's identity. Usage is reported per billing route and never totalled across routes: API use shows a list-price estimate, subscription use shows runs and tokens with no dollar figure, and unknown use (including assignments admitted before routes were recorded) shows no cost.
 _Avoid_: Plan, tier, provider
 
+**Subscription allowance**:
+The remaining share of each rate-limit window (for example 5-hour and weekly) of a harness login on the subscription billing route, with its reset time and observation time, as the harness reports it. Reading it sends no prompt. It is visibility only: it never limits or pauses work. A window or login without a reported value is unavailable with its reason, never zero.
+_Avoid_: Budget, quota cap
+
 **Delivery reporter**:
 A specialist responsible for Jira progress, decisions, blockers, and evidence summaries.
 _Avoid_: Technical writer

@@ -82,7 +82,9 @@ impl Workbench {
         ));
         let budget = draft.budget.clone();
         let fields = draft.fields.inputs.clone();
-        form = form.child(self.model_refresh(cx));
+        form = form
+            .child(self.model_refresh(cx))
+            .child(self.allowance_panel(cx));
         for (job, label) in [
             ("code", "Code model"),
             ("judgment", "Judgment model"),

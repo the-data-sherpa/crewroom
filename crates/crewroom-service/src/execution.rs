@@ -8,7 +8,12 @@ use crewroom_runtime::{
     jira_delivery::JiraDelivery,
     jira_sync::JiraSync,
     messaging::StoreAccess,
-    model_catalog::{billing, store::Catalog, unconfigured},
+    model_catalog::{
+        allowance::{self, Allowance},
+        billing,
+        store::Catalog,
+        unconfigured,
+    },
     providers::{
         bitbucket::BitbucketClient,
         config,
@@ -141,6 +146,8 @@ pub(crate) struct Execution {
     pub discovery: Option<Catalog>,
     /// Native login locations for billing detection without a runner.
     pub billing: billing::Sources,
+    /// FOR-74: latest remaining-allowance readings per harness login.
+    pub allowance: Allowance,
     pub scheduler: Option<Scheduler>,
     pub checks: bool,
     pub operations: RunTasks,
@@ -259,6 +266,12 @@ impl Execution {
             None
         };
         let billing = billing::Sources::native(&options.environment);
+        let push = changes.clone();
+        let allowance = Allowance::open(&data.join("allowance"), move || {
+            push.send_modify(|v| {
+                *v = v.saturating_add(1);
+            });
+        })?;
         let workflow = options
             .runtime
             .map(|runtime| {
@@ -318,6 +331,7 @@ impl Execution {
             workflow,
             discovery,
             billing,
+            allowance,
             scheduler,
             checks: checks.is_some(),
             operations: RunTasks::default(),
@@ -328,6 +342,34 @@ impl Execution {
         });
         let _ = callback.set(Arc::downgrade(&result));
         Ok(result)
+    }
+    /// FOR-74: read remaining subscription allowance for the harness logins
+    /// this service launches (runner) or would launch (discovery only).
+    pub fn refresh_allowance(&self) -> Result<Value> {
+        let (targets, missing) = if let Some(workflow) = &self.workflow {
+            (
+                workflow.allowance_targets(),
+                "{harness} is not configured in the runner.",
+            )
+        } else if let Some(catalog) = &self.discovery {
+            (
+                allowance::HARNESSES
+                    .iter()
+                    .filter_map(|h| catalog.source(h))
+                    .map(|s| allowance::Target {
+                        config: s.config.clone(),
+                        sources: self.billing.clone(),
+                    })
+                    .collect(),
+                "{harness} is not installed on the service PATH.",
+            )
+        } else {
+            (
+                Vec::new(),
+                "Model discovery is unavailable in this service.",
+            )
+        };
+        self.allowance.refresh(targets, missing)
     }
     pub fn changed(&self) {
         self.changes.send_modify(|v| {
@@ -386,6 +428,7 @@ impl Execution {
         if let Some(s) = &self.scheduler {
             s.drain().await;
         }
+        self.allowance.close().await;
         if let Some(c) = &self.discovery
             && let Err(e) = c.close().await
         {

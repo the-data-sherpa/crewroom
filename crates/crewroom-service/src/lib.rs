@@ -679,8 +679,21 @@ async fn workspace_value(state: &AppState) -> Result<Value, ApiError> {
     }
     value["modelDiscovery"] = model_discovery(state);
     value["runner"] = runner::summary(state);
+    value["allowance"] = allowance_view(state);
     ticket_sources::project(&mut value, &runs).await?;
     Ok(value)
+}
+/// FOR-74: always projected, so every harness shows a reading or the reason
+/// it has none.
+fn allowance_view(state: &AppState) -> Value {
+    match &state.execution {
+        Some(e) => e.allowance.view(),
+        None => {
+            json!({"state":"unavailable","note":crewroom_runtime::model_catalog::allowance::NOTE,
+            "harnesses":crewroom_runtime::model_catalog::allowance::HARNESSES.iter().map(|h|
+                crewroom_runtime::model_catalog::allowance::Reading::unavailable(h,"This service was started without model discovery.",None)).collect::<Vec<_>>()})
+        }
+    }
 }
 fn unavailable_catalog(reason: &str, remedy: &str) -> Value {
     json!({"state":"unavailable","reason":reason,"remedy":remedy,"harnesses":[],"choices":[],"offerings":[]})
@@ -727,6 +740,9 @@ async fn read(
             return workflow.catalog_view().map(Json).map_err(ApiError::from);
         }
         return Ok(Json(model_discovery(&state)));
+    }
+    if path == "allowance" {
+        return Ok(Json(allowance_view(&state)));
     }
     if path == "repository-folders/inspect" {
         return repository_folder(&state, None, query).await.map(Json);
@@ -937,6 +953,15 @@ async fn mutate_inner(state: AppState, path: String, body: Value) -> Result<Valu
         let catalog = execution.discovery.as_ref().ok_or_else(unavailable)?;
         catalog.refresh()?;
         return Ok(model_discovery(&state));
+    }
+    if path == "allowance/refresh" {
+        if body != json!({}) {
+            return Err(
+                Error::Invalid("Refresh accepts no configuration or credentials.".into()).into(),
+            );
+        }
+        let execution = state.execution.as_ref().ok_or_else(unavailable)?;
+        return execution.refresh_allowance().map_err(ApiError::from);
     }
     if path == "model-preview" {
         let role = crewroom_core::roles::validate_role(&body["role"])?;

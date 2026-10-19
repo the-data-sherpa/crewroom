@@ -775,3 +775,158 @@ for line in sys.stdin:
     assert_eq!(restored["modelDiscovery"]["choices"][0]["key"], key);
     reopened.close().await.unwrap();
 }
+
+/// FOR-74: remaining subscription allowance is read on an authenticated,
+/// same-origin refresh only, carries its observation time, and names why a
+/// harness has none instead of showing zero.
+#[tokio::test]
+async fn allowance_refresh_reads_subscription_logins_and_explains_missing_ones() {
+    let root = tempfile::tempdir().unwrap();
+    let bin = root.path().join("bin");
+    std::fs::DirBuilder::new().mode(0o700).create(&bin).unwrap();
+    let codex = bin.join("codex");
+    std::fs::write(&codex, r#"#!/usr/bin/python3
+import json,sys,os
+if '--version' in sys.argv:
+ print('codex-cli 0.163.0');sys.exit(0)
+assert sys.argv[1:4]==['app-server','--listen','stdio://']
+for line in sys.stdin:
+ v=json.loads(line)
+ if 'id' not in v: continue
+ assert v['method'] in ['initialize','model/list','account/rateLimits/read'], v
+ result={}
+ if v['method']=='account/rateLimits/read':
+  assert os.path.islink(os.path.join(os.environ['CODEX_HOME'],'auth.json'))
+  result={'accountId':'account-canary','rateLimits':{'limitId':'codex','planType':'plus','credits':{'balance':'credential-canary'},
+   'primary':{'usedPercent':30,'windowDurationMins':300,'resetsAt':1792800000},'secondary':{'usedPercent':70,'windowDurationMins':10080,'resetsAt':1793000000}}}
+ print(json.dumps({'id':v['id'],'result':result}),flush=True)
+"#).unwrap();
+    std::fs::set_permissions(&codex, std::fs::Permissions::from_mode(0o700)).unwrap();
+    let login = root.path().join(".codex");
+    std::fs::DirBuilder::new()
+        .mode(0o700)
+        .create(&login)
+        .unwrap();
+    crewroom_core::authority::write_private(
+        &login.join("auth.json"),
+        br#"{"auth_mode":"chatgpt","tokens":{"access_token":"credential-canary","account_id":"account-canary"}}"#,
+    )
+    .unwrap();
+    let mut setup = options(root.path());
+    setup.runtime = None;
+    setup.environment = json!({"PATH":bin,"HOME":root.path()});
+    let roles = root.path().join("roles.json");
+    let service = Service::start_with_options(root.path(), &roles, 0, setup)
+        .await
+        .unwrap();
+    let info = &service.info;
+    // Mutations need the token and the service's own origin.
+    for request in [
+        reqwest::Client::new().post(format!("{}/api/allowance/refresh", info.origin)),
+        reqwest::Client::new()
+            .post(format!("{}/api/allowance/refresh", info.origin))
+            .bearer_auth(&info.token)
+            .header("Origin", "https://invalid.example"),
+    ] {
+        assert_eq!(request.json(&json!({})).send().await.unwrap().status(), 403);
+    }
+    assert_eq!(
+        post(
+            info,
+            "allowance/refresh",
+            json!({"token":"credential-canary"})
+        )
+        .await
+        .status(),
+        400
+    );
+    let before = get(info, "workspace").await["allowance"].clone();
+    assert_eq!(before["harnesses"][0]["state"], "unavailable");
+    assert!(
+        before["harnesses"][0]["reason"]
+            .as_str()
+            .unwrap()
+            .starts_with("Not read yet")
+    );
+    post(info, "allowance/refresh", json!({}))
+        .await
+        .error_for_status()
+        .unwrap();
+    let view = tokio::time::timeout(Duration::from_secs(30), async {
+        loop {
+            let view = get(info, "allowance").await;
+            if view["state"] == "idle" && view["harnesses"][0]["observedAt"].is_u64() {
+                return view;
+            }
+            tokio::time::sleep(Duration::from_millis(100)).await;
+        }
+    })
+    .await
+    .unwrap();
+    let codex = &view["harnesses"][0];
+    assert_eq!(codex["harness"], "codex");
+    assert_eq!(codex["state"], "available", "{codex}");
+    assert_eq!(codex["plan"], "plus");
+    assert_eq!(codex["inferenceRequested"], false);
+    assert_eq!(codex["windows"][0]["label"], "5-hour");
+    assert_eq!(codex["windows"][0]["remainingPercent"], 70.0);
+    assert_eq!(codex["windows"][1]["label"], "Weekly");
+    assert_eq!(codex["windows"][1]["resetsAt"], 1793000000);
+    let claude = &view["harnesses"][1];
+    assert_eq!(claude["harness"], "claude-code");
+    assert_eq!(claude["state"], "unavailable");
+    assert_eq!(
+        claude["reason"],
+        "Claude Code is not installed on the service PATH."
+    );
+    assert_eq!(claude["windows"], json!([]));
+    let workspace = get(info, "workspace").await;
+    assert_eq!(workspace["allowance"], view);
+    let text = workspace.to_string();
+    assert!(!text.contains("credential-canary") && !text.contains("account-canary"));
+    // The login is linked for the read only; no link or copy remains.
+    assert!(
+        root.path()
+            .join("allowance/codex/home/auth.json")
+            .symlink_metadata()
+            .is_err()
+    );
+    service.close().await.unwrap();
+}
+
+/// FOR-74: with a configured runner, allowance follows the runner's harness
+/// configuration; a harness it does not configure is named, never zero.
+#[tokio::test]
+async fn configured_runner_allowance_names_harnesses_it_does_not_launch() {
+    let root = tempfile::tempdir().unwrap();
+    let roles = root.path().join("roles.json");
+    let service = Service::start_with_options(root.path(), &roles, 0, options(root.path()))
+        .await
+        .unwrap();
+    let info = &service.info;
+    post(info, "allowance/refresh", json!({}))
+        .await
+        .error_for_status()
+        .unwrap();
+    let view = tokio::time::timeout(Duration::from_secs(30), async {
+        loop {
+            let view = get(info, "allowance").await;
+            if view["state"] == "idle" && view["harnesses"][1]["observedAt"].is_u64() {
+                return view;
+            }
+            tokio::time::sleep(Duration::from_millis(100)).await;
+        }
+    })
+    .await
+    .unwrap();
+    for (index, label) in [(0, "Codex"), (1, "Claude Code")] {
+        let reading = &view["harnesses"][index];
+        assert_eq!(reading["state"], "unavailable", "{reading}");
+        assert_eq!(
+            reading["reason"],
+            format!("{label} is not configured in the runner.")
+        );
+        assert_eq!(reading["windows"], json!([]));
+    }
+    service.close().await.unwrap();
+}

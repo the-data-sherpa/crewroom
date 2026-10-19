@@ -795,3 +795,52 @@ fn picker_listing_groups_collapses_and_states_shared_reasons_once() {
     eligible["choices"][0]["eligibility"]["high"] = json!({"eligible":true,"blockers":[]});
     assert!(listing(&eligible, "high", false, &[]).shared.is_empty());
 }
+
+/// FOR-74: beside the model picker, Refresh allowance reads each harness
+/// login through the service. This Codex answers with no windows and Claude
+/// Code is not installed: both read unavailable with a reason, not zero.
+#[gpui::test]
+fn allowance_beside_the_picker_reads_through_the_service_and_names_reasons(
+    cx: &mut gpui::TestAppContext,
+) {
+    let fixture = Fixture::configured(|_, _| {}, unconfigured);
+    let (h, v, e) = open(cx, &fixture);
+    wait(cx, h, &v, &e, |v, _| v.connected);
+    navigate(cx, h, "models");
+    let before = labels(cx, h);
+    for expected in [
+        "Subscription allowance",
+        "Codex allowance · unavailable",
+        "Not read yet. Refresh allowance to read it.",
+    ] {
+        assert!(
+            before.iter().any(|l| l.contains(expected)),
+            "Missing {expected}: {before:?}"
+        );
+    }
+    activate_by_keyboard(cx, h, "refresh-allowance");
+    wait(cx, h, &v, &e, |v, _| {
+        v.workspace["allowance"]["state"] == "idle"
+            && v.workspace["allowance"]["harnesses"][0]["observedAt"].is_u64()
+    });
+    let after = labels(cx, h);
+    for expected in [
+        "Codex reported no rate-limit windows for this login.",
+        "Claude Code is not installed on the service PATH.",
+        "Observed ",
+    ] {
+        assert!(
+            after.iter().any(|l| l.contains(expected)),
+            "Missing {expected}: {after:?}"
+        );
+    }
+    assert!(!after.iter().any(|l| l.contains("% left")), "{after:?}");
+    cx.read(|cx| {
+        assert!(
+            !v.read(cx)
+                .workspace
+                .to_string()
+                .contains("picker-login-secret")
+        );
+    });
+}

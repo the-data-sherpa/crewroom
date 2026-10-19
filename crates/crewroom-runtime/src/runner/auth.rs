@@ -71,6 +71,14 @@ fn fresh(token: &str) -> bool {
                 + 120
         })
 }
+/// The filesystem lock every Crewroom reader or refresher of this Codex login
+/// holds. Stable across separate runtime roots that use the same login.
+pub fn lock_path(source: &Path) -> PathBuf {
+    source.with_file_name(format!(
+        ".crewroom-{}.lock",
+        super::profile::digest(source.as_os_str().as_encoded_bytes())
+    ))
+}
 pub async fn lock(path: &Path) -> Result<File> {
     let file = OpenOptions::new()
         .read(true)
@@ -113,12 +121,7 @@ pub async fn credentials(config: &Value, failed: Option<(&str, &str)>) -> Result
     let owner = Path::new(text(&config["codex"], "authRoot")?);
     private_dir(owner)?;
     canonical(source)?;
-    // Stable across separate runtime roots that use the same canonical login.
-    let lock_path = source.with_file_name(format!(
-        ".crewroom-{}.lock",
-        super::profile::digest(source.as_os_str().as_encoded_bytes())
-    ));
-    let lease = lock(&lock_path).await?;
+    let lease = lock(&lock_path(source)).await?;
     let before = read_credentials(source)?;
     if let Some((account, _)) = failed
         && before.account != account

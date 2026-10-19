@@ -467,6 +467,22 @@ impl<S: StoreAccess> Workflow<S> {
                     .collect(),
             )
     }
+    /// FOR-74: the configured harnesses and the logins they launch with,
+    /// for reading remaining subscription allowance.
+    pub fn allowance_targets(&self) -> Vec<crate::model_catalog::allowance::Target> {
+        let Some(catalog) = self.0.config.discovery.as_ref() else {
+            return Vec::new();
+        };
+        let sources = self.0.config.billing_sources();
+        crate::model_catalog::allowance::HARNESSES
+            .iter()
+            .filter_map(|h| catalog.source(h))
+            .map(|s| crate::model_catalog::allowance::Target {
+                config: s.config.clone(),
+                sources: sources.clone(),
+            })
+            .collect()
+    }
     pub fn catalog_view(&self) -> Result<Value> {
         let catalog = self
             .0

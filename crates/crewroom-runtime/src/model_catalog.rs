@@ -8,6 +8,7 @@ use std::collections::HashSet;
 
 pub use billing::BillingRoute;
 
+pub mod allowance;
 pub mod billing;
 pub mod bundled;
 pub mod capabilities;

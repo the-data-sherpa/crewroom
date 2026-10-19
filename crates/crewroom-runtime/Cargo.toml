@@ -17,6 +17,7 @@ path = "src/host_main.rs"
 crewroom-core = { path = "../crewroom-core" }
 serde.workspace = true
 serde_json.workspace = true
+chrono.workspace = true
 sha2.workspace = true
 uuid.workspace = true
 libc.workspace = true

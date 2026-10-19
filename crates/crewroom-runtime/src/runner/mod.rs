@@ -19,7 +19,11 @@ use std::{
 };
 
 pub type Event = Arc<dyn Fn(Value) + Send + Sync>;
+/// FOR-74: allowance reads share the launch login, its lock and environments.
+pub(crate) use auth::{lock as codex_login_lock, lock_path as codex_login_lock_path};
 pub(crate) use claude_profile::LAUNCH_FLAGS as CLAUDE_LAUNCH_FLAGS;
+pub(crate) use claude_profile::environment as claude_environment;
+pub(crate) use profile::environment as codex_environment;
 pub(crate) use profile::{launch_files as codex_launch_files, pinned_row as codex_pinned};
 
 /// OMP RPC launch flags shared by every attempt and by the FOR-69

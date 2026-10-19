@@ -3,6 +3,7 @@ mod acceptance_tests;
 #[cfg(test)]
 mod agent_state_tests;
 mod agents;
+mod allowance;
 #[cfg(test)]
 mod blocker_tests;
 mod blockers;
