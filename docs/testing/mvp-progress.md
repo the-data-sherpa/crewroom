@@ -6,7 +6,7 @@ Historical revision IDs and source hashes below refer to the original private sn
 
 ## FOR-75 — Project-first sidebar (2026-10-19)
 
-Implementation `0d13000` on branch `for-75-work` from main `9d409b5`. The sidebar groups live in `crates/crewroom-desktop/src/workbench/projects.rs`; the saved order, collapsed groups and current project extend `navigation.rs` (`ProjectPrefs`, serde defaults, at most 200 ids per list, file limit 64 KiB). Start reuses the default coordinator launch now shared with Queue run (`planning.rs`: `coordinator_role`, `coordinator_launch`).
+Implementation `7793927` on main (rebased without code changes from `0d13000`, written on main `9d409b5`, onto main `20a6149`). The sidebar groups live in `crates/crewroom-desktop/src/workbench/projects.rs`; the saved order, collapsed groups and current project extend `navigation.rs` (`ProjectPrefs`, serde defaults, at most 200 ids per list, file limit 64 KiB). Start reuses the default coordinator launch now shared with Queue run (`planning.rs`: `coordinator_role`, `coordinator_launch`).
 
 Desktop, GPUI test platform, no window on the operator's desktop (`crates/crewroom-desktop/src/workbench/projects_tests.rs` and `navigation.rs`):
 
@@ -17,13 +17,19 @@ Desktop, GPUI test platform, no window on the operator's desktop (`crates/crewro
 - `project_preferences_survive_reopening_and_keep_ticket_navigation`: a navigation file written before FOR-75 reads unchanged; duplicate and empty ids are dropped; preferences saved before any ticket was opened read back.
 - Updated: the GitHub Issues test now imports through the project header's **Import** against the simulated loopback GitHub API (2 issues, listed under the project); the session-shell test checks project sections instead of the old flat groups; wording tests follow "project".
 
-Checks at `0d13000` (private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, all through `scripts/system_limits.py run`):
+Checks at `0d13000`, before the rebase (private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, all through `scripts/system_limits.py run`):
 
 - `npm test`: **345/345**. `npm run build`: passes.
 - `cargo test -p crewroom-desktop`: **157 passed, 0 failed, 15 ignored**.
 - `cargo test --no-fail-fast -p crewroom-core -p crewroom-service -p crewroom-runtime`: **418 passed, 0 failed, 3 ignored**. An earlier combined run lost 5 `crewroom-service` `tests/http.rs` cases to SQLite `disk I/O error` while the shared `/tmp` tmpfs was nearly full; the rerun passed.
 - `cargo clippy -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop --all-targets -- -D warnings` and `cargo fmt --check` for these crates: clean.
 - `npm run test:e2e`: not run (integrator). The browser suite exercises the legacy TypeScript UI, which this change does not touch.
+
+**Integration at `7793927` on main `20a6149`** (rebase with documentation conflicts only), all through `scripts/system_limits.py run` with a private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4` and the worktree prepared with `--build-helpers`:
+
+- `npm test` **345/345**; `npm run build` passes; `npm run test:e2e` **31/31**.
+- `cargo test --locked --no-fail-fast -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop`: **574 passed, 1 failed, 18 ignored**. The failure was `crewroom-runtime` `tests/claude_adapter.rs` `alias_drift_and_changed_account_block_admission` (load average about 11); this change only rewords runtime messages. It passed alone 3 times, with its file (10/10) 3 times, and a full `crewroom-runtime` rerun was **205 passed, 0 failed, 3 ignored**.
+- Clippy `--all-targets -D warnings` and `cargo fmt --check` for these crates: clean.
 
 Not yet verified: the operator's on-screen check of the sidebar in the native app. Every interaction above ran on the GPUI test platform.
 
