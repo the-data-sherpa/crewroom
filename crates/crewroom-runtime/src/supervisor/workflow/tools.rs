@@ -136,7 +136,9 @@ impl<S: StoreAccess> Workflow<S> {
             "agent-roles" => {
                 empty()?;
                 let run = text(&c.run, "id")?;
-                Ok(listed_roles(&self.project_roles(run, &self.0.roles.read()?)?))
+                Ok(listed_roles(
+                    &self.project_roles(run, &self.0.roles.read()?)?,
+                ))
             }
             "playbook/status" => {
                 empty()?;
