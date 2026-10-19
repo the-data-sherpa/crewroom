@@ -157,6 +157,8 @@ pub struct ModelSources {
     /// The budget behind the effort; `None` when the role sets its effort.
     pub budget: Option<String>,
     pub effort_source: &'static str,
+    /// The effort is the legacy single default's, not the budget's.
+    pub legacy_default: bool,
 }
 pub fn model_sources(
     role: &Value,
@@ -185,19 +187,51 @@ pub fn model_sources(
         (None, ROLE)
     } else {
         let budget = resolve("models.budget", settings, project, model_jobs, roles);
-        // A legacy single default policy is workspace configuration.
-        let source = if budget.source != PROJECT && model_jobs["legacyDefault"] == true {
+        let source = if legacy_effort_applies(settings, project, model_jobs) {
+            // A legacy single default policy is workspace configuration.
             WORKSPACE
         } else {
-            budget.source
+            budget_source(&budget, model_jobs)
         };
         (budget.value.as_str().map(str::to_owned), source)
     };
     ModelSources {
         job: job.to_owned(),
         model_source,
+        legacy_default: budget.is_some() && legacy_effort_applies(settings, project, model_jobs),
         budget,
         effort_source,
+    }
+}
+
+/// Whether the project overrides any job model or the budget.
+pub fn project_overrides_models(settings: &Value, project: Option<&str>) -> bool {
+    project.is_some_and(|p| {
+        project_value("models.budget", settings, p).is_some()
+            || JOBS
+                .iter()
+                .any(|job| project_value(&format!("models.jobs.{job}"), settings, p).is_some())
+    })
+}
+
+/// FOR-88: whether a job's inherited effort is the legacy single default's.
+/// The runtime keeps the legacy policy only while no project model override
+/// applies; any override turns it into per-job values whose effort comes
+/// from the budget (the workspace's, or the built-in `large`).
+pub fn legacy_effort_applies(settings: &Value, project: Option<&str>, model_jobs: &Value) -> bool {
+    model_jobs["legacyDefault"] == true && !project_overrides_models(settings, project)
+}
+
+/// Where the budget behind an inherited effort comes from. A legacy policy
+/// without a budget of its own runs at the built-in budget.
+fn budget_source(budget: &Resolved, model_jobs: &Value) -> &'static str {
+    if budget.source == WORKSPACE
+        && model_jobs["legacyDefault"] == true
+        && model_jobs["legacyBudget"] != true
+    {
+        DEFAULT
+    } else {
+        budget.source
     }
 }
 

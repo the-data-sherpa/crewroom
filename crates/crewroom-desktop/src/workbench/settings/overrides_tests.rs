@@ -360,6 +360,29 @@ fn a_project_model_choice_shows_in_its_role_facts_and_preview(cx: &mut gpui::Tes
         h,
         "Model source: Project override · code job model"
     ));
+    // The fixture's workspace is a legacy single default policy (effort
+    // high, no budget). A project job-model override turns it into per-job
+    // values at admission, so the effort is the built-in budget's, and the
+    // source line and the project picker's effort both say so.
+    assert_eq!(view["modelJobs"]["legacyDefault"], true);
+    let budget_effort = crewroom_core::model_jobs::effort("large", "code").unwrap();
+    assert_eq!(string(resolved, "effort"), budget_effort);
+    assert!(shows(
+        cx,
+        h,
+        "Effort source: Built-in default · budget large"
+    ));
+    assert!(!shows(cx, h, "legacy default"));
+    cx.read(|cx| {
+        let view = v.read(cx);
+        assert_eq!(view.scope_effort("code", Some(&alpha)), budget_effort);
+        assert_eq!(view.scope_effort("code", None), "high");
+        // Where the budget's effort differs from the legacy default's.
+        let review = crewroom_core::model_jobs::effort("large", "review").unwrap();
+        assert_ne!(review, "high");
+        assert_eq!(view.scope_effort("review", Some(&alpha)), review);
+        assert_eq!(view.scope_effort("review", None), "high");
+    });
     // The workspace resolution is unchanged.
     assert_ne!(
         view["roleCatalog"]["implementer"]["model"]["selection"]["intendedModel"],

@@ -468,6 +468,48 @@ fn a_role_names_where_its_model_and_effort_come_from_in_each_scope() {
     let legacy = json!({"revision":0,"legacyDefault":true,"jobs":{"code":"legacy"}});
     let s = model_sources(&implementer, &settings, Some(&beta), &legacy, &f.roles);
     assert_eq!((s.model_source, s.effort_source), (WORKSPACE, WORKSPACE));
+    assert!(s.legacy_default);
     let s = model_sources(&implementer, &settings, Some(&alpha), &legacy, &f.roles);
     assert_eq!(s.effort_source, PROJECT);
+    assert!(!s.legacy_default);
+}
+
+/// A project that overrides only a job model turns a legacy single default
+/// into per-job values at admission, so the effort is the budget's: the
+/// legacy policy's own budget, or the built-in `large` when it has none.
+#[test]
+fn a_job_model_override_over_a_legacy_policy_takes_the_budget_effort() {
+    let f = fixture();
+    let alpha = f.project("alpha");
+    let beta = f.project("beta");
+    f.save(json!({"repositoryId":alpha,"set":{"models.jobs.review":"alpha-review"}}))
+        .unwrap();
+    let settings = f.store.project_settings().unwrap();
+    let implementer = json!({"id":"implementer","job":"code","model":"","effort":"default"});
+    let policy = json!({"default":{"model":"legacy-model","effort":"low"}});
+    let legacy = crewroom_core::model_jobs::defaults(&policy);
+    assert_eq!(legacy["legacyDefault"], true);
+    let s = model_sources(&implementer, &settings, Some(&alpha), &legacy, &f.roles);
+    assert_eq!(
+        (
+            s.model_source,
+            s.budget.as_deref(),
+            s.effort_source,
+            s.legacy_default
+        ),
+        (WORKSPACE, Some("large"), DEFAULT, false)
+    );
+    // Without a model override the legacy default still sets the effort.
+    let s = model_sources(&implementer, &settings, Some(&beta), &legacy, &f.roles);
+    assert_eq!((s.effort_source, s.legacy_default), (WORKSPACE, true));
+    let s = model_sources(&implementer, &settings, None, &legacy, &f.roles);
+    assert!(s.legacy_default);
+    // A legacy policy with its own budget supplies it.
+    let budgeted = json!({"default":{"model":"legacy-model","effort":"low"},"budget":"small"});
+    let legacy = crewroom_core::model_jobs::defaults(&budgeted);
+    let s = model_sources(&implementer, &settings, Some(&alpha), &legacy, &f.roles);
+    assert_eq!(
+        (s.budget.as_deref(), s.effort_source, s.legacy_default),
+        (Some("small"), WORKSPACE, false)
+    );
 }

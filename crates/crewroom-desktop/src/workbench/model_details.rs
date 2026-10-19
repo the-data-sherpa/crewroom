@@ -85,7 +85,7 @@ impl Workbench {
     /// FOR-88: where a role's model and effort come from in a scope, in
     /// operator words.
     pub(super) fn model_source_line(&self, role: &Value, project: Option<&str>) -> String {
-        use crewroom_core::project_settings::{PROJECT, ROLE, model_sources};
+        use crewroom_core::project_settings::{ROLE, model_sources};
         let sources = model_sources(
             role,
             &self.workspace["projectSettings"],
@@ -103,10 +103,9 @@ impl Workbench {
                 sources.job
             )
         };
-        let legacy = self.workspace["modelJobs"]["legacyDefault"] == true;
         let effort = match &sources.budget {
             None => "Role override".to_owned(),
-            Some(_) if legacy && sources.effort_source != PROJECT => {
+            Some(_) if sources.legacy_default => {
                 format!("{} · legacy default", label(sources.effort_source))
             }
             Some(budget) => format!("{} · budget {budget}", label(sources.effort_source)),

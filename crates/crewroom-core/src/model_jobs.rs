@@ -34,7 +34,7 @@ pub fn defaults(policy: &Value) -> Value {
                 .unwrap_or("")
         );
     }
-    json!({"revision":0,"jobs":jobs,"budget":policy["budget"].as_str().unwrap_or("large"),"legacyDefault":!policy["jobs"].is_object() && policy["default"]["model"].as_str().is_some_and(|m| !m.is_empty())})
+    json!({"revision":0,"jobs":jobs,"budget":policy["budget"].as_str().unwrap_or("large"),"legacyDefault":!policy["jobs"].is_object() && policy["default"]["model"].as_str().is_some_and(|m| !m.is_empty()),"legacyBudget":policy["budget"].is_string()})
 }
 pub fn read(path: &Path, policy: &Value) -> Result<Value> {
     if !path.exists() {

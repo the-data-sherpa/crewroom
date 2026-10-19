@@ -415,11 +415,21 @@ impl Workbench {
             .child(field)
             .child(self.scope_save_button(key, scope, cx))
     }
-    /// FOR-88: the effort a job runs at in a scope: the resolved budget's,
-    /// or the legacy single default's while no budget applies over it.
-    fn scope_effort(&self, job: &str, project: Option<&str>) -> String {
+    /// FOR-88: the effort a job model chosen in a scope runs at. A project's
+    /// job model is an override, and the runtime's policy turns a legacy
+    /// single default into per-job values once any override applies, so in a
+    /// project the effort is always the resolved budget's (the project's,
+    /// the workspace's or the built-in `large`); the legacy default's effort
+    /// applies only to the workspace scope.
+    pub(super) fn scope_effort(&self, job: &str, project: Option<&str>) -> String {
         let budget = self.resolved_setting("models.budget", project);
-        if budget.source != PROJECT && self.workspace["modelJobs"]["legacyDefault"] == true {
+        if project.is_none()
+            && crewroom_core::project_settings::legacy_effort_applies(
+                &self.workspace["projectSettings"],
+                None,
+                &self.workspace["modelJobs"],
+            )
+        {
             return self.workspace["modelJobs"]["legacyEffort"]
                 .as_str()
                 .unwrap_or("unknown")
