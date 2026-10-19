@@ -4,6 +4,16 @@ The operator requested that each work item pass its checks before the next start
 
 Historical revision IDs and source hashes below refer to the original private snapshots before the FOR-17 history rewrite. Sanitized copies are not byte-identical evidence for rewritten revisions; replay requires the private archive. New validation is recorded separately.
 
+## FOR-91 — Service starts after a probe-contract upgrade (2026-10-19)
+
+Cause: `Snapshot::validate` rejected the whole saved model catalog when any retained receipt failed `ProbeReceipt::valid()`. A receipt written under `harness-compatibility-probe-v1` (FOR-69) fails under `-v2` (FOR-71), so the upgraded service exited with "Invalid compatibility probe receipts." after the workflow database had already migrated.
+
+Fix: `Snapshot::drop_unusable_probes` removes receipts this build cannot reuse before validation; the harness is probed again on its next refresh or launch. Tests: `receipts_from_an_older_probe_contract_are_dropped_not_fatal` (fails on the previous code) and `dropping_unusable_probes_keeps_other_snapshot_checks_strict`.
+
+Checks (wrapped through `scripts/system_limits.py`): `cargo test -p crewroom-runtime` 253 passed / 0 failed / 3 ignored; `cargo clippy -p crewroom-runtime --all-targets -D warnings` and `cargo fmt --check` clean; `npm test` 346/346; `npm run build` passes. e2e was not run for this Rust-only store change.
+
+Live (operator machine): the debug package built from this change started the operator's service on port 4318 with its existing data directory, which had failed on `860acac`. The saved `v1` receipt stays on disk until the next catalog write. No provider was contacted.
+
 ## FOR-86 — Claude adapter admission test under load (2026-10-19)
 
 Code `fd6cb73` and `426fa01` on branch `for-86-work` from main `3f05023` (rebased without code changes onto main `b71b476` as `8168ffa` and `71bacf3`); only `crates/crewroom-runtime/tests/claude_adapter.rs` changes. Private `CARGO_TARGET_DIR` in the worktree, every test command through `scripts/system_limits.py run`. All results use the fake Claude protocol peer (`tests/fixtures/claude-rpc.py`) and fake account metadata; nothing contacted a live service.

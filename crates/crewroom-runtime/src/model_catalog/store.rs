@@ -138,6 +138,15 @@ impl Default for Snapshot {
     }
 }
 impl Snapshot {
+    /// Drop retained probe receipts this build cannot reuse, for example one
+    /// written under an older probe contract. A receipt only lets a passed
+    /// probe be reused, so discarding it is fail-safe: the harness is probed
+    /// again on its next refresh or launch.
+    fn drop_unusable_probes(&mut self) -> usize {
+        let before = self.probes.len();
+        self.probes.retain(ProbeReceipt::valid);
+        before - self.probes.len()
+    }
     fn validate(&self) -> Result<()> {
         if self.schema_version != SCHEMA_VERSION
             || self.harnesses.len() != 3
@@ -378,6 +387,7 @@ impl Catalog {
         } else {
             Snapshot::default()
         };
+        snapshot.drop_unusable_probes();
         snapshot.validate()?;
         let mut persistence_error = false;
         if snapshot.state == "refreshing" {
@@ -733,6 +743,42 @@ mod tests {
             inference_requested: false,
             cleanup_verified: true,
         }
+    }
+    #[test]
+    fn receipts_from_an_older_probe_contract_are_dropped_not_fatal() {
+        let mut s = Snapshot::default();
+        let current = ProbeReceipt::new(
+            &Harness::Codex,
+            "codex-cli 9.9.9",
+            std::path::Path::new("/fixture/codex"),
+            "hash-current",
+            100,
+        );
+        let mut older = ProbeReceipt::new(
+            &Harness::ClaudeCode,
+            "9.9.9 (Claude Code)",
+            std::path::Path::new("/fixture/claude"),
+            "hash-older",
+            100,
+        );
+        older.contract = "harness-compatibility-probe-v1".into();
+        older.id = String::new();
+        older.id = policy::digest(&json!(older));
+        s.probes = vec![current.clone(), older];
+        assert!(
+            s.validate().is_err(),
+            "an unusable receipt fails strict validation"
+        );
+        assert_eq!(s.drop_unusable_probes(), 1);
+        assert_eq!(s.probes, vec![current]);
+        s.validate().unwrap();
+    }
+    #[test]
+    fn dropping_unusable_probes_keeps_other_snapshot_checks_strict() {
+        let mut s = Snapshot::default();
+        s.schema_version += 1;
+        assert_eq!(s.drop_unusable_probes(), 0);
+        assert!(s.validate().is_err());
     }
     #[test]
     fn partial_refresh_retains_history_without_freshening_failed_entries() {
