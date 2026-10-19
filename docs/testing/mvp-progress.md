@@ -29,6 +29,10 @@ All checks ran at `89bbb06` in a fresh worktree prepared with `python3 scripts/p
 
 Not executed: `npm run test:e2e` (left to the integrator), the operator's on-screen check, and live providers.
 
+### FOR-88 integration on main 67edf10 (2026-10-19)
+
+Rebased onto main `67edf10` with only `docs/status.md` and this file in conflict (all entries kept). `51320ae` became `1af35a5`, `293deff` became `42650de`, `89bbb06` became `c056ecc` and `be3b054` became `fef738f`, with identical code changes. At `fef738f` (code identical to `c056ecc`), all through `system_limits.py run` in a worktree prepared with `--build-helpers` and a private `CARGO_TARGET_DIR` (`-j6`, `--test-threads=4`): `npm test` **346/346**, `npm run build` passes (existing chunk-size warning), `npm run test:e2e` **31/31**, `cargo test -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop` **683 passed / 0 failed / 18 ignored** over 74 result lines, Clippy `--all-targets -D warnings` and `cargo fmt --check` for those crates clean. Simulated only; the operator's on-screen check in the 4318 app is still pending.
+
 ## FOR-87 — Approve execution profiles for discovered models (2026-10-19)
 
 Code `176c550` and fix `7170303` on branch `for-87-work` from main `3f05023` (builds on the FOR-83 runner save path `a1ce41b`, `bf62c79`, `88bb6c9`). Checks ran in a fresh worktree prepared with `prepare_worktree.py --build-helpers`, a private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, wrapped by `scripts/system_limits.py`.
