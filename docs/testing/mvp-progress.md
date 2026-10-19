@@ -33,6 +33,16 @@ Simulated (fixture runner, synthetic provider replies; no live delivery):
 - `npm test` **345/345**. `npm run build` passes. The implementer did not run `npm run test:e2e`.
 - Other native journeys that pause, run as a regression sample: 44 pass and 12 fail, none on slot release. They fail for these reasons: the native driver binary (`scripts/test-native-resume.sh`) was not built (2); the macOS-only `/opt/homebrew/bin/tmux` path (1); "Needs an accepted implementation plan" or "Workflow database is newer" in retained-work and conflict journeys, tracked in FOR-84 (8); and one continuation-observer timeout in those same journeys. This sample was not compared against `6fc0109`.
 
+### FOR-76 integration on main 73c6700 (2026-10-19)
+
+`f51dedf`, its evidence commit `6fc0109`, `fee2825` and its evidence commit `81aca38` were rebased onto main `73c6700` as `1f6f09c`, `a97e7ee`, `bdca32d` and `099be7e`; the checks above ran at the pre-rebase revisions. The only code conflict was the Settings projects panel heading in `crates/crewroom-desktop/src/workbench/settings.rs`: FOR-75's "Projects" heading and hint were kept and FOR-76's capacity block was appended. Documentation conflicts kept every ticket's entries. All checks below ran at `099be7e` (the following commit changes only documentation) through `scripts/system_limits.py run`, with a private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4` and `TMPDIR` on a short on-disk directory, after `python3 scripts/prepare_worktree.py --build-helpers`. Linux x86_64. Simulated runner and providers only.
+
+- `npm test` **346/346**; `npm run build` passes; `npm run test:e2e` **31/31**.
+- `scripts/rust/daemon-capacity.test.ts` **1/1**.
+- `cargo test --locked --no-fail-fast -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop`: **656 passed, 0 failed, 18 ignored** over 72 binaries.
+- Clippy `--all-targets -D warnings` and `cargo fmt -p <crate> -- --check` for these crates: clean.
+- Not verified: the Settings capacity controls in a live window (operator check), live providers, and macOS. `daemon-scheduling.test.ts` was not rerun at integration (its one known failure is tracked in FOR-85).
+
 ## FOR-78 — Snooze and settle tickets in the project sidebar (2026-10-19)
 
 Implementation `14df3af` (branch `for-78-work`, from main `e8b86de`). Shelf logic is in `crates/crewroom-desktop/src/workbench/shelves.rs`; the shelves extend the private per-dataset `native-ui-state.json` (`navigation.rs`, `Shelves`); the sidebar groups in `projects.rs` keep shelved tickets out of the four sections; the service's workspace view adds a read-only `publicationWatch` per run (`crates/crewroom-service/src/views.rs`) with the PR's recorded feedback ids and hosted-check state, so PR events can be watched without a provider call.
