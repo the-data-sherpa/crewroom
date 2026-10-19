@@ -1,0 +1,153 @@
+{
+  "issue": "FOR-74",
+  "date": "2026-10-19",
+  "revision": "6d19f33",
+  "machine": "operator Linux x86_64 workstation; Codex codex-cli 0.163.0, Claude Code 2.1.303",
+  "command": "python3 scripts/verify_allowance.py --output <new private dir> --binaries target/debug --port 4398",
+  "kind": "live metadata read through a disposable crewroomd (own data directory, loopback port 4398, no runner configuration); no prompt, no agent, no inference; redacted (no plan name, no shares, no account data)",
+  "runs": [
+    {
+      "label": "run 1: crewroomd built before the desktop and documentation changes; runtime and service sources identical to 6d19f33",
+      "report": {
+        "passed": true,
+        "scope": "live allowance read; runner unconfigured; no prompt; no inference",
+        "beforeRefresh": [
+          {
+            "harness": "codex",
+            "state": "unavailable",
+            "reason": "Not read yet. Refresh allowance to read it.",
+            "observedAt": null
+          },
+          {
+            "harness": "claude-code",
+            "state": "unavailable",
+            "reason": "Not read yet. Refresh allowance to read it.",
+            "observedAt": null
+          }
+        ],
+        "readSeconds": 2.5,
+        "harnesses": [
+          {
+            "harness": "codex",
+            "state": "available",
+            "reason": null,
+            "source": "Codex app-server account/rateLimits/read",
+            "planReported": true,
+            "observedAt": 1792399263,
+            "inferenceRequested": false,
+            "notes": 0,
+            "windows": [
+              {
+                "label": "Weekly",
+                "remainingReported": true,
+                "remainingInRange": true,
+                "resetReported": true,
+                "reason": null
+              }
+            ]
+          },
+          {
+            "harness": "claude-code",
+            "state": "available",
+            "reason": null,
+            "source": "Claude Code stream-json get_usage (experimental)",
+            "planReported": true,
+            "observedAt": 1792399263,
+            "inferenceRequested": false,
+            "notes": 0,
+            "windows": [
+              {
+                "label": "5-hour",
+                "remainingReported": true,
+                "remainingInRange": true,
+                "resetReported": true,
+                "reason": null
+              },
+              {
+                "label": "Weekly",
+                "remainingReported": true,
+                "remainingInRange": true,
+                "resetReported": true,
+                "reason": null
+              },
+              {
+                "label": "Weekly \u00b7 Fable",
+                "remainingReported": true,
+                "remainingInRange": true,
+                "resetReported": true,
+                "reason": null
+              }
+            ]
+          }
+        ],
+        "secretScan": {
+          "localCredentialStrings": 132,
+          "found": 0
+        },
+        "runs": 0,
+        "daemonExit": 0
+      }
+    },
+    {
+      "label": "run 2: crewroomd built at 6d19f33",
+      "report": {
+        "passed": true,
+        "scope": "live allowance read; runner unconfigured; no prompt; no inference",
+        "beforeRefresh": [
+          {
+            "harness": "codex",
+            "state": "unavailable",
+            "reason": "Not read yet. Refresh allowance to read it.",
+            "observedAt": null
+          },
+          {
+            "harness": "claude-code",
+            "state": "unavailable",
+            "reason": "Not read yet. Refresh allowance to read it.",
+            "observedAt": null
+          }
+        ],
+        "readSeconds": 1.0,
+        "harnesses": [
+          {
+            "harness": "codex",
+            "state": "available",
+            "reason": null,
+            "source": "Codex app-server account/rateLimits/read",
+            "planReported": true,
+            "observedAt": 1792401269,
+            "inferenceRequested": false,
+            "notes": 0,
+            "windows": [
+              {
+                "label": "Weekly",
+                "remainingReported": true,
+                "remainingInRange": true,
+                "resetReported": true,
+                "reason": null
+              }
+            ]
+          },
+          {
+            "harness": "claude-code",
+            "state": "unavailable",
+            "reason": "Claude Code could not read plan rate limits from claude.ai for this login.",
+            "source": "Claude Code stream-json get_usage (experimental)",
+            "planReported": true,
+            "observedAt": 1792401269,
+            "inferenceRequested": false,
+            "notes": 0,
+            "windows": []
+          }
+        ],
+        "secretScan": {
+          "localCredentialStrings": 132,
+          "found": 0
+        },
+        "runs": 0,
+        "daemonExit": 0
+      }
+    }
+  ],
+  "interpretation": "Run 1 read both logins: Codex reported one weekly window, Claude Code the 5-hour, weekly and one model-specific weekly window, each with a remaining share in 0-100 and a reset time. In run 2, about 33 minutes and several manual reads later, Claude Code's get_usage answered with rate_limits null, which Crewroom shows as unavailable with its reason rather than zero. A direct get_usage probe at the same time also returned null, so this is the source's answer, not a Crewroom parsing failure. The secret scan compared the allowance and workspace views against every string of 16 or more characters in the local Codex and Claude Code login files and found none."
+}
