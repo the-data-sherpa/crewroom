@@ -56,7 +56,14 @@ test('daemon history and provider usage equal the retained projection after a re
   const events:any[]=[{type:'provider_request'},{type:'provider_usage',state:'actual',usage:{input:10,output:2,cacheRead:3,cacheWrite:4,reasoning:1,total:20}},{type:'provider_request'},{type:'provider_usage',state:'unavailable',reason:'Receipt unavailable'},{type:'provider_request'},{type:'message_end',message:{role:'assistant',provider:'fixture',model:'model',timestamp:123,content:'Recorded answer',usage:{cost:{total:0.2}}}},{type:'message_end',message:{role:'assistant',provider:'fixture',model:'model',timestamp:123,content:'Recorded answer',usage:{cost:{total:0.2}}}},{type:'process_exit',code:17,signal:null},{type:'prompt_result',status:'error',error:{message:'Retained failure'}}];
   let seq=Number(store.prepare('SELECT COALESCE(MAX(sequence),0)+1 AS next FROM agent_events WHERE attempt_id=?').get(attempt.id)!.next);for(const e of events)store.prepare('INSERT INTO agent_events(attempt_id,sequence,data) VALUES(?,?,?)').run(attempt.id,seq++,JSON.stringify(e));
  }finally{store.close();}
- await f.reopen();const got=(await f.snapshot()).history;assert.ok(got.attempts.some((a:any)=>a.causes.some((c:string)=>c.includes('Retained failure'))));assert.ok(JSON.stringify(got.usage).includes('0.2'));await f.kill();await f.reopen();assert.deepEqual((await f.snapshot()).history,got);
+ await f.reopen();const got=(await f.snapshot()).history;assert.ok(got.attempts.some((a:any)=>a.causes.some((c:string)=>c.includes('Retained failure'))));
+ // FOR-44 billing routes: the fixture model records no route, so its use is unknown and the seeded 0.2 list-price
+ // estimate is withheld, never shown as a cost. Receipts, tokens and deduplicated responses still project.
+ const route=got.usage.routes.find((r:any)=>r.billing==='unknown');const row=got.usage.rows.find((r:any)=>r.attemptId===attempt.id);
+ assert.equal(got.usage.routes.length,1);assert.equal(route.costUsd,null);assert.equal(route.costResponses,0);assert.equal(route.estimateWithheld,true);assert.equal(route.unrecordedAttempts,route.attempts);
+ assert.equal(row.billingRecorded,false);assert.equal(row.costUsd,null);assert.equal(row.estimateWithheld,true);assert.equal(row.providerRequests,3);assert.equal(row.actualResponses,1);assert.equal(row.responses,1);assert.equal(row.tokens.total,20);assert.equal(row.state,'partial');
+ assert.ok(row.unavailableReasons.includes('Receipt unavailable'));
+ await f.kill();await f.reopen();assert.deepEqual((await f.snapshot()).history,got);
 });
 
 test('dependency merge records hold queue admission until the selected checkout contains the verified merge',{timeout:90000},async t=>{
