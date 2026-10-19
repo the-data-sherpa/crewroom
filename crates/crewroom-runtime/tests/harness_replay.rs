@@ -146,9 +146,25 @@ fn matches(step: &Value, event: &Value) -> bool {
             .all(|k| step.get(*k).is_none() || event[*k] == step[*k])
 }
 
+/// Consume the first event at or after `cursor` that satisfies a `wait` step
+/// and return the cursor just past it. Like the recorder's per-session queue,
+/// a wait never matches an event that an earlier wait or close consumed, so an
+/// earlier session's `agent_end` cannot satisfy the reattached turn's wait.
+fn take_match(events: &[Value], cursor: usize, step: &Value) -> Option<usize> {
+    events[cursor.min(events.len())..]
+        .iter()
+        .position(|e| matches(step, e))
+        .map(|at| cursor + at + 1)
+}
+
 /// Drive the production adapter through the transcript's recorded steps
 /// against the replay peer. `lines` may be a mutated copy of a transcript.
 pub async fn replay(lines: &[Value]) -> Replay {
+    replay_within(lines, Duration::from_secs(20)).await
+}
+
+/// `replay` with a bound on how long each `wait` step may take.
+pub async fn replay_within(lines: &[Value], wait_limit: Duration) -> Replay {
     let header = &lines[0];
     let temp = tempfile::tempdir().unwrap();
     let root = temp.path().canonicalize().unwrap();
@@ -188,6 +204,8 @@ pub async fn replay(lines: &[Value]) -> Replay {
     let (send, mut receive) = mpsc::unbounded_channel::<Value>();
     let mut current: Option<runner::Runner> = None;
     let mut opens = 0;
+    // Index of the first event no `wait` or `close` has consumed yet.
+    let mut cursor = 0usize;
     let mut errors = Vec::new();
     let label = format!(
         "{} {} {}",
@@ -262,13 +280,16 @@ pub async fn replay(lines: &[Value]) -> Replay {
                     .await
                     .map_err(|e| format!("input {}: {e}", step["id"]))?,
                 "wait" => {
-                    let seen = events.lock().unwrap().iter().any(|e| matches(step, e));
-                    if !seen {
-                        timeout(Duration::from_secs(20), async {
+                    let found = take_match(&events.lock().unwrap(), cursor, step);
+                    if let Some(next) = found {
+                        cursor = next;
+                    } else {
+                        cursor = timeout(wait_limit, async {
                             while let Some(event) = receive.recv().await {
-                                events.lock().unwrap().push(event.clone());
+                                let mut seen = events.lock().unwrap();
+                                seen.push(event.clone());
                                 if matches(step, &event) {
-                                    return Ok(());
+                                    return Ok(seen.len());
                                 }
                                 if event["type"] == "model_policy_rejected" {
                                     return Err(format!("adapter rejected: {}", event["reason"]));
@@ -315,6 +336,9 @@ pub async fn replay(lines: &[Value]) -> Replay {
                     while let Ok(event) = receive.try_recv() {
                         events.lock().unwrap().push(event);
                     }
+                    // As the recorder starts a new queue per process, a later
+                    // wait must not match what this session emitted.
+                    cursor = events.lock().unwrap().len();
                 }
                 other => return Err(format!("unknown step {other}")),
             }
@@ -455,6 +479,48 @@ async fn a_changed_harness_frame_fails_the_replay() {
     assert!(
         r.errors.iter().any(|e| e.contains("adapter sent 'user'")),
         "{:?}",
+        r.errors
+    );
+}
+
+/// A wait never matches an event an earlier wait or session consumed.
+#[test]
+fn a_wait_only_matches_unconsumed_events() {
+    let step = json!({"op": "wait", "type": "agent_end"});
+    let events = vec![
+        json!({"type": "agent_start"}),
+        json!({"type": "agent_end"}),
+        json!({"type": "opened"}),
+        json!({"type": "agent_start"}),
+    ];
+    assert_eq!(take_match(&events, 0, &step), Some(2));
+    // After session 1 closed, its agent_end no longer satisfies the wait.
+    assert_eq!(take_match(&events, 2, &step), None);
+    assert_eq!(take_match(&events, 9, &step), None);
+}
+
+/// The reattach replay must wait for the resumed turn itself. With the second
+/// session's `agent_end` removed (and the expectation adjusted so only the wait
+/// can catch it), the first session's `agent_end` must not satisfy the wait.
+#[tokio::test]
+async fn the_reattached_turn_must_complete_on_its_own() {
+    let file = transcripts("omp")
+        .into_iter()
+        .find(|p| p.ends_with("reattach.jsonl"))
+        .expect("omp reattach transcript");
+    let mut lines = read(&file);
+    let at = lines
+        .iter()
+        .position(|l| l["session"] == 2 && l["dir"] == "recv" && l["frame"]["type"] == "agent_end")
+        .expect("the second session's agent_end");
+    lines.remove(at);
+    let ends = lines[0]["expect"]["agent_end"].as_array_mut().unwrap();
+    assert_eq!(ends.len(), 2, "both sessions end a turn");
+    ends.pop();
+    let r = replay_within(&lines, Duration::from_secs(3)).await;
+    assert!(
+        r.errors.iter().any(|e| e.contains("timed out waiting")),
+        "the wait must not be satisfied by session 1: {:?}",
         r.errors
     );
 }
