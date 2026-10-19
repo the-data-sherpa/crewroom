@@ -6,7 +6,7 @@ Historical revision IDs and source hashes below refer to the original private sn
 
 ## FOR-73 — Model catalog: typed capabilities, bundled model facts and a readable picker (2026-10-19)
 
-Implementation `4ae7449` and wording fix `517466d` (capability notes name the release, for example `Claude Code 2.1.303 (compatible, probed)`) on branch `for-73-work` from main `9d409b5`. Checks ran in a fresh worktree with a private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, wrapped by `scripts/system_limits.py`.
+Implementation `8c9f837` and wording fix `7053ab0` on main (rebased from `4ae7449` and `517466d`, written on main `9d409b5`, onto main `8ce59f1`; the only code conflict was the `model_catalog` module list, merged to keep FOR-71's `codex_protocol` and `known_broken` beside FOR-73's `bundled`, `capabilities` and `login`). The wording fix makes capability notes name the release, for example `Claude Code 2.1.303 (compatible, probed)`. Checks below cite the pre-rebase revisions they ran at, except the integration checks at the end. Checks ran in a fresh worktree with a private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, wrapped by `scripts/system_limits.py`.
 
 Simulated (unit and fixture tests; no inference):
 
@@ -28,6 +28,13 @@ Checks:
 - At `517466d`: `cargo test -p crewroom-core -p crewroom-runtime -p crewroom-service`: **434 passed / 0 failed / 3 ignored** over 66 binaries; `cargo test --no-fail-fast -p crewroom-desktop`: **153 passed / 0 failed / 15 ignored**. `cargo clippy --all-targets … -D warnings` and `cargo fmt --check` for the four crates: clean. `npm test`: **345/345**. `npm run build`: passes.
 - An earlier full run at `4ae7449` hit `Disk quota exceeded` in the shared `/tmp` (load from parallel agents) in 5 desktop tests; they passed on rerun and in the `517466d` run.
 - `npm run test:e2e`: not run (integrator).
+
+**Integration at `7053ab0` on main `8ce59f1`** (rebase with the module-list conflict above and documentation conflicts), all through `scripts/system_limits.py run` with a private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, `TMPDIR` on a short on-disk directory and the worktree prepared with `--build-helpers`:
+
+- `npm test` **345/345**; `npm run build` passes; `npm run test:e2e` **31/31**.
+- `cargo test --locked --no-fail-fast -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop`: **603 passed, 0 failed, 18 ignored** over 67 test binaries.
+- Clippy `--all-targets -D warnings` and `cargo fmt --check` for these crates: clean.
+- The live OMP login listing and unconfigured-daemon check were not rerun at integration. Not yet verified: the operator's on-screen check of the picker in the native app.
 
 ## FOR-71 — Harden the harness compatibility probe (2026-10-19)
 
