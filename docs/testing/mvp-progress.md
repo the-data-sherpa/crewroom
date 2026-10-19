@@ -4,6 +4,36 @@ The operator requested that each work item pass its checks before the next start
 
 Historical revision IDs and source hashes below refer to the original private snapshots before the FOR-17 history rewrite. Sanitized copies are not byte-identical evidence for rewritten revisions; replay requires the private archive. New validation is recorded separately.
 
+## FOR-71 — Harden the harness compatibility probe (2026-10-19)
+
+Implementation `9f9e217` on branch `for-71-work` from main `9d409b5` (FOR-69 merged). Every check below ran at `9f9e217`. Each ran in a fresh worktree prepared with `scripts/prepare_worktree.py --build-helpers`, with a private `CARGO_TARGET_DIR`, `-j6` and `--test-threads=4`, wrapped by `scripts/system_limits.py run`.
+
+Simulated (synthetic schemas and Python harnesses; no inference, no network):
+
+- `codex_protocol::tests` (6): the reviewed baseline passes with no differences. One unhandled server request fails with `Codex reports server request Crewroom does not handle: item/browser/requestNavigation`, and several are all named. A missing handled request (`account/chatgptAuthTokens/refresh`) or required notification (`turn/completed`) fails. Added or removed notifications are recorded without failing. Methods are read from `enum` or `const`, and malformed schemas are refused.
+- `tests/compatibility_probe.rs::codex_protocol_diff_names_unhandled_requests_and_fails_closed`: a simulated `codex-cli 0.164.0` describes the baseline plus a new notification. It passes with `protocol-schema` among the receipt checks and the notification recorded. An extra server request fails with `failed check: protocol-schema` and names the method before the app-server handshake runs. A Codex without the schema subcommand fails closed (`generate-json-schema is unavailable or failed`). A receipt with the v1 contract is invalid.
+- `known_broken::tests` (3): no verified baseline version is on the shipped list. Ranges are inclusive and per harness. `a_listed_version_is_refused_even_when_its_probe_passes` uses a simulated OMP `omp/19.0.0` run through the real `crewroom-process` helper. It passes the full probe and is launchable with an empty list. With a synthetic entry it is refused with the recorded reason (`failed check: known-broken`), and no probe process runs.
+- `catalog::tests::replacement_attempts_reprobe_changed_executables_and_stale_receipts`: an admitted, claimed, stopped and paused attempt is replaced as resume does it (`replace_attempt`). The replacement keeps the frozen selection. After the executable changes and fails its re-probe, the replacement is held: `Launch held: the OMP executable changed after admission (omp/18.4.12) and its re-probe failed`. A passing `omp/19.1.0` re-probe is recorded on the replacement attempt with a v2 receipt. A selection whose receipt carries the v1 contract is re-probed even though the executable is unchanged; the new receipt reports the same SHA-256 as admission. An admitted version on a synthetic known-broken list is held with its reason.
+- The existing FOR-69 compatibility, catalog and runner tests pass unchanged except the Codex receipt check list, which now includes `protocol-schema`. The Claude Code fixture asserts that `ENABLE_CLAUDEAI_MCP_SERVERS=false`, `CLAUDE_CODE_AUTO_CONNECT_IDE=0` and `CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL=1` reach the launch handshake.
+
+Claude Code isolation check (installed 2.1.303, read-only inspection, nothing launched): `claude --help` describes `--bare` as skipping hooks, LSP, plugin sync, attribution, auto-memory, background prefetches, keychain reads and CLAUDE.md discovery. It describes `--safe-mode` as disabling customizations including MCP servers. Neither mentions claude.ai connectors or IDE setup. The binary contains all three variables. Its IDE auto-connect returns early only on `CLAUDE_CODE_AUTO_CONNECT_IDE` false. Extension auto-install is skipped only by `CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL` or a user setting. claude.ai connectors are also suppressed by safe mode and strict MCP configuration. Crewroom therefore sets all three in every probe and does not rely on `--bare`.
+
+Live, isolated (installed CLIs; isolated HOME and configuration; no prompt sent):
+
+- `CREWROOM_LIVE_DISCOVERY=1 cargo test -p crewroom-runtime --test compatibility_probe installed_harnesses -- --ignored`: **1/1**, contract `harness-compatibility-probe-v2`:
+  - Codex `0.163.0` (verified; probe forced): checks `version, model-discovery, bundled-model-catalog, protocol-schema, control-protocol`. The real `generate-json-schema --experimental` matches the baseline exactly (no added or removed notifications). 8 offerings.
+  - Claude Code `2.1.303` (probed): checks `version, model-discovery, stream-protocol`, with the isolation variables set. 5 offerings.
+  - OMP `18.11.3` (verified; probe forced): `rpc-frame-contract` against a synthetic loopback provider that is never contacted. 1 offering.
+  - Each CLI behind a wrapper reporting `99.0.0` is admitted as `compatible (probed 99.0.0)`. The wrapper simulates only the version string.
+- Not live: the known-broken refusal and resume/replacement re-probe are simulated. The shipped list is empty, and no real run was resumed across a harness update. The operator service on port 4318 was not touched.
+
+Checks at `9f9e217`:
+
+- `npm test`: **345/345**. `npm run build`: passes.
+- `cargo test -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop`: **581 passed / 0 failed / 18 ignored** over 67 test binaries.
+- `cargo clippy -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop --all-targets -- -D warnings` and `cargo fmt --check` for these crates: clean.
+- `npm run test:e2e`: not run (integrator).
+
 ## FOR-75 — Project-first sidebar (2026-10-19)
 
 Implementation `7793927` on main (rebased without code changes from `0d13000`, written on main `9d409b5`, onto main `20a6149`). The sidebar groups live in `crates/crewroom-desktop/src/workbench/projects.rs`; the saved order, collapsed groups and current project extend `navigation.rs` (`ProjectPrefs`, serde defaults, at most 200 ids per list, file limit 64 KiB). Start reuses the default coordinator launch now shared with Queue run (`planning.rs`: `coordinator_role`, `coordinator_launch`).
