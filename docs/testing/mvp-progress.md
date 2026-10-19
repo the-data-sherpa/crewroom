@@ -4,6 +4,31 @@ The operator requested that each work item pass its checks before the next start
 
 Historical revision IDs and source hashes below refer to the original private snapshots before the FOR-17 history rewrite. Sanitized copies are not byte-identical evidence for rewritten revisions; replay requires the private archive. New validation is recorded separately.
 
+## FOR-69 — Newer harness versions run after a compatibility probe (2026-10-19)
+
+Implementation `5d15a5f` on branch `for-69-probed-harness-versions` from main `a1faa87`. All checks below ran at `5d15a5f` in a fresh worktree with a private `CARGO_TARGET_DIR`, `-j6`, wrapped by `scripts/system_limits.py` (FOR-68).
+
+Simulated (Python harnesses that speak each launch protocol; no inference, no network):
+
+- `compatibility::tests` (3): per-harness version parsing; listed, newer, new-major, older and unparseable versions are classified for each harness, refusals naming `failed check: version` and a remedy; receipts bind harness, version, canonical path and content hash, and a forged receipt (inference flag, missing check) is invalid.
+- `tests/compatibility_probe.rs` (4): for each harness a newer and a new-major version (`codex-cli 1.0.0`, `3.0.0 (Claude Code)`, `omp/19.0.0`) pass the probe with one handshake each and are labeled `compatible (probed <version>)`; verified versions run no handshake; older and unparseable versions are refused before any handshake, and a probe-failing version is refused with `failed check: control-protocol`, `stream-protocol` or `rpc-frame-contract`; a retained receipt skips the handshake and a rebuilt executable with the same version is probed again; a refresh retains the receipt across restart, a launch re-probe reuses it, and a failing replacement is reported without retaining a receipt.
+- `runner::tests::launch_admits_listed_or_exactly_probed_versions`: a native adapter starts a listed version or the exact probed version and executable recorded in the frozen selection; no receipt, another version, changed content or another harness's receipt is refused.
+- `catalog::tests::probed_newer_versions_are_offered_and_changed_executables_hold_launch`: a probed OMP 19.0.0 gets an execution profile and no execution note; admission records version and receipt (`inferenceRequested: false`); after the executable changes, the launch is held with `Launch held: the OMP executable changed after admission (omp/19.0.0) and its re-probe failed`; a receipt for other content never makes the version launchable.
+- Service and desktop: the catalog view reports `compatibility` per harness (`verified` for Codex 0.163.0); the workbench shows it in the harness row and the route hint (`Version: verified`).
+
+Live, isolated (installed CLIs on this machine; isolated HOME and configuration; no prompt sent):
+
+- `CREWROOM_LIVE_DISCOVERY=1 cargo test -p crewroom-runtime --test compatibility_probe -- --ignored`: **1/1**. Claude Code `2.1.303` basis `probed`, checks `version, model-discovery, stream-protocol`, 5 offerings. Codex `0.163.0` and OMP `18.11.3` are verified; the probe was forced and passed `bundled-model-catalog, control-protocol` and `rpc-frame-contract` respectively (8 and 1 offerings; OMP against a synthetic loopback provider that is never contacted). Each CLI behind a wrapper that reports version `99.0.0` and delegates every other call to the real binary is admitted as `compatible (probed 99.0.0)`. The wrapper simulates the version string; the protocols exercised are the real binaries'.
+- `scripts/verify_unconfigured_catalog.py --port 4397` with a new private data directory and no runner configuration: state `success`; OMP `omp/18.11.3` `verified` (0 offerings: no provider configured, as before), Codex `codex-cli 0.163.0` `verified` (8), Claude Code `2.1.303 (Claude Code)` `compatible (probed 2.1.303)` (5), no execution notes, no runs. Job selections `code` = a Claude Code offering and `judgment` = a Codex offering were saved (revision 1) and read back unchanged. Before this change the operator's catalog refused Claude Code 2.1.303 as unverified.
+- Not done here: the operator service on port 4318 was not touched; its restart and model selection in that app are left to the coordinator.
+
+Checks at `5d15a5f`:
+
+- `cargo test --no-fail-fast -p crewroom-runtime -p crewroom-service -p crewroom-desktop -- --test-threads=4`: **391 passed / 0 failed / 18 ignored** over 33 test binaries. The first run failed one desktop expectation for the new route hint text; it was updated and the rerun passed.
+- `cargo clippy -p crewroom-runtime -p crewroom-service -p crewroom-desktop --all-targets -- -D warnings` and `cargo fmt --check` for those crates: clean.
+- `npm test`: **345/345**. `npm run build`: passes.
+- `npm run test:e2e`: not run (integrator).
+
 ## FOR-70 — Add a repository by choosing a folder (2026-10-19)
 
 Implementation `4f9f295` on branch `for-70-repository-folder-picker` from main `a1faa87`. The core module is `crates/crewroom-core/src/repository_folders.rs`, and the service routes are `GET /api/repository-folders/inspect` and `POST /api/repository-folders/initialize`. The desktop flow is in `crates/crewroom-desktop/src/workbench/settings/repository_folder.rs`.
