@@ -177,7 +177,7 @@ impl Workbench {
     }
 
     /// Replaces one ticket's shelf entries with `prior`'s.
-    fn place(&mut self, prior: Prior) {
+    fn restore_shelf(&mut self, prior: Prior) {
         self.save_shelves(|s| {
             s.snoozed.retain(|z| z.task != prior.task);
             s.settled.retain(|t| *t != prior.task);
@@ -193,7 +193,7 @@ impl Workbench {
     /// Applies a shelf change and offers Undo for five seconds.
     fn shelve(&mut self, next: Prior, label: String, cx: &mut Context<Self>) {
         let prior = self.prior(&next.task);
-        self.place(next);
+        self.restore_shelf(next);
         self.shelf.menu = None;
         self.shelf.generation += 1;
         let generation = self.shelf.generation;
@@ -220,7 +220,7 @@ impl Workbench {
         cx.notify();
     }
 
-    fn ticket_key(&self, task: &str) -> String {
+    fn shelf_ticket_key(&self, task: &str) -> String {
         records(&self.workspace, "tasks")
             .into_iter()
             .find(|t| t["id"] == task)
@@ -256,7 +256,7 @@ impl Workbench {
         };
         let label = format!(
             "Snoozed {} until {}",
-            self.ticket_key(task),
+            self.shelf_ticket_key(task),
             waits_for(&snooze)
         );
         self.shelve(
@@ -275,7 +275,7 @@ impl Workbench {
         let label = format!(
             "{} {}",
             if settled { "Settled" } else { "Un-settled" },
-            self.ticket_key(task)
+            self.shelf_ticket_key(task)
         );
         self.shelve(
             Prior {
@@ -293,9 +293,9 @@ impl Workbench {
     fn clear_snooze(&mut self, task: &str, cx: &mut Context<Self>) {
         let mut next = self.prior(task);
         let label = if next.snooze.is_some() {
-            format!("Woke {}", self.ticket_key(task))
+            format!("Woke {}", self.shelf_ticket_key(task))
         } else {
-            format!("Dismissed why {} woke", self.ticket_key(task))
+            format!("Dismissed why {} woke", self.shelf_ticket_key(task))
         };
         next.snooze = None;
         next.woke = None;
@@ -304,7 +304,7 @@ impl Workbench {
 
     pub(super) fn undo_shelf(&mut self, cx: &mut Context<Self>) {
         if let Some(undo) = self.shelf.undo.take() {
-            self.place(undo.prior);
+            self.restore_shelf(undo.prior);
             self.shelf.undo_timer = None;
             self.arm_wake_timer(cx);
             cx.notify();
