@@ -4,6 +4,37 @@ The operator requested that each work item pass its checks before the next start
 
 Historical revision IDs and source hashes below refer to the original private snapshots before the FOR-17 history rewrite. Sanitized copies are not byte-identical evidence for rewritten revisions; replay requires the private archive. New validation is recorded separately.
 
+## FOR-70 — Add a repository by choosing a folder (2026-10-19)
+
+Implementation `4f9f295` on branch `for-70-repository-folder-picker` from main `a1faa87`. The core module is `crates/crewroom-core/src/repository_folders.rs`, and the service routes are `GET /api/repository-folders/inspect` and `POST /api/repository-folders/initialize`. The desktop flow is in `crates/crewroom-desktop/src/workbench/settings/repository_folder.rs`.
+
+Real Git, temporary directories, no remote contacted (`crates/crewroom-core/tests/repository_folders.rs`, 6 tests):
+
+- Refusals with reason and remedy: relative or empty path, missing folder, file, unreadable folder (mode 000), bare repository, folder inside `.git`, repository without commits, Crewroom-owned worktree, `.git` symlink, and a checkout an active repository already uses. The repository being edited is excluded.
+- A subfolder resolves to the root, with the notice `Using repository root <root>`. Name, branches, default branch from `origin/HEAD` (`develop`), current branch, and publish remote `origin` are prefilled. Remote kinds are GitHub (`Octo-Fixture/Sandbox`), Bitbucket and unrecognised. A synthetic credentialed address never appears in the answer. A snapshot of every file's mtime and size under the checkout is identical before and after inspection.
+- Default fallbacks: a remote `HEAD` with no local branch gives `origin/trunk`, and no remote gives the current branch.
+- A plain folder with one file yields `notRepository` and stays unchanged. An unconfirmed request or an invalid branch writes nothing. Confirmed initialization on `trunk` gives `rev-list --count` 1, an empty tree, an empty index and `?? existing.txt`. Repeating it, initializing a subfolder of the new repository, or initializing a missing folder is refused, and nothing is written.
+
+Real local service over HTTP (`crates/crewroom-service/tests/repository_folders.rs`): inspection without the service token is 403 and writes nothing. Initialization without an `Origin` header or from a foreign origin is 403. An unconfirmed request is 400. A confirmed same-origin request is 200, with one commit on `trunk` and no indexed files. `POST /api/repositories` then re-verifies and saves, and a second inspection is refused as already configured unless `repository=<id>` names the repository being edited.
+
+Desktop over the real authenticated service, GPUI test platform with simulated picker answers, no window on the operator's desktop (`crates/crewroom-desktop/src/workbench/settings/tests.rs`):
+
+- `choosing_a_subfolder_prefills_name_branches_and_remotes`: Choose folder issues a directory-only, single-selection prompt. The picked subfolder fills the root path, name `Sandbox` and target `develop`. The UI shows the root notice, the default-branch source, `Publish remote · origin · github.com/Octo-Fixture/Sandbox` and one branch choice per branch. Choosing `main` and saving persists it. A new draft for the same checkout shows the refusal and the remedy.
+- `cancelled_or_unavailable_picker_keeps_the_typed_path`: a cancelled picker leaves the name and path unchanged. An unavailable picker (a simulated portal error, since the test platform cannot fail a prompt) shows its reason, and Inspect path on a typed path still prefills.
+- `initializing_a_plain_folder_requires_confirmation`: Don't initialize leaves no `.git`. After confirmation the folder has one empty commit on `trunk` and an untracked `notes.txt`, and Save succeeds.
+- `repository_path_and_branch_errors_are_distinct` (rewritten): each field shows its problem before saving. Save names its blockers and sends nothing while it is blocked. An unknown branch and an invalid prefix are reported inline. A branch renamed after inspection is still refused by the service on save (`Target branch 'main' was not found.`).
+- The existing repository tests now inspect the typed path before saving and pass unchanged otherwise.
+
+Checks at `4f9f295` (private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, all through `scripts/system_limits.py run`):
+
+- `npm test`: **345/345**. `npm run build`: passes. This change touches no TypeScript.
+- `cargo test -p crewroom-desktop`: 152 passed, 15 ignored, 0 failed.
+- `cargo test -p crewroom-core -p crewroom-service`: 45 test binaries, all ok, after `cargo build -p crewroom-runtime --bins`.
+- `cargo clippy -p crewroom-core -p crewroom-service -p crewroom-desktop --all-targets -- -D warnings` and `cargo fmt --check` for these crates: clean.
+- `npm run test:e2e`: not run (integrator). The browser suite exercises the legacy TypeScript server, which this change does not touch.
+
+Not yet verified: no on-screen check of the real xdg portal picker on the operator's Linux (Hyprland) machine. The coordinator will ask the operator to look at the window. Every picker answer above is simulated by the GPUI test platform; the portal integration is GPUI's own, unchanged.
+
 ## FOR-60 — `npm test` under machine load, closed (2026-10-18)
 
 Code revision `6791de4` (branch `for-60-close`, from main `4a2ac78`). It has two commits: `0007bf0` names the readiness blockers in the DEL-04/05/06 assertion message, and `6791de4` makes the lease helper's owner receipt atomic. This closes the two criteria that the first pass (section below) left partial, and adds one fix. Machine: 16 cores, shared with other agents. Every run started from this agent session, which has `RLIMIT_RTTIME` soft = hard = 0 (`grep "realtime timeout" /proc/self/limits`). Load came from a loop of clean `cargo build --locked -j16 -p crewroom-desktop` builds in a private target directory, started through `system_limits.py run`. All 93 builds succeeded, and the 1-minute load was about 17–25 for the whole series. All tests used simulated providers and fixture Git remotes; nothing contacted a live service.
