@@ -6,6 +6,10 @@ The daemon gets a new private data directory, a non-default loopback port and
 no CREWROOM_RUNTIME_CONFIG. Discovery is metadata only: no agent, assignment
 or inference starts. The report holds harness states, versions, offering
 counts, causes and remedies; it never contains tokens or account data.
+
+FOR-69: each harness row also reports its version basis (`verified` or
+`compatible (probed <version>)`), and the check saves one listed model per
+harness as a job selection in the disposable data directory and reads it back.
 """
 import argparse
 import json
@@ -79,7 +83,8 @@ def main():
                                 'version': (h.get('identity') or {}).get('version'),
                                 'offerings': len(h.get('offerings', [])), 'error': h.get('error'),
                                 'remedy': h.get('remedy'), 'note': h.get('note'),
-                                'executionNote': h.get('executionNote')}
+                                'executionNote': h.get('executionNote'),
+                                'compatibility': h.get('compatibility')}
                                for h in catalog['harnesses']]
         choices = catalog.get('choices', [])
         report['choices'] = {'total': len(choices),
@@ -88,9 +93,22 @@ def main():
                              'eligibleAtLow': sum(1 for c in choices if c['eligibility']['low']['eligible']),
                              'sampleKeys': [c['key'] for c in choices[:6]]}
         workspace = request(info, 'workspace')
+        # Select one listed model per harness for a job, as the picker does.
+        picked = {}
+        for job, harness in zip(('code', 'judgment', 'review'), ('claude-code', 'codex', 'omp')):
+            key = next((c['key'] for c in choices if c['key'].startswith(f'offering:{harness}:')), None)
+            if key:
+                picked[job] = key
+        jobs = dict(workspace['modelJobs']['jobs'], **picked)
+        saved = request(info, 'model-jobs', {'revision': workspace['modelJobs']['revision'],
+                                             'budget': workspace['modelJobs']['budget'], 'jobs': jobs})
+        workspace = request(info, 'workspace')
+        report['selection'] = {'picked': picked, 'savedRevision': saved['revision'],
+                               'readBack': {job: workspace['modelJobs']['jobs'][job] for job in picked}}
         report['runs'] = len(workspace['runs'])
         report['passed'] = (catalog['runner']['configured'] is False and catalog['selection'] == 'intent'
-                            and report['runs'] == 0 and len(choices) > 0)
+                            and report['runs'] == 0 and len(choices) > 0
+                            and report['selection']['readBack'] == picked)
     except Exception as error:  # Retain the failure in the report.
         report['error'] = f'{type(error).__name__}: {error}'
     finally:

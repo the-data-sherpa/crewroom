@@ -80,6 +80,7 @@ The [MVP build plan](mvp-plan.md) sequences the current scaffold through that fi
 - Review and test evidence identifies the relevant revision. Terminal silence does not establish success.
 - User role definitions are reusable; project instructions constrain each assignment.
 - The workflow remains independent of a particular runner. Runner integration requires a real contract test.
+- Harness versions (operator decision 2026-10-19, FOR-69): for Claude Code, Codex and OMP, any release newer than the oldest verified version, including a new major, may list models and run agents once a metadata-only compatibility probe passes for that exact executable. The verified list remains the baseline. The UI shows `verified` separately from `compatible (probed <version>)`; older, unparseable and probe-failing versions are refused with the failed check and a remedy. Nothing falls back to another harness or to free text.
 
 See [CONTEXT.md](../CONTEXT.md) for terminology and [discovery.md](discovery.md) for the decision record and final confirmation status.
 

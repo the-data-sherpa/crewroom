@@ -459,7 +459,7 @@ fn unconfigured_runner_lists_installed_models_and_explains_each_cause(
     let after = labels(cx, h);
     for expected in [
         "OMP lists models only from providers defined in the runner configuration",
-        "codex · success",
+        "codex · success · verified",
         "Billing (codex): subscription · Codex auth.json has a ChatGPT login",
     ] {
         assert!(
@@ -585,7 +585,7 @@ fn pre_billing_selections_show_their_only_route(cx: &mut gpui::TestAppContext) {
     );
     for expected in [
         "Saved before billing routes: offering:omp:fixture:second.",
-        "omp / fixture / second · unknown billing · Access:",
+        "omp / fixture / second · unknown billing · Version: verified · Access:",
     ] {
         assert!(
             models.iter().any(|l| l.contains(expected)),

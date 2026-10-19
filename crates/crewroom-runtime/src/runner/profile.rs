@@ -63,37 +63,17 @@ pub(super) async fn bounded_output(command: &mut Command) -> Result<Vec<u8>> {
     result?;
     Ok(bytes)
 }
-/// Returns the profile fingerprint and the verified version the binary reported.
-pub async fn prepare(
-    binary: &Path,
-    home: &Path,
-    state: &Path,
-    plan: &Value,
-) -> Result<(String, &'static str)> {
-    canonical(binary)?;
-    let reported = output(binary, &["--version"], home, state).await?;
-    let version = VERSIONS
-        .iter()
-        .copied()
-        .find(|v| reported == format!("{v}\n").as_bytes())
-        .ok_or_else(|| {
-            conflict(&format!(
-                "Codex requires a verified app-server profile ({}).",
-                VERSIONS.join(", ")
-            ))
-        })?;
-    let raw: Value = serde_json::from_slice(
-        &output(binary, &["debug", "models", "--bundled"], home, state).await?,
-    )?;
-    let expected = &plan["resolved"];
+/// The pinned catalog row for one model and effort, with the native tool
+/// surface disabled. Shared with the FOR-69 compatibility probe.
+pub(crate) fn pinned_row(raw: &Value, id: &Value, effort: &Value) -> Result<Value> {
     let mut row = raw["models"]
         .as_array()
-        .and_then(|rows| rows.iter().find(|r| r["slug"] == expected["id"]))
+        .and_then(|rows| rows.iter().find(|r| &r["slug"] == id))
         .cloned()
         .ok_or_else(|| conflict("Selected model is absent from the pinned Codex catalog."))?;
     if !row["supported_reasoning_levels"]
         .as_array()
-        .is_some_and(|levels| levels.iter().any(|l| l["effort"] == expected["effort"]))
+        .is_some_and(|levels| levels.iter().any(|l| &l["effort"] == effort))
     {
         return Err(conflict(
             "Selected effort is absent from the pinned Codex catalog.",
@@ -109,16 +89,53 @@ pub async fn prepare(
     ] {
         row[key] = value;
     }
-    let catalog = stringify(&json!({"models":[row]}));
-    let path = home.join("models.json");
-    durable_new(&path, catalog.as_bytes())?;
+    Ok(row)
+}
+/// The model catalog and `config.toml` an attempt launches with under
+/// `--strict-config`. The probe writes the same files for its handshake.
+pub(crate) fn launch_files(
+    row: Value,
+    id: &Value,
+    effort: &Value,
+    catalog: &Path,
+) -> (String, String) {
+    let models = stringify(&json!({"models":[row]}));
     let config = format!(
         "model = {}\nmodel_provider = \"openai\"\nmodel_reasoning_effort = {}\nweb_search = \"disabled\"\ncli_auth_credentials_store = \"ephemeral\"\nproject_doc_max_bytes = 0\nmodel_catalog_json = {}\n{}",
-        stringify(&expected["id"]),
-        stringify(&expected["effort"]),
-        stringify(&json!(path)),
+        stringify(id),
+        stringify(effort),
+        stringify(&json!(catalog)),
         RESTRICTED
     );
+    (models, config)
+}
+/// Returns the profile fingerprint and the admitted version the binary
+/// reported: a verified one, or the probed version its selection recorded.
+pub async fn prepare(
+    binary: &Path,
+    home: &Path,
+    state: &Path,
+    plan: &Value,
+) -> Result<(String, String)> {
+    canonical(binary)?;
+    let content = crate::read(binary)?;
+    let reported = output(binary, &["--version"], home, state).await?;
+    let version = super::admitted_version(
+        &crate::model_catalog::Harness::Codex,
+        VERSIONS,
+        &reported,
+        plan,
+        binary,
+        &content,
+    )?;
+    let raw: Value = serde_json::from_slice(
+        &output(binary, &["debug", "models", "--bundled"], home, state).await?,
+    )?;
+    let expected = &plan["resolved"];
+    let row = pinned_row(&raw, &expected["id"], &expected["effort"])?;
+    let path = home.join("models.json");
+    let (catalog, config) = launch_files(row, &expected["id"], &expected["effort"], &path);
+    durable_new(&path, catalog.as_bytes())?;
     // Attempt-specific configuration; CODEX_HOME is retained only for rollouts.
     let config_path = state.join("config.toml");
     if config_path.try_exists()? {
@@ -131,15 +148,7 @@ pub async fn prepare(
     durable_new(&config_path, config.as_bytes())?;
     // Configuration contains an attempt path; the binding uses its stable content policy.
     Ok((
-        digest(
-            format!(
-                "{}\n{}\n{}",
-                digest(&crate::read(binary)?),
-                catalog,
-                RESTRICTED
-            )
-            .as_bytes(),
-        ),
+        digest(format!("{}\n{}\n{}", digest(&content), catalog, RESTRICTED).as_bytes()),
         version,
     ))
 }

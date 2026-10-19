@@ -41,6 +41,7 @@ fn fixture() -> (tempfile::TempDir, RuntimeConfig, Vec<Value>) {
             binary_stamp: discovery::binary_stamp(&binary).unwrap(),
             version: "omp/18.4.12".into(),
             profile: "fixture".into(),
+            compatibility: None,
         }),
         configuration_revision: Some(config.catalog_configuration(&Harness::Omp)),
         offerings: vec![Offering {
@@ -330,6 +331,99 @@ fn launch_verified_omp_18_11_3_offerings_are_eligible() {
     let model = config.assignment_model(role).unwrap();
     assert_eq!(model["resolved"]["adapter"], "omp");
     assert_eq!(snapshot.harnesses[0].execution_note(), None);
+    assert_eq!(
+        snapshot.harnesses[0].compatibility().as_deref(),
+        Some("verified")
+    );
+}
+
+/// FOR-69: a newer unlisted version whose compatibility probe passed for this
+/// exact executable is offered as `compatible (probed …)`, and its admission
+/// records the receipt. A changed executable holds the launch.
+#[tokio::test]
+async fn probed_newer_versions_are_offered_and_changed_executables_hold_launch() {
+    use crate::model_catalog::compatibility::{Basis, Compatibility, ProbeReceipt};
+    let (root, mut config, roles) = fixture();
+    let role = roles.iter().find(|r| r["id"] == "coordinator").unwrap();
+    let path = root.path().join("catalog");
+    let mut snapshot: Snapshot =
+        serde_json::from_slice(&std::fs::read(path.join("catalog.json")).unwrap()).unwrap();
+    let identity = snapshot.harnesses[0].identity.as_mut().unwrap();
+    identity.version = "omp/19.0.0".into();
+    let receipt = ProbeReceipt::new(
+        &Harness::Omp,
+        "omp/19.0.0",
+        &identity.canonical_binary,
+        &identity.binary_sha256,
+        crate::model_catalog::store::now(),
+    );
+    identity.compatibility = Some(Compatibility {
+        basis: Basis::Probed,
+        probe: Some(receipt.clone()),
+    });
+    snapshot.probes = vec![receipt.clone()];
+    write_private(
+        &path.join("catalog.json"),
+        &serde_json::to_vec(&snapshot).unwrap(),
+    )
+    .unwrap();
+    let reopen = |config: &mut RuntimeConfig| {
+        let sources = config.discovery_sources(
+            Path::new("/fixture/process"),
+            &json!({"PATH":"/usr/bin:/bin"}),
+        );
+        config.discovery =
+            Some(crate::model_catalog::store::Catalog::open(&path, sources, || {}).unwrap());
+    };
+    reopen(&mut config);
+    let routes = config
+        .catalog_routes(
+            &config.discovery.as_ref().unwrap().snapshot().unwrap(),
+            false,
+        )
+        .unwrap();
+    assert!(routes[0].offering.execution_profile.is_some());
+    assert_eq!(snapshot.harnesses[0].execution_note(), None);
+    assert_eq!(
+        snapshot.harnesses[0].compatibility().as_deref(),
+        Some("compatible (probed 19.0.0)")
+    );
+    let view = crate::model_catalog::store::Catalog::view(
+        config.discovery.as_ref().unwrap(),
+        crate::model_catalog::store::now(),
+    );
+    assert_eq!(view["probes"][0]["id"], json!(receipt.id));
+    // The admitted selection records the version and its probe receipt.
+    let model = config.assignment_model(role).unwrap();
+    let frozen = &model["selection"]["identity"];
+    assert_eq!(frozen["version"], "omp/19.0.0");
+    assert_eq!(frozen["compatibility"]["basis"], "probed");
+    assert_eq!(frozen["compatibility"]["probe"]["id"], json!(receipt.id));
+    assert_eq!(
+        frozen["compatibility"]["probe"]["inferenceRequested"],
+        false
+    );
+    config.hold_changed_executable(&model).await.unwrap();
+    // The executable changes between admission and launch: the launch is
+    // re-probed and held with the reason, never started.
+    std::fs::write(root.path().join("omp"), "rebuilt executable").unwrap();
+    let held = config
+        .hold_changed_executable(&model)
+        .await
+        .unwrap_err()
+        .to_string();
+    assert!(
+        held.contains("Launch held: the OMP executable changed after admission (omp/19.0.0)"),
+        "{held}"
+    );
+    assert!(held.contains("re-probe failed"), "{held}");
+    assert!(!held.contains("secret-canary"), "{held}");
+    assert!(config.verify_frozen_catalog_route(&model).is_err());
+    // A receipt bound to other content never makes a version launchable.
+    let mut tampered = snapshot.harnesses[0].clone();
+    tampered.identity.as_mut().unwrap().binary_sha256 = "other".into();
+    assert_eq!(tampered.compatibility(), None);
+    assert!(tampered.execution_note().is_some());
 }
 
 /// A configured Codex harness whose listed model is `native-model`, with the

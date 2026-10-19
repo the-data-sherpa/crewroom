@@ -57,15 +57,24 @@ impl<S: StoreAccess> Workflow<S> {
         // Several CLI versions can be launch-verified; record the observed
         // one and whether the adapter will require it at launch.
         let version = discovered.as_ref().map(|i| i.version.clone());
-        let basis = match &version {
-            Some(v)
+        let basis = match (&version, &discovered) {
+            (Some(v), _)
                 if crate::runner::pins_version(kind)
                     && crate::runner::execution_versions(kind).contains(&v.as_str()) =>
             {
                 "required-runtime-profile"
             }
-            Some(_) => "discovery",
-            None => "unavailable-until-launch",
+            // FOR-69: launch requires the probed version for this executable.
+            (Some(_), Some(identity))
+                if crate::runner::pins_version(kind)
+                    && crate::model_catalog::Harness::from_kind(kind).is_some_and(|h| {
+                        crate::model_catalog::compatibility::launchable(&h, identity)
+                    }) =>
+            {
+                "probed-runtime-profile"
+            }
+            (Some(_), _) => "discovery",
+            (None, _) => "unavailable-until-launch",
         };
         Ok(
             json!({"runner":{"kind":kind,"path":path,"sha256":files::hash(crate::read(&path)?),"version":version,"versionBasis":basis,"profileHash":digest(&profile),"credentialReference":digest(&json!({"kind":kind,"reference":native,"account":account,"provider":model["resolved"]["provider"]}))},"application":{"path":application,"sha256":files::hash(crate::read(&application)?),"helpers":helpers,"launchPrefixExecutable":prefix_executable},"platform":{"os":std::env::consts::OS,"arch":std::env::consts::ARCH},"image":self.0.config.evaluation_image}),

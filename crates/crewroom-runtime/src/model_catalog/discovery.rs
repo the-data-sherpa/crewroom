@@ -42,10 +42,15 @@ pub struct Identity {
     pub binary_stamp: String,
     pub version: String,
     pub profile: String,
+    /// FOR-69: `verified` (listed) or `probed` with its receipt. Absent in
+    /// snapshots written before the probe contract; those are list-checked.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub compatibility: Option<compatibility::Compatibility>,
 }
 
 /// `--version` outputs whose metadata exchange was executed against the real
-/// CLI. Discovery only lists models; execution keeps its own pinned profile.
+/// CLI. Since FOR-69 this is the baseline: newer releases run the
+/// compatibility probe instead of requiring a new entry here.
 pub fn verified_versions(harness: &Harness) -> &'static [&'static str] {
     match harness {
         // FOR-9 verified the first entries; FOR-38 the installed Linux CLIs.
@@ -54,26 +59,6 @@ pub fn verified_versions(harness: &Harness) -> &'static [&'static str] {
         Harness::Omp => &["omp/18.4.12", "omp/18.11.3"],
     }
 }
-/// Operator-facing drift explanation. The reported version is bounded,
-/// printable harness output, never configuration.
-pub fn version_message(harness: &Harness, reported: &str) -> String {
-    let reported: String = reported
-        .chars()
-        .filter(|c| !c.is_control())
-        .take(80)
-        .collect();
-    format!(
-        "{} reported version \"{}\", which Crewroom has not verified for model discovery (verified: {}). Install a verified version or update Crewroom, then refresh.",
-        harness.label(),
-        if reported.is_empty() {
-            "unknown"
-        } else {
-            &reported
-        },
-        verified_versions(harness).join(", ")
-    )
-}
-
 /// Cheap freshness observation for UI reads. Admission also compares SHA-256.
 pub fn binary_stamp(path: &Path) -> Result<String> {
     use std::os::unix::fs::MetadataExt;
@@ -132,7 +117,7 @@ pub fn binary_digest(path: &Path) -> Result<(PathBuf, String)> {
     Ok((real, format!("{:x}", digest.finalize())))
 }
 
-fn private_dir(path: &Path) -> Result<()> {
+pub(super) fn private_dir(path: &Path) -> Result<()> {
     std::fs::DirBuilder::new()
         .recursive(true)
         .mode(0o700)
@@ -140,16 +125,18 @@ fn private_dir(path: &Path) -> Result<()> {
     canonical(path)
 }
 
-struct Process {
+pub(super) struct Process {
     child: Child,
     input: Option<ChildStdin>,
     output: ChildStdout,
     root: PathBuf,
     buffer: Vec<u8>,
     total: usize,
+    /// OMP protocol-v2 frames are decoded with the runtime's own decoder.
+    pub(super) decoder: Option<crate::rpc_frame::Decoder>,
 }
 impl Process {
-    async fn start(
+    pub(super) async fn start(
         config: &Config,
         cwd: &Path,
         name: &str,
@@ -186,9 +173,10 @@ impl Process {
             root,
             buffer: Vec::new(),
             total: 0,
+            decoder: None,
         })
     }
-    async fn send(&mut self, value: &Value) -> Result<()> {
+    pub(super) async fn send(&mut self, value: &Value) -> Result<()> {
         let mut bytes = serde_json::to_vec(value)?;
         bytes.push(b'\n');
         self.input
@@ -212,15 +200,21 @@ impl Process {
         self.buffer.extend_from_slice(&bytes[..n]);
         Ok(n != 0)
     }
-    async fn receive(&mut self, matches: impl Fn(&Value) -> bool) -> Result<Value> {
+    pub(super) async fn receive(&mut self, matches: impl Fn(&Value) -> bool) -> Result<Value> {
         loop {
             if let Some(end) = self.buffer.iter().position(|b| *b == b'\n') {
                 let line: Vec<_> = self.buffer.drain(..=end).collect();
                 if line.iter().all(u8::is_ascii_whitespace) {
                     continue;
                 }
-                let frame: Value = serde_json::from_slice(&line)
-                    .map_err(|_| conflict("Invalid discovery JSON."))?;
+                let frame: Value = match self.decoder.as_mut() {
+                    Some(decoder) => match decoder.line(&line)? {
+                        Some(frame) => frame,
+                        None => continue,
+                    },
+                    None => serde_json::from_slice(&line)
+                        .map_err(|_| conflict("Invalid discovery JSON."))?,
+                };
                 if !frame.is_object() {
                     return Err(conflict("Invalid discovery frame."));
                 }
@@ -232,7 +226,7 @@ impl Process {
             }
         }
     }
-    async fn collect(&mut self) -> Result<Vec<u8>> {
+    pub(super) async fn collect(&mut self) -> Result<Vec<u8>> {
         self.input.take();
         while self.chunk().await? {}
         // Do not reap yet: the reserved leader PID keeps group cleanup safe.
@@ -261,7 +255,7 @@ impl Process {
         }
         Ok(std::mem::take(&mut self.buffer))
     }
-    async fn close(&mut self) -> Result<()> {
+    pub(super) async fn close(&mut self) -> Result<()> {
         self.input.take();
         // No wait/try_wait has reaped this child. Its PID still identifies our
         // process group, even when it exited before publishing an owner receipt.
@@ -302,7 +296,7 @@ impl Drop for Process {
     }
 }
 
-async fn bounded<T>(
+pub(super) async fn bounded<T>(
     process: &mut Process,
     cancel: &CancellationToken,
     seconds: Duration,
@@ -435,7 +429,12 @@ pub fn normalize(harness: &Harness, values: &Value, observed_at: u64) -> Result<
     Ok(offerings)
 }
 
-async fn request(process: &mut Process, id: u64, method: &str, params: Value) -> Result<Value> {
+pub(super) async fn request(
+    process: &mut Process,
+    id: u64,
+    method: &str,
+    params: Value,
+) -> Result<Value> {
     process
         .send(&json!({"id":id,"method":method,"params":params}))
         .await?;
@@ -517,6 +516,44 @@ pub async fn discover(
     cancel: &CancellationToken,
     limit: Duration,
 ) -> Result<Receipt> {
+    discover_with(config, root, observed_at, cancel, limit, &[]).await
+}
+
+/// Run the full compatibility probe even for a listed version. Used for
+/// revision-bound live evidence on installed CLIs; never by admission.
+pub async fn probe_installed(
+    config: &Config,
+    root: &Path,
+    observed_at: u64,
+    cancel: &CancellationToken,
+    limit: Duration,
+) -> Result<Receipt> {
+    run(config, root, observed_at, cancel, limit, &[], true).await
+}
+
+/// Discovery plus, for a newer unlisted version, the FOR-69 compatibility
+/// probe. A retained receipt for the identical executable skips the protocol
+/// handshake; version and model discovery always run again.
+pub async fn discover_with(
+    config: &Config,
+    root: &Path,
+    observed_at: u64,
+    cancel: &CancellationToken,
+    limit: Duration,
+    probes: &[compatibility::ProbeReceipt],
+) -> Result<Receipt> {
+    run(config, root, observed_at, cancel, limit, probes, false).await
+}
+
+async fn run(
+    config: &Config,
+    root: &Path,
+    observed_at: u64,
+    cancel: &CancellationToken,
+    limit: Duration,
+    probes: &[compatibility::ProbeReceipt],
+    force: bool,
+) -> Result<Receipt> {
     if cancel.is_cancelled() {
         return Err(conflict("Discovery was cancelled."));
     }
@@ -577,11 +614,14 @@ pub async fn discover(
     let version = std::str::from_utf8(&raw)
         .map_err(|_| conflict("Invalid harness version."))?
         .trim();
-    let Some(expected) = verified_versions(&config.harness)
-        .iter()
-        .find(|v| **v == version)
-    else {
-        return Err(conflict(&version_message(&config.harness, version)));
+    let basis = compatibility::classify(&config.harness, version).map_err(|m| conflict(&m))?;
+    let probed = force || basis == compatibility::Basis::Probed;
+    // A probe names the check that failed; cancellation stays cancellation.
+    let failed = |check: &str, error: crewroom_core::Error| match error {
+        crewroom_core::Error::Conflict(message) if probed && !cancel.is_cancelled() => conflict(
+            &compatibility::probe_failure(&config.harness, version, check, &message),
+        ),
+        other => other,
     };
     let args: Vec<String> = match config.harness {
         Harness::Codex => vec![
@@ -626,7 +666,36 @@ pub async fn discover(
     })
     .await;
     process.close().await?;
-    let offerings = result?;
+    let offerings = result.map_err(|e| failed(compatibility::MODEL_DISCOVERY, e))?;
+    if probed && offerings.is_empty() {
+        return Err(failed(
+            compatibility::MODEL_DISCOVERY,
+            conflict("The harness listed no models."),
+        ));
+    }
+    let probe = if probed {
+        let reused = probes
+            .iter()
+            .find(|p| p.covers(&config.harness, version, &canonical_binary, &binary_sha256))
+            .cloned();
+        Some(match reused {
+            Some(receipt) => receipt,
+            None => {
+                super::probe::handshake(config, root, &env, cancel, limit)
+                    .await
+                    .map_err(|(check, e)| failed(check, e))?;
+                compatibility::ProbeReceipt::new(
+                    &config.harness,
+                    version,
+                    &canonical_binary,
+                    &binary_sha256,
+                    observed_at,
+                )
+            }
+        })
+    } else {
+        None
+    };
     if binary_digest_blocking(&config.binary).await?
         != (canonical_binary.clone(), binary_sha256.clone())
         || binary_stamp(&config.binary)? != stamp
@@ -640,7 +709,8 @@ pub async fn discover(
             binary_sha256,
             binary_stamp: stamp,
             version: version.into(),
-            profile: format!("{}-{expected}-metadata-v1", config.harness.as_str()),
+            profile: format!("{}-{version}-metadata-v1", config.harness.as_str()),
+            compatibility: Some(compatibility::Compatibility { basis, probe }),
         },
         offerings,
         inference_requested: false,

@@ -57,15 +57,17 @@ pub fn environment(home: &Path) -> BTreeMap<String, String> {
     ])
 }
 
-/// Returns the profile fingerprint, session directory and the verified
-/// version the binary reported.
+/// Returns the profile fingerprint, session directory and the admitted
+/// version the binary reported: verified, or probed for this executable.
 pub async fn prepare(
     binary: &Path,
     home: &Path,
     cwd: &Path,
-) -> Result<(String, PathBuf, &'static str)> {
+    plan: &Value,
+) -> Result<(String, PathBuf, String)> {
     canonical(binary)?;
     canonical(home)?;
+    let content = crate::read(binary)?;
     let output = profile::bounded_output(
         Command::new(binary)
             .arg("--version")
@@ -74,16 +76,14 @@ pub async fn prepare(
             .current_dir(cwd),
     )
     .await?;
-    let version = VERSIONS
-        .iter()
-        .copied()
-        .find(|v| output == format!("{v}\n").as_bytes())
-        .ok_or_else(|| {
-            conflict(&format!(
-                "Claude requires a verified native profile ({}).",
-                VERSIONS.join(", ")
-            ))
-        })?;
+    let version = super::admitted_version(
+        &crate::model_catalog::Harness::ClaudeCode,
+        VERSIONS,
+        &output,
+        plan,
+        binary,
+        &content,
+    )?;
     // The standard native HOME preserves the original account metadata/keychain
     // and native refresh locks. All settings/customizations are disabled by argv.
     let encoded: String = cwd
@@ -100,39 +100,40 @@ pub async fn prepare(
     let sessions = home.join(".claude/projects").join(encoded);
     private_dir(&sessions)?;
     Ok((
-        profile::digest(format!("{}:{POLICY}", profile::digest(&crate::read(binary)?)).as_bytes()),
+        profile::digest(format!("{}:{POLICY}", profile::digest(&content)).as_bytes()),
         sessions,
         version,
     ))
 }
 
+/// Launch flags shared by every attempt and by the FOR-69 compatibility
+/// probe; per-attempt model, prompt and session arguments follow them.
+pub const LAUNCH_FLAGS: &[&str] = &[
+    "--safe-mode",
+    "-p",
+    "--input-format",
+    "stream-json",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--include-partial-messages",
+    "--replay-user-messages",
+    "--tools",
+    "",
+    "--strict-mcp-config",
+    "--mcp-config",
+    r#"{"mcpServers":{"crewroom":{"type":"sdk","name":"crewroom"}}}"#,
+    "--setting-sources",
+    "",
+    "--disable-slash-commands",
+    "--no-chrome",
+    "--permission-mode",
+    "dontAsk",
+];
+
 pub fn arguments(model: &Value, prompt: &str, session: &str, resume: bool) -> Vec<String> {
-    let mut args: Vec<String> = [
-        "--safe-mode",
-        "-p",
-        "--input-format",
-        "stream-json",
-        "--output-format",
-        "stream-json",
-        "--verbose",
-        "--include-partial-messages",
-        "--replay-user-messages",
-        "--tools",
-        "",
-        "--strict-mcp-config",
-        "--mcp-config",
-        r#"{"mcpServers":{"crewroom":{"type":"sdk","name":"crewroom"}}}"#,
-        "--setting-sources",
-        "",
-        "--disable-slash-commands",
-        "--no-chrome",
-        "--permission-mode",
-        "dontAsk",
-        "--model",
-    ]
-    .into_iter()
-    .map(String::from)
-    .collect();
+    let mut args: Vec<String> = LAUNCH_FLAGS.iter().map(|s| (*s).to_owned()).collect();
+    args.push("--model".into());
     args.extend([
         model["id"].as_str().unwrap().into(),
         "--effort".into(),

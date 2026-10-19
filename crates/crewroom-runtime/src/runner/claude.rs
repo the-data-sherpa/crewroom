@@ -56,8 +56,9 @@ pub struct Claude {
     home: PathBuf,
     cwd: PathBuf,
     account: String,
-    /// The verified `--version` this executable reported before launch.
-    version: &'static str,
+    /// The admitted (verified or probed) `--version` this executable
+    /// reported before launch.
+    version: String,
     submit_lock: AsyncMutex<()>,
     delivery_lock: AsyncMutex<()>,
     failed: AtomicBool,
@@ -79,7 +80,8 @@ pub(super) async fn open(
     let lease = auth::lock(&saved.join("owner.lock")).await?;
     let binary = Path::new(text(&config["claudeCode"], "binary")?);
     let home = Path::new(text(&config["claudeCode"], "home")?);
-    let (fingerprint, sessions, version) = policy::prepare(binary, home, cwd).await?;
+    let (fingerprint, sessions, version) =
+        policy::prepare(binary, home, cwd, &config["model"]).await?;
     let account = policy::account(home)?;
     let model = &config["model"]["resolved"];
     for key in ["id", "resolvedModel", "effort"] {
@@ -174,7 +176,7 @@ pub(super) async fn open(
         let retained=adapter.journal.lock().unwrap().usage.clone();
         if retained["totalTokens"].is_u64(){adapter.publish_usage(&retained)?;}
         if stopping.is_cancelled() || adapter.failed.load(Ordering::SeqCst){return Err(conflict("Claude stopped during initialization."));}
-        let mut identity=json!({"hostPid":std::process::id(),"runnerKind":"claude-code","runnerPid":rpc.pid,"runnerVersion":version,
+        let mut identity=json!({"hostPid":std::process::id(),"runnerKind":"claude-code","runnerPid":rpc.pid,"runnerVersion":adapter.version,
             "runnerProfile":fingerprint,"model":model,"observedModel":model["resolvedModel"],"thinkingLevel":model["effort"],
             "sessionId":session,"sessionDirectory":sessions,"capabilities":{"authentication":"native-claude","usage":"cumulative-tokens","cost":"list-price-estimate",
                 "preRequestBudget":false,"hardOutputLimit":false,"compaction":"harness-managed","toolAuthority":"crewroom"}});
@@ -275,7 +277,7 @@ impl Claude {
                     .collect();
                 if frame["model"] != self.model["resolvedModel"]
                     || frame["permissionMode"] != "dontAsk"
-                    || frame["claude_code_version"] != policy::startup_version(self.version)
+                    || frame["claude_code_version"] != policy::startup_version(&self.version)
                     || expected != actual
                 {
                     return Err(conflict(

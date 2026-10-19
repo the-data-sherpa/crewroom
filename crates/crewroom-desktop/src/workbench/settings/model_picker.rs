@@ -203,6 +203,18 @@ fn saved_rows<'a>(selected: &str, rows: &'a [Value]) -> Vec<&'a Value> {
         })
         .collect()
 }
+/// FOR-69 version basis the service reports for a harness: `verified` or
+/// `compatible (probed <version>)`. None while the version may not launch.
+pub(in crate::workbench) fn harness_compatibility(
+    catalog: &Value,
+    harness: &str,
+) -> Option<String> {
+    records(catalog, "harnesses")
+        .iter()
+        .find(|h| h["harness"] == harness)
+        .and_then(|h| h["compatibility"].as_str())
+        .map(String::from)
+}
 /// A pre-billing selection several billing routes offer: never pick one.
 fn route_choice_required(rows: &[&Value]) -> String {
     format!(
@@ -396,8 +408,13 @@ impl Workbench {
             for route in records(row, "routes") {
                 let caps = &route["capabilities"];
                 field = field.child(hint(format!(
-                    "{} · Access: {} · Tools: {} · Inputs: {} · Profile: {}",
+                    "{} · Version: {} · Access: {} · Tools: {} · Inputs: {} · Profile: {}",
                     route_label(&route),
+                    harness_compatibility(
+                        &self.workspace["modelDiscovery"],
+                        &string(&route, "harness")
+                    )
+                    .unwrap_or_else(|| "not launchable".into()),
                     string(&route, "access"),
                     caps["tools"]
                         .as_bool()
@@ -498,8 +515,12 @@ impl Workbench {
                 .min_w_0()
                 .gap_1()
                 .child(hint(format!(
-                    "{} · {state} · Last success: {last} · {} models",
+                    "{} · {state}{} · Last success: {last} · {} models",
                     string(&harness, "harness"),
+                    harness["compatibility"]
+                        .as_str()
+                        .map(|c| format!(" · {c}"))
+                        .unwrap_or_default(),
                     records(&harness, "offerings").len()
                 )));
             // A remedy for a missing executable replaces its generic error.

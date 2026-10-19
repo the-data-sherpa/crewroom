@@ -9,8 +9,10 @@ use std::collections::HashSet;
 pub use billing::BillingRoute;
 
 pub mod billing;
+pub mod compatibility;
 pub mod discovery;
 pub mod policy;
+mod probe;
 pub mod store;
 pub mod unconfigured;
 
@@ -30,6 +32,15 @@ impl Harness {
             Self::Omp => "omp",
             Self::Codex => "codex",
             Self::ClaudeCode => "claude-code",
+        }
+    }
+    /// The runner kind a frozen model names (`omp`, `codex`, `claude-code`).
+    pub fn from_kind(kind: &str) -> Option<Self> {
+        match kind {
+            "omp" => Some(Self::Omp),
+            "codex" => Some(Self::Codex),
+            "claude-code" => Some(Self::ClaudeCode),
+            _ => None,
         }
     }
     /// Product name for operator-facing explanations.

@@ -140,10 +140,10 @@ impl RuntimeConfig {
                     Access::Unavailable
                 };
                 // A verified profile describes a specific CLI version. Newer
-                // listed versions stay without an execution profile.
+                // listed versions get one only after their compatibility probe
+                // passed for this exact executable (FOR-69).
                 let executable = entry.identity.as_ref().is_some_and(|i| {
-                    crate::runner::execution_versions(entry.harness.as_str())
-                        .contains(&i.version.as_str())
+                    crate::model_catalog::compatibility::launchable(&entry.harness, i)
                 });
                 // One offering per reachable billing route; never merged.
                 for route in sources
@@ -177,6 +177,57 @@ impl RuntimeConfig {
             ));
         }
         policy::verify_preview(&current, &model["selection"]["previewRevision"])
+    }
+    /// FOR-69: a frozen catalog selection whose harness executable changed
+    /// after admission is re-probed before launch, and the launch is held
+    /// with the outcome. The frozen identity is never rebound silently: a
+    /// passing new binary still needs re-admission, a failing one names the
+    /// failed check.
+    pub(crate) async fn hold_changed_executable(&self, model: &Value) -> Result<()> {
+        let Some(selection) = model.get("selection") else {
+            return Ok(());
+        };
+        let Ok(offering) =
+            serde_json::from_value::<crate::model_catalog::Offering>(selection["offering"].clone())
+        else {
+            // The frozen-route check refuses an invalid selection.
+            return Ok(());
+        };
+        let Some(binary) = self.binary(&offering.harness) else {
+            return Ok(());
+        };
+        let current = tokio::task::spawn_blocking(move || discovery::binary_digest(&binary))
+            .await
+            .map_err(|_| conflict("Harness executable hashing did not finish."))?;
+        if current.as_ref().is_ok_and(|(canonical, digest)| {
+            selection["identity"]["canonicalBinary"] == json!(canonical)
+                && selection["identity"]["binarySha256"] == json!(digest)
+        }) {
+            return Ok(());
+        }
+        let label = offering.harness.label();
+        let admitted = selection["identity"]["version"]
+            .as_str()
+            .unwrap_or("unknown");
+        let Some(catalog) = self.discovery.as_ref() else {
+            return Err(conflict(&format!(
+                "Launch held: the {label} executable changed after admission ({admitted}), and model discovery is unavailable to re-probe it."
+            )));
+        };
+        match catalog.probe_now(&offering.harness).await {
+            Err(reason) => Err(conflict(&format!(
+                "Launch held: the {label} executable changed after admission ({admitted}) and its re-probe failed. {reason}"
+            ))),
+            Ok(identity) => Err(conflict(&format!(
+                "Launch held: the {label} executable changed after admission ({admitted}). The new executable reports {} and is {}; refresh models and re-admit the assignment to launch with it.",
+                identity.version,
+                identity
+                    .compatibility
+                    .as_ref()
+                    .map(|c| c.label(&offering.harness, &identity.version))
+                    .unwrap_or_else(|| "unverified".into())
+            ))),
+        }
     }
     pub(crate) fn verify_frozen_catalog_route(&self, model: &Value) -> Result<()> {
         let Some(selection) = model.get("selection") else {
@@ -232,6 +283,10 @@ impl RuntimeConfig {
 }
 
 impl<S: StoreAccess> Workflow<S> {
+    /// FOR-69 launch hold; see `RuntimeConfig::hold_changed_executable`.
+    pub(super) async fn hold_changed_executable(&self, model: &Value) -> Result<()> {
+        self.0.config.hold_changed_executable(model).await
+    }
     pub fn refresh_model_catalog(&self) -> Result<Value> {
         self.check_open()?;
         self.0.authority.assert_current()?;
@@ -281,6 +336,7 @@ impl<S: StoreAccess> Workflow<S> {
                         .find(|h| json!(h.harness) == entry["harness"])
                     {
                         entry["executionNote"] = json!(saved.execution_note());
+                        entry["compatibility"] = json!(saved.compatibility());
                         if entry["configured"] == true {
                             entry["billing"] = sources.summary(&saved.harness);
                         }

@@ -1,6 +1,7 @@
 //! Durable per-harness refresh lifecycle. Catalog writes never hold workflow
 //! authority while a metadata process runs, and never admit agent work.
 use super::{
+    compatibility::{self, ProbeReceipt},
     discovery::{self, Config, Identity, Receipt},
     *,
 };
@@ -61,17 +62,37 @@ impl HarnessSnapshot {
                 .is_some_and(|t| now >= t && now - t < FRESH_FOR_SECONDS)
     }
     /// Listing models and running them are separate verifications. Explain a
-    /// discovered version whose execution adapter has not passed live launch.
+    /// discovered version that is neither launch-verified nor probed.
     pub fn execution_note(&self) -> Option<String> {
-        let version = &self.identity.as_ref()?.version;
+        let identity = self.identity.as_ref()?;
+        let version = &identity.version;
         let verified = crate::runner::execution_versions(self.harness.as_str());
-        (!verified.contains(&version.as_str())).then(|| {
+        (!compatibility::launchable(&self.harness, identity)).then(|| {
             format!(
-                "{} {version} lists models, but Crewroom has verified launching agents only with {}. Its models stay unavailable for new work until this version is verified.",
+                "{} {version} lists models, but has no passed compatibility probe for this executable, and Crewroom has verified launching agents only with {}. Its models stay unavailable for new work until a refresh probes this version.",
                 self.harness.label(),
                 verified.join(", ")
             )
         })
+    }
+    /// FOR-69 operator wording for the discovered version: `verified`,
+    /// `compatible (probed <version>)`, or none when it may not launch.
+    pub fn compatibility(&self) -> Option<String> {
+        let identity = self.identity.as_ref()?;
+        if !compatibility::launchable(&self.harness, identity) {
+            return None;
+        }
+        Some(
+            if compatibility::verified(&self.harness).contains(&identity.version.as_str()) {
+                "verified".into()
+            } else {
+                compatibility::Compatibility {
+                    basis: compatibility::Basis::Probed,
+                    probe: None,
+                }
+                .label(&self.harness, &identity.version)
+            },
+        )
     }
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -82,6 +103,10 @@ pub struct Snapshot {
     pub generation: u64,
     pub state: String,
     pub harnesses: Vec<HarnessSnapshot>,
+    /// FOR-69 probe receipts, keyed by harness, version and executable
+    /// identity. A retained pass lets a refresh skip the protocol handshake.
+    #[serde(default)]
+    pub probes: Vec<ProbeReceipt>,
 }
 impl Default for Snapshot {
     fn default() -> Self {
@@ -103,6 +128,7 @@ impl Default for Snapshot {
                     error: None,
                 })
                 .collect(),
+            probes: Vec::new(),
         }
     }
 }
@@ -123,6 +149,32 @@ impl Snapshot {
             }
             validate_contract(&entry.offerings, &[])?;
         }
+        if self.probes.len() > compatibility::MAX_RECEIPTS || self.probes.iter().any(|p| !p.valid())
+        {
+            return Err(conflict("Invalid compatibility probe receipts."));
+        }
+        Ok(())
+    }
+    /// Retain one passed probe; an identical executable replaces its older
+    /// receipt and the oldest receipts are dropped beyond the bound.
+    pub(crate) fn retain_probe(&mut self, receipt: &ProbeReceipt) -> Result<()> {
+        if !receipt.valid() {
+            return Err(conflict("Invalid compatibility probe receipt."));
+        }
+        self.probes.retain(|p| {
+            !p.covers(
+                &receipt.harness,
+                &receipt.version,
+                &receipt.canonical_binary,
+                &receipt.binary_sha256,
+            )
+        });
+        self.probes.push(receipt.clone());
+        let excess = self
+            .probes
+            .len()
+            .saturating_sub(compatibility::MAX_RECEIPTS);
+        self.probes.drain(..excess);
         Ok(())
     }
     fn advance(&mut self) -> Result<()> {
@@ -173,12 +225,32 @@ impl Snapshot {
                     ));
                 }
                 validate_contract(&receipt.offerings, &[])?;
+                let probe = receipt
+                    .identity
+                    .compatibility
+                    .as_ref()
+                    .and_then(|c| c.probe.clone());
+                // A probed basis must carry a receipt for this exact identity.
+                if receipt
+                    .identity
+                    .compatibility
+                    .as_ref()
+                    .is_some_and(|c| c.basis == compatibility::Basis::Probed)
+                    && !compatibility::launchable(harness, &receipt.identity)
+                {
+                    return Err(conflict(
+                        "Discovery receipt has no valid compatibility basis.",
+                    ));
+                }
                 entry.outcome = Outcome::Success;
                 entry.last_success = Some(now);
                 entry.identity = Some(receipt.identity);
                 entry.configuration_revision = Some(configuration.into());
                 entry.offerings = receipt.offerings;
                 entry.error = None;
+                if let Some(probe) = probe {
+                    self.retain_probe(&probe)?;
+                }
             }
             Err(error) => {
                 entry.outcome = Outcome::Error;
@@ -385,6 +457,7 @@ impl Catalog {
                 source.configuration_revision = revision.clone();
             }
         }
+        let probes = state.snapshot.probes.clone();
         let this = self.clone();
         state.worker = Some(tokio::spawn(async move {
             let recovery = this.recover_processes().await;
@@ -401,12 +474,13 @@ impl Catalog {
                         .processes
                         .join(format!("refresh-{generation}"))
                         .join(harness.as_str());
-                    discovery::discover(
+                    discovery::discover_with(
                         &source.config,
                         &root,
                         now(),
                         &this.0.cancel,
                         Duration::from_secs(30),
+                        &probes,
                     )
                     .await
                     .map_err(|error| match error {
@@ -439,6 +513,52 @@ impl Catalog {
         (self.0.changed)();
         Ok(self.view(now()))
     }
+    /// FOR-69 launch-time re-probe of one harness's current executable. The
+    /// receipt is retained like a refresh's; offerings and freshness of the
+    /// catalog entry are not changed, so admission still needs a refresh.
+    pub async fn probe_now(&self, harness: &Harness) -> std::result::Result<Identity, String> {
+        let source = self
+            .source(harness)
+            .ok_or_else(|| "Harness is not configured.".to_owned())?;
+        let probes = self.snapshot().map(|s| s.probes).unwrap_or_default();
+        let root = self
+            .0
+            .processes
+            .join(format!("launch-{}", uuid::Uuid::new_v4().simple()))
+            .join(harness.as_str());
+        let receipt = discovery::discover_with(
+            &source.config,
+            &root,
+            now(),
+            &self.0.cancel,
+            Duration::from_secs(30),
+            &probes,
+        )
+        .await
+        .map_err(|error| match error {
+            crewroom_core::Error::Conflict(message) => message,
+            _ => {
+                "Compatibility probe failed; inspect the configured executable and profile.".into()
+            }
+        })?;
+        if let Some(probe) = receipt
+            .identity
+            .compatibility
+            .as_ref()
+            .and_then(|c| c.probe.as_ref())
+        {
+            let mut state = self.0.state.lock().unwrap();
+            let mut next = state.snapshot.clone();
+            let retained = next
+                .retain_probe(probe)
+                .and_then(|()| next.advance())
+                .and_then(|()| self.persist(&mut state, next));
+            drop(state);
+            retained.map_err(|_| "Probe receipt could not be retained.".to_owned())?;
+            (self.0.changed)();
+        }
+        Ok(receipt.identity)
+    }
     pub(crate) async fn recover_processes(&self) -> Result<()> {
         if !self.0.processes.exists() {
             return Ok(());
@@ -449,7 +569,7 @@ impl Catalog {
                 return Err(conflict("Invalid discovery recovery directory."));
             }
             for harness in ["omp", "codex", "claude-code"] {
-                for command in ["version", "metadata"] {
+                for command in ["version", "metadata", "probe-catalog", "probe-handshake"] {
                     let root = run.path().join(harness).join(command);
                     if root.exists() && crate::stop_owned(&root).await.state != "stopped" {
                         return Err(conflict(
@@ -489,6 +609,7 @@ mod tests {
                 binary_stamp: "stamp".into(),
                 version: "fixture".into(),
                 profile: "fixture".into(),
+                compatibility: None,
             },
             offerings: vec![Offering {
                 key: offering_key(&harness, "p", "m"),

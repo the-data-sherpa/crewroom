@@ -722,7 +722,9 @@ for line in sys.stdin:
     assert_eq!(view["selection"], "intent");
     let codex_view = harness(&view, "codex");
     assert_eq!(codex_view["outcome"], "success", "{codex_view}");
-    // 0.163.0 passed live launch, so no execution caveat is shown.
+    // 0.163.0 passed live launch, so no execution caveat is shown and the
+    // version is reported as verified rather than probed (FOR-69).
+    assert_eq!(codex_view["compatibility"], "verified", "{codex_view}");
     assert!(codex_view["executionNote"].is_null(), "{codex_view}");
     assert_eq!(
         harness(&view, "claude-code")["error"],

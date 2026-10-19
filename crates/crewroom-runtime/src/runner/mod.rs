@@ -19,6 +19,23 @@ use std::{
 };
 
 pub type Event = Arc<dyn Fn(Value) + Send + Sync>;
+pub(crate) use claude_profile::LAUNCH_FLAGS as CLAUDE_LAUNCH_FLAGS;
+pub(crate) use profile::{launch_files as codex_launch_files, pinned_row as codex_pinned};
+
+/// OMP RPC launch flags shared by every attempt and by the FOR-69
+/// compatibility probe; cwd, session, model and prompt arguments follow them.
+pub const OMP_RPC_FLAGS: &[&str] = &[
+    "--mode",
+    "rpc",
+    "--no-ui",
+    "--no-tools",
+    "--no-extensions",
+    "--no-rules",
+    "--no-skills",
+    "--no-lsp",
+    "--no-title",
+    "--no-pty",
+];
 
 pub enum Runner {
     Omp(crate::rpc::OmpRpc),
@@ -56,8 +73,48 @@ pub(crate) fn account_binding(adapter: &str, config: &Value) -> Result<String> {
         _ => Err(conflict("Unknown native account profile.")),
     }
 }
-/// Native adapters refuse to launch a CLI whose `--version` is not listed in
-/// `execution_versions`; OMP's version is observed through discovery.
+/// FOR-69: a native adapter launches a listed `--version`, or an unlisted
+/// newer one whose frozen selection carries a passed compatibility probe for
+/// this exact version, canonical executable and content hash. Anything else
+/// is refused before the harness starts.
+pub(crate) fn admitted_version(
+    harness: &crate::model_catalog::Harness,
+    verified: &[&str],
+    reported: &[u8],
+    plan: &Value,
+    binary: &Path,
+    content: &[u8],
+) -> Result<String> {
+    if let Some(v) = verified
+        .iter()
+        .find(|v| reported == format!("{v}\n").as_bytes())
+    {
+        return Ok((*v).to_owned());
+    }
+    let refused = || {
+        conflict(&format!(
+            "{} requires a verified version ({}) or a passed compatibility probe for this exact executable. Refresh models, then re-admit the assignment.",
+            harness.label(),
+            verified.join(", ")
+        ))
+    };
+    let reported = std::str::from_utf8(reported)
+        .ok()
+        .and_then(|v| v.strip_suffix('\n'))
+        .ok_or_else(refused)?;
+    let identity: crate::model_catalog::discovery::Identity =
+        serde_json::from_value(plan["selection"]["identity"].clone()).map_err(|_| refused())?;
+    let canonical = binary.canonicalize().map_err(|_| refused())?;
+    let digest = profile::digest(content);
+    let probed = identity.version == reported
+        && identity.canonical_binary == canonical
+        && identity.binary_sha256 == digest
+        && crate::model_catalog::compatibility::launchable(harness, &identity);
+    probed.then(|| reported.to_owned()).ok_or_else(refused)
+}
+/// Native adapters refuse to launch a CLI whose `--version` is neither listed
+/// in `execution_versions` nor probed (`admitted_version`); OMP's version is
+/// observed through discovery.
 pub(crate) fn pins_version(adapter: &str) -> bool {
     matches!(adapter, "codex" | "claude-code")
 }
@@ -160,4 +217,90 @@ fn private_dir(path: &Path) -> Result<()> {
         return Err(conflict("Runner directory must be private."));
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::model_catalog::{
+        Harness,
+        compatibility::{Basis, Compatibility, ProbeReceipt},
+        discovery::Identity,
+    };
+
+    /// FOR-69: launch accepts a listed version, or the exact probed version
+    /// and executable the frozen selection recorded; nothing else.
+    #[test]
+    fn launch_admits_listed_or_exactly_probed_versions() {
+        let root = tempfile::tempdir().unwrap();
+        let binary = root.path().join("claude");
+        std::fs::write(&binary, b"fixture executable").unwrap();
+        let content = std::fs::read(&binary).unwrap();
+        let canonical = binary.canonicalize().unwrap();
+        let sha = profile::digest(&content);
+        let listed = claude_profile::VERSIONS;
+        let harness = Harness::ClaudeCode;
+        let plan = |version: &str, probe: Option<ProbeReceipt>| {
+            json!({"selection":{"identity":Identity {
+                binary: binary.clone(),
+                canonical_binary: canonical.clone(),
+                binary_sha256: sha.clone(),
+                binary_stamp: "stamp".into(),
+                version: version.into(),
+                profile: "fixture".into(),
+                compatibility: Some(Compatibility {
+                    basis: if probe.is_some() { Basis::Probed } else { Basis::Verified },
+                    probe,
+                }),
+            }}})
+        };
+        let admit = |reported: &[u8], plan: &Value, content: &[u8]| {
+            admitted_version(&harness, listed, reported, plan, &binary, content)
+        };
+        assert_eq!(
+            admit(b"2.1.302 (Claude Code)\n", &json!({}), &content).unwrap(),
+            "2.1.302 (Claude Code)"
+        );
+        let newer = "3.0.0 (Claude Code)";
+        let receipt = ProbeReceipt::new(&harness, newer, &canonical, &sha, 1);
+        assert_eq!(
+            admit(
+                b"3.0.0 (Claude Code)\n",
+                &plan(newer, Some(receipt.clone())),
+                &content
+            )
+            .unwrap(),
+            newer
+        );
+        // No receipt, another version, changed content or another harness's
+        // receipt: refused before the harness starts.
+        let other = ProbeReceipt::new(&Harness::Codex, newer, &canonical, &sha, 1);
+        for (reported, plan, content) in [
+            (
+                &b"3.0.0 (Claude Code)\n"[..],
+                plan(newer, None),
+                &content[..],
+            ),
+            (&b"3.0.0 (Claude Code)\n"[..], json!({}), &content[..]),
+            (
+                &b"3.0.1 (Claude Code)\n"[..],
+                plan(newer, Some(receipt.clone())),
+                &content[..],
+            ),
+            (
+                &b"3.0.0 (Claude Code)\n"[..],
+                plan(newer, Some(receipt.clone())),
+                &b"rebuilt"[..],
+            ),
+            (
+                &b"3.0.0 (Claude Code)\n"[..],
+                plan(newer, Some(other)),
+                &content[..],
+            ),
+        ] {
+            let error = admit(reported, &plan, content).unwrap_err().to_string();
+            assert!(error.contains("passed compatibility probe"), "{error}");
+            assert!(error.contains("2.1.302 (Claude Code)"), "{error}");
+        }
+    }
 }

@@ -130,6 +130,7 @@ pub fn view(catalog: &Catalog, billing: &billing::Sources, now: u64) -> Value {
                     continue;
                 };
                 entry["executionNote"] = json!(saved.execution_note());
+                entry["compatibility"] = json!(saved.compatibility());
                 if catalog.source(&saved.harness).is_none() {
                     entry["remedy"] = json!(format!(
                         "{} (`{}`) was not found on the service PATH. Install it or add its directory to the service PATH, then restart the service.",

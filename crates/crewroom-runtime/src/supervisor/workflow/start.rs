@@ -245,6 +245,13 @@ impl<S: StoreAccess> Workflow<S> {
             } else {
                 false
             };
+            self.hold_changed_executable(
+                attempt
+                    .get("model")
+                    .filter(|v| !v.is_null())
+                    .unwrap_or(&assignment["model"]),
+            )
+            .await?;
             let port = self.lease_port(id).await?;
             self.current(run, control)?;
             let token = format!(

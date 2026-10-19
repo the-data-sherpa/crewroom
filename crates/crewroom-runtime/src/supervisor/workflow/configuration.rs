@@ -475,20 +475,10 @@ impl RuntimeConfig {
         let mut command = self.prefix.clone();
         command.push(self.omp.clone());
         command.extend(
-            [
-                "--mode",
-                "rpc",
-                "--no-ui",
-                "--no-tools",
-                "--no-extensions",
-                "--no-rules",
-                "--no-skills",
-                "--no-lsp",
-                "--no-title",
-                "--no-pty",
-                "--cwd",
-            ]
-            .map(String::from),
+            crate::runner::OMP_RPC_FLAGS
+                .iter()
+                .chain(&["--cwd"])
+                .map(|s| (*s).to_owned()),
         );
         command.extend([
             runner_cwd.to_string_lossy().into_owned(),
