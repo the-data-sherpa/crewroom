@@ -4,6 +4,31 @@ The operator requested that each work item pass its checks before the next start
 
 Historical revision IDs and source hashes below refer to the original private snapshots before the FOR-17 history rewrite. Sanitized copies are not byte-identical evidence for rewritten revisions; replay requires the private archive. New validation is recorded separately.
 
+## FOR-73 — Model catalog: typed capabilities, bundled model facts and a readable picker (2026-10-19)
+
+Implementation `4ae7449` and wording fix `517466d` (capability notes name the release, for example `Claude Code 2.1.303 (compatible, probed)`) on branch `for-73-work` from main `9d409b5`. Checks ran in a fresh worktree with a private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, wrapped by `scripts/system_limits.py`.
+
+Simulated (unit and fixture tests; no inference):
+
+- `capabilities::tests` (4): verified versions carry the MH2/MH3/OMP baseline (Codex: no request counts, cost or pre-request budget; Claude Code: cost estimated; OMP: gateway counts and budget, no cost). A probed version claims only what its receipt exercised (host tools, effort) and states steering as held and interruption, resume and token accounting as degraded. A receipt without the handshake refuses admission. A frozen record is kept; routes admitted before FOR-73 keep the baseline; a tampered record claims nothing.
+- `bundled::tests` (4): the shipped file parses and covers all three harnesses; duplicate, malformed or unknown-field entries are rejected; bundled facts fill only unreported capabilities; a live-only model stays listed with `unknownCapabilities`; a model missing only because the installed Codex/Claude Code predates it names the release; OMP never gets a version claim.
+- `login::tests` (2) and `unconfigured::tests` (2 new): login models are launchable only through a runner-configured provider; others state the subscription or API-key reason; a credential-shaped field in the harness output never reaches the view; a login listing on a non-OMP entry is rejected.
+- `tests/catalog_policy.rs` (4 new): admission freezes `harnessCapabilities` and `degradedModes`; a refusal blocks admission and the picker alike with bare `blockers`; a login blocker is the only reason shown; choices carry bundled status and unknown capabilities.
+- `catalog::tests::passing_reprobe_of_a_changed_executable_lets_the_launch_proceed`: after a re-probe to `omp/19.0.1` the attempt's record becomes `probed`; `steering_mode` changes from `steer` to held and `resumes_session` to false. The store accepts the record and its notes changing with the identity.
+- Desktop `picker_listing_groups_collapses_and_states_shared_reasons_once`: one line per model (name · route · efforts) under harness headers; legacy rows collapsed (shown when expanded or saved); a reason shared by every runner-listed model appears once with its remedy and not on rows; version-update rows name the release. The three existing picker journeys were updated to the new row text.
+
+Live, on this machine (metadata only; no prompt sent; operator service on 4318 and its data untouched):
+
+- `target/debug/examples/omp-login-models omp …` at the `4ae7449` tree, through the production login listing: the operator's OMP login lists **149 models from 4 providers**; **0 launchable** without runner-configured providers (7 subscription sign-in, 142 not in the runner configuration); no credential-shaped text in the serialized listing.
+- `scripts/verify_unconfigured_catalog.py --port 4397` at `4ae7449` with a new private data directory and no runner configuration: passed; state `success`; OMP `omp/18.11.3` verified (0 runner offerings; login listing `success`, 149 models, 0 launchable), Codex `codex-cli 0.163.0` verified (8), Claude Code `2.1.303` `compatible (probed 2.1.303)` (5). Capability records: OMP and Codex `verified`, Claude Code `probed` with steering held and interruption, resume and token accounting stated as degraded. Choices: 162 (149 OMP login, 8 Codex, 5 Claude Code); 22 with bundled facts, 7 legacy, 140 live-only; no credential-shaped text in the catalog; job selections saved and read back; no runs. The private report stays outside the repository.
+- Not done here: the operator on-screen check of the picker (coordinator).
+
+Checks:
+
+- At `517466d`: `cargo test -p crewroom-core -p crewroom-runtime -p crewroom-service`: **434 passed / 0 failed / 3 ignored** over 66 binaries; `cargo test --no-fail-fast -p crewroom-desktop`: **153 passed / 0 failed / 15 ignored**. `cargo clippy --all-targets … -D warnings` and `cargo fmt --check` for the four crates: clean. `npm test`: **345/345**. `npm run build`: passes.
+- An earlier full run at `4ae7449` hit `Disk quota exceeded` in the shared `/tmp` (load from parallel agents) in 5 desktop tests; they passed on rerun and in the `517466d` run.
+- `npm run test:e2e`: not run (integrator).
+
 ## FOR-71 — Harden the harness compatibility probe (2026-10-19)
 
 Implementation `b68910b` on main (rebased without code changes from `9f9e217`, written on main `9d409b5` with FOR-69 merged, onto main `e8b86de`). Every check below, except the integration checks at the end, ran at `9f9e217`. Each ran in a fresh worktree prepared with `scripts/prepare_worktree.py --build-helpers`, with a private `CARGO_TARGET_DIR`, `-j6` and `--test-threads=4`, wrapped by `scripts/system_limits.py run`.
