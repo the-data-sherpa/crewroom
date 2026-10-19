@@ -1020,3 +1020,35 @@ fn captured_project_instructions_reach_the_assignment_prompt() {
         assert!(prompt.contains(expected), "{prompt}");
     }
 }
+
+/// FOR-79: `list_roles` lists the roles the run's project may assign, in
+/// both directions: a project enabling a workspace-disabled role lists it,
+/// a project disabling a role hides it, and other projects inherit.
+#[test]
+fn coordinator_role_listing_follows_the_projects_role_overrides() {
+    use crewroom_core::{capacity::run_project, project_settings::effective_roles};
+    let (_root, _config, mut roles) = fixture();
+    for role in &mut roles {
+        if role["id"] == "sre" {
+            role["enabled"] = json!(false);
+        }
+    }
+    let settings =
+        json!({"workspace":{},"projects":{"alpha":{"roles.sre":true,"roles.reviewer":false}}});
+    let listed = |project: &str| -> Vec<String> {
+        let run = json!({"taskSnapshot":{"repositoryId":project}});
+        let resolved = effective_roles(&roles, &settings, &run_project(&run));
+        super::super::tools::listed_roles(&resolved)
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|r| r["id"].as_str().unwrap().to_owned())
+            .collect()
+    };
+    let alpha = listed("alpha");
+    assert!(alpha.contains(&"sre".to_owned()), "{alpha:?}");
+    assert!(!alpha.contains(&"reviewer".to_owned()), "{alpha:?}");
+    let beta = listed("beta");
+    assert!(!beta.contains(&"sre".to_owned()), "{beta:?}");
+    assert!(beta.contains(&"reviewer".to_owned()), "{beta:?}");
+}

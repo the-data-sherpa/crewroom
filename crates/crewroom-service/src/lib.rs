@@ -1182,6 +1182,7 @@ async fn mutate_inner(state: AppState, path: String, body: Value) -> Result<Valu
                         .as_u64()
                         .ok_or_else(|| Error::Invalid("Principle revision is required.".into()))?,
                     &s.roles,
+                    &s.store.project_settings()?,
                 )
             }
             ["roles"] => {

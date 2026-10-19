@@ -309,3 +309,121 @@ fn the_snapshot_reports_settings_and_capacity_with_the_workspace_default() {
         .clone();
     assert_eq!(view["capacity"], 2);
 }
+
+fn launch_with(role: &str) -> Value {
+    json!({"team":[
+        {"name":"Coordinator","roleId":"coordinator","coordinator":true,"input":"Inspect accepted work."},
+        {"name":"Specialist","roleId":role,"coordinator":false,"input":"Assess the change."}
+    ]})
+}
+impl Fixture {
+    fn ready_task(&self, repo: &str, title: &str) -> String {
+        let task = self
+            .store
+            .create_task(&json!({"title":title,"description":"","repositoryId":repo}))
+            .unwrap();
+        let task_id = task["id"].as_str().unwrap().to_owned();
+        self.store
+            .refine(
+                &task_id,
+                &json!({"revision":1,"sourceRevision":1,"brief":"Keep behavior","criteria":["Retain evidence"]}),
+            )
+            .unwrap();
+        support::accept_plan(&self.store, &task_id);
+        task_id
+    }
+    fn queue_launch(&self, task_id: &str, launch: Option<Value>) -> crewroom_core::Result<Value> {
+        let revision = self.store.get_task(task_id).unwrap()["revision"].clone();
+        let mut body = json!({"revision":revision});
+        if let Some(launch) = launch {
+            body["launch"] = launch;
+        }
+        self.store.queue_with_roles(task_id, &body, &self.roles)
+    }
+    fn change_launch(&self, run_id: &str, launch: Value) -> crewroom_core::Result<Value> {
+        self.store.set_queue_launch(
+            run_id,
+            &json!({"requestId":uuid::Uuid::new_v4().to_string(),"launch":launch}),
+            &self.roles,
+        )
+    }
+}
+
+#[test]
+fn saving_launch_details_checks_the_projects_roles_in_both_directions() {
+    let mut f = fixture();
+    // The workspace disables sre; alpha enables it and disables reviewer.
+    for role in &mut f.roles {
+        if role["id"] == "sre" {
+            role["enabled"] = json!(false);
+        }
+    }
+    let alpha = f.project("alpha");
+    let beta = f.project("beta");
+    f.save(json!({"repositoryId":alpha,"set":{"roles.sre":true,"roles.reviewer":false}}))
+        .unwrap();
+
+    // Queue with a launch (POST /api/tasks/:id/runs).
+    let task = f.ready_task(&alpha, "Alpha sre");
+    let run = f.queue_launch(&task, Some(launch_with("sre"))).unwrap();
+    assert_eq!(run["launch"]["team"][1]["roleId"], "sre");
+    let task = f.ready_task(&alpha, "Alpha reviewer");
+    let refused = f
+        .queue_launch(&task, Some(launch_with("reviewer")))
+        .unwrap_err();
+    assert!(refused.to_string().contains("unavailable"), "{refused}");
+    // Beta inherits the workspace: sre stays unavailable, reviewer is allowed.
+    let task = f.ready_task(&beta, "Beta sre");
+    let refused = f.queue_launch(&task, Some(launch_with("sre"))).unwrap_err();
+    assert!(refused.to_string().contains("unavailable"), "{refused}");
+    let run = f
+        .queue_launch(&task, Some(launch_with("reviewer")))
+        .unwrap();
+    assert_eq!(run["launch"]["team"][1]["roleId"], "reviewer");
+
+    // Change launch details on a queued plan (POST /api/queue/:id/launch).
+    let task = f.ready_task(&alpha, "Alpha later");
+    let queued = f.queue_launch(&task, None).unwrap();
+    let run_id = queued["id"].as_str().unwrap();
+    let saved = f.change_launch(run_id, launch_with("sre")).unwrap();
+    assert_eq!(saved["launch"]["team"][1]["roleId"], "sre");
+    let refused = f
+        .change_launch(run_id, launch_with("reviewer"))
+        .unwrap_err();
+    assert!(refused.to_string().contains("unavailable"), "{refused}");
+}
+
+#[test]
+fn a_principle_that_settings_apply_cannot_be_deleted() {
+    let f = fixture();
+    let alpha = f.project("alpha");
+    let roles = crewroom_core::roles::Roles::new(f.root.path().join("roles.json"));
+    let catalog = crewroom_core::principles::Principles::beside_roles(roles.path());
+    for p in &f.principles {
+        let mut p = p.clone();
+        p["revision"] = json!(0);
+        catalog.save(&p).unwrap();
+    }
+    f.save(json!({"repositoryId":null,"set":{"principles":["small-changes"]}}))
+        .unwrap();
+    f.save(json!({"repositoryId":alpha,"set":{"principles":["no-network"]}}))
+        .unwrap();
+    let settings = f.store.project_settings().unwrap();
+    let refused = catalog
+        .delete("small-changes", 1, &roles, &settings)
+        .unwrap_err()
+        .to_string();
+    assert!(refused.contains("workspace settings"), "{refused}");
+    let refused = catalog
+        .delete("no-network", 1, &roles, &settings)
+        .unwrap_err()
+        .to_string();
+    assert!(refused.contains(&format!("project {alpha}")), "{refused}");
+    assert_eq!(catalog.read().unwrap().len(), 2);
+
+    // Once no setting applies it, the principle can go.
+    f.save(json!({"repositoryId":alpha,"reset":["principles"]}))
+        .unwrap();
+    let settings = f.store.project_settings().unwrap();
+    catalog.delete("no-network", 1, &roles, &settings).unwrap();
+}

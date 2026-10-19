@@ -194,7 +194,13 @@ impl Store {
                     "A linked continuation must retain its selected branch and expected head.",
                 ));
             }
-            parse_launch(&input["launch"], Some(roles))?;
+            // FOR-79: availability is the project's, not the workspace's.
+            let roles = crate::project_settings::effective_roles(
+                roles,
+                &s.project_settings()?,
+                &crate::capacity::run_project(&run),
+            );
+            parse_launch(&input["launch"], Some(&roles))?;
             s.validate_launch_briefs(&run["taskSnapshot"], &launch)?;
             s.validate_insertion_team(run_id, launch["team"].as_array().unwrap())?;
             run["launch"] = launch;

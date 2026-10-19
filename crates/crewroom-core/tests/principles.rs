@@ -49,7 +49,7 @@ fn revisions_references_and_assignment_copies_survive_edit_delete_and_restart() 
     assert_eq!(next["principles"][0]["text"], second["text"]);
     assert!(
         principles
-            .delete("evidence", 2, &roles)
+            .delete("evidence", 2, &roles, &json!({}))
             .unwrap_err()
             .to_string()
             .contains("Detach")
@@ -62,7 +62,9 @@ fn revisions_references_and_assignment_copies_survive_edit_delete_and_restart() 
         .unwrap();
     detached["principles"] = json!([]);
     roles.update("coordinator", &detached).unwrap();
-    principles.delete("evidence", 2, &roles).unwrap();
+    principles
+        .delete("evidence", 2, &roles, &json!({}))
+        .unwrap();
     assert!(principles.read().unwrap().is_empty());
     assert!(snapshot(&brief, &role, &principles.read().unwrap()).is_err());
     drop(store);

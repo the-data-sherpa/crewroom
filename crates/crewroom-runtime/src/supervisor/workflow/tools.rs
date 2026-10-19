@@ -18,6 +18,12 @@ fn envelope(input: &Value) -> Result<(String, String, Value)> {
     }
     Ok((attempt, key, input["arguments"].clone()))
 }
+/// What `list_roles` tells a coordinator: the roles its run's project may
+/// assign (FOR-79), so a proposal drawn from this list is never refused for
+/// availability.
+pub(super) fn listed_roles(project_roles: &[Value]) -> Value {
+    json!(project_roles.iter().filter(|r|r["enabled"]==true).map(|r|json!({"id":r["id"],"name":r["name"],"purpose":r["purpose"],"model":r["model"],"effort":r["effort"]})).collect::<Vec<_>>())
+}
 impl<S: StoreAccess> Workflow<S> {
     fn authorize(&self, authorization: &str, input: &Value, route: &str) -> Result<Caller> {
         self.check_open()?;
@@ -129,7 +135,8 @@ impl<S: StoreAccess> Workflow<S> {
             }
             "agent-roles" => {
                 empty()?;
-                Ok(json!(self.0.roles.read()?.iter().filter(|r|r["enabled"]==true).map(|r|json!({"id":r["id"],"name":r["name"],"purpose":r["purpose"],"model":r["model"],"effort":r["effort"]})).collect::<Vec<_>>()))
+                let run = text(&c.run, "id")?;
+                Ok(listed_roles(&self.project_roles(run, &self.0.roles.read()?)?))
             }
             "playbook/status" => {
                 empty()?;

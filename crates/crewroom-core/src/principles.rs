@@ -69,7 +69,16 @@ impl Principles {
         write_private(&self.path, &serde_json::to_vec_pretty(&rows)?)?;
         Ok(next)
     }
-    pub fn delete(&self, id: &str, revision: u64, roles: &Roles) -> Result<Value> {
+    /// `settings` is `Store::project_settings()`: a principle that the
+    /// workspace or a project applies to every role cannot be deleted
+    /// either, or every later admission there would fail.
+    pub fn delete(
+        &self,
+        id: &str,
+        revision: u64,
+        roles: &Roles,
+        settings: &Value,
+    ) -> Result<Value> {
         let mut rows = self.read()?;
         let current = rows
             .iter()
@@ -94,6 +103,26 @@ impl Principles {
             return Err(Error::Conflict(format!(
                 "Detach this principle from these roles before deleting: {}.",
                 used.join(", ")
+            )));
+        }
+        let lists = |v: &Value| {
+            v["principles"]
+                .as_array()
+                .is_some_and(|ids| ids.iter().any(|v| v == id))
+        };
+        let mut scopes = Vec::new();
+        if lists(&settings["workspace"]) {
+            scopes.push("workspace settings".to_owned());
+        }
+        for (repo, values) in settings["projects"].as_object().into_iter().flatten() {
+            if lists(values) {
+                scopes.push(format!("project {repo}"));
+            }
+        }
+        if !scopes.is_empty() {
+            return Err(Error::Conflict(format!(
+                "Remove this principle from these settings before deleting: {}.",
+                scopes.join(", ")
             )));
         }
         rows.retain(|r| r["id"] != id);

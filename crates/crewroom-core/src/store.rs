@@ -449,7 +449,7 @@ impl Store {
                 if prior["taskRevision"] != revision || prior["taskSnapshot"]["sourceRevision"] != task["sourceRevision"] { return Err(conflict("This ticket is already queued with an earlier brief.")); }
                 if key.is_some() || prior.get("queuedPlaybookId") != body.get("playbookId") || !crate::repository_work::same(prior.get("launch"), launch.as_ref()) { return Err(conflict("This ticket already has a different queued run request.")); } return Ok(prior);
             }
-            if let Some(launch) = &launch { crate::launch::parse_launch(&body["launch"],Some(roles))?; s.validate_launch_briefs(&task,launch)?; }
+            if let Some(launch) = &launch { let roles = crate::project_settings::effective_roles(roles, &s.project_settings()?, repository); crate::launch::parse_launch(&body["launch"],Some(&roles))?; s.validate_launch_briefs(&task,launch)?; }
             let implementation_plan = s.current_implementation_plan(task_id)?;
             if implementation_plan.is_none() {
                 let run = s.queue_intake(&task, &payload)?;
