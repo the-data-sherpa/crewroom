@@ -4,6 +4,26 @@ The operator requested that each work item pass its checks before the next start
 
 Historical revision IDs and source hashes below refer to the original private snapshots before the FOR-17 history rewrite. Sanitized copies are not byte-identical evidence for rewritten revisions; replay requires the private archive. New validation is recorded separately.
 
+## FOR-86 — Claude adapter admission test under load (2026-10-19)
+
+Code `fd6cb73` and `426fa01` on branch `for-86-work` from main `3f05023`; only `crates/crewroom-runtime/tests/claude_adapter.rs` changes. Private `CARGO_TARGET_DIR` in the worktree, every test command through `scripts/system_limits.py run`. All results use the fake Claude protocol peer (`tests/fixtures/claude-rpc.py`) and fake account metadata; nothing contacted a live service.
+
+**Cause, reproduced.** `Fixture::new` wrote the fake `claude` CLI with `std::fs::write` in the test process, and `open()` then executed it (`--version`, then the launch). Any spawn by a sibling test thread copies all open descriptors, `O_CLOEXEC` included, until its child execs. When one copy is a writer of the script, exec fails with `ETXTBSY`, and `open()` returns that error. Sixteen concurrent copies of the unchanged `claude_adapter` binary (load 23–40) failed 1 of 208 runs with `Io(Os { code: 26, kind: ExecutableFileBusy, message: "Text file busy" })` at an `open().unwrap()`. That run's panic was in `duplicate_terminal_…`; `alias_drift_and_changed_account_block_admission` unwraps the same `open()` for its `normal` fixture, so it fails in the same way. The FOR-75 panic text was not retained, so this is the cause the code and this reproduction support, not a recovered copy of that panic. A standalone probe (4 writer threads that write and exec a script, 4 threads spawning `/bin/true`) failed 245 of 8000 execs with in-process writes and 0 of 8000 when a separate process wrote the file. Before the 16-copy runs, the file alone at load 11–35 had passed 30 + 75 + 60 runs, and the test alone had passed 480, so the window is narrow.
+
+**Change.** `install_executable` writes the content to a staging file, copies it into place with a separate `cp` and sets mode `0700`, so the test process never holds a writer to a file it executes. The admission assertions are stronger: alias drift must be refused with `Claude alias or effort differs from the frozen assignment`, and the changed account with `Claude authority or native account changed`. Before, any error passed, including an `ETXTBSY` launch failure. New test `fixture_executables_start_while_sibling_threads_spawn` installs and runs 600 fixtures while 4 threads spawn children. With the old in-process write it failed 3 of 3 runs (`Text file busy`); with `install_executable` it passes 3 of 3 (0.33 s).
+
+**After the change.**
+
+| Check | Result |
+|---|---|
+| 16 concurrent copies of the fixed `claude_adapter` binary × 15 rounds (load 130–147, mostly other agents' work) | 239 of 240 passed. No `ETXTBSY`. The one failure was a different problem: `close()` in `duplicate_terminal_…` returned `A process survives without its inherited ownership lock.`. Filed as FOR-90. |
+| `cargo test --locked --no-fail-fast -j6 -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop -- --test-threads=4`, 5 consecutive runs at `426fa01`, 10 CPU burners for runs 2–5 plus other agents' builds | **670 passed, 0 failed, 18 ignored** in each run; `alias_drift_and_changed_account_block_admission` passed in all 5. 1-minute load at the end of each run: 1.6, 19.9, 15.3, 14.2, 5.0 (5-minute: 12.0, 20.2, 17.5, 14.4, 12.2) |
+| `cargo clippy --locked` for the four crates `--all-targets -- -D warnings`; `cargo fmt --check` | clean |
+| `npm test` | **346/346** |
+| `npm run build` | passes (existing chunk-size warning) |
+
+`npm run test:e2e` is left to the integrator. Follow-ups: FOR-89 (other test fixtures still write executables in-process), FOR-90 (the `close()` ownership report above).
+
 ## FOR-88 — Project job-model picker and project-aware role previews (2026-10-19)
 
 Implementation `51320ae` on branch `for-88-work` from main `3f05023`. All checks below ran at `51320ae` (the evidence commit changes only documentation) in a fresh worktree prepared with `python3 scripts/prepare_worktree.py --build-helpers`, a private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, and every test command wrapped by `scripts/system_limits.py`. Linux x86_64.
