@@ -33,6 +33,13 @@ Checks at `4f9f295` (private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, all 
 - `cargo clippy -p crewroom-core -p crewroom-service -p crewroom-desktop --all-targets -- -D warnings` and `cargo fmt --check` for these crates: clean.
 - `npm run test:e2e`: not run (integrator). The browser suite exercises the legacy TypeScript server, which this change does not touch.
 
+Integration at `4f9f295` on main `a1faa87` (fast-forward, no rebase; private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, all through `scripts/system_limits.py run`, 1-minute load about 3–6):
+
+- `npm test`: **345/345**. `npm run build`: passes.
+- `npm run test:e2e`: **31/31** (worktree prepared with `scripts/prepare_worktree.py`).
+- `cargo test -p crewroom-core -p crewroom-service -p crewroom-desktop`: **365 passed, 0 failed, 15 ignored**.
+- `cargo clippy -p crewroom-core -p crewroom-service -p crewroom-desktop --all-targets -- -D warnings` and `cargo fmt --check` for these crates: clean.
+
 Not yet verified: no on-screen check of the real xdg portal picker on the operator's Linux (Hyprland) machine. The coordinator will ask the operator to look at the window. Every picker answer above is simulated by the GPUI test platform; the portal integration is GPUI's own, unchanged.
 
 ## FOR-60 — `npm test` under machine load, closed (2026-10-18)
