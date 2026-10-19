@@ -20,6 +20,8 @@ Code `0ef395d` (branch `for-82-work`, from main `9d409b5`). Every check below ra
 
 **Found, not fixed here:** `scripts/rust/target-refresh.test.ts` (8/9, the same oracle failure) and `retained-work.test.ts` (1/10, mostly "Needs an accepted implementation plan.") fail at `9d409b5`; tracked in FOR-84. Not re-run: rootless Docker, macOS.
 
+**Integration at `676f759` on main `9d409b5`** (fast-forward, no rebase; same code tree as `0ef395d`), all through `scripts/system_limits.py run` with a private `CARGO_TARGET_DIR` and the worktree prepared with `--build-helpers`: `npm test` **345/345**; `npm run build` passes; `npm run test:e2e` **31/31**; `repository.test.ts`, `workflow-transitions.test.ts` and `workflow-interruption.test.ts` **26/26** against real Docker, with no `io.crewroom.command` container before or after; `cargo test --locked -p crewroom-runtime -- --test-threads=4` **205 passed, 0 failed, 3 ignored**; Clippy `--all-targets -D warnings` and fmt clean.
+
 ## FOR-69 — Newer harness versions run after a compatibility probe (2026-10-19)
 
 Implementation `5d15a5f` on branch `for-69-probed-harness-versions` from main `a1faa87`. All checks below ran at `5d15a5f` in a fresh worktree with a private `CARGO_TARGET_DIR`, `-j6`, wrapped by `scripts/system_limits.py` (FOR-68).
