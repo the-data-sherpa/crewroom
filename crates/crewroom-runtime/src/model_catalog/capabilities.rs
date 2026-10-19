@@ -239,17 +239,12 @@ impl HarnessCapabilities {
     }
     fn subject(&self) -> String {
         let label = self.harness.label();
+        let release = compatibility::parse(&self.harness, &self.version)
+            .map(|[a, b, c]| format!("{a}.{b}.{c}"))
+            .unwrap_or_else(|| self.version.clone());
         match self.basis {
-            compatibility::Basis::Verified => format!("{label} {}", self.version),
-            compatibility::Basis::Probed => format!(
-                "{label} {} ({})",
-                self.version,
-                compatibility::Compatibility {
-                    basis: compatibility::Basis::Probed,
-                    probe: None
-                }
-                .label(&self.harness, &self.version)
-            ),
+            compatibility::Basis::Verified => format!("{label} {release}"),
+            compatibility::Basis::Probed => format!("{label} {release} (compatible, probed)"),
         }
     }
     /// Operator wording for one capability that is not usable.
@@ -380,7 +375,7 @@ mod tests {
         assert!(omp.allows(Capability::RequestCounts));
         assert_eq!(
             omp.notes(),
-            ["Cost is unavailable: OMP omp/18.11.3 does not provide cost."]
+            ["Cost is unavailable: OMP 18.11.3 does not provide cost."]
         );
     }
 
@@ -409,7 +404,7 @@ mod tests {
             let holds = record.holds();
             assert_eq!(holds.len(), 1);
             assert!(holds[0].starts_with("Steering waits until the current turn ends"));
-            assert!(holds[0].contains("compatible (probed"), "{}", holds[0]);
+            assert!(holds[0].contains("(compatible, probed)"), "{}", holds[0]);
             assert!(
                 record
                     .degraded()

@@ -340,7 +340,7 @@ fn a_capability_refusal_blocks_admission_and_the_picker_alike() {
         blockers[0]
             .as_str()
             .unwrap()
-            .starts_with("Codex codex-cli 1.0.0")
+            .starts_with("Codex 1.0.0 (compatible, probed)")
     );
 }
 
