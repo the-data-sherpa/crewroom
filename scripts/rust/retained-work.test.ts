@@ -5,7 +5,6 @@ import {join} from 'node:path';
 import {test,type TestContext} from 'node:test';
 import {DatabaseSync} from 'node:sqlite';
 import {defaultRoles} from '../../server/roles';
-import {Workbench} from '../../server/workbench';
 import {fixture,alter,waitFor} from './target-fixture';
 import {describeCheckedOwned,prepareCheckedOwned,launchCheckedOwned,inspectCheckedOwned,stopOwned} from './process-adapter';
 import {gitLatch} from '../../tests/fixtures/git-latch';
@@ -19,9 +18,19 @@ async function cancelled(t:TestContext,dirty=false) {
   await f.c.command('cancel',{target:id});const runtime=await f.c.command('runtime',{target:id});for(const a of runtime.attempts)await f.c.command('ownership',{target:a.id});await f.c.command('finish_pause',{target:id});await f.c.command('reconcile_writer',{target:id});await f.c.command('checkpoint',{target:id});
  };
  await cancel();
+ // FOR-84: the native queue admits a coding successor only under an accepted implementation plan,
+ // so the operator acceptance goes through the same public plan gate before any continuation is queued.
+ // A moved target or changed brief needs a re-accepted plan; the continuation itself stays pinned to the retained base.
+ let prior:any;
+ const accept=async()=>{
+  const task=await f.c.command('task',{target:f.seed.task.id});const source=await f.c.command('plan_source',{target:task.id,input:{revision:task.revision}});
+  const plan=await f.c.command('plan_save',{target:task.id,input:{requestId:randomUUID(),revision:task.revision,sourceId:source.id,...(prior?{predecessorId:prior.id}:{}),content:{schemaVersion:1,goal:task.brief,scope:[task.brief],exclusions:[],assumptions:[],decisions:[],workPackages:[{id:'fixture',name:'Continue retained work',dependsOn:[],outputs:['A checked change'],criteria:task.criteria.map((_:unknown,i:number)=>i),validation:['Fresh checks and independent review']}]}}});
+  await f.c.command('plan_decide',{target:plan.id,input:{requestId:randomUUID(),revision:task.revision,sourceId:source.id,decision:'accept'}});prior=plan;return plan;
+ };
+ await accept();
  const request=async()=>({requestId:randomUUID(),revision:(await f.c.command('task',{target:f.seed.task.id})).revision,roleId:'coordinator'});
  const queue=async(input?:any,id=f.seed.run.id)=>f.c.command('queue_later',{target:id,input:input??await request(),roles});
- return {f,work,candidate,cancel,request,queue,prepare:(run:any)=>f.c.command('prepare',{target:run.id,input:run.launch.repository})};
+ return {f,work,candidate,cancel,request,queue,accept,prepare:(run:any)=>f.c.command('prepare',{target:run.id,input:run.launch.repository})};
 }
 
 test('cancelled dirty work transfers once to the same branch and survives reopen with fresh evidence',{timeout:90000},async t=>{
@@ -77,13 +86,13 @@ test('observer awaits cannot admit changed files, configuration, publication or 
 });
 
 test('a successor accepts the new brief while preserving source history and rejecting a mismatched PR',{timeout:60000},async t=>{
- const {f,work,candidate,queue,prepare}=await cancelled(t);const prior=await f.c.command('run',{target:f.seed.run.id});const task=await f.c.command('task',{target:f.seed.task.id});await f.c.command('refine',{target:f.seed.task.id,input:{revision:task.revision,sourceRevision:task.sourceRevision,brief:'Accept new successor scope',criteria:['New scope needs new evidence']}});
+ const {f,work,candidate,queue,accept,prepare}=await cancelled(t);const prior=await f.c.command('run',{target:f.seed.run.id});const task=await f.c.command('task',{target:f.seed.task.id});await f.c.command('refine',{target:f.seed.task.id,input:{revision:task.revision,sourceRevision:task.sourceRevision,brief:'Accept new successor scope',criteria:['New scope needs new evidence']}});await accept();
  const pub=publication(f,work,candidate);await f.c.command('save_publication',{input:{...pub,branch:'unrelated-branch'}});const path=observer(f);await f.reopen({continuationObserver:path});await assert.rejects(queue(),/PR does not match/);await f.c.command('save_publication',{input:pub});const next=await queue();const prepared=await prepare(next);assert.notEqual(prepared.requirementsHash,work.requirementsHash);assert.equal(prepared.checkpoints[0].revision.requirementsHash,prepared.requirementsHash);assert.equal((await f.c.command('run',{target:f.seed.run.id})).taskRevision,prior.taskRevision);assert.equal(next.taskSnapshot.brief,'Accept new successor scope');assert.equal(await f.c.command('record',{target:next.id}),null);
 });
 
 test('moved targets remain pinned across repeated cancellation until fresh evidence and explicit refresh',{timeout:120000},async t=>{
  for(const mode of ['moved','returned','repeated']) {
-  const {f,work,candidate,cancel,queue,prepare}=await cancelled(t);const target=f.move();let next=await queue();let prepared=await prepare(next);assert.equal(prepared.base,work.base);assert.equal(prepared.targetRef,work.base);assert.equal(prepared.continuationTargetRef,work.targetRef);
+  const {f,work,candidate,cancel,queue,accept,prepare}=await cancelled(t);const target=f.move();await accept();let next=await queue();let prepared=await prepare(next);assert.equal(prepared.base,work.base);assert.equal(prepared.targetRef,work.base);assert.equal(prepared.continuationTargetRef,work.targetRef);
   if(mode==='repeated'){await cancel(next.id);next=await queue(undefined,next.id);prepared=await prepare(next);assert.equal(prepared.continuationTargetRef,work.targetRef);}
   const team=[];for(const [name,coordinator] of [['Coordinator',true],['Writer',false]] as const)team.push(await f.c.command('admit',{target:next.id,input:{name,coordinator,role:roles.find(r=>r.id===(coordinator?'coordinator':'implementer')),model:f.seed.sender.assignment.model,input:'Inspect retained implementation against the accepted brief.'}}));
   await f.c.command('activate',{target:next.id});await f.c.command('ownership',{target:team[1].attempt.id});const fresh=await f.c.command('candidate',{target:next.id,input:[team[1].attempt.id]});assert.notEqual(fresh.id,candidate.id);assert.match((await f.c.command('assess',{target:next.id})).blockers.join(' '),/Refresh from the target/);
@@ -112,10 +121,13 @@ test('old-owner checked Git barriers survive controller death and seal unlaunche
 });
 
 test('dependency merges must be in the retained accepted base even when the target checkout has advanced',{timeout:60000},async t=>{
- const {f,work,queue,prepare}=await cancelled(t);f.git('checkout','-b','dependency-future');f.git('commit','--allow-empty','-m','Future dependency merge');const merge=f.git('rev-parse','HEAD');f.git('checkout','main');f.git('merge','--ff-only','dependency-future');await f.c.close();const store=new Workbench(f.seed.database);
- try {
-  const task=store.createTask({title:'Upstream fixture',description:'',repositoryId:work.repository.id});store.refine(task.id,{revision:1,sourceRevision:1,brief:'Upstream',criteria:['Delivered']});const run=store.queue(task.id,{revision:2});store.setDependencies(f.seed.task.id,{requestId:randomUUID(),dependencyRevision:0,dependsOn:[task.id]});
-  store.savePublication({id:randomUUID(),runId:run.id,attemptId:randomUUID(),candidateId:randomUUID(),repositoryPath:f.seed.root,repository:{uuid:randomUUID(),workspace:'fixture',slug:'repo'},branch:'dependency-future',target:'main',revision:{base:work.base,head:merge,tree:f.git('rev-parse','HEAD^{tree}'),worktreeHash:'d'.repeat(64),dirty:false,requirementsHash:'e'.repeat(64),instructionsHash:'f'.repeat(64)},title:'Fixture',description:'Fixture',policy:{statusKeys:[],pipelineSteps:[],optionalSteps:[]},createdAt:new Date().toISOString(),push:{state:'confirmed',expectedHead:null},pr:{state:'confirmed',id:1,providerState:'MERGED'},ready:false,blockers:[],merged:{commit:merge,observedAt:new Date().toISOString()}});
- }finally{store.close();}
- await f.reopen();const next=await queue();assert.equal(await f.c.command('dependency_hold',{target:next.id}),null);await assert.rejects(prepare(next),/verified merge.*prepared base/);assert.equal((await f.record()).transferredTo,undefined);assert.equal(await f.c.command('work_record',{target:next.id}),null);
+ const {f,work,queue,accept,prepare}=await cancelled(t);f.git('checkout','-b','dependency-future');f.git('commit','--allow-empty','-m','Future dependency merge');const merge=f.git('rev-parse','HEAD');f.git('checkout','main');f.git('merge','--ff-only','dependency-future');
+ // FOR-84: seeded through the native store, which the retained TypeScript Workbench (schema 26) can no longer open.
+ {const task=await f.c.command('create_task',{input:{title:'Upstream fixture',description:'',repositoryId:work.repository.id}});await f.c.command('refine',{target:task.id,input:{revision:1,sourceRevision:1,brief:'Upstream',criteria:['Delivered']}});const refined=await f.c.command('task',{target:task.id});const source=await f.c.command('plan_source',{target:task.id,input:{revision:refined.revision}});
+  // An accepted implementation plan is the native gate that makes the queued upstream run a coding run.
+  const plan=await f.c.command('plan_save',{target:task.id,input:{requestId:randomUUID(),revision:refined.revision,sourceId:source.id,content:{schemaVersion:1,goal:refined.brief,scope:[refined.brief],exclusions:[],assumptions:[],decisions:[],workPackages:[{id:'fixture',name:'Upstream delivery',dependsOn:[],outputs:['A merged change'],criteria:[0],validation:['Provider merge fixture']}]}}});
+  await f.c.command('plan_decide',{target:plan.id,input:{requestId:randomUUID(),revision:refined.revision,sourceId:source.id,decision:'accept'}});const run=await f.c.command('queue',{target:task.id,input:{revision:refined.revision}});assert.equal(run.purpose,'coding');await f.c.command('set_dependencies',{target:f.seed.task.id,input:{requestId:randomUUID(),dependencyRevision:0,dependsOn:[task.id]}});
+  // Saved provider observation is a fixture; Git ancestry against the retained base is checked by Rust.
+  await f.c.command('save_publication',{input:{id:randomUUID(),runId:run.id,attemptId:randomUUID(),candidateId:randomUUID(),repositoryPath:f.seed.root,repository:{uuid:randomUUID(),workspace:'fixture',slug:'repo'},branch:'dependency-future',target:'main',revision:{base:work.base,head:merge,tree:f.git('rev-parse','HEAD^{tree}'),worktreeHash:'d'.repeat(64),dirty:false,requirementsHash:'e'.repeat(64),instructionsHash:'f'.repeat(64)},title:'Fixture',description:'Fixture',policy:{statusKeys:[],pipelineSteps:[],optionalSteps:[]},createdAt:new Date().toISOString(),push:{state:'confirmed',expectedHead:null},pr:{state:'confirmed',id:1,providerState:'MERGED'},ready:false,blockers:[],merged:{commit:merge,observedAt:new Date().toISOString()}}});
+ }await accept();await f.reopen();const next=await queue();assert.equal(await f.c.command('dependency_hold',{target:next.id}),null);await assert.rejects(prepare(next),/verified merge.*prepared base/);assert.equal((await f.record()).transferredTo,undefined);assert.equal(await f.c.command('work_record',{target:next.id}),null);
 });

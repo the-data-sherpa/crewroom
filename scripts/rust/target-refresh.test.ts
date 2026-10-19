@@ -5,8 +5,6 @@ import {chmodSync,existsSync,mkdirSync,readFileSync,realpathSync,rmSync,writeFil
 import {join} from 'node:path';
 import {test} from 'node:test';
 import {DatabaseSync} from 'node:sqlite';
-import {Workbench} from '../../server/workbench';
-import {RepositoryWork} from '../../server/repository-work';
 import {inspectCheckedOwned,stopOwned} from './process-adapter';
 import {gitLatch} from '../../tests/fixtures/git-latch';
 import {fixture,alter,waitFor} from './target-fixture';
@@ -23,10 +21,16 @@ test('native refresh preserves scoped source, atomically associates its candidat
 
 test('unchanged native target names the exact same-head source candidate and performs no Git mutation',{timeout:60000},async t=>{
  const f=fixture(t);const {candidate}=await f.candidate();const count=f.descriptors().length;
- const other={...candidate,id:randomUUID()};const store=new Workbench(f.seed.database);store.updateCodingRecord(f.seed.run.id,r=>({...r!,candidates:[...r!.candidates,other]}));store.close();
+ const other={...candidate,id:randomUUID()};const record=await f.c.command('record',{target:f.seed.run.id});await f.c.command('policy_fixture',{target:f.seed.run.id,input:{candidates:[...record.candidates,other]}});
  await assert.rejects(f.refresh(candidate),/source/);const key=randomUUID();const result=await f.refresh(other,key);assert.equal(result.refresh.state,'completed');assert.equal(result.refresh.candidateId,other.id);assert.equal(f.descriptors().length,count);assert.deepEqual(await f.c.command('associate_refresh',{target:f.seed.run.id,key}),other);
- // Direct retained implementation oracle at a second request key: IDs/times differ only.
- const oracleStore=new Workbench(f.seed.database);try{const ts=await new RepositoryWork(oracleStore,f.config.root).refreshBase(f.seed.run.id,randomUUID(),'refs/heads/main',other.id);const normalize=(r:any)=>{const {requestId,at,...value}=r;return value;};assert.deepEqual(normalize(result.refresh),normalize(ts.refresh));}finally{oracleStore.close();}
+ // FOR-84: native-only expectations replace the retained TypeScript RepositoryWork oracle (schema 26 cannot
+ // open the native store). The oracle compared the whole refresh receipt except requestId/at; the same fields are
+ // derived here from the seeded candidate and actual Git, and a second request key must yield the same receipt.
+ const normalize=(r:any)=>{const {requestId,at,...value}=r;return value;};const target=f.git('rev-parse','refs/heads/main');assert.equal(target,candidate.revision.base);
+ const expected={fromBase:candidate.revision.base,fromHead:candidate.revision.head,targetRef:'refs/heads/main',sourceCandidateId:other.id,state:'completed',toBase:target,toHead:candidate.revision.head,candidateId:other.id};
+ assert.deepEqual(normalize(result.refresh),expected);assert.equal(result.refresh.requestId,key);assert.equal(result.work.base,target);assert.equal(f.gitAt(result.work.path,'rev-parse','HEAD'),candidate.revision.head);assert.equal(f.gitAt(result.work.path,'status','--porcelain'),'');
+ const again=await f.refresh(other,randomUUID());assert.deepEqual(normalize(again.refresh),expected);assert.equal(f.descriptors().length,count);assert.equal(f.gitAt(result.work.path,'rev-parse','HEAD'),candidate.revision.head);
+ assert.deepEqual((await f.record()).refreshes.map(normalize),[expected,expected]);
 });
 
 test('native refresh rejects rewritten targets and included custom merge drivers before admitting mutation',{timeout:60000},async t=>{
