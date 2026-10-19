@@ -72,7 +72,60 @@ async fn output(program: &str, args: &[&str]) -> Result<String> {
         .await
         .map_err(|_| conflict("Process inspection timed out."))?
 }
-async fn inspect(root: &Path, scan_holders: bool) -> Result<Ownership> {
+const SURVIVES: &str = "A process survives without its inherited ownership lock.";
+const EXITING: &str = "Every remaining process is exiting; ownership is not yet released.";
+/// How long a settle re-inspects an uncertain ownership.
+const SETTLE_WINDOW: Duration = Duration::from_secs(1);
+/// How long a settle waits, in total, once every listed group member was seen
+/// irrevocably exiting. A loaded scheduler can keep an exiting process listed,
+/// or its lock held, for longer than [`SETTLE_WINDOW`].
+const EXIT_WINDOW: Duration = Duration::from_secs(5);
+/// Whether the process `pid` has exited or is irrevocably exiting.
+type ExitProbe = fn(i32) -> bool;
+
+/// Whether one task's `/proc/<pid>/task/<tid>/stat` line shows it dead or
+/// past the point of no return in `do_exit` (`PF_EXITING`).
+#[cfg_attr(not(target_os = "linux"), allow(dead_code))]
+fn task_exiting(stat: &str) -> Option<bool> {
+    const PF_EXITING: u64 = 0x4;
+    // The command name may itself contain spaces and parentheses.
+    let fields: Vec<_> = stat
+        .get(stat.rfind(')')? + 1..)?
+        .split_whitespace()
+        .collect();
+    let state = fields.first()?;
+    let flags: u64 = fields.get(6)?.parse().ok()?;
+    Some(state.starts_with(['Z', 'X']) || flags & PF_EXITING != 0)
+}
+/// A process with no remaining task, or whose every task is dead or flagged
+/// `PF_EXITING`, can no longer run user code. Anything unreadable counts as
+/// running, so an unknown process is never mistaken for an exiting one.
+#[cfg(target_os = "linux")]
+fn exiting(pid: i32) -> bool {
+    use std::io::ErrorKind::NotFound;
+    let tasks = match std::fs::read_dir(format!("/proc/{pid}/task")) {
+        Ok(tasks) => tasks,
+        Err(error) => return error.kind() == NotFound,
+    };
+    for task in tasks {
+        let Ok(task) = task else { return false };
+        match std::fs::read_to_string(task.path().join("stat")) {
+            Ok(stat) if task_exiting(&stat) == Some(true) => {}
+            Err(error) if error.kind() == NotFound => {} // This task already finished.
+            _ => return false,
+        }
+    }
+    true
+}
+/// Elsewhere `ps` already reports an exiting process (`E`), so only a process
+/// that no longer exists counts.
+#[cfg(not(target_os = "linux"))]
+fn exiting(pid: i32) -> bool {
+    // SAFETY: signal 0 only checks that the process exists; nothing is delivered.
+    let missing = unsafe { libc::kill(pid, 0) } != 0;
+    missing && std::io::Error::last_os_error().raw_os_error() == Some(libc::ESRCH)
+}
+async fn inspect(root: &Path, scan_holders: bool, exiting: ExitProbe) -> Result<Ownership> {
     if !root.join("launch.json").try_exists()? {
         return Ok(Ownership::new("stopped", None));
     }
@@ -83,6 +136,10 @@ async fn inspect(root: &Path, scan_holders: bool) -> Result<Ownership> {
             "Process identity does not match its launch intent.",
         ));
     }
+    // Read the lease before listing processes. Under load the listing can take
+    // long enough for a member to exit after it is listed; a lease read after
+    // the listing would then pair a stale member with a lock it has released.
+    let free = lease_free(root)?;
     let table = output("/bin/ps", &["-axo", "pid=,pgid=,stat=,lstart="]).await?;
     let processes: Vec<_> = table
         .lines()
@@ -107,7 +164,6 @@ async fn inspect(root: &Path, scan_holders: bool) -> Result<Ownership> {
         .filter(|p| p.1 == owner.pgid)
         .map(|p| p.0)
         .collect();
-    let free = lease_free(root)?;
     let mut state = Ownership {
         state: "uncertain".into(),
         reason: None,
@@ -130,8 +186,18 @@ async fn inspect(root: &Path, scan_holders: bool) -> Result<Ownership> {
         state.reason = Some("PID identity changed; refusing to signal it.".into());
         return Ok(state);
     }
+    // A member that the kernel shows as exiting (or already gone) can no longer
+    // run user code and drops whatever it still holds, the lock included. On
+    // Linux it releases its files in `do_exit` before it becomes a zombie, so
+    // it can stay listed, with or without the lock, after its leader exits.
+    // Waiting for it is not proof of stop: only a later inspection that finds
+    // the group empty and the lock free reports `stopped`.
+    if !members.is_empty() && members.iter().all(|&pid| exiting(pid)) {
+        state.reason = Some(EXITING.into());
+        return Ok(state);
+    }
     if free {
-        state.reason = Some("A process survives without its inherited ownership lock.".into());
+        state.reason = Some(SURVIVES.into());
         return Ok(state);
     }
     let path = root.join("lease.lock");
@@ -165,24 +231,37 @@ async fn inspect(root: &Path, scan_holders: bool) -> Result<Ownership> {
     Ok(state)
 }
 pub async fn inspect_owned(root: &Path, scan_holders: bool) -> Ownership {
-    inspect(root, scan_holders)
+    inspect_probed(root, scan_holders, exiting).await
+}
+async fn inspect_probed(root: &Path, scan_holders: bool, exiting: ExitProbe) -> Ownership {
+    inspect(root, scan_holders, exiting)
         .await
         .unwrap_or_else(|_| Ownership::uncertain("Launch ownership cannot be established."))
 }
-async fn settled(root: &Path, first: Ownership, window: Duration) -> Ownership {
+/// Re-inspect an uncertain ownership for `window`, or for [`EXIT_WINDOW`] in
+/// all once an inspection found only exiting members. Only a
+/// completed fresh inspection ever reports `stopped`; waiting never does.
+async fn settled(root: &Path, first: Ownership, window: Duration, exiting: ExitProbe) -> Ownership {
     let mut state = first.clone();
-    let deadline = Instant::now() + window;
-    while state.state == "uncertain" && Instant::now() + Duration::from_millis(50) < deadline {
-        sleep(Duration::from_millis(50)).await;
-        match timeout(
-            deadline.saturating_duration_since(Instant::now()),
-            inspect_owned(root, false),
-        )
-        .await
-        {
-            Ok(next) => state = next,
-            Err(_) => break,
+    let start = Instant::now();
+    let mut deadline = start + window;
+    loop {
+        // Once a member was seen exiting, keep the longer window: its later
+        // observations (lock still held while the group is already empty,
+        // say) are the same exit, not a new uncertainty.
+        if state.reason.as_deref() == Some(EXITING) {
+            deadline = deadline.max(start + EXIT_WINDOW);
         }
+        if state.state != "uncertain" || Instant::now() + Duration::from_millis(50) >= deadline {
+            break;
+        }
+        sleep(Duration::from_millis(50)).await;
+        // The window bounds when a re-inspection may start, not how long it
+        // may take: a loaded machine can spend most of a second listing
+        // processes, and cancelling that listing would leave the stale first
+        // observation as the answer. Each inspection is bounded by its own
+        // command timeouts.
+        state = inspect_probed(root, false, exiting).await;
     }
     if state.state == "uncertain" {
         state.members = Some(
@@ -203,7 +282,8 @@ pub async fn inspect_settled(root: &Path) -> Ownership {
     settled(
         root,
         inspect_owned(root, true).await,
-        Duration::from_secs(1),
+        SETTLE_WINDOW,
+        exiting,
     )
     .await
 }
@@ -409,5 +489,137 @@ mod tests {
 
         durable_new(&root.path().join("owner.json"), b"{}").unwrap();
         assert!(!stopped_before_owner(root.path(), reaped_group()).await);
+    }
+
+    /// A launch whose recorded owner is a real `sleep` group leader that does
+    /// not hold the (free) lease: what a runner looks like after it released
+    /// its files, whether it is exiting or survives.
+    fn unlocked_owner() -> (tempfile::TempDir, std::process::Child) {
+        let root = prepared();
+        let child = std::process::Command::new("/bin/sleep")
+            .arg("30")
+            .process_group(0)
+            .spawn()
+            .unwrap();
+        let pid = child.id() as i32;
+        let started = std::process::Command::new("/bin/ps")
+            .args(["-o", "lstart=", "-p", &pid.to_string()])
+            .env("LC_ALL", "C")
+            .output()
+            .unwrap()
+            .stdout;
+        let owner = json!({
+            "pid": pid,
+            "pgid": pid,
+            "started": String::from_utf8(started).unwrap().trim(),
+            "token": "t",
+        });
+        durable_new(
+            &root.path().join("owner.json"),
+            &serde_json::to_vec(&owner).unwrap(),
+        )
+        .unwrap();
+        assert!(lease_free(root.path()).unwrap());
+        (root, child)
+    }
+
+    #[tokio::test]
+    async fn a_member_exiting_after_its_lock_release_settles_stopped_past_the_window() {
+        let (root, mut child) = unlocked_owner();
+        // The kernel shows the member past PF_EXITING; it disappears only after
+        // the ordinary settle window has passed, as under heavy load.
+        let reaper = std::thread::spawn(move || {
+            std::thread::sleep(SETTLE_WINDOW + Duration::from_millis(500));
+            child.kill().unwrap();
+            child.wait().unwrap();
+        });
+        let first = inspect_probed(root.path(), true, |_| true).await;
+        assert_eq!(first.state, "uncertain");
+        assert_eq!(first.reason.as_deref(), Some(EXITING));
+        let start = Instant::now();
+        let state = settled(root.path(), first, SETTLE_WINDOW, |_| true).await;
+        reaper.join().unwrap();
+        assert_eq!(state.state, "stopped", "{state:?}");
+        assert!(start.elapsed() > SETTLE_WINDOW);
+    }
+
+    #[tokio::test]
+    async fn an_exit_seen_holding_the_lock_keeps_the_longer_window_until_release() {
+        let (root, mut child) = unlocked_owner();
+        // Stand in for the exiting member's lock, released only after the
+        // member itself is gone: the group is empty while the lock is held.
+        let lease = open_lease(root.path()).unwrap();
+        assert!(flock(&lease, libc::LOCK_EX | libc::LOCK_NB).unwrap());
+        let release = std::thread::spawn(move || {
+            std::thread::sleep(SETTLE_WINDOW + Duration::from_millis(300));
+            child.kill().unwrap();
+            child.wait().unwrap();
+            std::thread::sleep(Duration::from_millis(600));
+            drop(lease);
+        });
+        let first = inspect_probed(root.path(), true, |_| true).await;
+        assert_eq!(first.reason.as_deref(), Some(EXITING), "{first:?}");
+        let state = settled(root.path(), first, SETTLE_WINDOW, |_| true).await;
+        release.join().unwrap();
+        assert_eq!(state.state, "stopped", "{state:?}");
+    }
+
+    #[tokio::test]
+    async fn a_survivor_without_its_lock_stays_uncertain_and_is_never_signalled() {
+        let (root, mut child) = unlocked_owner();
+        let start = Instant::now();
+        let state = stop_owned(root.path()).await;
+        let elapsed = start.elapsed();
+        let alive = child.try_wait().unwrap().is_none();
+        child.kill().unwrap();
+        child.wait().unwrap();
+        assert_eq!(state.state, "uncertain");
+        assert_eq!(state.reason.as_deref(), Some(SURVIVES));
+        assert!(alive, "an uncertain survivor was signalled");
+        // A running survivor does not earn the longer exit window.
+        assert!(elapsed < EXIT_WINDOW, "{elapsed:?}");
+    }
+
+    #[test]
+    fn task_stat_flags_and_state_decide_exiting() {
+        let stat = |state: &str, flags: u64| {
+            format!("42 (a (b) c) {state} 1 42 42 0 -1 {flags} 0 0 0 0 1 2 0 0 20 0 1 0 9")
+        };
+        assert_eq!(task_exiting(&stat("R", 0x0040_0100)), Some(false));
+        assert_eq!(task_exiting(&stat("S", 0x0040_0104)), Some(true));
+        assert_eq!(task_exiting(&stat("D", 0x4)), Some(true));
+        assert_eq!(task_exiting(&stat("Z", 0x0040_0100)), Some(true));
+        assert_eq!(task_exiting(&stat("X", 0)), Some(true));
+        assert_eq!(task_exiting("42 (truncated"), None);
+        assert_eq!(task_exiting("42 (sleep) S 1 42"), None);
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn the_kernel_shows_a_running_process_as_not_exiting_and_a_dead_one_as_exiting() {
+        let mut running = std::process::Command::new("/bin/sleep")
+            .arg("30")
+            .spawn()
+            .unwrap();
+        let live = exiting(running.id() as i32);
+        running.kill().unwrap();
+        running.wait().unwrap();
+        assert!(!live);
+        assert!(!exiting(std::process::id() as i32));
+
+        let mut zombie = std::process::Command::new("/bin/true").spawn().unwrap();
+        let pid = zombie.id() as i32;
+        let deadline = std::time::Instant::now() + Duration::from_secs(10);
+        while !std::fs::read_to_string(format!("/proc/{pid}/stat"))
+            .unwrap()
+            .contains(") Z ")
+        {
+            assert!(std::time::Instant::now() < deadline);
+            std::thread::sleep(Duration::from_millis(10));
+        }
+        let dead = exiting(pid);
+        zombie.wait().unwrap();
+        assert!(dead);
+        assert!(exiting(reaped_group()));
     }
 }
