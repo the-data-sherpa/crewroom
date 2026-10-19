@@ -28,6 +28,13 @@ Checks at `ddc7fae`'s tree (private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4
 - `cargo clippy -p crewroom-core -p crewroom-service -p crewroom-runtime -p crewroom-desktop --all-targets -- -D warnings` and `cargo fmt --check` for these crates: clean.
 - `npm run test:e2e`: not run (integrator). The browser suite exercises the legacy TypeScript UI, which this change does not touch.
 
+Integration at `8147260` on main `cb8efca` (rebased from `ddc7fae`; the only conflict was the `Panel` enum, where FOR-83's `Runner` and FOR-77's `Overview` were both kept; the checks above cite the pre-rebase tree). Worktree prepared with `prepare_worktree.py --build-helpers`, private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, all tests through `scripts/system_limits.py run`:
+
+- `npm test`: **345/345**. `npm run build`: passes.
+- `npm run test:e2e`: **31/31** with `TMPDIR` on a short on-disk directory. A first run with the default `/tmp` failed 8 browser specs with Chromium `Target crashed` while the shared `/tmp` tmpfs user quota was nearly exhausted; this change does not touch the browser UI. An `npm test` run with `TMPDIR` under the long worktree path stalled and was stopped; with the default `TMPDIR` it passed.
+- `cargo test --locked --no-fail-fast -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop`: **619 passed, 0 failed, 18 ignored** over 69 test binaries.
+- Clippy `--all-targets -D warnings` and `cargo fmt --check` for these crates: clean.
+
 Not yet verified: the operator's on-screen check of the Overview in the native app, and the flag against a live agent run. Every interaction above ran on the GPUI test platform with injected or locally seeded state.
 
 ## FOR-83 — Configure the agent runner from Settings (2026-10-19)
