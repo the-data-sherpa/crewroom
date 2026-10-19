@@ -4,6 +4,29 @@ The operator requested that each work item pass its checks before the next start
 
 Historical revision IDs and source hashes below refer to the original private snapshots before the FOR-17 history rewrite. Sanitized copies are not byte-identical evidence for rewritten revisions; replay requires the private archive. New validation is recorded separately.
 
+## FOR-75 — Project-first sidebar (2026-10-19)
+
+Implementation `0d13000` on branch `for-75-work` from main `9d409b5`. The sidebar groups live in `crates/crewroom-desktop/src/workbench/projects.rs`; the saved order, collapsed groups and current project extend `navigation.rs` (`ProjectPrefs`, serde defaults, at most 200 ids per list, file limit 64 KiB). Start reuses the default coordinator launch now shared with Queue run (`planning.rs`: `coordinator_role`, `coordinator_launch`).
+
+Desktop, GPUI test platform, no window on the operator's desktop (`crates/crewroom-desktop/src/workbench/projects_tests.rs` and `navigation.rs`):
+
+- `sidebar_groups_tickets_by_project_in_four_sections_with_unassigned_last` (injected workspace, synthetic paths): row order is project, Needs you, Running, Queued, Other, then a second project, a retired project and Unassigned. Section counts, "● 2 running" (running workflow, including the run that needs the operator), "Nothing running", monograms `AA`/`BE`, source "GitHub Issues" and "Ticket source unavailable", and "Old tool · Retired" are checked. Every row has exactly one source, workflow and activity chip. New ticket and Import appear only on active projects, Import only with a confirmed source; Start appears only on tickets in an active project without an unfinished run; Choose a project appears on the unassigned ticket and opens its project picker. Selecting a project's ticket makes that project current.
+- `collapse_order_and_current_project_survive_a_restart`: move down, collapse a project and Unassigned, choose the current project; a second workbench reading the same private file shows the same order, hidden rows and current project. The footer New ticket targets the current project. Expanding is saved. A retired current project is no longer offered as current.
+- `empty_workspace_offers_add_a_project_through_the_folder_flow`: "What should we work on?", **Add a project** in the main panel and the sidebar, and "No projects yet."; Add a project opens Settings → Projects at **Choose folder**.
+- `new_ticket_and_start_from_a_project_act_in_that_project` (real authenticated local service, two synthetic Git checkouts): the second project's New ticket creates a ticket whose `repositoryId` is that project and lists it in that group. Start queues a run whose `taskSnapshot.repositoryId` is that project, with purpose `grill` because no plan was accepted; Start then disappears and the row reports "No agent processes". The other project gets no ticket.
+- `project_preferences_survive_reopening_and_keep_ticket_navigation`: a navigation file written before FOR-75 reads unchanged; duplicate and empty ids are dropped; preferences saved before any ticket was opened read back.
+- Updated: the GitHub Issues test now imports through the project header's **Import** against the simulated loopback GitHub API (2 issues, listed under the project); the session-shell test checks project sections instead of the old flat groups; wording tests follow "project".
+
+Checks at `0d13000` (private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, all through `scripts/system_limits.py run`):
+
+- `npm test`: **345/345**. `npm run build`: passes.
+- `cargo test -p crewroom-desktop`: **157 passed, 0 failed, 15 ignored**.
+- `cargo test --no-fail-fast -p crewroom-core -p crewroom-service -p crewroom-runtime`: **418 passed, 0 failed, 3 ignored**. An earlier combined run lost 5 `crewroom-service` `tests/http.rs` cases to SQLite `disk I/O error` while the shared `/tmp` tmpfs was nearly full; the rerun passed.
+- `cargo clippy -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop --all-targets -- -D warnings` and `cargo fmt --check` for these crates: clean.
+- `npm run test:e2e`: not run (integrator). The browser suite exercises the legacy TypeScript UI, which this change does not touch.
+
+Not yet verified: the operator's on-screen check of the sidebar in the native app. Every interaction above ran on the GPUI test platform.
+
 ## FOR-82 — Workflow and repository journeys without the TypeScript oracle (2026-10-19)
 
 Code `0ef395d` (branch `for-82-work`, from main `9d409b5`). Every check below ran at `0ef395d` on Linux x86_64 with Docker Engine 29.7.2 (rootful) and Node 26, with Rust binaries built from this revision in a target directory private to the worktree (worktree prepared with `python3 scripts/prepare_worktree.py --build-helpers`). Docker and Git are real; no provider, Jira or GitHub service was contacted. The machine was shared with parallel agents (load average 9–21).
