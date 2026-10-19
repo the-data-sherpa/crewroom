@@ -119,51 +119,14 @@ impl Scheduler {
         self.open()?;
         self.reconcile_intakes().await?;
         self.reconcile_comparisons().await?;
-        if let Some(holder) = self.store(|s| s.coding_slot())? {
-            let id = text(&holder, "id")?;
-            if holder["purpose"] == "evaluation" {
-                return Ok(());
-            }
-            let publication = self.store(|s| s.publication(id))?.unwrap_or(Value::Null);
-            if present(&publication["merged"]) {
-                self.store(|s| s.release_coding_slot(id, "merged", None))?;
-                self.kick();
-                return Ok(());
-            }
-            if present(&holder["resumeRequest"]) && !self.0.workflow.busy(id) {
-                Self::wait(self.0.workflow.resume(id)?).await?;
-                return Ok(());
-            }
-            if publication["ready"] == true && !present(&holder["sourceConflict"]) {
-                if holder["slotRelease"]["candidateId"] != publication["candidateId"] {
-                    self.store(|s| {
-                        s.release_coding_slot(id, "review", publication["candidateId"].as_str())
-                    })?;
-                    Self::wait(self.0.workflow.pause(id, true, Some("review"))?).await?;
-                    self.kick();
-                    return Ok(());
-                }
-                if holder["slotRelease"]["reason"] == "review"
-                    && holder["status"] == "paused"
-                    && holder["desiredState"] == "paused"
-                    && ["review", "validation"]
-                        .contains(&holder["pauseReason"].as_str().unwrap_or(""))
-                {
-                    self.store(|s| {
-                        s.release_coding_slot(id, "review", publication["candidateId"].as_str())
-                    })?;
-                    self.kick();
-                    return Ok(());
-                }
-            }
-            if present(&holder["schedule"])
-                && !self.0.workflow.busy(id)
-                && !self.0.launches.busy(id)
-                && self.replay(&holder)?
-            {
-                Self::wait(self.launch(holder, None)?).await?;
-            }
-            return Ok(());
+        // FOR-76: each project holds up to its capacity of slots. Handle every
+        // holder, then admit queued plans while any project has room.
+        let holders = self.store(|s| s.coding_slots())?;
+        if holders.iter().any(|h| h["purpose"] == "evaluation") {
+            return Ok(()); // A comparison keeps the whole workspace.
+        }
+        for holder in &holders {
+            self.reconcile_holder(holder).await?;
         }
         let snapshot = self.store(|s| s.snapshot())?;
         let mut resumes: Vec<_> = array(&snapshot["runs"])
@@ -176,15 +139,16 @@ impl Scheduler {
             })
             .collect();
         resumes.sort_by_key(|r| r["resumeRequest"]["requestedAt"].as_str().unwrap_or(""));
-        if let Some(run) = resumes.first() {
+        for run in resumes {
+            // Holders resumed above; others resume when their project has room.
             let id = text(run, "id")?;
-            if self.store(|s| s.unstopped_coding_run(id))?.is_none() {
+            let current = self.store(|s| s.get_run(id))?;
+            if self.0.workflow.busy(id) || !present(&current["resumeRequest"]) {
+                continue;
+            }
+            if self.store(|s| Ok(!s.holds_slot(id)? && s.capacity_hold(&current)?.is_none()))? {
                 Self::wait(self.0.workflow.resume(id)?).await?;
             }
-            return Ok(());
-        }
-        if self.store(|s| s.unstopped_coding_run(""))?.is_some() {
-            return Ok(());
         }
         let mut reholds = Vec::new();
         for run in array(&snapshot["runs"]) {
@@ -205,12 +169,20 @@ impl Scheduler {
             }
         }
         reholds.sort_by_key(|r| r["slotRelease"]["at"].as_str().unwrap_or(""));
-        if let Some(run) = reholds.first() {
-            self.store(|s| s.reclaim_coding_slot(text(run, "id")?, true))?;
-            return Ok(());
+        for run in reholds {
+            let id = text(run, "id")?;
+            let current = self.store(|s| s.get_run(id))?;
+            if self.store(|s| Ok(!s.holds_slot(id)? && s.capacity_hold(&current)?.is_none()))? {
+                self.store(|s| s.reclaim_coding_slot(id, true))?;
+            }
         }
+        // Readiness work (source refresh, preflight, dependency bases) is only
+        // spent on plans whose project and the workspace currently have room.
+        let room = |plan: &Value| -> Result<bool> {
+            self.store(|s| s.capacity_hold(plan)).map(|h| h.is_none())
+        };
         for plan in array(&self.store(|s| s.coding_queue())?["plans"]) {
-            if present(&plan["implementationPlan"]) {
+            if present(&plan["implementationPlan"]) && room(plan)? {
                 let result = self.refresh_source(text(plan, "taskId")?).await;
                 if let Err(error) = result {
                     self.store(|s| {
@@ -226,17 +198,24 @@ impl Scheduler {
         for plan in array(&self.store(|s| s.coding_queue())?["plans"]) {
             let mut eligible = plan.clone();
             eligible.as_object_mut().unwrap().remove("launchHold");
-            if !present(&plan["launch"])
+            if (!present(&plan["launch"]) && !present(&plan["startRequest"]))
                 || (present(&plan["launchHold"]) && plan["launchHold"]["source"] != "preflight")
                 || self.store(|s| s.eligibility_hold(&eligible))?.is_some()
+                || !room(plan)?
             {
                 continue;
             }
             let id = text(plan, "id")?;
+            // A queued manual start re-checks the team it was given.
+            let team = if present(&plan["launch"]) {
+                &plan["launch"]["team"]
+            } else {
+                &plan["startRequest"]["input"]["team"]
+            };
             let result = self.0.store.roles().and_then(|roles| {
                 self.0
                     .workflow
-                    .preflight_start(id, &json!({"team":plan["launch"]["team"]}), &roles)
+                    .preflight_start(id, &json!({"team":team}), &roles)
             });
             let reason = result.err().map(|e| e.to_string());
             self.store(|s| s.set_launch_hold(id, &plan["launch"], reason.as_deref()))?;
@@ -245,7 +224,9 @@ impl Scheduler {
             self.open()?;
             let merges = stringify(&self.store(|s| s.dependency_merges(plan))?);
             if merges == "[]"
-                || (!present(&plan["launch"]) && !present(&plan["dependencyBaseHold"]))
+                || (!present(&plan["launch"])
+                    && !present(&plan["startRequest"])
+                    && !present(&plan["dependencyBaseHold"]))
             {
                 continue;
             }
@@ -261,9 +242,71 @@ impl Scheduler {
                 self.store(|s| s.save_dependency_base_hold(id, &merges, reason.as_deref()))?;
             }
         }
-        self.open()?;
-        if let Some(run) = self.store(|s| s.claim_next_coding_slot())? {
-            Self::wait(self.launch(run, None)?).await?;
+        // Fill every free slot, in queue order. Each claim removes a plan from
+        // the queue, so the loop is bounded by the queue length.
+        let limit = array(&self.store(|s| s.coding_queue())?["plans"]).len();
+        for _ in 0..limit {
+            self.open()?;
+            let Some(run) = self.store(|s| s.claim_next_coding_slot())? else {
+                break;
+            };
+            let manual = (!present(&run["launch"]) && present(&run["startRequest"]))
+                .then(|| run["startRequest"]["input"].clone());
+            Self::wait(self.launch(run, manual)?).await?;
+        }
+        Ok(())
+    }
+    /// One slot holder: release on merge or review readiness, resume a
+    /// queued Resume, or replay an interrupted initial launch.
+    async fn reconcile_holder(&self, holder: &Value) -> Result<()> {
+        let id = text(holder, "id")?;
+        let publication = self.store(|s| s.publication(id))?.unwrap_or(Value::Null);
+        if present(&publication["merged"]) {
+            self.store(|s| s.release_coding_slot(id, "merged", None))?;
+            self.kick();
+            return Ok(());
+        }
+        if present(&holder["resumeRequest"]) && !self.0.workflow.busy(id) {
+            Self::wait(self.0.workflow.resume(id)?).await?;
+            return Ok(());
+        }
+        if publication["ready"] == true && !present(&holder["sourceConflict"]) {
+            if holder["slotRelease"]["candidateId"] != publication["candidateId"] {
+                self.store(|s| {
+                    s.release_coding_slot(id, "review", publication["candidateId"].as_str())
+                })?;
+                Self::wait(self.0.workflow.pause(id, true, Some("review"))?).await?;
+                self.kick();
+                return Ok(());
+            }
+            if holder["slotRelease"]["reason"] == "review"
+                && holder["status"] == "paused"
+                && holder["desiredState"] == "paused"
+                && ["review", "validation"].contains(&holder["pauseReason"].as_str().unwrap_or(""))
+            {
+                self.store(|s| {
+                    s.release_coding_slot(id, "review", publication["candidateId"].as_str())
+                })?;
+                self.kick();
+                return Ok(());
+            }
+        }
+        if self.0.workflow.busy(id) || self.0.launches.busy(id) {
+            return Ok(());
+        }
+        if present(&holder["schedule"]) && present(&holder["launch"]) && self.replay(holder)? {
+            Self::wait(self.launch(holder.clone(), None)?).await?;
+        } else if present(&holder["startRequest"])
+            && !present(&holder["launch"])
+            && self.store(|s| s.can_dispatch_start_request(id))?
+        {
+            // A queued manual start whose dispatch was interrupted (for
+            // example by a service restart) is dispatched again.
+            Self::wait(self.launch(
+                holder.clone(),
+                Some(holder["startRequest"]["input"].clone()),
+            )?)
+            .await?;
         }
         Ok(())
     }
@@ -332,9 +375,7 @@ impl Scheduler {
                 let current = self.store(|s| s.get_run(id))?;
                 if ["cancelled", "paused"].contains(&current["desiredState"].as_str().unwrap_or(""))
                     || current["status"] != "awaiting_runner"
-                    || self
-                        .store(|s| s.coding_slot())?
-                        .is_none_or(|r| r["id"] != id)
+                    || self.store(|s| s.holds_slot(id)).map(|held| !held)?
                 {
                     return Ok(Value::Null);
                 }
@@ -357,9 +398,7 @@ impl Scheduler {
         if self.store(|s| s.repository_work(id))?.is_none()
             && !array(&self.store(|s| s.dependency_merges(&s.get_run(id)?))?).is_empty()
             && let Some(reason) = self.0.work.dependency_base_hold(id, None).await?
-            && self
-                .store(|s| s.coding_slot())?
-                .is_some_and(|r| r["id"] == id)
+            && self.store(|s| s.holds_slot(id))?
         {
             self.store(|s| s.defer_unadmitted_launch(id, Some(&reason), true))?;
             return Ok(Value::Null);
@@ -389,9 +428,7 @@ impl Scheduler {
         if !["cancelled", "paused"].contains(&current["desiredState"].as_str().unwrap_or(""))
             && self.store(|s| s.repository_work(id))?.is_none()
             && array(&self.store(|s| s.runtime(id))?["assignments"]).is_empty()
-            && self
-                .store(|s| s.coding_slot())?
-                .is_some_and(|r| r["id"] == id)
+            && self.store(|s| s.holds_slot(id))?
         {
             self.store(|s| s.defer_unadmitted_launch(id, Some(&reason), false))?;
             if scheduled {

@@ -155,7 +155,7 @@ fn slot_upgrade_keeps_first_claimed_owner_and_holds_other_retained_owners() {
     drop(store);
     let db = Connection::open(&path).unwrap();
     assert_eq!(
-        db.query_row("SELECT run_id FROM coding_slot", [], |r| r
+        db.query_row("SELECT run_id FROM coding_slots", [], |r| r
             .get::<_, String>(0))
             .unwrap(),
         "run-1"
@@ -268,7 +268,7 @@ fn transferred_history_does_not_claim_the_current_branch_after_upgrade() {
 }
 #[test]
 fn newer_and_nonempty_unversioned_databases_are_refused_without_adopting_tables() {
-    for version in [0, 36] {
+    for version in [0, 37] {
         let root = tempfile::tempdir().unwrap();
         let path = root.path().join("workflow.sqlite");
         let db = Connection::open(&path).unwrap();

@@ -15,19 +15,7 @@ struct DependencyMerge {
     commit: String,
 }
 impl Store {
-    pub fn coding_slot(&self) -> Result<Option<Value>> {
-        let id: Option<String> =
-            self.db
-                .query_row("SELECT run_id FROM coding_slot WHERE id=1", [], |r| {
-                    r.get(0)
-                })?;
-        id.as_deref().map(|id| self.get_run(id)).transpose()
-    }
-    pub(crate) fn readiness_hold(
-        &self,
-        run: &Value,
-        holder_id: Option<&str>,
-    ) -> Result<Option<Value>> {
+    pub(crate) fn readiness_hold(&self, run: &Value) -> Result<Option<Value>> {
         let publication = self
             .record("publications", "run_id", run["id"].as_str().unwrap())?
             .unwrap_or(Value::Null);
@@ -47,7 +35,7 @@ impl Store {
             return Ok(None);
         }
         Ok(Some(
-            json!({"state":if holder_id==run["id"].as_str(){"held"}else{"pending"},"candidateId":publication.get("candidateId").unwrap_or(&run["slotRelease"]["candidateId"]),"since":run["slotRelease"]["at"]}),
+            json!({"state":if self.holds_slot(run["id"].as_str().unwrap_or(""))?{"held"}else{"pending"},"candidateId":publication.get("candidateId").unwrap_or(&run["slotRelease"]["candidateId"]),"since":run["slotRelease"]["at"]}),
         ))
     }
     fn slot_reason(&self, run: &Value) -> Result<String> {
@@ -55,9 +43,8 @@ impl Store {
         if run["status"] == "attention_required" {
             return Ok(format!("{key} needs attention"));
         }
-        let holder = self.coding_slot()?;
         if self
-            .readiness_hold(run, holder.as_ref().and_then(|v| v["id"].as_str()))?
+            .readiness_hold(run)?
             .is_some_and(|h| h["state"] == "held")
         {
             return Ok(format!(
@@ -86,12 +73,8 @@ impl Store {
         .into())
     }
     pub fn coding_queue(&self) -> Result<Value> {
-        let holder = self.coding_slot()?;
-        let unstopped = if holder.is_none() {
-            self.unstopped_coding_run("")?
-        } else {
-            None
-        };
+        let holders = self.coding_slots()?;
+        let priority = self.priority_projects()?;
         let mut plans: Vec<_> = self
             .all("runs")?
             .into_iter()
@@ -102,18 +85,12 @@ impl Store {
             remove(plan, "holdReason");
             let mut reason = self.eligibility_hold(plan)?;
             if reason.is_none() {
-                if let Some(holder) = &holder {
-                    reason = Some(format!(
-                        "Waiting for {} to reach ready for review ({})",
-                        holder["taskSnapshot"]["key"].as_str().unwrap_or(""),
-                        self.slot_reason(holder)?
-                    ));
-                } else if let Some(unstopped) = &unstopped {
-                    reason = Some(format!(
-                        "Waiting for {}'s agents to stop; process ownership needs reconciliation",
-                        unstopped["taskSnapshot"]["key"].as_str().unwrap_or("")
-                    ));
-                }
+                reason = self.capacity_hold(plan)?;
+            }
+            if reason.is_none() && priority.contains(&crate::capacity::run_project(plan)) {
+                reason = Some(
+                    "Waiting for a review-ready run in this project to resume or reclaim its slot first".into(),
+                );
             }
             if let Some(reason) = reason {
                 plan["holdReason"] = json!(reason);
@@ -124,10 +101,16 @@ impl Store {
                 .query_row("SELECT revision FROM queue_state WHERE id=1", [], |r| {
                     r.get(0)
                 })?;
-        let mut queue = json!({"revision":revision,"plans":plans});
-        if let Some(holder) = holder {
-            queue["slot"] = json!({"runId":holder["id"],"key":holder["taskSnapshot"]["key"],"reason":self.slot_reason(&holder)?,"decisionId":holder["schedule"]["id"],"decidedAt":holder["schedule"]["at"]});
+        let mut slots = Vec::new();
+        for holder in &holders {
+            slots.push(json!({"runId":holder["id"],"key":holder["taskSnapshot"]["key"],"repositoryId":crate::capacity::run_project(holder),"reason":self.slot_reason(holder)?,"decisionId":holder["schedule"]["id"],"decidedAt":holder["schedule"]["at"]}));
         }
+        let mut queue = json!({"revision":revision,"plans":plans,"capacity":self.capacity_view()?});
+        if let Some(first) = slots.first() {
+            // Compatibility: the earliest holder. `slots` lists every project's.
+            queue["slot"] = first.clone();
+        }
+        queue["slots"] = json!(slots);
         Ok(queue)
     }
     pub fn eligibility_hold(&self, run: &Value) -> Result<Option<String>> {
@@ -174,8 +157,7 @@ impl Store {
             .as_str()
             .map(str::to_owned)
             .or_else(|| {
-                run.get("launch")
-                    .is_none()
+                (run.get("launch").is_none() && run.get("startRequest").is_none())
                     .then(|| "Needs launch details".into())
             }))
     }
@@ -259,31 +241,51 @@ impl Store {
             Ok(true)
         })
     }
+    /// FOR-76: succeeds when the run holds a slot or its project and the
+    /// workspace have room; otherwise the conflict carries the queue reason.
     pub fn assert_coding_slot_available(&self, run_id: &str) -> Result<()> {
-        self.get_run(run_id)?;
-        if let Some(holder) = self.coding_slot()? {
-            if holder["id"] != run_id {
-                return Err(conflict(&format!(
-                    "{} holds the coding slot ({}).",
-                    holder["taskSnapshot"]["key"].as_str().unwrap_or(""),
-                    self.slot_reason(&holder)?
-                )));
-            }
-        } else if let Some(unstopped) = self.unstopped_coding_run(run_id)? {
-            return Err(conflict(&format!(
-                "{} still has unconfirmed coding process ownership. Wait for its agents to stop before starting another coding ticket.",
-                unstopped["taskSnapshot"]["key"].as_str().unwrap_or("")
-            )));
+        let run = self.get_run(run_id)?;
+        if self.holds_slot(run_id)? {
+            return Ok(());
+        }
+        if let Some(reason) = self.capacity_hold(&run)? {
+            return Err(conflict(&reason));
         }
         Ok(())
     }
+    /// Projects whose released, review-ready runs wait to resume or to
+    /// reclaim a slot. They keep priority over new plans in that project.
+    fn priority_projects(&self) -> Result<std::collections::HashSet<String>> {
+        let mut projects = std::collections::HashSet::new();
+        for run in self.all("runs")? {
+            if !coding(&run) || self.holds_slot(run["id"].as_str().unwrap_or(""))? {
+                continue;
+            }
+            let resuming = run.get("resumeRequest").is_some_and(|v| !v.is_null())
+                && ["paused", "attention_required"].contains(&run["status"].as_str().unwrap_or(""))
+                && run["desiredState"] != "cancelled";
+            let rehold = run["feedbackResumeHold"]["terminal"] != true
+                && run["feedbackContinuations"]
+                    .as_array()
+                    .and_then(|a| a.last())
+                    .is_none_or(|v| v["state"] != "blocked")
+                && self.readiness_hold(&run)?.is_some();
+            if resuming || rehold {
+                projects.insert(crate::capacity::run_project(&run));
+            }
+        }
+        Ok(projects)
+    }
+    /// Claims a slot for the first eligible queued plan whose project and the
+    /// workspace have room, in queue order. Call again to fill further slots.
     pub fn claim_next_coding_slot(&self) -> Result<Option<Value>> {
         self.transaction(|s| {
-            if s.coding_slot()?.is_some() || s.unstopped_coding_run("")?.is_some() {
-                return Ok(None);
-            }
+            let priority = s.priority_projects()?;
             for plan in s.coding_queue()?["plans"].as_array().unwrap() {
-                if s.eligibility_hold(plan)?.is_none() {
+                if priority.contains(&crate::capacity::run_project(plan)) {
+                    continue;
+                }
+                if s.eligibility_hold(plan)?.is_none() && s.capacity_hold(plan)?.is_none() {
                     return s
                         .claim_coding_slot_in_transaction(plan["id"].as_str().unwrap(), false)
                         .map(Some);
@@ -326,8 +328,7 @@ impl Store {
             self.save_run(&run)?;
             run = self.get_run(run_id)?;
         }
-        self.db
-            .execute("UPDATE coding_slot SET run_id=? WHERE id=1", [run_id])?;
+        self.occupy_slot(run_id)?;
         Ok(run)
     }
     pub fn release_coding_slot(
@@ -351,7 +352,7 @@ impl Store {
         if run["purpose"] == "evaluation" {
             return Ok(run); // Only a stopped, committed comparison result releases this slot.
         }
-        if self.coding_slot()?.is_none_or(|r| r["id"] != run_id) {
+        if !self.holds_slot(run_id)? {
             return Ok(run);
         }
         let publication = self
@@ -394,8 +395,7 @@ impl Store {
             updated["slotRelease"]["candidateId"] = json!(candidate);
         }
         self.save_run(&updated)?;
-        self.db
-            .execute("UPDATE coding_slot SET run_id=NULL WHERE id=1", [])?;
+        self.vacate_slot(run_id)?;
         self.get_run(run_id)
     }
     pub fn defer_unadmitted_launch(
@@ -406,7 +406,7 @@ impl Store {
     ) -> Result<Value> {
         self.transaction(|s| {
             let mut run = s.get_run(run_id)?;
-            if s.coding_slot()?.is_none_or(|r| r["id"] != run_id)
+            if !s.holds_slot(run_id)?
                 || run["status"] != "awaiting_runner"
                 || s.record("repository_work", "run_id", run_id)?.is_some()
                 || !s.run_records("assignments", run_id)?.is_empty()
@@ -416,7 +416,7 @@ impl Store {
                     "Cannot defer a coding run after preparation or admission.",
                 ));
             }
-            s.db.execute("UPDATE coding_slot SET run_id=NULL WHERE id=1", [])?;
+            s.vacate_slot(run_id)?;
             let queued = s.coding_queue()?;
             let plans = queued["plans"].as_array().unwrap();
             let position = run["schedule"]["position"]
@@ -459,7 +459,7 @@ impl Store {
         revision: u64,
     ) -> Result<bool> {
         let run = self.get_run(run_id)?;
-        if self.coding_slot()?.is_none_or(|r| r["id"] != run_id)
+        if !self.holds_slot(run_id)?
             || run["schedule"]["id"] != decision
             || run.get("launchCompletedAt").is_some()
             || run.get("launch").is_none()
@@ -523,24 +523,15 @@ impl Store {
     pub fn reclaim_coding_slot(&self, run_id: &str, regressed: bool) -> Result<()> {
         self.transaction(|s| {
             let mut run = s.get_run(run_id)?;
-            let holder = s.coding_slot()?;
             if !coding(&run) || run.get("slotRelease").is_none() {
                 return Ok(());
             }
-            if let Some(holder) = holder {
-                if holder["id"] == run_id {
-                    return Ok(());
-                }
-                return Err(conflict(&format!(
-                    "{} holds the coding slot ({}). Resume this run when it is free.",
-                    holder["taskSnapshot"]["key"].as_str().unwrap_or(""),
-                    s.slot_reason(&holder)?
-                )));
+            if s.holds_slot(run_id)? {
+                return Ok(());
             }
-            if let Some(unstopped) = s.unstopped_coding_run(run_id)? {
+            if let Some(reason) = s.capacity_hold(&run)? {
                 return Err(conflict(&format!(
-                    "{} still has unconfirmed coding process ownership.",
-                    unstopped["taskSnapshot"]["key"].as_str().unwrap_or("")
+                    "{reason}. Resume this run when a slot is free."
                 )));
             }
             if regressed {
@@ -551,7 +542,7 @@ impl Store {
                 remove(&mut run, "slotRelease");
             }
             s.save_run(&run)?;
-            s.db.execute("UPDATE coding_slot SET run_id=? WHERE id=1", [run_id])?;
+            s.occupy_slot(run_id)?;
             Ok(())
         })
     }

@@ -62,12 +62,15 @@ fn failed_slot_release_cannot_partially_commit_a_merge_observation() {
         rusqlite::params![coding.to_string(), id(&run)],
     )
     .unwrap();
-    db.execute("UPDATE coding_slot SET run_id=? WHERE id=1", [id(&run)])
-        .unwrap();
+    db.execute(
+        "INSERT INTO coding_slots(run_id,task_id,project) SELECT id,task_id,'' FROM runs WHERE id=?",
+        [id(&run)],
+    )
+    .unwrap();
     let original = publication(&run);
     store.save_publication(&original).unwrap();
     let before = store.get_run(id(&run)).unwrap();
-    db.execute_batch("CREATE TRIGGER fail_slot BEFORE UPDATE ON coding_slot BEGIN SELECT RAISE(ABORT,'slot interrupted'); END").unwrap();
+    db.execute_batch("CREATE TRIGGER fail_slot BEFORE DELETE ON coding_slots BEGIN SELECT RAISE(ABORT,'slot interrupted'); END").unwrap();
     let mut merged = original.clone();
     merged["merged"] = json!({"commit":"fixture-head","observedAt":"2026-09-28T00:00:00Z"});
     assert!(store.save_publication(&merged).is_err());

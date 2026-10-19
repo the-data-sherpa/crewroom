@@ -7,7 +7,7 @@ use std::{collections::HashSet, path::Path};
 use uuid::Uuid;
 /// Current workflow store schema. Version 31 moves ticket source status to the
 /// provider-neutral `sourceStatus`/`sourceStatusId` fields (FOR-40).
-pub const SCHEMA_VERSION: u32 = 35;
+pub const SCHEMA_VERSION: u32 = 36;
 
 pub struct Store {
     pub(crate) db: Connection,
@@ -624,10 +624,8 @@ impl Store {
     pub fn snapshot(&self) -> Result<Value> {
         let mut tasks = self.tasks()?;
         let mut runs = self.all("runs")?;
-        let holder = self.coding_slot()?;
-        let holder_id = holder.as_ref().and_then(|r| r["id"].as_str());
         for run in &mut runs {
-            if let Some(hold) = self.readiness_hold(run, holder_id)? {
+            if let Some(hold) = self.readiness_hold(run)? {
                 run["readinessHold"] = hold;
             }
         }

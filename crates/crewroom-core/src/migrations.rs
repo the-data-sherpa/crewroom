@@ -30,6 +30,7 @@ impl Store {
                     31 => s.migrate_ticket_sources()?,
                     34 => s.migrate_github_project_sources()?,
                     35 => s.migrate_jira_project_sources()?,
+                    36 => s.migrate_project_slots()?,
                     _ => (),
                 }
                 s.db.pragma_update(None, "user_version", version)?;
@@ -252,6 +253,19 @@ impl Store {
                 }
             }
             self.save_migrated_run(&run)?;
+        }
+        Ok(())
+    }
+    /// FOR-76: the single workspace slot becomes one slot row per holder,
+    /// tagged with its ticket (unique) and project.
+    fn migrate_project_slots(&self) -> Result<()> {
+        let legacy: bool = self.db.query_row(
+            "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='coding_slot')",
+            [],
+            |r| r.get(0),
+        )?;
+        if legacy {
+            self.db.execute_batch("INSERT OR IGNORE INTO coding_slots(run_id,task_id,project) SELECT c.run_id, r.task_id, COALESCE(json_extract(r.data,'$.taskSnapshot.repositoryId'),'') FROM coding_slot c JOIN runs r ON r.id=c.run_id WHERE c.run_id IS NOT NULL; DROP TABLE coding_slot;")?;
         }
         Ok(())
     }

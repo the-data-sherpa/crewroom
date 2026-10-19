@@ -55,7 +55,7 @@ fn failed_slot_write_rolls_back_schedule_positions_and_queue_revision() {
     let (root, store, runs, _) = setup();
     let before = store.coding_queue().unwrap();
     let db = Connection::open(root.path().join("workflow.sqlite")).unwrap();
-    db.execute_batch("CREATE TRIGGER fail_slot BEFORE UPDATE ON coding_slot BEGIN SELECT RAISE(ABORT,'fixture interruption'); END;").unwrap();
+    db.execute_batch("CREATE TRIGGER fail_slot BEFORE INSERT ON coding_slots BEGIN SELECT RAISE(ABORT,'fixture interruption'); END;").unwrap();
     assert!(store.claim_next_coding_slot().is_err());
     assert_eq!(store.coding_queue().unwrap(), before);
     assert_eq!(

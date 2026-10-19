@@ -224,7 +224,7 @@ impl Store {
             run["evaluationResult"]=json!({"cellId":cell_id,"hash":cell["resultHash"],"state":state});
             run.as_object_mut().unwrap().remove("activeSince");
             s.save_run(&run)?;
-            s.db.execute("UPDATE coding_slot SET run_id=NULL WHERE id=1 AND run_id=?",[&run_id])?;
+            s.vacate_slot(&run_id)?;
             let comparison_id=cell["comparisonId"].as_str().unwrap();
             let mut comparison=s.comparison_record(comparison_id)?;
             let cells=s.comparison_cells(comparison_id)?;

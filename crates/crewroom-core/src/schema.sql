@@ -55,7 +55,9 @@ CREATE TABLE queue_state (id INTEGER PRIMARY KEY CHECK(id=1), revision INTEGER N
 
 CREATE TABLE queue_requests (request_id TEXT PRIMARY KEY, kind TEXT NOT NULL, payload TEXT NOT NULL, result TEXT NOT NULL);
 
-CREATE TABLE coding_slot (id INTEGER PRIMARY KEY CHECK(id=1), run_id TEXT REFERENCES runs(id));
+CREATE TABLE coding_slots (run_id TEXT PRIMARY KEY REFERENCES runs(id), task_id TEXT NOT NULL UNIQUE REFERENCES tickets(id), project TEXT NOT NULL);
+
+CREATE TABLE execution_settings (id INTEGER PRIMARY KEY CHECK(id=1), data TEXT NOT NULL);
 
 CREATE TABLE team_proposals (id TEXT PRIMARY KEY, run_id TEXT NOT NULL REFERENCES runs(id), attempt_id TEXT REFERENCES attempts(id), tool_call_id TEXT NOT NULL, data TEXT NOT NULL, UNIQUE(attempt_id,tool_call_id));
 
@@ -73,13 +75,13 @@ CREATE UNIQUE INDEX operator_proposal_request ON team_proposals(run_id,tool_call
 
 CREATE UNIQUE INDEX current_branch_owner ON repository_work(common_dir,branch) WHERE json_extract(data,'$.transferredTo') IS NULL;
 INSERT INTO queue_state VALUES(1,0);
-INSERT INTO coding_slot VALUES(1,NULL);
+INSERT INTO execution_settings VALUES(1,'{}');
 CREATE TABLE plan_sources (task_id TEXT PRIMARY KEY REFERENCES tickets(id), data TEXT NOT NULL);
 CREATE TABLE implementation_plans (id TEXT PRIMARY KEY, task_id TEXT NOT NULL REFERENCES tickets(id), data TEXT NOT NULL);
 CREATE TABLE plan_decisions (plan_id TEXT PRIMARY KEY REFERENCES implementation_plans(id), data TEXT NOT NULL);
 CREATE TABLE intake_requests (id TEXT PRIMARY KEY, task_id TEXT NOT NULL REFERENCES tickets(id), data TEXT NOT NULL);
 CREATE UNIQUE INDEX one_active_intake ON intake_requests(task_id) WHERE json_extract(data,'$.state') NOT IN ('cancelled','handed_off');
-PRAGMA user_version=35;
+PRAGMA user_version=36;
 
 CREATE TABLE choreography_revisions (run_id TEXT NOT NULL REFERENCES runs(id), revision INTEGER NOT NULL, data TEXT NOT NULL, PRIMARY KEY(run_id,revision));
 

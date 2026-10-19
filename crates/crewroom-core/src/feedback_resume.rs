@@ -78,7 +78,7 @@ impl Store {
             let work=s.record("repository_work","run_id",run_id)?.unwrap_or(Value::Null);
             if !work.is_object() || work["branch"]!=publication["branch"] || work["repository"]["path"]!=publication["repositoryPath"] {return Err(feedback_conflict("The owned branch or repository no longer matches the published PR.",true));}
             remove(&mut run,"feedbackResumeHold");
-            if run.get("resumeRequest").is_some() {return Ok(s.coding_slot()?.is_some_and(|h|h["id"]!=run_id) || s.unstopped_coding_run(run_id)?.is_some());}
+            if run.get("resumeRequest").is_some() {return Ok(!s.holds_slot(run_id)? && s.capacity_hold(&run)?.is_some());}
             let coding=s.record("coding","run_id",run_id)?.unwrap_or(Value::Null);
             let latest=coding["candidates"].as_array().and_then(|a|a.last());
             if let Some(latest)=latest && latest["id"]!=publication["candidateId"] {
@@ -133,7 +133,7 @@ impl Store {
                 },
             )?;
             if terminal
-                && s.coding_slot()?.is_some_and(|h| h["id"] == run_id)
+                && s.holds_slot(run_id)?
                 && s.record("repository_work", "run_id", run_id)?
                     .is_none_or(|w| w.get("writer").is_none())
                 && s.runtime(run_id)?["attempts"]
@@ -142,7 +142,7 @@ impl Store {
                     .iter()
                     .all(|a| a["state"] == "admitted" || a["ownership"] == "stopped")
             {
-                s.db.execute("UPDATE coding_slot SET run_id=NULL WHERE id=1", [])?;
+                s.vacate_slot(run_id)?;
             }
             Ok(held)
         })
@@ -150,10 +150,7 @@ impl Store {
     pub fn queue_review_resume(&self, run_id: &str) -> Result<bool> {
         self.transaction(|s| {
             let mut run = s.get_run(run_id)?;
-            let holder = s.coding_slot()?;
-            if holder.as_ref().is_none_or(|h| h["id"] == run_id)
-                && s.unstopped_coding_run(run_id)?.is_none()
-            {
+            if s.holds_slot(run_id)? || s.capacity_hold(&run)?.is_none() {
                 return Ok(false);
             }
             if !coding(&run) || run["slotRelease"]["reason"] != "review" {

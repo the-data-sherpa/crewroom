@@ -1126,6 +1126,7 @@ async fn mutate_inner(state: AppState, path: String, body: Value) -> Result<Valu
             ["runs", id, "close"] => s.store.close_refinement(id),
             ["runs", id, "steering"] => s.store.steer(id, &body),
             ["queue", "order"] => s.store.reorder_queue(&body),
+            ["execution-capacity"] => s.store.set_execution_capacity(&body),
             ["queue", id, "remove"] => s.store.cancel_queued(id, &body),
             ["queue", id, "launch"] | ["runs", id, "launch"] => {
                 s.store.set_queue_launch(id, &body, &s.roles.read()?)

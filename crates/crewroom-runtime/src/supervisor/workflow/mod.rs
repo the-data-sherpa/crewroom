@@ -220,27 +220,12 @@ impl<S: StoreAccess> Workflow<S> {
             return Err(conflict("Workflow supervision is stopping."));
         }
         if !state.admitting.contains_key(run) {
-            self.store(|s| {
-                let coding =
-                    s.repository_work(run)?.is_some() || s.get_run(run)?["purpose"] == "evaluation";
-                if coding
-                    && (array(&s.executing_runs()?)
-                        .iter()
-                        .any(|r| r["runId"] != run && r["coding"] == true)
-                        || state
-                            .admitting
-                            .keys()
-                            .filter(|id| id.as_str() != run)
-                            .any(|id| {
-                                s.get_run(id).map_or(true, |v| v["purpose"] == "evaluation")
-                                    || s.repository_work(id).map_or(true, |v| v.is_some())
-                            }))
-                {
-                    return Err(conflict(
-                        "Another coding ticket is executing. Wait until its agents stop.",
-                    ));
-                }
-                Ok(())
+            // FOR-76: per-project capacity, the workspace ceiling and the
+            // atomic ticket claim, counting runs still being admitted.
+            let admitting: Vec<String> = state.admitting.keys().cloned().collect();
+            self.store(|s| match s.execution_conflict(run, &admitting)? {
+                Some(reason) => Err(conflict(&reason)),
+                None => Ok(()),
             })?;
         }
         *state.admitting.entry(run.into()).or_default() += 1;

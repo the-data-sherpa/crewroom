@@ -7,7 +7,7 @@ use crate::{
         Store, conflict, id, integer, invalid, remove, request_id, strict, text, trimmed_text,
     },
 };
-use rusqlite::{OptionalExtension, params};
+use rusqlite::params;
 use serde_json::{Value, json};
 
 impl Store {
@@ -208,22 +208,34 @@ impl Store {
             .collect::<std::result::Result<Vec<_>, _>>()?;
         Ok(json!(runs))
     }
+    /// Any coding or evaluation run other than `except_run_id` whose process
+    /// ownership is not confirmed stopped (workspace-wide; per-project
+    /// occupancy is [`Store::capacity_hold`]).
     pub fn unstopped_coding_run(&self, except_run_id: &str) -> Result<Option<Value>> {
-        let run_id: Option<String> = self.db.query_row("SELECT s.run_id FROM attempts a JOIN assignments s ON a.assignment_id=s.id JOIN runs r ON r.id=s.run_id WHERE s.run_id<>? AND COALESCE(json_extract(r.data,'$.purpose'),'coding') IN ('coding','evaluation') AND a.state<>'admitted' AND a.ownership IS NOT 'stopped' LIMIT 1",[except_run_id],|r|r.get(0)).optional()?;
-        run_id.as_deref().map(|id| self.get_run(id)).transpose()
+        Ok(self
+            .unstopped_coding_runs(except_run_id)?
+            .into_iter()
+            .next())
     }
     pub fn claim_attempt(&self, attempt_id: &str) -> Result<Value> {
         self.transaction(|s| {
             let mut attempt = s.get_attempt(attempt_id)?;
-            if attempt["state"] != "admitted" { return Err(conflict("Attempt already claimed; reconcile ownership before replacement.")); }
+            if attempt["state"] != "admitted" {
+                return Err(conflict(
+                    "Attempt already claimed; reconcile ownership before replacement.",
+                ));
+            }
             let run_id = attempt["runId"].as_str().unwrap().to_owned();
             s.assert_intake_dispatch(&run_id)?;
             s.assert_evaluation_dispatch(&run_id)?;
-            let run=s.get_run(&run_id)?;
-            if (crate::dependencies::coding(&run) || run["purpose"]=="evaluation" || s.record("repository_work","run_id",&run_id)?.is_some()) && s.executing_runs()?.as_array().unwrap().iter().any(|r| r["runId"] != run_id && r["coding"] == true) {
-                return Err(conflict("Another coding ticket is executing. Crewroom executes one coding ticket at a time; wait until its agents stop."));
+            // FOR-76: the atomic ticket claim and per-project/workspace capacity.
+            if let Some(reason) = s.execution_conflict(&run_id, &[])? {
+                return Err(conflict(&reason));
             }
-            attempt["state"] = json!("starting"); s.save_attempt(&attempt)?; s.account_time_in_transaction(&run_id)?; Ok(attempt)
+            attempt["state"] = json!("starting");
+            s.save_attempt(&attempt)?;
+            s.account_time_in_transaction(&run_id)?;
+            Ok(attempt)
         })
     }
     /// FOR-69: the harness executable changed after admission and its

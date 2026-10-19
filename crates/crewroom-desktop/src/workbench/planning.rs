@@ -332,12 +332,23 @@ impl Workbench {
         let queue = &self.workspace["queue"];
         let plans = records(queue, "plans");
         let mut panel=section("Coding queue").child(hint("Local queue order is independent of Jira order. A queued plan has not started its agents."));
-        if queue["slot"].is_object() {
-            panel = panel.child(hint(format!(
-                "Coding slot: {} · {}",
-                string(&queue["slot"], "key"),
-                string(&queue["slot"], "reason")
-            )));
+        // FOR-76: each project has its own slots; a queued plan is never shown
+        // as executing, only the runs holding slots are.
+        let repositories = records(&self.workspace, "repositories");
+        for slot in records(queue, "slots") {
+            let project = repositories
+                .iter()
+                .find(|r| r["id"] == slot["repositoryId"])
+                .map(|r| string(r, "name"))
+                .unwrap_or_else(|| "Unassigned project".into());
+            panel = panel.child(named_hint(
+                format!("queue-slot-{}", string(&slot, "runId")),
+                format!(
+                    "Slot in {project}: {} · {}",
+                    string(&slot, "key"),
+                    string(&slot, "reason")
+                ),
+            ));
         }
         if let Some(intakes) = self.workspace["intake"].as_object() {
             for (task_id, view) in intakes.iter().filter(|(_, v)| v["intake"].is_object()) {

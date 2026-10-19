@@ -2,6 +2,7 @@
 use super::forms::Fields;
 use super::*;
 use gpui_kit::component::checkbox::Checkbox;
+mod capacity;
 mod learning;
 mod model_picker;
 pub(super) use model_picker::billing_label;
@@ -521,7 +522,7 @@ impl Workbench {
                 .insert(id.clone(), RepositoryDraft::new(&value, window, cx));
         }
         self.apply_folder(window, cx);
-        let mut panel=section("Projects").child(hint("A project is one local checkout with its ticket source, checks and branch prefix. Choose the checkout folder; the local service inspects it and verifies it again on save. Existing runs keep their captured configuration."));
+        let mut panel=section("Projects").child(hint("A project is one local checkout with its ticket source, checks and branch prefix. Choose the checkout folder; the local service inspects it and verifies it again on save. Existing runs keep their captured configuration.")).child(self.ceiling_block(cx));
         for repo in records(&self.workspace, "repositories") {
             let target = string(&repo, "id");
             let edit = target.clone();
@@ -554,6 +555,7 @@ impl Workbench {
             }
             if !retired {
                 row = row.child(self.ticket_source_block(&repo, window, cx));
+                row = row.child(self.capacity_block(&repo, cx));
             }
             if !retired {
                 row=row.child(div().flex().flex_wrap().gap_2().child(Button::new(SharedString::from(format!("edit-repository-{target}"))).label(format!("Edit {name}")).selected(target==id).disabled(self.busy).on_click(cx.listener(move|this,_,_,cx|{this.settings.repository=edit.clone();cx.notify();}))).child(Button::new(SharedString::from(format!("retire-repository-{target}"))).label("Retire project").disabled(self.blocked()).on_click(cx.listener(move|_,_,window,cx|{let view=cx.entity().downgrade();let target=target.clone();window.open_alert_dialog(cx,move|dialog,_,_|{let view=view.clone();let target=target.clone();dialog.title(crate::accessibility::text("Retire this project?")).description(crate::accessibility::text("New work will require another project. Saved tickets, history and worktrees are retained. Active or queued work can prevent retirement.")).show_cancel(true).cancel_text("Keep project").ok_text("Retire project").on_ok(move|_,_,cx|{let _=view.update(cx,|this,cx|this.send(format!("/repositories/{target}/retire"),json!({"revision":revision}),true,cx));true})});}))));

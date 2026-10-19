@@ -349,7 +349,8 @@ impl Store {
             if comparison["desiredState"]!="running" {return Err(conflict("Comparison must be explicitly started or resumed."));}
             let first=cells.iter().find(|c|c.get("result").is_none() && c["state"]!="cancelled").ok_or_else(||conflict("Comparison has no unfinished cell."))?;
             if first["id"]!=cell_id {return Err(conflict("Cells must execute in their frozen order after the preceding result commits."));}
-            if s.coding_slot()?.is_some() || s.unstopped_coding_run("")?.is_some() {return Err(conflict("Another coding or evaluation run retains the execution slot or unverified ownership."));}
+            // Comparisons keep the whole workspace: every project's slot must be free.
+            if !s.occupants("")?.is_empty() {return Err(conflict("Another coding or evaluation run retains an execution slot or unverified ownership."));}
             let manifest=&comparison["manifest"];
             let used=comparison["activeMs"].as_u64().unwrap_or(0);
             let remaining=manifest["design"]["totalActiveMs"].as_u64().unwrap().saturating_sub(used);
@@ -370,7 +371,7 @@ impl Store {
             if let Some(guidance)=case.get("projectGuidance") {run["evaluationGuidance"]=guidance.clone();}
             if let Some(playbook)=run["evaluationInputs"][0]["brief"].get("playbook").cloned() {crate::playbooks::initial(&mut run,playbook);}
             s.save_run(&run)?;
-            s.db.execute("UPDATE coding_slot SET run_id=? WHERE id=1",[&run_id])?;
+            s.occupy_slot(&run_id)?;
             // Strip view-only fields before writing the durable cell.
             cell.as_object_mut().unwrap().remove("events");
             cell["runId"]=json!(run_id); cell["state"]=json!("running"); cell["startedAt"]=json!(s.time());

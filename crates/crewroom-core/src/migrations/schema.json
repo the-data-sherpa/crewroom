@@ -23,5 +23,6 @@
   "32": "CREATE TABLE IF NOT EXISTS github_sync (id INTEGER PRIMARY KEY CHECK(id=1), data TEXT NOT NULL);",
   "33": "CREATE TABLE IF NOT EXISTS github_updates (id TEXT PRIMARY KEY, run_id TEXT NOT NULL REFERENCES runs(id), event_key TEXT NOT NULL, data TEXT NOT NULL, UNIQUE(run_id,event_key));",
   "34": "CREATE TABLE IF NOT EXISTS github_project_sync (repository_id TEXT PRIMARY KEY REFERENCES repositories(id), data TEXT NOT NULL);",
-  "35": "CREATE TABLE IF NOT EXISTS jira_project_sync (repository_id TEXT PRIMARY KEY REFERENCES repositories(id), data TEXT NOT NULL);"
+  "35": "CREATE TABLE IF NOT EXISTS jira_project_sync (repository_id TEXT PRIMARY KEY REFERENCES repositories(id), data TEXT NOT NULL);",
+  "36": "CREATE TABLE IF NOT EXISTS coding_slots (run_id TEXT PRIMARY KEY REFERENCES runs(id), task_id TEXT NOT NULL UNIQUE REFERENCES tickets(id), project TEXT NOT NULL); CREATE TABLE IF NOT EXISTS execution_settings (id INTEGER PRIMARY KEY CHECK(id=1), data TEXT NOT NULL); INSERT OR IGNORE INTO execution_settings(id,data) VALUES(1,'{}');"
 }

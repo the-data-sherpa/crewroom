@@ -118,11 +118,29 @@ pub(crate) async fn mutate(
                 }
                 "research" => wait(w.start(id, body.clone(), e.store.roles()?)?).await?,
                 "coding" => {
-                    e.store.with_store(|s| s.assert_coding_slot_available(id))?;
+                    // FOR-76: over capacity, a queued plan waits for a slot
+                    // instead of being refused; the scheduler dispatches it.
+                    let full = e.store.with_store(|s| {
+                        let run = s.get_run(id)?;
+                        Ok(if s.holds_slot(id)? {
+                            None
+                        } else {
+                            s.capacity_hold(&run)?
+                                .map(|reason| (reason, run.get("position").is_some()))
+                        })
+                    })?;
+                    if let Some((reason, false)) = full {
+                        return Err(Error::Conflict(reason).into());
+                    }
                     if let Some(reason) = e.work.dependency_base_hold(id, None).await? {
                         return Err(Error::Conflict(reason).into());
                     }
                     w.preflight_start(id, body, &e.store.roles()?)?;
+                    if full.is_some() {
+                        let queued = e.store.with_store(|s| s.queue_start_request(id, body))?;
+                        e.changed();
+                        return Ok(Some(queued));
+                    }
                     let decided = e.store.with_store(|s| s.claim_coding_slot(id, true))?;
                     wait(
                         e.scheduler

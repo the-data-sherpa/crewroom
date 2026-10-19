@@ -5,6 +5,7 @@ mod runner_identity;
 pub use runner_identity::{runner_kind, verify_runner_identity};
 pub mod authority;
 mod briefs;
+pub mod capacity;
 pub use briefs::snapshot_briefs;
 pub mod choreography;
 pub mod comparisons;
