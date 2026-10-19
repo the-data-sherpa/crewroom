@@ -528,7 +528,17 @@ pub async fn probe_installed(
     cancel: &CancellationToken,
     limit: Duration,
 ) -> Result<Receipt> {
-    run(config, root, observed_at, cancel, limit, &[], true).await
+    run(
+        config,
+        root,
+        observed_at,
+        cancel,
+        limit,
+        &[],
+        true,
+        compatibility::known_broken_list(),
+    )
+    .await
 }
 
 /// Discovery plus, for a newer unlisted version, the FOR-69 compatibility
@@ -542,9 +552,41 @@ pub async fn discover_with(
     limit: Duration,
     probes: &[compatibility::ProbeReceipt],
 ) -> Result<Receipt> {
-    run(config, root, observed_at, cancel, limit, probes, false).await
+    run(
+        config,
+        root,
+        observed_at,
+        cancel,
+        limit,
+        probes,
+        false,
+        compatibility::known_broken_list(),
+    )
+    .await
 }
 
+/// `discover_with` against a synthetic known-broken list (tests only).
+#[cfg(test)]
+pub(crate) async fn discover_with_known_broken(
+    config: &Config,
+    root: &Path,
+    cancel: &CancellationToken,
+    broken: &[super::known_broken::KnownBroken],
+) -> Result<Receipt> {
+    run(
+        config,
+        root,
+        100,
+        cancel,
+        Duration::from_secs(30),
+        &[],
+        false,
+        broken,
+    )
+    .await
+}
+
+#[allow(clippy::too_many_arguments)] // Discovery inputs plus the reviewed list.
 async fn run(
     config: &Config,
     root: &Path,
@@ -553,6 +595,7 @@ async fn run(
     limit: Duration,
     probes: &[compatibility::ProbeReceipt],
     force: bool,
+    broken: &[super::known_broken::KnownBroken],
 ) -> Result<Receipt> {
     if cancel.is_cancelled() {
         return Err(conflict("Discovery was cancelled."));
@@ -576,6 +619,14 @@ async fn run(
             "1".into(),
         ),
         ("DISABLE_AUTOUPDATER".into(), "1".into()),
+        // FOR-71 probe isolation: a health probe never triggers login, hooks,
+        // MCP servers or IDE setup. `--bare` (metadata) and `--safe-mode`
+        // (handshake) do not cover claude.ai connectors, IDE auto-connect or
+        // IDE extension auto-install in Claude Code 2.1.303, so all three are
+        // switched off explicitly; the other harnesses ignore them.
+        ("ENABLE_CLAUDEAI_MCP_SERVERS".into(), "false".into()),
+        ("CLAUDE_CODE_AUTO_CONNECT_IDE".into(), "0".into()),
+        ("CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL".into(), "1".into()),
         ("GIT_CONFIG_GLOBAL".into(), "/dev/null".into()),
         ("GIT_CONFIG_NOSYSTEM".into(), "1".into()),
         (
@@ -614,7 +665,8 @@ async fn run(
     let version = std::str::from_utf8(&raw)
         .map_err(|_| conflict("Invalid harness version."))?
         .trim();
-    let basis = compatibility::classify(&config.harness, version).map_err(|m| conflict(&m))?;
+    let basis =
+        compatibility::classify_with(&config.harness, version, broken).map_err(|m| conflict(&m))?;
     let probed = force || basis == compatibility::Basis::Probed;
     // A probe names the check that failed; cancellation stays cancellation.
     let failed = |check: &str, error: crewroom_core::Error| match error {
@@ -686,7 +738,7 @@ async fn run(
         Some(match reused {
             Some(receipt) => receipt,
             None => {
-                super::probe::handshake(config, root, &env, cancel, limit)
+                let protocol = super::probe::handshake(config, root, &env, cancel, limit)
                     .await
                     .map_err(|(check, e)| failed(check, e))?;
                 compatibility::ProbeReceipt::new(
@@ -696,6 +748,7 @@ async fn run(
                     &binary_sha256,
                     observed_at,
                 )
+                .with_protocol(protocol)
             }
         })
     } else {

@@ -1,6 +1,9 @@
 //! FOR-69 runtime-version contract. The exact verified list stays the
 //! baseline; any newer release (including a new major) may run once a
 //! metadata-only compatibility probe passes for that exact executable.
+//! FOR-71 adds the Codex protocol diff, the bundled known-broken list and a
+//! probe isolation rule: a health probe never triggers login, hooks, MCP
+//! servers or IDE setup.
 use super::*;
 use std::path::PathBuf;
 
@@ -9,16 +12,22 @@ use std::path::PathBuf;
 pub const VERSION: &str = "version";
 pub const MODEL_DISCOVERY: &str = "model-discovery";
 pub const CODEX_CATALOG: &str = "bundled-model-catalog";
+pub const CODEX_SCHEMA: &str = "protocol-schema";
 pub const CODEX_CONTROL: &str = "control-protocol";
 pub const CLAUDE_STREAM: &str = "stream-protocol";
 pub const OMP_RPC: &str = "rpc-frame-contract";
-pub const CONTRACT: &str = "harness-compatibility-probe-v1";
+/// The bundled known-broken list (`known_broken::LIST`); checked with the
+/// version, before any other probe process starts.
+pub const KNOWN_BROKEN: &str = "known-broken";
+/// v2 (FOR-71): Codex protocol diff and Claude Code probe isolation. A v1
+/// receipt no longer admits a version; it is probed again.
+pub const CONTRACT: &str = "harness-compatibility-probe-v2";
 /// Retained receipts across harnesses; oldest are dropped first.
 pub const MAX_RECEIPTS: usize = 32;
 
 pub fn handshake_checks(harness: &Harness) -> &'static [&'static str] {
     match harness {
-        Harness::Codex => &[CODEX_CATALOG, CODEX_CONTROL],
+        Harness::Codex => &[CODEX_CATALOG, CODEX_SCHEMA, CODEX_CONTROL],
         Harness::ClaudeCode => &[CLAUDE_STREAM],
         Harness::Omp => &[OMP_RPC],
     }
@@ -75,6 +84,9 @@ pub struct ProbeReceipt {
     pub checks: Vec<String>,
     pub inference_requested: bool,
     pub probed_at: u64,
+    /// Codex: notification differences from the reviewed protocol baseline.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub protocol: Option<super::codex_protocol::ProtocolDiff>,
 }
 impl ProbeReceipt {
     pub fn new(
@@ -96,9 +108,17 @@ impl ProbeReceipt {
             checks,
             inference_requested: false,
             probed_at,
+            protocol: None,
         };
         receipt.id = policy::digest(&json!(receipt));
         receipt
+    }
+    /// Record the protocol differences the probe observed; re-signs the id.
+    pub fn with_protocol(mut self, protocol: Option<super::codex_protocol::ProtocolDiff>) -> Self {
+        self.protocol = protocol;
+        self.id = String::new();
+        self.id = policy::digest(&json!(self));
+        self
     }
     /// A receipt is reusable only for the identical executable and contract.
     pub fn covers(
@@ -154,6 +174,9 @@ impl Compatibility {
 /// Whether this exact discovered identity may launch agents: listed, or
 /// probed with a receipt bound to the same version and executable content.
 pub fn launchable(harness: &Harness, identity: &discovery::Identity) -> bool {
+    if broken(harness, &identity.version).is_some() {
+        return false;
+    }
     if verified(harness).contains(&identity.version.as_str()) {
         return true;
     }
@@ -186,6 +209,31 @@ fn printable(reported: &str) -> String {
 /// Decide what a reported version needs. Refusals name the failing check and
 /// a remedy; nothing falls back to another harness or to free text.
 pub fn classify(harness: &Harness, reported: &str) -> std::result::Result<Basis, String> {
+    classify_with(harness, reported, known_broken::LIST)
+}
+
+/// The shipped list; the only list discovery and launch consult.
+pub fn known_broken_list() -> &'static [known_broken::KnownBroken] {
+    known_broken::LIST
+}
+
+/// The shipped known-broken entry refusing this reported version, if any.
+pub fn broken(harness: &Harness, reported: &str) -> Option<&'static known_broken::KnownBroken> {
+    known_broken::find(known_broken::LIST, harness, parse(harness, reported)?)
+}
+
+/// `classify` against an explicit known-broken list (tests use synthetic
+/// entries; production always passes the shipped `known_broken::LIST`).
+pub fn classify_with(
+    harness: &Harness,
+    reported: &str,
+    broken: &[known_broken::KnownBroken],
+) -> std::result::Result<Basis, String> {
+    if let Some(entry) =
+        parse(harness, reported).and_then(|v| known_broken::find(broken, harness, v))
+    {
+        return Err(known_broken::refusal(entry, reported));
+    }
     let list = verified(harness);
     if list.contains(&reported) {
         return Ok(Basis::Verified);
@@ -302,6 +350,7 @@ mod tests {
                 "version",
                 "model-discovery",
                 "bundled-model-catalog",
+                "protocol-schema",
                 "control-protocol"
             ]
         );

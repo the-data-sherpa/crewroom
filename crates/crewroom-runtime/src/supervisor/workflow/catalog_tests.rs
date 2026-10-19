@@ -569,6 +569,134 @@ async fn passing_reprobe_of_a_changed_executable_lets_the_launch_proceed() {
     assert!(held.contains("no longer lists Example"), "{held}");
 }
 
+/// FOR-71: resume and process replacement launch a replacement attempt that
+/// carries the frozen selection, and every launch (`launch_assignments`, used
+/// by start, resume and replacement) compares the executable with that
+/// recorded identity and probe receipt. A changed executable is re-probed and
+/// a failure holds with the reason; a receipt that no longer satisfies the
+/// probe contract is re-probed even when the executable is unchanged; an
+/// admitted version on the known-broken list is held.
+#[tokio::test]
+async fn replacement_attempts_reprobe_changed_executables_and_stale_receipts() {
+    use crate::model_catalog::known_broken::KnownBroken;
+    let (root, mut config, roles) = fixture();
+    let helpers =
+        crate::test_binaries::ensure(&crate::test_binaries::profile_dir_of_current_test());
+    let sources = config.discovery_sources(&helpers.process, &json!({"PATH":"/usr/bin:/bin"}));
+    config.discovery = Some(
+        crate::model_catalog::store::Catalog::open(&root.path().join("catalog"), sources, || {})
+            .unwrap(),
+    );
+    let role = roles.iter().find(|r| r["id"] == "coordinator").unwrap();
+    let model = config.assignment_model(role).unwrap();
+    let store = Store::open(&root.path().join("store.sqlite")).unwrap();
+    let task = store
+        .create_task(&json!({"title":"Replacement fixture","description":""}))
+        .unwrap();
+    let run = store
+        .queue_refinement(
+            task["id"].as_str().unwrap(),
+            &json!({"revision":1,"purpose":"explore"}),
+        )
+        .unwrap();
+    let run_id = run["id"].as_str().unwrap();
+    let admitted=store.admit_assignment(run_id,&json!({"name":"Coordinator","coordinator":true,"role":role,"model":model,"input":"Inspect"})).unwrap();
+    let first = admitted["attempt"]["id"].as_str().unwrap();
+    store.claim_attempt(first).unwrap();
+    store
+        .record_attempt_identity(
+            first,
+            &json!({"hostPid":2_000_000_001_u32,"hostUrl":"http://127.0.0.1:49999","pane":"%999","sessionId":"retained","ompPid":2_000_000_002_u32}),
+        )
+        .unwrap();
+    store
+        .record_ownership(first, true, Some("Fixture process stopped"))
+        .unwrap();
+    store.set_desired_state(run_id, "paused").unwrap();
+    store.begin_pause(run_id, None).unwrap();
+    store.finish_pause(run_id).unwrap();
+    // Resume replaces the stopped attempt; the replacement keeps the frozen
+    // selection, including the executable identity recorded at admission.
+    let replacement = store
+        .replace_attempt(
+            admitted["assignment"]["id"].as_str().unwrap(),
+            &json!({"automatic":false}),
+        )
+        .unwrap();
+    assert_eq!(replacement["state"], "admitted");
+    assert_eq!(replacement["previousAttemptId"], first);
+    assert_eq!(replacement["model"], model);
+    assert_eq!(config.hold_changed_executable(&model).await.unwrap(), None);
+
+    // The harness updated itself while the run was paused and the new
+    // executable fails its re-probe: the replacement is held with the reason.
+    let binary = root.path().join("omp");
+    std::fs::write(&binary, "#!/bin/sh\nexit 3\n").unwrap();
+    let held = config
+        .hold_changed_executable(&replacement["model"])
+        .await
+        .unwrap_err()
+        .to_string();
+    assert!(
+        held.contains("Launch held: the OMP executable changed after admission (omp/18.4.12)"),
+        "{held}"
+    );
+    assert!(held.contains("re-probe failed"), "{held}");
+
+    // A passing newer release is recorded on the replacement attempt.
+    simulated_omp(&binary, "omp/19.1.0", "model");
+    let (next, receipt) = config
+        .hold_changed_executable(&replacement["model"])
+        .await
+        .unwrap()
+        .expect("a changed executable is re-probed on replacement");
+    let recorded = store
+        .record_attempt_reprobe(replacement["id"].as_str().unwrap(), &next, &receipt)
+        .unwrap();
+    assert_eq!(recorded["reprobes"][0]["version"], "omp/19.1.0");
+    assert_eq!(
+        next["selection"]["identity"]["compatibility"]["probe"]["contract"],
+        crate::model_catalog::compatibility::CONTRACT
+    );
+    assert_eq!(config.hold_changed_executable(&next).await.unwrap(), None);
+
+    // Same executable, but its recorded receipt predates the probe contract:
+    // it is re-probed (identical content, new receipt) instead of trusted.
+    let mut stale = next.clone();
+    stale["selection"]["identity"]["compatibility"]["probe"]["contract"] =
+        json!("harness-compatibility-probe-v1");
+    let (renewed, receipt) = config
+        .hold_changed_executable(&stale)
+        .await
+        .unwrap()
+        .expect("a stale receipt is re-probed");
+    assert_eq!(receipt["binarySha256"], receipt["admittedBinarySha256"]);
+    assert_eq!(
+        renewed["selection"]["identity"]["compatibility"]["probe"]["contract"],
+        crate::model_catalog::compatibility::CONTRACT
+    );
+
+    // An admitted version later added to the known-broken list is held.
+    let list = [KnownBroken {
+        harness: Harness::Omp,
+        from: [19, 1, 0],
+        through: [19, 1, 9],
+        reason: "Synthetic: host tool results are lost after resume.",
+        reviewed: "test fixture",
+    }];
+    let reason = known_broken_hold(&Harness::Omp, "omp/19.1.0", &list).unwrap();
+    assert!(
+        reason.starts_with("Launch held: OMP omp/19.1.0"),
+        "{reason}"
+    );
+    assert!(reason.contains("host tool results are lost"), "{reason}");
+    assert_eq!(known_broken_hold(&Harness::Omp, "omp/19.2.0", &list), None);
+    assert_eq!(
+        known_broken_hold(&Harness::Codex, "omp/19.1.0", &list),
+        None
+    );
+}
+
 /// A configured Codex harness whose listed model is `native-model`, with the
 /// given login file contents. Returns the config with its catalog reopened.
 fn codex_catalog(login: &str) -> (tempfile::TempDir, RuntimeConfig, Vec<Value>) {

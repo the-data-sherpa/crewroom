@@ -1,8 +1,10 @@
 //! FOR-69: newer unlisted harness versions run after a metadata-only
 //! compatibility probe. Simulated harnesses below speak each launch protocol;
 //! the opt-in live test probes the CLIs installed on this machine.
+//! FOR-71: the Codex fixture also describes its protocol from synthetic
+//! schemas, and the Claude Code fixture records its isolation environment.
 use crewroom_runtime::model_catalog::{
-    Harness,
+    Harness, codex_protocol,
     compatibility::{Basis, ProbeReceipt},
     discovery::{Config, Receipt, discover_with, probe_installed},
 };
@@ -20,6 +22,14 @@ fn fixture(root: &Path, harness: &Harness, version: &str, fail: bool) -> Config 
 args=sys.argv[1:]
 if args[:3]==['debug','models','--bundled']:
  print(json.dumps({'models':[{'slug':'fixture-model','supported_reasoning_levels':[{'effort':'low'}]}]}));sys.exit(0)
+if args[:2]==['app-server','generate-json-schema']:
+ schema=json.load(open(os.path.join(HERE,'protocol.json')))
+ if schema is None: print('unrecognized subcommand',file=sys.stderr);sys.exit(2)
+ assert '--experimental' in args
+ out=args[args.index('--out')+1]
+ for name,methods in [('ServerRequest.json',schema['requests']),('ServerNotification.json',schema['notifications'])]:
+  json.dump({'oneOf':[{'properties':{'method':{'enum':[m]}}} for m in methods]},open(os.path.join(out,name),'w'))
+ sys.exit(0)
 if '--strict-config' in args:
  cfg=open(os.path.join(os.environ['CODEX_HOME'],'config.toml')).read()
  assert 'model = "fixture-model"' in cfg and 'plugins = false' in cfg and 'model_catalog_json' in cfg
@@ -37,6 +47,7 @@ for line in sys.stdin:
             r#"
 v=json.loads(sys.stdin.readline())
 assert v['request']['subtype']=='initialize'
+assert os.environ['ENABLE_CLAUDEAI_MCP_SERVERS']=='false' and os.environ['CLAUDE_CODE_AUTO_CONNECT_IDE']=='0' and os.environ['CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL']=='1'
 ok=True
 if '--safe-mode' in sys.argv:
  assert '--bare' not in sys.argv and sys.argv[sys.argv.index('--permission-mode')+1]=='dontAsk'
@@ -69,12 +80,15 @@ for line in sys.stdin:
     std::fs::write(
         &binary,
         format!(
-            "#!/usr/bin/python3\nimport json,sys,os,time\nFAIL={}\ndef mark():\n open(os.path.join(os.path.dirname(os.path.realpath(__file__)),'handshakes'),'a').write('x\\n')\nif '--version' in sys.argv:\n print({version:?});sys.exit(0)\n{body}\n",
+            "#!/usr/bin/python3\nimport json,sys,os,time\nFAIL={}\nHERE=os.path.dirname(os.path.realpath(__file__))\ndef mark():\n open(os.path.join(HERE,'handshakes'),'a').write('x\\n')\nif '--version' in sys.argv:\n print({version:?});sys.exit(0)\n{body}\n",
             if fail { "True" } else { "False" }
         ),
     )
     .unwrap();
     std::fs::set_permissions(&binary, std::fs::Permissions::from_mode(0o700)).unwrap();
+    if !root.join("protocol.json").exists() {
+        protocol(root, Some((&[], &[])));
+    }
     Config {
         harness: harness.clone(),
         binary,
@@ -82,6 +96,22 @@ for line in sys.stdin:
         path: "/usr/bin:/bin".into(),
         omp_models: json!({"providers":{}}),
     }
+}
+/// The synthetic protocol the Codex fixture describes: the reviewed baseline
+/// plus `extra` server requests and notifications, or (`None`) no schema
+/// subcommand at all.
+fn protocol(root: &Path, extra: Option<(&[&str], &[&str])>) {
+    let value = extra.map(|(requests, notifications)| {
+        json!({
+            "requests": codex_protocol::BASELINE_SERVER_REQUESTS.iter().chain(requests).collect::<Vec<_>>(),
+            "notifications": codex_protocol::BASELINE_NOTIFICATIONS.iter().chain(notifications).collect::<Vec<_>>(),
+        })
+    });
+    std::fs::write(
+        root.join("protocol.json"),
+        value.unwrap_or(json!(null)).to_string(),
+    )
+    .unwrap();
 }
 fn handshakes(root: &Path) -> usize {
     std::fs::read_to_string(root.join("handshakes"))
@@ -387,14 +417,19 @@ async fn installed_harnesses_pass_the_compatibility_probe() {
         .unwrap_or_else(|e| panic!("{name}: {e}"));
         let probe = receipt.identity.compatibility.as_ref().unwrap();
         println!(
-            "LIVE-PROBE {} version={:?} basis={:?} checks={:?} offerings={} inference={}",
+            "LIVE-PROBE {} version={:?} basis={:?} contract={} checks={:?} protocol={:?} offerings={} inference={}",
             harness.as_str(),
             receipt.identity.version,
             probe.basis,
+            probe.probe.as_ref().unwrap().contract,
             probe.probe.as_ref().unwrap().checks,
+            probe.probe.as_ref().unwrap().protocol,
             receipt.offerings.len(),
             receipt.inference_requested
         );
+        if harness == Harness::Codex {
+            assert!(probe.probe.as_ref().unwrap().protocol.is_some());
+        }
         assert!(receipt.cleanup_verified && !receipt.inference_requested);
         let wrapper = root.path().join(format!("{name}-major"));
         std::fs::write(
@@ -429,4 +464,52 @@ async fn installed_harnesses_pass_the_compatibility_probe() {
             compatibility.label(&harness, major)
         );
     }
+}
+
+/// FOR-71: the Codex probe diffs the protocol Codex describes offline with
+/// the reviewed baseline. An unhandled server request fails, naming it; a
+/// missing schema subcommand fails closed; new notifications are recorded.
+#[tokio::test]
+async fn codex_protocol_diff_names_unhandled_requests_and_fails_closed() {
+    let root = tempfile::tempdir().unwrap();
+    let c = fixture(root.path(), &Harness::Codex, "codex-cli 0.164.0", false);
+    protocol(root.path(), Some((&[], &["thread/memory/updated"])));
+    let receipt = run(&c, root.path(), "baseline", &[]).await.unwrap();
+    let probe = receipt.identity.compatibility.unwrap().probe.unwrap();
+    assert!(probe.checks.contains(&"protocol-schema".to_owned()));
+    let diff = probe.protocol.clone().unwrap();
+    assert_eq!(diff.added_notifications, ["thread/memory/updated"]);
+    assert!(diff.removed_notifications.is_empty());
+    assert!(probe.valid());
+    assert_eq!(handshakes(root.path()), 1);
+
+    protocol(
+        root.path(),
+        Some((&["item/browser/requestNavigation"], &[])),
+    );
+    let error = run(&c, root.path(), "unhandled", &[]).await.unwrap_err();
+    assert!(error.contains("failed check: protocol-schema"), "{error}");
+    assert!(
+        error.contains("does not handle: item/browser/requestNavigation"),
+        "{error}"
+    );
+    assert!(error.contains("codex-cli 0.164.0"), "{error}");
+    assert_eq!(
+        handshakes(root.path()),
+        1,
+        "refused before the app-server ran"
+    );
+
+    protocol(root.path(), None);
+    let error = run(&c, root.path(), "missing", &[]).await.unwrap_err();
+    assert!(error.contains("failed check: protocol-schema"), "{error}");
+    assert!(
+        error.contains("generate-json-schema is unavailable or failed"),
+        "{error}"
+    );
+    assert_eq!(handshakes(root.path()), 1);
+    // A retained receipt from the passing run does not cover a v1 contract.
+    let mut stale = probe.clone();
+    stale.contract = "harness-compatibility-probe-v1".into();
+    assert!(!stale.valid());
 }

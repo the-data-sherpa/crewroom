@@ -9,8 +9,10 @@ use std::collections::HashSet;
 pub use billing::BillingRoute;
 
 pub mod billing;
+pub mod codex_protocol;
 pub mod compatibility;
 pub mod discovery;
+pub mod known_broken;
 pub mod policy;
 mod probe;
 pub mod store;

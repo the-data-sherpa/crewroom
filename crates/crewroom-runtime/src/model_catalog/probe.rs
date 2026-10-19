@@ -1,8 +1,10 @@
 //! FOR-69 launch-protocol handshakes. Each starts the harness with the same
 //! launch-shaped arguments an attempt uses, exchanges only initialization and
 //! state frames, and stops it. No prompt is sent, so no inference can run.
+//! FOR-71: Codex also describes its protocol offline for the protocol diff.
 use super::{
-    compatibility::{CLAUDE_STREAM, CODEX_CATALOG, CODEX_CONTROL, OMP_RPC},
+    codex_protocol::{self, ProtocolDiff},
+    compatibility::{CLAUDE_STREAM, CODEX_CATALOG, CODEX_CONTROL, CODEX_SCHEMA, OMP_RPC},
     discovery::{Config, Process, bounded, private_dir, request},
     *,
 };
@@ -13,6 +15,8 @@ use tokio::time::Duration;
 use tokio_util::sync::CancellationToken;
 
 type Failure = (&'static str, Error);
+/// Largest generated protocol schema file the probe reads.
+const MAX_SCHEMA_BYTES: u64 = 8 * 1024 * 1024;
 
 /// Runs one bounded exchange in its own owned process and always verifies
 /// cleanup, so a failed check never leaves a harness running.
@@ -47,16 +51,78 @@ pub(super) async fn handshake(
     env: &BTreeMap<String, String>,
     cancel: &CancellationToken,
     limit: Duration,
-) -> std::result::Result<(), Failure> {
+) -> std::result::Result<Option<ProtocolDiff>, Failure> {
     match config.harness {
-        Harness::Codex => codex(config, root, env, cancel, limit).await,
+        Harness::Codex => codex(config, root, env, cancel, limit).await.map(Some),
         Harness::ClaudeCode => claude(config, root, env, cancel, limit)
             .await
+            .map(|()| None)
             .map_err(|e| (CLAUDE_STREAM, e)),
         Harness::Omp => omp(config, root, env, cancel, limit)
             .await
+            .map(|()| None)
             .map_err(|e| (OMP_RPC, e)),
     }
+}
+
+/// FOR-71: `app-server generate-json-schema --experimental` writes the
+/// protocol bundle without contacting a model. Its server requests and
+/// notifications are compared with the reviewed baseline. The subcommand is
+/// experimental, so a missing subcommand, failed run or unreadable bundle
+/// fails this check; it never passes by default.
+async fn codex_schema(
+    config: &Config,
+    root: &Path,
+    env: &BTreeMap<String, String>,
+    cancel: &CancellationToken,
+    limit: Duration,
+) -> Result<ProtocolDiff> {
+    let out = root.join("probe-protocol-schema");
+    private_dir(&out)?;
+    let unavailable = |_| {
+        conflict(
+            "Codex could not describe its app-server protocol (app-server generate-json-schema is unavailable or failed).",
+        )
+    };
+    exchange(
+        config,
+        root,
+        "probe-schema",
+        vec![
+            "app-server".into(),
+            "generate-json-schema".into(),
+            "--experimental".into(),
+            "--out".into(),
+            out.to_string_lossy().into(),
+        ],
+        env,
+        cancel,
+        limit,
+        false,
+        |p| Box::pin(p.collect()),
+    )
+    .await
+    .map_err(unavailable)?;
+    let read = |name: &str| -> Result<std::collections::BTreeSet<String>> {
+        let path = out.join(name);
+        let file = std::fs::File::open(&path)
+            .map_err(|_| conflict(&format!("Codex's generated protocol schema has no {name}.")))?;
+        if !file.metadata()?.is_file() || file.metadata()?.len() > MAX_SCHEMA_BYTES {
+            return Err(conflict(&format!(
+                "Codex's generated {name} is not a bounded regular file."
+            )));
+        }
+        let value: Value = serde_json::from_reader(std::io::BufReader::new(file))
+            .map_err(|_| conflict(&format!("Codex's generated {name} is not JSON.")))?;
+        codex_protocol::methods(&value).map_err(|m| conflict(&format!("{name}: {m}")))
+    };
+    let compared = read("ServerRequest.json").and_then(|requests| {
+        let notifications = read("ServerNotification.json")?;
+        codex_protocol::compare(&requests, &notifications).map_err(|m| conflict(&m))
+    });
+    // The bundle is evidence only for this comparison; do not retain it.
+    let _ = std::fs::remove_dir_all(&out);
+    compared
 }
 
 /// The bundled catalog `prepare` pins, then the app-server under
@@ -67,7 +133,7 @@ async fn codex(
     env: &BTreeMap<String, String>,
     cancel: &CancellationToken,
     limit: Duration,
-) -> std::result::Result<(), Failure> {
+) -> std::result::Result<ProtocolDiff, Failure> {
     let state = root.join("probe-codex");
     private_dir(&state).map_err(|e| (CODEX_CATALOG, e))?;
     let mut env = env.clone();
@@ -124,6 +190,9 @@ async fn codex(
         crate::runner::codex_launch_files(pinned.0, &slug, &pinned.1, &catalog_path);
     durable_new(&catalog_path, catalog.as_bytes()).map_err(|e| (CODEX_CONTROL, e))?;
     durable_new(&state.join("config.toml"), settings.as_bytes()).map_err(|e| (CODEX_CONTROL, e))?;
+    let diff = codex_schema(config, root, &env, cancel, limit)
+        .await
+        .map_err(|e| (CODEX_SCHEMA, e))?;
     exchange(
         config,
         root,
@@ -150,7 +219,8 @@ async fn codex(
         },
     )
     .await
-    .map_err(|e| (CODEX_CONTROL, e))
+    .map_err(|e| (CODEX_CONTROL, e))?;
+    Ok(diff)
 }
 
 /// The stream-json control handshake with the launch flags, the SDK tool

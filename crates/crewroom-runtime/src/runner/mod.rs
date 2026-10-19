@@ -85,6 +85,17 @@ pub(crate) fn admitted_version(
     binary: &Path,
     content: &[u8],
 ) -> Result<String> {
+    // FOR-71: the bundled known-broken list refuses a release at the adapter
+    // too, whether it is listed or probed.
+    if let Some(entry) = std::str::from_utf8(reported)
+        .ok()
+        .and_then(|v| v.strip_suffix('\n'))
+        .and_then(|v| crate::model_catalog::compatibility::broken(harness, v).map(|e| (v, e)))
+    {
+        return Err(conflict(&crate::model_catalog::known_broken::refusal(
+            entry.1, entry.0,
+        )));
+    }
     if let Some(v) = verified
         .iter()
         .find(|v| reported == format!("{v}\n").as_bytes())

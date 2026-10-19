@@ -184,6 +184,12 @@ impl RuntimeConfig {
     /// launch with the reason. A passing re-probe returns the selection with
     /// the new executable identity and the receipt to record on the attempt;
     /// route, offering and effort stay as admitted.
+    ///
+    /// FOR-71: this runs for every launch, including resume and process
+    /// replacement (both launch through `launch_assignments` with the
+    /// replacement attempt's frozen selection). A probed admission whose
+    /// receipt no longer satisfies the current probe contract is re-probed,
+    /// and an admitted version on the bundled known-broken list is held.
     pub(crate) async fn hold_changed_executable(
         &self,
         model: &Value,
@@ -200,28 +206,57 @@ impl RuntimeConfig {
         let Some(binary) = self.binary(&offering.harness) else {
             return Ok(None);
         };
-        let current = tokio::task::spawn_blocking(move || discovery::binary_digest(&binary))
-            .await
-            .map_err(|_| conflict("Harness executable hashing did not finish."))?;
-        if current.as_ref().is_ok_and(|(canonical, digest)| {
-            selection["identity"]["canonicalBinary"] == json!(canonical)
-                && selection["identity"]["binarySha256"] == json!(digest)
-        }) {
-            return Ok(None);
-        }
         let harness = &offering.harness;
         let label = harness.label();
         let admitted = selection["identity"]["version"]
             .as_str()
             .unwrap_or("unknown");
+        // FOR-71: a Crewroom revision may add the admitted version to the
+        // bundled known-broken list after admission; it is never launched.
+        if let Some(reason) = known_broken_hold(
+            harness,
+            admitted,
+            crate::model_catalog::compatibility::known_broken_list(),
+        ) {
+            return Err(conflict(&reason));
+        }
+        let current = tokio::task::spawn_blocking(move || discovery::binary_digest(&binary))
+            .await
+            .map_err(|_| conflict("Harness executable hashing did not finish."))?;
+        let unchanged = current.as_ref().is_ok_and(|(canonical, digest)| {
+            selection["identity"]["canonicalBinary"] == json!(canonical)
+                && selection["identity"]["binarySha256"] == json!(digest)
+        });
+        // FOR-71: the executable is compared with the recorded probe receipt
+        // too. A probed admission whose receipt no longer satisfies the
+        // current probe contract (or does not cover this executable) is
+        // re-probed exactly like a changed executable.
+        let receipt_current =
+            serde_json::from_value::<discovery::Identity>(selection["identity"].clone())
+                .ok()
+                .is_some_and(|identity| {
+                    identity.compatibility.as_ref().is_none_or(|c| {
+                        c.basis == crate::model_catalog::compatibility::Basis::Verified
+                    }) || crate::model_catalog::compatibility::launchable(harness, &identity)
+                });
+        if unchanged && receipt_current {
+            return Ok(None);
+        }
+        let why = if unchanged {
+            format!(
+                "the {label} probe receipt recorded at admission ({admitted}) does not satisfy the current compatibility probe"
+            )
+        } else {
+            format!("the {label} executable changed after admission ({admitted})")
+        };
         let Some(catalog) = self.discovery.as_ref() else {
             return Err(conflict(&format!(
-                "Launch held: the {label} executable changed after admission ({admitted}), and model discovery is unavailable to re-probe it."
+                "Launch held: {why}, and model discovery is unavailable to re-probe it."
             )));
         };
         let receipt = catalog.probe_now(harness).await.map_err(|reason| {
             conflict(&format!(
-                "Launch held: the {label} executable changed after admission ({admitted}) and its re-probe failed. {reason}"
+                "Launch held: {why} and its re-probe failed. {reason}"
             ))
         })?;
         let identity = receipt.identity;
@@ -232,7 +267,7 @@ impl RuntimeConfig {
             .map(|c| c.label(harness, &identity.version))
             .ok_or_else(|| {
                 conflict(&format!(
-                    "Launch held: the {label} executable changed after admission ({admitted}) and its re-probe produced no compatibility receipt. Refresh models, then re-admit the assignment."
+                    "Launch held: {why} and its re-probe produced no compatibility receipt. Refresh models, then re-admit the assignment."
                 ))
             })?;
         if !receipt
@@ -241,7 +276,7 @@ impl RuntimeConfig {
             .any(|o| o.legacy_key() == offering.legacy_key())
         {
             return Err(conflict(&format!(
-                "Launch held: the {label} executable changed after admission ({admitted}). The new executable reports {} and is {compatibility}, but no longer lists {}. Refresh models, then re-admit the assignment.",
+                "Launch held: {why}. The new executable reports {} and is {compatibility}, but no longer lists {}. Refresh models, then re-admit the assignment.",
                 identity.version, offering.display_name
             )));
         }
@@ -307,6 +342,22 @@ impl RuntimeConfig {
         }
         Ok(())
     }
+}
+
+/// FOR-71: the hold reason when an admitted version is on the given
+/// known-broken list (production passes the shipped list).
+pub(crate) fn known_broken_hold(
+    harness: &Harness,
+    admitted: &str,
+    list: &[crate::model_catalog::known_broken::KnownBroken],
+) -> Option<String> {
+    let version = crate::model_catalog::compatibility::parse(harness, admitted)?;
+    crate::model_catalog::known_broken::find(list, harness, version).map(|entry| {
+        format!(
+            "Launch held: {}",
+            crate::model_catalog::known_broken::refusal(entry, admitted)
+        )
+    })
 }
 
 impl<S: StoreAccess> Workflow<S> {
