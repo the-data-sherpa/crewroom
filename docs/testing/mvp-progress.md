@@ -4,6 +4,32 @@ The operator requested that each work item pass its checks before the next start
 
 Historical revision IDs and source hashes below refer to the original private snapshots before the FOR-17 history rewrite. Sanitized copies are not byte-identical evidence for rewritten revisions; replay requires the private archive. New validation is recorded separately.
 
+## FOR-77 — Overview home across projects (2026-10-19)
+
+Implementation `ddc7fae` (branch `for-77-work`, from main `e8b86de`, building on the FOR-75 sidebar). The screen lives in `crates/crewroom-desktop/src/workbench/overview.rs`; the thresholds extend `navigation.rs` (`OverviewPrefs`, defaults 20 and 60 minutes, bounded to 1–1440 with promotion strictly later, serde defaults so older files read unchanged). The service projection (`crates/crewroom-service/src/views.rs`) adds `runProgress` per unfinished run and `landed`; `Store::run_progress` (`crates/crewroom-core/src/observations.rs`) takes the latest of an attempt's `lastEventAt` (now stamped when a new agent event is recorded; replays are not new output), peer-message `createdAt`, repository checkpoint `at` and the run's `startedAt`.
+
+Desktop, GPUI test platform, no window on the operator's desktop (`overview_tests.rs`, synthetic projects and paths):
+
+- `the_home_screen_renders_every_section_with_an_empty_state`: with no ticket chosen the home screen is the Overview and its sidebar entry is current; Needs you, Running, Landed and Next each render "· 0" with an empty-state sentence; returning from a ticket through the sidebar entry shows the same screen.
+- `without_the_execution_layer_the_overview_says_what_it_cannot_list`: no `needsYou`/`landed` in the projection gives explicit "cannot be listed" sentences instead of empty claims.
+- `needs_you_lists_only_actionable_items_highest_impact_first`: order is attention-required run, unconfirmed publication, rejected GitHub token, ticket-source mismatch, plan review, PR feedback, learning proposal; a running run with recent progress and a scoping intake are not items. Each item is labelled "Project · KEY" and has its action (Open session, Reconcile publication, Reconnect GitHub, Open project settings, Review plan, Resume run, Review proposal); an unavailable reconciliation says why. Review plan opens the ticket's Brief; Open project settings opens Settings → Projects at that project.
+- `a_quiet_run_is_flagged_then_promoted_without_claiming_failure`: Running lists only executing runs (a paused run with old progress is not listed or flagged), with coordinator and specialists from the saved launch and "Last progress 3 min ago · agent output". Runs quiet for 30 and 90 minutes get "No progress for 30 min" / "No progress for 90 min" as a separate chip; only the 90-minute run is listed under Needs you, with "This does not mean the run failed"; no line contains "fail" otherwise. Raising the thresholds to 35/105 minutes removes the 30-minute flag and the Needs you item.
+- `landed_names_the_covered_revision_and_next_names_the_reason`: "PR #7 · merged" with "Evidence covers revision 0123456789ab", "PR #8 · published · open", research "Evidence covers research revision 3", and "Evidence revision not recorded" when the head is missing; Next shows "#1 in queue · <hold reason>" and "#2 in queue · Eligible · scheduling" with project labels.
+- `the_local_service_projects_progress_and_landed_work_for_the_overview` (real authenticated local service, synthetic Git checkout, queued coding plan): the service sends `landed: []` and `runProgress` with `{"lastAt":null,"source":null}` for the queued run; the Overview shows Landed · 0, Running empty and Next · 1 with the project name and "#1 in queue · …".
+- Updated `every_panel_has_exactly_one_selected_sidebar_control`: Overview is a sidebar control, and is current when no ticket is chosen. `project_preferences_survive_reopening_and_keep_ticket_navigation` checks threshold bounds and persistence.
+
+Core and service: `crates/crewroom-core/tests/progress.rs` (run start, then agent output, a replayed sequence ignored, then a peer message, under an injected clock) and `views::tests::landed_names_the_published_revision_and_skips_unconfirmed_work` (open and merged PRs name the published head; an uncertain PR is not landed; completed research names its revision).
+
+Checks at `ddc7fae`'s tree (private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, `TMPDIR` on disk because the shared `/tmp` tmpfs was at its quota, all tests through `scripts/system_limits.py run`):
+
+- `npm test`: **345/345**. `npm run build`: passes.
+- `cargo test -p crewroom-desktop`: **163 passed, 0 failed, 15 ignored** (run before a formatting-only change to one test file). A first run with fixture roots in `/tmp` lost 66 tests to `Disk quota exceeded`; the rerun on disk passed.
+- `cargo test --no-fail-fast -p crewroom-core -p crewroom-service -p crewroom-runtime`: **420 passed, 0 failed, 3 ignored**.
+- `cargo clippy -p crewroom-core -p crewroom-service -p crewroom-runtime -p crewroom-desktop --all-targets -- -D warnings` and `cargo fmt --check` for these crates: clean.
+- `npm run test:e2e`: not run (integrator). The browser suite exercises the legacy TypeScript UI, which this change does not touch.
+
+Not yet verified: the operator's on-screen check of the Overview in the native app, and the flag against a live agent run. Every interaction above ran on the GPUI test platform with injected or locally seeded state.
+
 ## FOR-83 — Configure the agent runner from Settings (2026-10-19)
 
 Code `a1ce41b`, `bf62c79` and `88bb6c9` on main (rebased without code changes from `45d58a1`, `66cc86b` and `145acfb`, written on main `9d409b5`, onto main `beb340c`). Checks below cite the pre-rebase revisions they ran at, except the integration checks at the end. Checks ran in a fresh worktree with a private `CARGO_TARGET_DIR`, `-j6`, wrapped by `scripts/system_limits.py`.
