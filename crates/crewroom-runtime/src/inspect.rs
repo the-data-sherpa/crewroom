@@ -186,20 +186,6 @@ async fn inspect(root: &Path, scan_holders: bool, exiting: ExitProbe) -> Result<
         state.reason = Some("PID identity changed; refusing to signal it.".into());
         return Ok(state);
     }
-    // A member that the kernel shows as exiting (or already gone) can no longer
-    // run user code and drops whatever it still holds, the lock included. On
-    // Linux it releases its files in `do_exit` before it becomes a zombie, so
-    // it can stay listed, with or without the lock, after its leader exits.
-    // Waiting for it is not proof of stop: only a later inspection that finds
-    // the group empty and the lock free reports `stopped`.
-    if !members.is_empty() && members.iter().all(|&pid| exiting(pid)) {
-        state.reason = Some(EXITING.into());
-        return Ok(state);
-    }
-    if free {
-        state.reason = Some(SURVIVES.into());
-        return Ok(state);
-    }
     let path = root.join("lease.lock");
     let path = path
         .to_str()
@@ -218,6 +204,29 @@ async fn inspect(root: &Path, scan_holders: bool, exiting: ExitProbe) -> Result<
             .filter_map(|s| s.parse::<i32>().ok())
             .collect::<Vec<_>>()
     };
+    // A member that the kernel shows as exiting (or already gone) can no longer
+    // run user code and drops whatever it still holds, the lock included. On
+    // Linux it releases its files in `do_exit` before it becomes a zombie, so
+    // it can stay listed, with or without the lock, after its leader exits.
+    // Waiting for it is not proof of stop: only a later inspection that finds
+    // the group empty and the lock free reports `stopped`.
+    if !members.is_empty() && members.iter().all(|&pid| exiting(pid)) {
+        // A held lock with an exiting group may belong to a process that
+        // escaped the group (with `setsid`, say) and inherited the lease.
+        // Reconciliation needs that holder, and later re-inspections do not
+        // scan for it.
+        if !free && scan_holders {
+            let mut members: BTreeSet<_> = members.into_iter().collect();
+            members.extend(holders(false).await);
+            state.members = Some(members.into_iter().collect());
+        }
+        state.reason = Some(EXITING.into());
+        return Ok(state);
+    }
+    if free {
+        state.reason = Some(SURVIVES.into());
+        return Ok(state);
+    }
     if current.is_some() && holders(true).await.contains(&owner.pid) {
         state.state = "live".into();
         return Ok(state);
@@ -562,6 +571,46 @@ mod tests {
         let state = settled(root.path(), first, SETTLE_WINDOW, |_| true).await;
         release.join().unwrap();
         assert_eq!(state.state, "stopped", "{state:?}");
+    }
+
+    #[tokio::test]
+    async fn an_escaped_holder_of_an_exiting_group_is_reported_for_reconciliation() {
+        use std::os::fd::AsRawFd;
+        let (root, mut child) = unlocked_owner();
+        // A process outside the group (as after `setsid`) inherits the held
+        // lease; the test process then lets go, so only the escapee holds it.
+        let lease = open_lease(root.path()).unwrap();
+        assert!(flock(&lease, libc::LOCK_EX | libc::LOCK_NB).unwrap());
+        let fd = lease.as_raw_fd();
+        let mut command = std::process::Command::new("/bin/sleep");
+        command.arg("30").process_group(0);
+        // SAFETY: fcntl is async-signal-safe; clearing close-on-exec lets the
+        // child inherit the locked open file description.
+        unsafe {
+            command.pre_exec(move || {
+                if libc::fcntl(fd, libc::F_SETFD, 0) < 0 {
+                    return Err(std::io::Error::last_os_error());
+                }
+                Ok(())
+            });
+        }
+        let mut escaped = command.spawn().unwrap();
+        drop(lease);
+        let holder = escaped.id() as i32;
+        assert!(!lease_free(root.path()).unwrap());
+
+        // The recorded owner is reported exiting throughout the settle.
+        let first = inspect_probed(root.path(), true, |_| true).await;
+        assert_eq!(first.reason.as_deref(), Some(EXITING), "{first:?}");
+        let state = settled(root.path(), first, SETTLE_WINDOW, |_| true).await;
+        for process in [&mut child, &mut escaped] {
+            process.kill().unwrap();
+            process.wait().unwrap();
+        }
+        assert_eq!(state.state, "uncertain", "{state:?}");
+        let members = state.members.unwrap_or_default();
+        assert!(members.contains(&holder), "{members:?} lacks {holder}");
+        assert!(members.contains(&(child.id() as i32)), "{members:?}");
     }
 
     #[tokio::test]
