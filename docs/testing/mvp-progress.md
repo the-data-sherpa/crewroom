@@ -29,6 +29,16 @@ Code `814f804` on branch `for-79-review-fixes` (from `for-79-work` at `d0cebd9`)
 
 Checks at `814f804` through `system_limits.py run`, private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`: `cargo test --no-fail-fast -p crewroom-core -p crewroom-runtime -p crewroom-service` **491 passed / 3 failed** with `TMPDIR` inside the worktree (the shared `/tmp` quota was exhausted). The three failures were `repository_folders` tests that need a temp directory outside any Git checkout. Rerun with `TMPDIR` on a disk-backed directory outside any checkout, core `repository_folders` passes **6/6** and service `repository_folders` passes **1/1**. `npm test` **346/346** with the same outside `TMPDIR`; an earlier run with `TMPDIR` inside the worktree failed path-sensitive tests and hung in `supervision-hosts`. `npm run build` passes. Clippy `--all-targets` for core, runtime and service is clean, and rustfmt is clean on the changed files. The desktop crate was not rebuilt because no desktop code changed. Not executed: `npm run test:e2e` (integrator) and the daemon fixture tests.
 
+### FOR-79 integration on main 096a6de (2026-10-19)
+
+`for-79-review-fixes` (`58032ad`, `d0cebd9`, `814f804`, `062f0c5`) already descended from main `096a6de`, so no rebase was needed and the SHAs above are final. Integration added `210c2bb`, a rustfmt-only change to the coordinator role listing in `tools.rs`. Tests and Clippy ran at `062f0c5`; fmt was checked at `210c2bb`. All runs used `scripts/system_limits.py run`, a private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4` and `TMPDIR` on a disk-backed directory outside any checkout, after `python3 scripts/prepare_worktree.py --build-helpers`. Linux x86_64. Simulated runner and providers only.
+
+- `npm test` **346/346**; `npm run build` passes; `npm run test:e2e` **31/31**.
+- `scripts/rust/daemon-project-settings.test.ts` and `daemon-capacity.test.ts` **2/2**.
+- `cargo test -p crewroom-core -p crewroom-runtime -p crewroom-service` **494 passed, 0 failed, 3 ignored**; `cargo test -p crewroom-desktop` **175 passed, 0 failed, 15 ignored**.
+- `cargo clippy --workspace --all-targets -- -D warnings` clean; `cargo fmt -p <crate> -- --check` for the four crates clean at `210c2bb`.
+- Not verified: the operator's on-screen check of the Settings selector and overrides, live providers, and macOS. The coordinator role listing is tested through the listing helper, not through an authenticated agent host.
+
 ## FOR-76 — Per-project run capacity (2026-10-19)
 
 Implementation `f51dedf` on branch `for-76-work` from main `9d409b5`. All checks below ran at `f51dedf` (the evidence commit changes only documentation) in a fresh worktree prepared with `python3 scripts/prepare_worktree.py --build-helpers`, a private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, and every test command wrapped by `scripts/system_limits.py` (FOR-68). Linux x86_64.
