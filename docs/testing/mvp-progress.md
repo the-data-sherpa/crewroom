@@ -4,6 +4,40 @@ The operator requested that each work item pass its checks before the next start
 
 Historical revision IDs and source hashes below refer to the original private snapshots before the FOR-17 history rewrite. Sanitized copies are not byte-identical evidence for rewritten revisions; replay requires the private archive. New validation is recorded separately.
 
+## FOR-89 — Test fixtures installed without an in-process writer (2026-10-19)
+
+Code `ab2d161` on branch `for-89-work` from main `860acac`; tests and test support only. Private `CARGO_TARGET_DIR` in the worktree, `-j6`, `--test-threads=4`, and every test command run through `scripts/system_limits.py run`. All fixtures are simulated harness scripts with synthetic data. Nothing contacted a live service.
+
+**Change.** New dev-only workspace crate `crates/crewroom-test-support` (a `[dev-dependencies]` entry of runtime, service and desktop; it is never linked into a product binary). `install_executable(path, content)` writes the content to a uniquely named hidden staging file, has a separate `cp` write a second hidden file, sets mode `0700` and renames that file onto `path`. The test process therefore never holds a writer to a file it executes, and replacement is atomic. FOR-86's local copy in `claude_adapter.rs` now uses the shared helper.
+
+Sites converted (each wrote a script with `std::fs::write` or `durable_new` in the test process and then executed it):
+
+- runtime integration tests: `model_discovery.rs`, `model_allowance.rs`, `compatibility_probe.rs` (fake binary and major-version wrapper), `harness_replay.rs`, `claude_adapter.rs`
+- runtime unit tests: `model_catalog/known_broken.rs`, `repository/git/lifecycle.rs` (configuration probe shim), `runner/auth.rs` (2), `supervisor/workflow/catalog_tests.rs` (`simulated_omp`, and the self-updated executable that must fail its re-probe)
+- service tests: `model_catalog.rs` (3 installs, plus the restore after the in-place "changed after discovery" append), `daemon.rs` (2 Git shims), `runner_settings.rs`
+- desktop tests: `settings/model_picker/tests.rs` (3), `settings/runner/tests.rs`
+
+Audited and left unchanged because the file is never executed: `model_catalog/unconfigured.rs` (checks the mode only), the `"fixture executable"` content fixtures in `runner/mod.rs` and `catalog_tests.rs` (hashed, never run), harness-replay setup files (mode `0600`), and the `credentials.rs` data-directory copies. Product code: every `0700` mode site creates a directory, and `durable_new` writes data files. No product path writes a file and then executes it.
+
+One fixture now behaves as its comment describes. Before, the re-probe fixture in `replacement_attempts_reprobe_changed_executables_and_stale_receipts` was written with mode `0644`, so the re-probe failed with a permission error. It is now executable and fails by exiting 3. The test still requires `Launch held: the OMP executable changed after admission` and `re-probe failed`. No assertion was weakened, removed or ignored.
+
+| Check | Result |
+|---|---|
+| `crewroom-test-support` tests with an in-process `std::fs::write` swapped into the helper (temporary control, reverted) | **3 of 3 runs failed**, both tests (`Text file busy`, `ExecutableFileBusy`) |
+| `crewroom-test-support` tests with the helper, 20 consecutive runs | **20 of 20 passed** |
+| `cargo test --locked --no-fail-fast -j6 -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop -p crewroom-test-support -- --test-threads=4` at `ab2d161` | **685 passed, 0 failed, 18 ignored**. FOR-86 integration had 684; this adds 2 new tests and moves 1. |
+| `cargo clippy --locked --all-targets` for the same five crates `-- -D warnings`; `cargo fmt -p <five crates> -- --check` | clean |
+| `npm test` | **346/346** |
+| `npm run build` | passes (existing chunk-size warning) |
+
+Load-sensitive results seen while iterating, recorded rather than retried silently:
+
+- The first draft of the replacement test failed 1 of 12 runs because it swapped the file before `sh` had opened the first script. It now waits for a start marker, and the 20 runs above came after that fix.
+- At load ~120 (other agents' builds), two service `model_catalog` tests timed out after the 5 s refresh wait. Rerun alone at the final revision: 7/7. The final five-crate run passed them.
+- An `npm test` run at the same load, concurrent with cargo, failed two timing assertions (`live.test.ts` reconnect and `repository-work.test.ts` observer ticks). No TypeScript changed, and the rerun passed 346/346.
+
+Not run here: `npm run test:e2e` (the integrator runs it serially).
+
 ## FOR-91 — Service starts after a probe-contract upgrade (2026-10-19)
 
 Cause: `Snapshot::validate` rejected the whole saved model catalog when any retained receipt failed `ProbeReceipt::valid()`. A receipt written under `harness-compatibility-probe-v1` (FOR-69) fails under `-v2` (FOR-71), so the upgraded service exited with "Invalid compatibility probe receipts." after the workflow database had already migrated.
