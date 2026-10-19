@@ -429,6 +429,7 @@ async fn main() -> Result<()> {
             // Seeds later queued intents after the native store owns the schema the legacy workbench can no longer open.
             "create_task"=>store.with_store(|s|s.create_task(&r["input"])),
             "queue"=>store.with_store(|s|s.queue(target,&r["input"])),
+            "set_dependencies"=>store.with_store(|s|s.set_dependencies(target,&r["input"])),
             "configure_checks"=>store.with_store(|s|s.update_coding_record(target,|old|{let mut record=old.unwrap();record["requiredChecks"]=r["input"].clone();Ok(record)})),
             "policy_fixture"=>store.with_store(|s|s.update_coding_record(target,|old|{let mut record=old.unwrap();for(k,v)in r["input"].as_object().unwrap(){record[k]=v.clone();}Ok(record)})),
             "activate"=>store.with_store(|s|{

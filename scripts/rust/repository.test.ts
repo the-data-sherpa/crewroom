@@ -1,18 +1,17 @@
 import assert from 'node:assert/strict';
-import {mkdtempSync,realpathSync,mkdirSync,writeFileSync,readFileSync,rmSync,readdirSync,symlinkSync,linkSync,chmodSync,statSync,existsSync} from 'node:fs';
+import {mkdtempSync,realpathSync,mkdirSync,writeFileSync,readFileSync,rmSync,readdirSync,symlinkSync,linkSync,chmodSync,statSync,existsSync,lstatSync,readlinkSync} from 'node:fs';
 import {tmpdir} from 'node:os';
-import {join} from 'node:path';
+import {join,basename} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {DatabaseSync} from 'node:sqlite';
 import {test,type TestContext} from 'node:test';
 import {NativeRepository} from './repository-adapter';
 import {seedMessages} from './messaging-fixture';
-import {Workbench} from '../../server/workbench';
-import {RepositoryWork} from '../../server/repository-work';
+import {requirementsHash} from '../../shared/requirements';
 import {gitLatch} from '../../tests/fixtures/git-latch';
 import {setTimeout as delay} from 'node:timers/promises';
 import {ContainerCommand} from './container-adapter';
-import {randomUUID} from 'node:crypto';
+import {randomUUID,createHash} from 'node:crypto';
 import {inspectCheckedOwned,stopOwned} from './process-adapter';
 import {checkImage,dockerSocket} from './docker-engine';
 function fixture(t:TestContext){
@@ -23,10 +22,26 @@ function fixture(t:TestContext){
   t.after(async()=>{await c.close();const jobs=join(config.root,'.git-operations');if(existsSync(jobs))for(const run of readdirSync(jobs))for(const name of readdirSync(join(jobs,run)).filter(v=>v.endsWith('.json'))){const descriptor=JSON.parse(readFileSync(join(jobs,run,name),'utf8')).descriptor;const state=await inspectCheckedOwned(descriptor);if(state.state!=='stopped')await stopOwned(descriptor.root);assert.equal(state.state,'stopped','Repository fixture left unresolved Git ownership');}rmSync(root,{recursive:true,force:true});});
   return {root,seed,git,config,get c(){return c;},async reopen(){await c.close();c=new NativeRepository(config);await c.ready;},prepare:()=>c.command('prepare',{target:seed.run.id,input:{mode:'new'}}),status:()=>c.command('status',{target:seed.run.id})};
 }
-test('native admission preserves operator changes, pins exact ownership and matches retained revision manifests',{timeout:60000},async t=>{
+// FOR-82: the retained TypeScript Workbench stops at schema 26 and cannot open the native-migrated store, so the former
+// RepositoryWork parity oracle is replaced by expectations derived from the owned worktree with the retained manifest and
+// revision contract (server/repository-work.ts files(), instructions() and revision()), and by exact search results.
+const sha256=(value:string|Buffer)=>createHash('sha256').update(value).digest('hex');
+function manifest(path:string){
+  const names=execFileSync('git',['-C',path,'ls-files','-z','--cached','--others','--exclude-standard'],{encoding:'utf8'}).split('\0').filter(Boolean);
+  return [...new Set(names)].sort().map(name=>{const file=join(path,name);let stat;try{stat=lstatSync(file);}catch(error:any){if(error?.code==='ENOENT')return {path:name,mode:0,hash:'deleted'};throw error;}
+    return {path:name,mode:stat.mode,hash:sha256(stat.isSymbolicLink()?readlinkSync(file):readFileSync(file))};});
+}
+function expectedRevision(f:ReturnType<typeof fixture>,path:string){
+  const git=(...args:string[])=>execFileSync('git',['-C',path,...args],{encoding:'utf8'}).trim();const files=manifest(path);
+  const instructions=files.filter(file=>['AGENTS.md','CLAUDE.md'].includes(basename(file.path))&&file.hash!=='deleted').map(file=>({path:file.path,body:readFileSync(join(path,file.path),'utf8'),sha256:file.hash}));
+  // The seeded accepted requirements (messaging-fixture), hashed with the retained shared requirementsHash.
+  const requirements={title:'External messages',description:'',brief:'Exchange durable messages',criteria:['Preserve each logical effect'],repositoryId:f.seed.task.repositoryId};
+  return {base:f.git('rev-parse','main'),head:git('rev-parse','HEAD'),tree:git('rev-parse','HEAD^{tree}'),worktreeHash:sha256(JSON.stringify(files)),dirty:!!git('status','--porcelain=v1','--untracked-files=all','--ignore-submodules=none'),requirementsHash:requirementsHash(requirements as any),instructionsHash:sha256(JSON.stringify(instructions))};
+}
+test('native admission preserves operator changes, pins exact ownership and matches expected revision manifests',{timeout:60000},async t=>{
   const f=fixture(t);writeFileSync(join(f.seed.root,'answer.txt'),'operator edit\n');const work=await f.prepare();assert.equal(work.base,f.git('rev-parse','main'));assert.equal(work.path,join(f.root,'owned',f.seed.run.id));assert.equal(readFileSync(join(work.path,'answer.txt'),'utf8'),'original\n');assert.equal(readFileSync(join(f.seed.root,'answer.txt'),'utf8'),'operator edit\n');assert.equal(work.instructions[0].body,'Keep changes scoped.\n');
   const status=await f.status();assert.deepEqual(status.drift,{base:false,head:false,worktree:false,requirements:false,instructions:false});assert.deepEqual(await f.prepare(),work);await f.reopen();assert.deepEqual(await f.prepare(),work);assert.equal(f.git('worktree','list','--porcelain').split('worktree ').length-1,2);
-  const nativeFiles=await f.c.command('list',{target:f.seed.run.id});await f.c.close();const store=new Workbench(f.seed.database);try{const retained=new RepositoryWork(store,f.config.root);assert.deepEqual((await retained.status(f.seed.run.id)).revision,status.revision);assert.deepEqual(await retained.listFiles(f.seed.run.id),nativeFiles);}finally{store.close();}
+  const nativeFiles=await f.c.command('list',{target:f.seed.run.id});assert.deepEqual(nativeFiles,manifest(work.path));assert.deepEqual(status.revision,expectedRevision(f,work.path));assert.equal(status.revision.dirty,false);assert.equal(status.revision.head,work.base);
 });
 test('native writer edits, exact patches and pinned reads preserve scope and durable replay',{timeout:60000},async t=>{
   const f=fixture(t);const work=await f.prepare();const pinned=(await f.status()).revision;await f.c.command('activate',{target:f.seed.run.id});await f.c.command('claim',{target:f.seed.recipient.attempt.id});
@@ -130,13 +145,16 @@ test('post-effect admission receipt loss reopens the same worktree with exact re
   f.c.proc.kill('SIGKILL');await f.c.exit;const repair=new DatabaseSync(f.seed.database);repair.exec('DROP TRIGGER lose_admission');repair.close();await f.reopen();const work=await f.prepare();assert.equal(work.state,'ready');assert.equal(readFileSync(join(work.path,'answer.txt'),'utf8'),'original\n');assert.equal(f.git('worktree','list','--porcelain').split('worktree ').length-1,2);
 });
 
-test('dirty manifests and bounded literal, regex and pinned searches match retained source behavior',{timeout:60000},async t=>{
+test('dirty manifests and bounded literal, regex and pinned searches match expected source behavior',{timeout:60000},async t=>{
   const f=fixture(t);const work=await f.prepare();const pinned=(await f.status()).revision;
   for(const name of ['😀.txt','\uE000.txt','space name.txt'])writeFileSync(join(work.path,name),'Match[0]\n');rmSync(join(work.path,'answer.txt'));symlinkSync('missing-relative-target',join(work.path,'symbolic'));writeFileSync(join(work.path,'many.txt'),'many '+ '😀'.repeat(200)+'\n'+Array.from({length:110},()=> 'many\n').join(''));
   const files=await f.c.command('list',{target:f.seed.run.id});const status=await f.status();assert.equal(status.drift.worktree,true);assert.ok(files.some((file:any)=>file.path==='answer.txt'&&file.hash==='deleted'));
   const queries=[{query:'Match[0]'},{query:'match',ignoreCase:true},{query:'Match.0.',regex:true},{query:'Match',path:'space name.txt'},{query:'many'}];const results=[];for(const input of queries)results.push(await f.c.command('search',{target:f.seed.run.id,input}));assert.equal(results[4].matches.length,100);assert.equal(results[4].truncated,true);assert.ok(results[4].matches[0].text.length<=300);assert.ok(!/[\uD800-\uDBFF]$/.test(results[4].matches[0].text));
   await assert.rejects(f.c.command('search',{target:f.seed.run.id,input:{query:'x',path:':(glob)**'}}),/plain repository paths/);await assert.rejects(f.c.command('read_revision',{target:f.seed.run.id,revision:{...pinned,tree:'a'.repeat(40)},path:'answer.txt'}),/tree identity/);
-  await f.c.close();const store=new Workbench(f.seed.database);try{const retained=new RepositoryWork(store,f.config.root);assert.deepEqual(await retained.listFiles(f.seed.run.id),files);assert.deepEqual((await retained.status(f.seed.run.id)).revision,status.revision);for(let i=0;i<queries.length-1;i++)assert.deepEqual(JSON.parse(JSON.stringify(await retained.search(f.seed.run.id,queries[i]))),results[i]);}finally{store.close();}
+  assert.deepEqual(files,manifest(work.path));assert.deepEqual(status.revision,expectedRevision(f,work.path));assert.equal(status.revision.dirty,true);
+  // Exact results in Git's path order (the retained search returned git grep's order unchanged); the bounded query is checked above.
+  const hits=(names:string[])=>names.map(path=>({path,line:1,text:'Match[0]'}));const all=hits(['space name.txt','\uE000.txt','😀.txt']);
+  assert.deepEqual(results.slice(0,4),[{query:'Match[0]',regex:false,matches:all,truncated:false},{query:'match',regex:false,matches:all,truncated:false},{query:'Match.0.',regex:true,matches:all,truncated:false},{query:'Match',regex:false,path:'space name.txt',matches:hits(['space name.txt']),truncated:false}]);
 });
 
 test('native research reads remain pinned after operator target movement and create no coding evidence',{timeout:60000},async t=>{
@@ -172,10 +190,14 @@ test('replacement-decoded text hashes support edits while raw byte manifests rem
 });
 
 test('provider merge records require actual ancestry in the configured target before admission',{timeout:60000},async t=>{
-  const f=fixture(t);f.git('checkout','-b','future');f.git('commit','--allow-empty','-m','future merge');const merge=f.git('rev-parse','HEAD');await f.c.close();const store=new Workbench(f.seed.database);
-  try {const repositoryId=store.getTask(f.seed.task.id).repositoryId;const task=store.createTask({title:'Upstream fixture',description:'',repositoryId});store.refine(task.id,{revision:1,sourceRevision:1,brief:'Upstream',criteria:['Delivered']});const run=store.queue(task.id,{revision:2});store.setDependencies(f.seed.task.id,{requestId:randomUUID(),dependencyRevision:0,dependsOn:[task.id]});
+  const f=fixture(t);f.git('checkout','-b','future');f.git('commit','--allow-empty','-m','future merge');const merge=f.git('rev-parse','HEAD');
+  // FOR-82: seeded through the native store, which the retained TypeScript Workbench (schema 26) can no longer open.
+  {const repositoryId=(await f.c.command('task',{target:f.seed.task.id})).repositoryId;const task=await f.c.command('create_task',{input:{title:'Upstream fixture',description:'',repositoryId}});await f.c.command('refine',{target:task.id,input:{revision:1,sourceRevision:1,brief:'Upstream',criteria:['Delivered']}});const refined=await f.c.command('task',{target:task.id});const source=await f.c.command('plan_source',{target:task.id,input:{revision:refined.revision}});
+    // An accepted implementation plan is the native gate that makes the queued upstream run a coding run.
+    const plan=await f.c.command('plan_save',{target:task.id,input:{requestId:randomUUID(),revision:refined.revision,sourceId:source.id,content:{schemaVersion:1,goal:refined.brief,scope:[refined.brief],exclusions:[],assumptions:[],decisions:[],workPackages:[{id:'fixture',name:'Upstream delivery',dependsOn:[],outputs:['A merged change'],criteria:[0],validation:['Provider merge fixture']}]}}});
+    await f.c.command('plan_decide',{target:plan.id,input:{requestId:randomUUID(),revision:refined.revision,sourceId:source.id,decision:'accept'}});const run=await f.c.command('queue',{target:task.id,input:{revision:refined.revision}});assert.equal(run.purpose,'coding');await f.c.command('set_dependencies',{target:f.seed.task.id,input:{requestId:randomUUID(),dependencyRevision:0,dependsOn:[task.id]}});
     // Saved provider observation is a fixture; Git ancestry below is checked by Rust.
-    store.savePublication({id:randomUUID(),runId:run.id,attemptId:randomUUID(),candidateId:randomUUID(),repositoryPath:f.seed.root,repository:{uuid:randomUUID(),workspace:'fixture',slug:'repo'},branch:'future',target:'main',revision:{base:merge,head:merge,tree:f.git('rev-parse','HEAD^{tree}'),worktreeHash:'d'.repeat(64),dirty:false,requirementsHash:'e'.repeat(64),instructionsHash:'f'.repeat(64)},title:'Fixture',description:'Fixture',policy:{statusKeys:[],pipelineSteps:[],optionalSteps:[]},createdAt:new Date().toISOString(),push:{state:'confirmed',expectedHead:null},pr:{state:'confirmed',id:1,providerState:'MERGED'},ready:false,blockers:[],merged:{commit:merge,observedAt:new Date().toISOString()}});
-  }finally{store.close();}await f.reopen();assert.match(await f.c.command('dependency_hold',{target:f.seed.run.id}),/verified merge.*update the target branch/);await assert.rejects(f.prepare(),/verified merge/);assert.equal(f.git('worktree','list','--porcelain').split('worktree ').length-1,1);
+    await f.c.command('save_publication',{input:{id:randomUUID(),runId:run.id,attemptId:randomUUID(),candidateId:randomUUID(),repositoryPath:f.seed.root,repository:{uuid:randomUUID(),workspace:'fixture',slug:'repo'},branch:'future',target:'main',revision:{base:merge,head:merge,tree:f.git('rev-parse','HEAD^{tree}'),worktreeHash:'d'.repeat(64),dirty:false,requirementsHash:'e'.repeat(64),instructionsHash:'f'.repeat(64)},title:'Fixture',description:'Fixture',policy:{statusKeys:[],pipelineSteps:[],optionalSteps:[]},createdAt:new Date().toISOString(),push:{state:'confirmed',expectedHead:null},pr:{state:'confirmed',id:1,providerState:'MERGED'},ready:false,blockers:[],merged:{commit:merge,observedAt:new Date().toISOString()}}});
+  }await f.reopen();assert.match(await f.c.command('dependency_hold',{target:f.seed.run.id}),/verified merge.*update the target branch/);await assert.rejects(f.prepare(),/verified merge/);assert.equal(f.git('worktree','list','--porcelain').split('worktree ').length-1,1);
   f.git('checkout','main');f.git('merge','--ff-only','future');assert.equal(await f.c.command('dependency_hold',{target:f.seed.run.id}),null);assert.equal((await f.prepare()).base,merge);
 });
