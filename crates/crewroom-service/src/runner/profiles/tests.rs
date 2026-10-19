@@ -251,3 +251,21 @@ fn approval_needs_a_discovered_offering_on_a_configured_harness() {
         assert!(request(&bad).is_err(), "{bad}");
     }
 }
+
+/// Found by the isolated live check: a Codex and Claude Code configuration
+/// has no `models` section, and approving must not invent an empty one
+/// (the runtime refuses `models` without `providers`).
+#[test]
+fn approval_on_a_configuration_without_omp_providers_adds_no_models_section() {
+    let mut native = saved();
+    native.as_object_mut().unwrap().remove("models");
+    native["catalog"] = json!([]);
+    let view = catalog_view(&[offering(Harness::Codex, "codex", "gpt-synthetic", &["low"])]);
+    let approve = request(&json!({"harness":"codex","provider":"codex","selector":"gpt-synthetic","approve":true,"efforts":["low"]})).unwrap();
+    let body = change(&native, &approve, &view).unwrap();
+    assert_eq!(body["advanced"].get("models"), None, "{body}");
+    let mut config = native.clone();
+    config["catalog"] = body["advanced"]["catalog"].clone();
+    config["mail"]["token"] = json!("synthetic");
+    RuntimeConfig::parse(&config).unwrap();
+}

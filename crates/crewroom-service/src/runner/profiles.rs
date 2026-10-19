@@ -328,7 +328,13 @@ pub(super) fn change(existing: &Value, request: &Request, catalog: &Value) -> Re
         }
     }
     advanced["catalog"] = json!(next);
-    if let Some(providers) = advanced["models"]["providers"].as_object_mut() {
+    // Never index `models` mutably: that would add an empty section, which
+    // the runtime refuses (a Codex or Claude Code only configuration).
+    if let Some(providers) = advanced
+        .get_mut("models")
+        .and_then(|m| m.get_mut("providers"))
+        .and_then(Value::as_object_mut)
+    {
         for provider in providers.values_mut() {
             if let Some(provider) = provider.as_object_mut()
                 && provider
