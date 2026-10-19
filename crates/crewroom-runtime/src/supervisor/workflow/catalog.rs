@@ -179,22 +179,26 @@ impl RuntimeConfig {
         policy::verify_preview(&current, &model["selection"]["previewRevision"])
     }
     /// FOR-69: a frozen catalog selection whose harness executable changed
-    /// after admission is re-probed before launch, and the launch is held
-    /// with the outcome. The frozen identity is never rebound silently: a
-    /// passing new binary still needs re-admission, a failing one names the
-    /// failed check.
-    pub(crate) async fn hold_changed_executable(&self, model: &Value) -> Result<()> {
+    /// after admission is re-probed before launch. A failed re-probe, or a
+    /// new executable that no longer lists the admitted offering, holds the
+    /// launch with the reason. A passing re-probe returns the selection with
+    /// the new executable identity and the receipt to record on the attempt;
+    /// route, offering and effort stay as admitted.
+    pub(crate) async fn hold_changed_executable(
+        &self,
+        model: &Value,
+    ) -> Result<Option<(Value, Value)>> {
         let Some(selection) = model.get("selection") else {
-            return Ok(());
+            return Ok(None);
         };
         let Ok(offering) =
             serde_json::from_value::<crate::model_catalog::Offering>(selection["offering"].clone())
         else {
             // The frozen-route check refuses an invalid selection.
-            return Ok(());
+            return Ok(None);
         };
         let Some(binary) = self.binary(&offering.harness) else {
-            return Ok(());
+            return Ok(None);
         };
         let current = tokio::task::spawn_blocking(move || discovery::binary_digest(&binary))
             .await
@@ -203,9 +207,10 @@ impl RuntimeConfig {
             selection["identity"]["canonicalBinary"] == json!(canonical)
                 && selection["identity"]["binarySha256"] == json!(digest)
         }) {
-            return Ok(());
+            return Ok(None);
         }
-        let label = offering.harness.label();
+        let harness = &offering.harness;
+        let label = harness.label();
         let admitted = selection["identity"]["version"]
             .as_str()
             .unwrap_or("unknown");
@@ -214,20 +219,42 @@ impl RuntimeConfig {
                 "Launch held: the {label} executable changed after admission ({admitted}), and model discovery is unavailable to re-probe it."
             )));
         };
-        match catalog.probe_now(&offering.harness).await {
-            Err(reason) => Err(conflict(&format!(
+        let receipt = catalog.probe_now(harness).await.map_err(|reason| {
+            conflict(&format!(
                 "Launch held: the {label} executable changed after admission ({admitted}) and its re-probe failed. {reason}"
-            ))),
-            Ok(identity) => Err(conflict(&format!(
-                "Launch held: the {label} executable changed after admission ({admitted}). The new executable reports {} and is {}; refresh models and re-admit the assignment to launch with it.",
-                identity.version,
-                identity
-                    .compatibility
-                    .as_ref()
-                    .map(|c| c.label(&offering.harness, &identity.version))
-                    .unwrap_or_else(|| "unverified".into())
-            ))),
+            ))
+        })?;
+        let identity = receipt.identity;
+        let compatibility = identity
+            .compatibility
+            .as_ref()
+            .filter(|_| crate::model_catalog::compatibility::launchable(harness, &identity))
+            .map(|c| c.label(harness, &identity.version))
+            .ok_or_else(|| {
+                conflict(&format!(
+                    "Launch held: the {label} executable changed after admission ({admitted}) and its re-probe produced no compatibility receipt. Refresh models, then re-admit the assignment."
+                ))
+            })?;
+        if !receipt
+            .offerings
+            .iter()
+            .any(|o| o.legacy_key() == offering.legacy_key())
+        {
+            return Err(conflict(&format!(
+                "Launch held: the {label} executable changed after admission ({admitted}). The new executable reports {} and is {compatibility}, but no longer lists {}. Refresh models, then re-admit the assignment.",
+                identity.version, offering.display_name
+            )));
         }
+        let record = json!({
+            "admittedVersion": selection["identity"]["version"],
+            "admittedBinarySha256": selection["identity"]["binarySha256"],
+            "version": identity.version,
+            "binarySha256": identity.binary_sha256,
+            "compatibility": compatibility,
+        });
+        let mut next = model.clone();
+        next["selection"]["identity"] = json!(identity);
+        Ok(Some((next, record)))
     }
     pub(crate) fn verify_frozen_catalog_route(&self, model: &Value) -> Result<()> {
         let Some(selection) = model.get("selection") else {
@@ -283,9 +310,25 @@ impl RuntimeConfig {
 }
 
 impl<S: StoreAccess> Workflow<S> {
-    /// FOR-69 launch hold; see `RuntimeConfig::hold_changed_executable`.
-    pub(super) async fn hold_changed_executable(&self, model: &Value) -> Result<()> {
-        self.0.config.hold_changed_executable(model).await
+    /// FOR-69 launch-time re-probe; see `RuntimeConfig::hold_changed_executable`.
+    /// A passing re-probe of a changed executable is recorded on the attempt
+    /// (new identity and receipt) and the updated attempt is returned.
+    pub(super) async fn hold_changed_executable(
+        &self,
+        attempt: &Value,
+        assignment: &Value,
+    ) -> Result<Value> {
+        let model = attempt
+            .get("model")
+            .filter(|v| !v.is_null())
+            .unwrap_or(&assignment["model"]);
+        match self.0.config.hold_changed_executable(model).await? {
+            None => Ok(attempt.clone()),
+            Some((model, receipt)) => {
+                let id = text(attempt, "id")?;
+                self.store(|s| s.record_attempt_reprobe(id, &model, &receipt))
+            }
+        }
     }
     pub fn refresh_model_catalog(&self) -> Result<Value> {
         self.check_open()?;

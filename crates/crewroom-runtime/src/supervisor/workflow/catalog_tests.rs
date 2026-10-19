@@ -403,9 +403,9 @@ async fn probed_newer_versions_are_offered_and_changed_executables_hold_launch()
         frozen["compatibility"]["probe"]["inferenceRequested"],
         false
     );
-    config.hold_changed_executable(&model).await.unwrap();
-    // The executable changes between admission and launch: the launch is
-    // re-probed and held with the reason, never started.
+    assert_eq!(config.hold_changed_executable(&model).await.unwrap(), None);
+    // The executable changes between admission and launch and its re-probe
+    // fails: the launch is held with the reason, never started.
     std::fs::write(root.path().join("omp"), "rebuilt executable").unwrap();
     let held = config
         .hold_changed_executable(&model)
@@ -424,6 +424,149 @@ async fn probed_newer_versions_are_offered_and_changed_executables_hold_launch()
     tampered.identity.as_mut().unwrap().binary_sha256 = "other".into();
     assert_eq!(tampered.compatibility(), None);
     assert!(tampered.execution_note().is_some());
+}
+
+/// A simulated OMP that reports `version`, lists `listed` models from the
+/// `fixture` provider and answers the protocol-v2 RPC handshake.
+fn simulated_omp(path: &Path, version: &str, listed: &str) {
+    use std::os::unix::fs::PermissionsExt;
+    let script = format!(
+        r#"#!/usr/bin/python3
+import json,sys,os
+if '--version' in sys.argv:
+ print({version:?});sys.exit(0)
+if sys.argv[1:]==['models','--json','--no-extensions']:
+ print(json.dumps({{'models':[{{'provider':'fixture','id':{listed:?},'selector':'fixture/'+{listed:?},'name':'Model','thinking':['high','xhigh','low'],'input':['text']}}]}}));sys.exit(0)
+assert sys.argv[1:3]==['--mode','rpc'] and '--no-tools' in sys.argv
+assert sys.argv[sys.argv.index('--model')+1]=='crewroom-probe/probe'
+print(json.dumps({{'type':'ready','protocolVersion':1,'supportedProtocolVersions':[1,2]}}),flush=True)
+sessions=sys.argv[sys.argv.index('--session-dir')+1]
+for line in sys.stdin:
+ v=json.loads(line)
+ data={{'negotiate_protocol':{{'protocolVersion':2}},'get_state':{{'sessionFile':os.path.join(sessions,'s.jsonl')}},'set_host_tools':{{'toolNames':[]}}}}[v['type']]
+ print(json.dumps({{'id':v['id'],'type':'response','command':v['type'],'success':True,'data':data}}),flush=True)
+"#
+    );
+    // Replace atomically so the path never names a half-written executable.
+    let next = path.with_extension("next");
+    std::fs::write(&next, script).unwrap();
+    std::fs::set_permissions(&next, std::fs::Permissions::from_mode(0o700)).unwrap();
+    std::fs::rename(&next, path).unwrap();
+}
+
+/// FOR-69: when the harness self-updates between admission and launch and
+/// the new executable passes its re-probe, the launch proceeds with the new
+/// identity and probe receipt recorded on the attempt; route, offering and
+/// effort stay frozen. A new executable that no longer lists the admitted
+/// model holds the launch with that reason.
+#[tokio::test]
+async fn passing_reprobe_of_a_changed_executable_lets_the_launch_proceed() {
+    let (root, mut config, roles) = fixture();
+    let helpers =
+        crate::test_binaries::ensure(&crate::test_binaries::profile_dir_of_current_test());
+    let sources = config.discovery_sources(&helpers.process, &json!({"PATH":"/usr/bin:/bin"}));
+    config.discovery = Some(
+        crate::model_catalog::store::Catalog::open(&root.path().join("catalog"), sources, || {})
+            .unwrap(),
+    );
+    let role = roles.iter().find(|r| r["id"] == "coordinator").unwrap();
+    let model = config.assignment_model(role).unwrap();
+    let admitted_sha = model["selection"]["identity"]["binarySha256"].clone();
+    let store = Store::open(&root.path().join("store.sqlite")).unwrap();
+    let task = store
+        .create_task(&json!({"title":"Catalog fixture","description":""}))
+        .unwrap();
+    let run = store
+        .queue_refinement(
+            task["id"].as_str().unwrap(),
+            &json!({"revision":1,"purpose":"explore"}),
+        )
+        .unwrap();
+    let admitted=store.admit_assignment(run["id"].as_str().unwrap(),&json!({"name":"Coordinator","coordinator":true,"role":role,"model":model,"input":"Inspect"})).unwrap();
+    let attempt_id = admitted["attempt"]["id"].as_str().unwrap();
+
+    // Self-update to a newer unlisted release that still lists the model.
+    let binary = root.path().join("omp");
+    simulated_omp(&binary, "omp/19.0.1", "model");
+    assert!(config.verify_frozen_catalog_route(&model).is_err());
+    let (next, receipt) = config
+        .hold_changed_executable(&model)
+        .await
+        .unwrap()
+        .expect("a changed executable is re-probed");
+    let identity = &next["selection"]["identity"];
+    assert_eq!(identity["version"], "omp/19.0.1");
+    assert_eq!(identity["compatibility"]["basis"], "probed");
+    assert_eq!(
+        identity["compatibility"]["probe"]["inferenceRequested"],
+        false
+    );
+    assert_eq!(
+        identity["binarySha256"],
+        json!(discovery::binary_digest(&binary).unwrap().1)
+    );
+    assert_eq!(receipt["admittedVersion"], "omp/18.4.12");
+    assert_eq!(receipt["admittedBinarySha256"], admitted_sha);
+    assert_eq!(receipt["version"], "omp/19.0.1");
+    assert_eq!(receipt["compatibility"], "compatible (probed 19.0.1)");
+    // Only the executable identity changed; the frozen route still verifies.
+    for key in [
+        "offering",
+        "billingRoute",
+        "requestedEffort",
+        "previewRevision",
+    ] {
+        assert_eq!(next["selection"][key], model["selection"][key], "{key}");
+    }
+    assert_eq!(next["resolved"], model["resolved"]);
+    config.verify_frozen_catalog_route(&next).unwrap();
+    assert!(!next.to_string().contains("secret-canary"));
+    // The receipt is retained with the catalog's probes.
+    let probe_id = identity["compatibility"]["probe"]["id"].clone();
+    assert!(
+        config
+            .discovery
+            .as_ref()
+            .unwrap()
+            .snapshot()
+            .unwrap()
+            .probes
+            .iter()
+            .any(|p| json!(p.id) == probe_id)
+    );
+
+    // Recorded on the attempt, which the launch then uses.
+    let recorded = store
+        .record_attempt_reprobe(attempt_id, &next, &receipt)
+        .unwrap();
+    assert_eq!(recorded["model"], next);
+    assert_eq!(recorded["reprobes"][0]["version"], "omp/19.0.1");
+    assert_eq!(recorded["reprobes"][0]["admittedVersion"], "omp/18.4.12");
+    assert!(recorded["reprobes"][0]["at"].is_string());
+    // The recorded selection is now current: no further re-probe.
+    assert_eq!(config.hold_changed_executable(&next).await.unwrap(), None);
+    // The store refuses a re-probe that changes anything but the identity.
+    let mut rerouted = next.clone();
+    rerouted["selection"]["requestedEffort"] = json!("low");
+    assert!(
+        store
+            .record_attempt_reprobe(attempt_id, &rerouted, &receipt)
+            .is_err()
+    );
+
+    // A further update that drops the admitted model holds the launch.
+    simulated_omp(&binary, "omp/19.0.2", "other");
+    let held = config
+        .hold_changed_executable(&next)
+        .await
+        .unwrap_err()
+        .to_string();
+    assert!(
+        held.contains("Launch held: the OMP executable changed after admission (omp/19.0.1)"),
+        "{held}"
+    );
+    assert!(held.contains("compatible (probed 19.0.2)"), "{held}");
+    assert!(held.contains("no longer lists Example"), "{held}");
 }
 
 /// A configured Codex harness whose listed model is `native-model`, with the

@@ -226,6 +226,77 @@ impl Store {
             attempt["state"] = json!("starting"); s.save_attempt(&attempt)?; s.account_time_in_transaction(&run_id)?; Ok(attempt)
         })
     }
+    /// FOR-69: the harness executable changed after admission and its
+    /// launch-time re-probe passed. Only the frozen selection's executable
+    /// identity may change; route, offering and effort stay as admitted. The
+    /// receipt is appended to the attempt's `reprobes`.
+    pub fn record_attempt_reprobe(
+        &self,
+        attempt_id: &str,
+        model: &Value,
+        receipt: &Value,
+    ) -> Result<Value> {
+        strict(
+            receipt,
+            &[
+                "admittedVersion",
+                "admittedBinarySha256",
+                "version",
+                "binarySha256",
+                "compatibility",
+            ],
+        )?;
+        for key in [
+            "admittedVersion",
+            "admittedBinarySha256",
+            "version",
+            "binarySha256",
+            "compatibility",
+        ] {
+            text(receipt, key, 1, 4000)?;
+        }
+        self.transaction(|s| {
+            let mut attempt = s.get_attempt(attempt_id)?;
+            if attempt["state"] != "admitted" {
+                return Err(conflict("Only an unclaimed attempt can record a re-probe."));
+            }
+            let assignment = s.get_assignment(attempt["assignmentId"].as_str().unwrap())?;
+            let current = attempt
+                .get("model")
+                .filter(|v| !v.is_null())
+                .unwrap_or(&assignment["model"])
+                .clone();
+            let mut unchanged = model.clone();
+            if let (Some(next), Some(frozen)) = (
+                unchanged.pointer_mut("/selection/identity"),
+                current.pointer("/selection/identity"),
+            ) {
+                *next = frozen.clone();
+            } else {
+                return Err(conflict("A re-probe needs a frozen catalog selection."));
+            }
+            if unchanged != current
+                || current["selection"]["identity"]["version"] != receipt["admittedVersion"]
+                || current["selection"]["identity"]["binarySha256"]
+                    != receipt["admittedBinarySha256"]
+                || model["selection"]["identity"]["version"] != receipt["version"]
+                || model["selection"]["identity"]["binarySha256"] != receipt["binarySha256"]
+            {
+                return Err(conflict(
+                    "A re-probe may change only the frozen executable identity.",
+                ));
+            }
+            attempt["model"] = model.clone();
+            if !attempt["reprobes"].is_array() {
+                attempt["reprobes"] = json!([]);
+            }
+            let mut entry = receipt.clone();
+            entry["at"] = json!(s.time());
+            attempt["reprobes"].as_array_mut().unwrap().push(entry);
+            s.save_attempt(&attempt)?;
+            Ok(attempt)
+        })
+    }
     pub fn record_attempt_identity(&self, attempt_id: &str, identity: &Value) -> Result<Value> {
         strict(
             identity,

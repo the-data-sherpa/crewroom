@@ -245,13 +245,9 @@ impl<S: StoreAccess> Workflow<S> {
             } else {
                 false
             };
-            self.hold_changed_executable(
-                attempt
-                    .get("model")
-                    .filter(|v| !v.is_null())
-                    .unwrap_or(&assignment["model"]),
-            )
-            .await?;
+            // FOR-69: a changed executable is re-probed; a pass is recorded on
+            // the attempt and launches, a failure holds the launch.
+            let attempt = self.hold_changed_executable(&attempt, &assignment).await?;
             let port = self.lease_port(id).await?;
             self.current(run, control)?;
             let token = format!(

@@ -49,6 +49,8 @@ time.sleep(30)
         }
         Harness::Omp => {
             r#"
+if sys.argv[1:]==['models','--json','--no-extensions'] and os.path.exists(os.path.join(os.path.dirname(os.path.realpath(__file__)),'no-providers')):
+ print(json.dumps({'models':[]}));sys.exit(0)
 if sys.argv[1:]==['models','--json','--no-extensions']:
  print(json.dumps({'models':[{'provider':'fixture','id':'m','selector':'fixture/m','name':'Model','thinking':['low'],'input':['text']}]}));sys.exit(0)
 assert sys.argv[1:3]==['--mode','rpc'] and '--no-tools' in sys.argv
@@ -233,6 +235,57 @@ async fn retained_receipts_skip_the_handshake_until_the_executable_changes() {
     }
 }
 
+/// OMP lists models only from configured providers. A newer OMP on a runner
+/// without provider configuration passes the probe with zero offerings; the
+/// refusal is never blamed on a probe failure.
+#[tokio::test]
+async fn newer_omp_without_configured_providers_is_compatible_with_no_offerings() {
+    use crewroom_runtime::model_catalog::store::{Catalog, Source};
+    let root = tempfile::tempdir().unwrap();
+    let c = fixture(root.path(), &Harness::Omp, "omp/18.11.4", false);
+    std::fs::write(root.path().join("no-providers"), "").unwrap();
+    let receipt = run(&c, root.path(), "discovery", &[]).await.unwrap();
+    assert!(receipt.offerings.is_empty());
+    assert_eq!(handshakes(root.path()), 1, "the handshake still ran");
+    let compatibility = receipt.identity.compatibility.clone().unwrap();
+    assert_eq!(compatibility.basis, Basis::Probed);
+    assert_eq!(
+        compatibility.label(&Harness::Omp, "omp/18.11.4"),
+        "compatible (probed 18.11.4)"
+    );
+    assert!(crewroom_runtime::model_catalog::compatibility::launchable(
+        &Harness::Omp,
+        &receipt.identity
+    ));
+    // Through the catalog: labelled compatible, no error, zero offerings.
+    let catalog = Catalog::open(
+        &root.path().join("catalog"),
+        vec![Source {
+            config: c.clone(),
+            configuration_revision: "one".into(),
+        }],
+        || {},
+    )
+    .unwrap();
+    catalog.refresh().unwrap();
+    tokio::time::timeout(Duration::from_secs(60), async {
+        while catalog.snapshot().unwrap().state == "refreshing" {
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
+    })
+    .await
+    .unwrap();
+    let snapshot = catalog.snapshot().unwrap();
+    let entry = &snapshot.harnesses[0];
+    assert_eq!(
+        entry.compatibility().as_deref(),
+        Some("compatible (probed 18.11.4)")
+    );
+    assert!(entry.offerings.is_empty());
+    assert!(entry.error.is_none(), "{:?}", entry.error);
+    catalog.close().await.unwrap();
+}
+
 #[tokio::test]
 async fn refresh_and_launch_reprobe_retain_receipts_and_report_failures() {
     use crewroom_runtime::model_catalog::store::{Catalog, Source};
@@ -264,7 +317,7 @@ async fn refresh_and_launch_reprobe_retain_receipts_and_report_failures() {
     assert_eq!(snapshot.probes.len(), 1);
     assert_eq!(handshakes(root.path()), 1);
     // Launch-time re-probe of the unchanged executable reuses the receipt.
-    let identity = catalog.probe_now(&Harness::Omp).await.unwrap();
+    let identity = catalog.probe_now(&Harness::Omp).await.unwrap().identity;
     assert_eq!(
         identity.compatibility.unwrap().probe.unwrap(),
         snapshot.probes[0]

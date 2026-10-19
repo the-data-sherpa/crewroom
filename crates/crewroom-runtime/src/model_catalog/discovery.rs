@@ -667,7 +667,12 @@ async fn run(
     .await;
     process.close().await?;
     let offerings = result.map_err(|e| failed(compatibility::MODEL_DISCOVERY, e))?;
-    if probed && offerings.is_empty() {
+    // OMP lists models only from providers in the runner configuration, so
+    // an empty list means no provider is configured, not a broken harness:
+    // its check passes when the output parses, and the catalog keeps naming
+    // the missing provider configuration. The protocol handshake below uses
+    // its own synthetic provider either way.
+    if probed && offerings.is_empty() && config.harness != Harness::Omp {
         return Err(failed(
             compatibility::MODEL_DISCOVERY,
             conflict("The harness listed no models."),

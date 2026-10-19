@@ -514,9 +514,13 @@ impl Catalog {
         Ok(self.view(now()))
     }
     /// FOR-69 launch-time re-probe of one harness's current executable. The
-    /// receipt is retained like a refresh's; offerings and freshness of the
-    /// catalog entry are not changed, so admission still needs a refresh.
-    pub async fn probe_now(&self, harness: &Harness) -> std::result::Result<Identity, String> {
+    /// probe receipt is retained like a refresh's; the catalog entry's
+    /// offerings and freshness are not changed. The caller decides from the
+    /// returned identity and offerings whether a launch may proceed.
+    pub async fn probe_now(
+        &self,
+        harness: &Harness,
+    ) -> std::result::Result<discovery::Receipt, String> {
         let source = self
             .source(harness)
             .ok_or_else(|| "Harness is not configured.".to_owned())?;
@@ -557,7 +561,7 @@ impl Catalog {
             retained.map_err(|_| "Probe receipt could not be retained.".to_owned())?;
             (self.0.changed)();
         }
-        Ok(receipt.identity)
+        Ok(receipt)
     }
     pub(crate) async fn recover_processes(&self) -> Result<()> {
         if !self.0.processes.exists() {
