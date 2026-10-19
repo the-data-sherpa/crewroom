@@ -31,6 +31,7 @@ pub mod principles;
 pub mod project_source;
 mod provider_records;
 pub mod repositories;
+pub mod repository_folders;
 mod repository_work;
 mod requirements;
 pub use requirements::requirements_hash;

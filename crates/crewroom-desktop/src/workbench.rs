@@ -372,7 +372,9 @@ impl Workbench {
                 path,
                 result,
             } => {
-                if path == "/comparisons" || path.starts_with("/comparisons/") {
+                if path.starts_with(settings::repository_folder::INSPECT) {
+                    self.settings.inspected(&path, result);
+                } else if path == "/comparisons" || path.starts_with("/comparisons/") {
                     self.comparison_read(&path, result);
                 } else if generation == self.observation.generation && path.ends_with("/feedback") {
                     self.observation.feedback_pending = false;
@@ -616,6 +618,9 @@ impl Workbench {
                         }
                         if path == "/repositories" {
                             self.notice = "Repository saved. Existing runs keep their captured configuration.".into();
+                        }
+                        if path == settings::repository_folder::INITIALIZE {
+                            self.notice = "Repository initialized with one empty commit. Existing files were not staged or committed. Review the details, then save.".into();
                         }
                         self.comparison_result(&path, &value, cx);
                     }

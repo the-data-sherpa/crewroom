@@ -103,7 +103,7 @@ pub fn split_remote(remote: &str) -> Option<(String, String)> {
 /// remote named by a `remote/branch` target, the branch's push remote, the
 /// default push remote, the branch's upstream remote, `origin`, or the only
 /// remote. `None` when the checkout has no usable remote.
-fn publish_remote_name(path: &Path, target: &str) -> Option<String> {
+pub(crate) fn publish_remote_name(path: &Path, target: &str) -> Option<String> {
     let remotes: Vec<String> = git(path, &["remote"])
         .ok()?
         .lines()

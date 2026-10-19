@@ -8,6 +8,7 @@ pub(super) use model_picker::billing_label;
 mod models;
 mod playbooks;
 mod principles;
+pub(super) mod repository_folder;
 mod roles;
 
 const NEW: &str = "__new";
@@ -157,6 +158,7 @@ struct RepositoryDraft {
     checks: Vec<CheckDraft>,
     revision: Option<u64>,
     original: Value,
+    folder: repository_folder::Folder,
 }
 impl RepositoryDraft {
     fn new(value: &Value, window: &mut Window, cx: &mut Context<Workbench>) -> Self {
@@ -178,6 +180,7 @@ impl RepositoryDraft {
                 .collect(),
             revision: value["revision"].as_u64(),
             original: Value::Null,
+            folder: Default::default(),
         };
         draft.original = draft.value(cx).unwrap();
         draft
@@ -252,6 +255,10 @@ impl Settings {
             if self.principle == id {
                 self.principle.clear();
             }
+            return;
+        }
+        if path == repository_folder::INITIALIZE {
+            self.initialized(value);
             return;
         }
         if path == "/model-jobs" {
@@ -508,7 +515,8 @@ impl Workbench {
                 .repositories
                 .insert(id.clone(), RepositoryDraft::new(&value, window, cx));
         }
-        let mut panel=section("Repositories").child(hint("The service verifies the checkout and target before saving. Existing runs keep their captured configuration."));
+        self.apply_folder(window, cx);
+        let mut panel=section("Repositories").child(hint("Choose the checkout folder; the local service inspects it and verifies it again on save. Existing runs keep their captured configuration."));
         for repo in records(&self.workspace, "repositories") {
             let target = string(&repo, "id");
             let edit = target.clone();
@@ -577,9 +585,10 @@ impl Workbench {
                 current["revision"]
             )));
         }
+        let problems = draft.problems(cx);
         for (key, label) in [
-            ("name", "Repository name"),
             ("path", "Checkout path"),
+            ("name", "Repository name"),
             ("targetBranch", "Target branch"),
             ("branchPrefix", "Branch prefix"),
         ] {
@@ -589,7 +598,17 @@ impl Workbench {
                 label,
                 self.busy || retired,
             ));
+            if let Some(problem) = problems.fields.get(key) {
+                panel = panel.child(named_hint(
+                    format!("repository-{key}-problem"),
+                    problem.clone(),
+                ));
+            }
+            if key == "path" {
+                panel = panel.child(self.folder_block(self.busy || retired, cx));
+            }
         }
+        let draft = &self.settings.repositories[&id];
         panel=panel.child(hint("Leave the prefix blank to use codex/crewroom/.")).child(crate::accessibility::text("Repository checks")).child(hint("Each check uses a pinned container image. Leave the list empty if no checks are required."));
         for check in &draft.checks {
             let key = check.key.clone();
@@ -679,6 +698,11 @@ impl Workbench {
                     })),
             )
             .children(self.feedback(crate::workbench::feedback::Place::SaveRow))
+            .children(if retired {
+                None
+            } else {
+                self.save_blockers(&problems)
+            })
             .child(
                 div()
                     .flex()
@@ -688,7 +712,7 @@ impl Workbench {
                         Button::new("save-repository")
                             .primary()
                             .label("Save repository")
-                            .disabled(self.blocked() || retired)
+                            .disabled(self.blocked() || retired || !problems.blockers.is_empty())
                             .on_click(cx.listener(|this, _, _, cx| {
                                 let id = this.settings.repository.clone();
                                 match this.settings.repositories[&id].value(cx) {

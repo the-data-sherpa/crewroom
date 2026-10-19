@@ -712,6 +712,9 @@ async fn read(
         }
         return Ok(Json(model_discovery(&state)));
     }
+    if path == "repository-folders/inspect" {
+        return repository_folder(&state, None, query).await.map(Json);
+    }
     if let Some(e) = &state.execution
         && let Some(value) = views::read(e, &path, &query).await?
     {
@@ -761,6 +764,31 @@ async fn internal(
     }
     Ok(Json(result))
 }
+/// Inspects a chosen folder (read-only), or initializes it after the
+/// operator confirmed (`body`). The store lock is held only to read the
+/// configured checkouts; Git runs on a blocking worker without it (FOR-70).
+async fn repository_folder(
+    state: &AppState,
+    body: Option<Value>,
+    query: std::collections::HashMap<String, String>,
+) -> Result<Value, ApiError> {
+    let exclude = query.get("repository").cloned();
+    let known = operation(state, move |s| s.store.known_folders(exclude.as_deref())).await?;
+    let initializing = body.is_some();
+    let result = tokio::task::spawn_blocking(move || match body {
+        Some(body) => crewroom_core::repository_folders::initialize(&body, &known),
+        None => Ok(crewroom_core::repository_folders::inspect(
+            query.get("path").map(String::as_str).unwrap_or(""),
+            &known,
+        )),
+    })
+    .await
+    .map_err(|_| ApiError::from(Error::Conflict("Folder inspection was interrupted.".into())))??;
+    if initializing {
+        state.changes.send_modify(|v| *v += 1);
+    }
+    Ok(result)
+}
 fn unavailable() -> ApiError {
     Error::Conflict(
         "Rust runner integration is not configured. No agent was started or stopped.".into(),
@@ -805,6 +833,9 @@ async fn mutate_inner(state: AppState, path: String, body: Value) -> Result<Valu
         }
         ["repositories", id, "ticket-source"] => {
             return ticket_sources::confirm(&state, id, body).await;
+        }
+        ["repository-folders", "initialize"] => {
+            return repository_folder(&state, Some(body), Default::default()).await;
         }
         ["github", action] => return github_mutation(&state, action, body).await,
         // A GitHub token is saved only after GitHub accepts it.

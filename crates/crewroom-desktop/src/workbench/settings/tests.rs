@@ -238,6 +238,41 @@ fn repository_text(
     })
     .unwrap();
 }
+/// Types a checkout path, asks the service to inspect it and waits for the
+/// answer to prefill the form (FOR-70).
+fn inspect_typed(
+    cx: &mut gpui::TestAppContext,
+    handle: AnyWindowHandle,
+    view: &Entity<Workbench>,
+    events: &async_channel::Receiver<Event>,
+    path: &std::path::Path,
+) {
+    repository_text(cx, handle, view, "path", path.to_str().unwrap());
+    click(cx, handle, "inspect-repository-folder");
+    wait_inspected(cx, handle, view, events);
+}
+fn wait_inspected(
+    cx: &mut gpui::TestAppContext,
+    handle: AnyWindowHandle,
+    view: &Entity<Workbench>,
+    events: &async_channel::Receiver<Event>,
+) {
+    wait(cx, handle, view, events, |v, _| {
+        let draft = &v.settings.repositories[&v.settings.repository];
+        draft.folder.view.is_some() && !draft.folder.inspecting()
+    });
+    // The prefill is written on the next frame.
+    cx.update_window(handle, |_, window, cx| window.render_frame(cx))
+        .unwrap();
+}
+fn repository_field(cx: &mut gpui::TestAppContext, view: &Entity<Workbench>, key: &str) -> String {
+    cx.read(|cx| {
+        let v = view.read(cx);
+        v.settings.repositories[&v.settings.repository]
+            .fields
+            .text(key, cx)
+    })
+}
 #[gpui::test]
 fn native_repository_checks_conflicts_and_retirement_use_the_real_service(
     cx: &mut gpui::TestAppContext,
@@ -273,7 +308,7 @@ fn native_repository_checks_conflicts_and_retirement_use_the_real_service(
     wait(cx, handle, &view, &events, |v, _| v.connected);
     navigate(cx, handle, "repositories");
     repository_text(cx, handle, &view, "name", "Native checked checkout");
-    repository_text(cx, handle, &view, "path", checkout.to_str().unwrap());
+    inspect_typed(cx, handle, &view, &events, &checkout);
     repository_text(cx, handle, &view, "branchPrefix", "native/");
     click(cx, handle, "add-check");
     cx.update_window(handle, |_, window, cx| {
@@ -1249,21 +1284,12 @@ fn unsaved_new_principle_and_playbook_drafts_stay_reachable(cx: &mut gpui::TestA
 fn native_repository_save_error_is_visible_at_the_save_row(cx: &mut gpui::TestAppContext) {
     let fixture = Fixture::start();
     let checkout = fixture.root.path().join("checkout");
-    std::fs::create_dir(&checkout).unwrap();
-    assert!(
-        std::process::Command::new("git")
-            .args(["init", "-b", "main"])
-            .arg(&checkout)
-            .output()
-            .unwrap()
-            .status
-            .success()
-    );
+    git_checkout(&checkout);
     let (handle, view, events) = open(cx, &fixture);
     wait(cx, handle, &view, &events, |v, _| v.connected);
     navigate(cx, handle, "repositories");
     repository_text(cx, handle, &view, "name", "Digest fixture");
-    repository_text(cx, handle, &view, "path", checkout.to_str().unwrap());
+    inspect_typed(cx, handle, &view, &events, &checkout);
     click(cx, handle, "add-check");
     cx.update_window(handle, |_, window, cx| {
         for (key, text) in [
@@ -1374,7 +1400,7 @@ fn repository_check_errors_name_their_check_and_field(cx: &mut gpui::TestAppCont
     wait(cx, handle, &view, &events, |v, _| v.connected);
     navigate(cx, handle, "repositories");
     repository_text(cx, handle, &view, "name", "Two checks");
-    repository_text(cx, handle, &view, "path", checkout.to_str().unwrap());
+    inspect_typed(cx, handle, &view, &events, &checkout);
     click(cx, handle, "add-check");
     click(cx, handle, "add-check");
     assert!(
@@ -1429,14 +1455,283 @@ fn repository_path_and_branch_errors_are_distinct(cx: &mut gpui::TestAppContext)
     let (handle, view, events) = open(cx, &fixture);
     wait(cx, handle, &view, &events, |v, _| v.connected);
     navigate(cx, handle, "repositories");
+    // Before any folder: each field names its problem and Save names its blockers.
+    repository_text(cx, handle, &view, "targetBranch", "");
+    let shown = labels(cx, handle);
+    for expected in [
+        "Choose the checkout folder.",
+        "Enter a repository name.",
+        "Choose a target branch.",
+        "To save this repository: enter a repository name, choose the checkout folder, choose a target branch.",
+    ] {
+        assert!(shown.iter().any(|s| s == expected), "{expected}: {shown:?}");
+    }
     repository_text(cx, handle, &view, "name", "Path or branch");
     repository_text(cx, handle, &view, "path", plain.to_str().unwrap());
-    let path_error = save_error(cx, handle, &view, &events);
-    assert_eq!(path_error, "Checkout path is not a Git repository root.");
-    repository_text(cx, handle, &view, "path", checkout.to_str().unwrap());
+    assert!(
+        labels(cx, handle)
+            .iter()
+            .any(|s| s == "Inspect this path before saving.")
+    );
+    click(cx, handle, "inspect-repository-folder");
+    wait_inspected(cx, handle, &view, &events);
+    let shown = labels(cx, handle);
+    assert!(
+        shown
+            .iter()
+            .any(|s| s == "This folder is not a Git repository.")
+    );
+    assert!(shown.iter().any(|s| {
+        s.starts_with("To save this repository: initialize the folder or choose a Git checkout")
+    }));
+    // Save is unavailable, so a click sends nothing.
+    click(cx, handle, "save-repository");
+    cx.read(|cx| {
+        let v = view.read(cx);
+        assert!(!v.busy && v.error.is_empty());
+        assert!(records(&v.workspace, "repositories").is_empty());
+    });
+    inspect_typed(cx, handle, &view, &events, &checkout);
     repository_text(cx, handle, &view, "targetBranch", "release");
-    let branch_error = save_error(cx, handle, &view, &events);
-    assert_eq!(branch_error, "Target branch 'release' was not found.");
+    repository_text(cx, handle, &view, "branchPrefix", "bad prefix");
+    let shown = labels(cx, handle);
+    for expected in [
+        "'release' is not a branch in this checkout.",
+        "Use a branch prefix ending in /, with letters, numbers, hyphens or underscores.",
+        "To save this repository: choose one of the checkout's branches, fix the branch prefix.",
+    ] {
+        assert!(shown.iter().any(|s| s == expected), "{expected}: {shown:?}");
+    }
+    click(cx, handle, "target-branch-0");
+    repository_text(cx, handle, &view, "branchPrefix", "");
+    assert!(
+        !labels(cx, handle)
+            .iter()
+            .any(|s| s.starts_with("To save this repository"))
+    );
+    // The service still re-verifies on save: a branch deleted after
+    // inspection is refused at the save row.
+    assert!(
+        std::process::Command::new("git")
+            .arg("-C")
+            .arg(&checkout)
+            .args(["branch", "-m", "main", "renamed"])
+            .status()
+            .unwrap()
+            .success()
+    );
+    let error = save_error(cx, handle, &view, &events);
+    assert_eq!(error, "Target branch 'main' was not found.");
+}
+
+/// A folder chosen in the system picker is inspected by the service and
+/// prefills the form; a subfolder resolves to its checkout's root (FOR-70).
+#[gpui::test]
+fn choosing_a_subfolder_prefills_name_branches_and_remotes(cx: &mut gpui::TestAppContext) {
+    let fixture = Fixture::start();
+    let checkout = std::fs::canonicalize(fixture.root.path())
+        .unwrap()
+        .join("Sandbox");
+    git_checkout(&checkout);
+    let git = |args: &[&str]| {
+        assert!(
+            std::process::Command::new("git")
+                .arg("-C")
+                .arg(&checkout)
+                .args(args)
+                .status()
+                .unwrap()
+                .success()
+        )
+    };
+    git(&["branch", "develop"]);
+    git(&[
+        "remote",
+        "add",
+        "origin",
+        "git@github.com:Octo-Fixture/Sandbox.git",
+    ]);
+    git(&["update-ref", "refs/remotes/origin/develop", "HEAD"]);
+    git(&[
+        "symbolic-ref",
+        "refs/remotes/origin/HEAD",
+        "refs/remotes/origin/develop",
+    ]);
+    let nested = checkout.join("docs/guides");
+    std::fs::create_dir_all(&nested).unwrap();
+    let (handle, view, events) = open(cx, &fixture);
+    wait(cx, handle, &view, &events, |v, _| v.connected);
+    navigate(cx, handle, "repositories");
+    assert!(!cx.did_prompt_for_paths());
+    click(cx, handle, "choose-repository-folder");
+    assert!(cx.did_prompt_for_paths());
+    assert!(
+        labels(cx, handle)
+            .iter()
+            .any(|s| s == "Waiting for the system folder picker…")
+    );
+    let picked = nested.clone();
+    cx.simulate_path_prompt_response(move |options| {
+        assert!(options.directories && !options.files && !options.multiple);
+        Some(vec![picked])
+    });
+    wait_inspected(cx, handle, &view, &events);
+    assert_eq!(
+        repository_field(cx, &view, "path"),
+        checkout.to_str().unwrap()
+    );
+    assert_eq!(repository_field(cx, &view, "name"), "Sandbox");
+    assert_eq!(repository_field(cx, &view, "targetBranch"), "develop");
+    assert_eq!(repository_field(cx, &view, "branchPrefix"), "");
+    let shown = labels(cx, handle);
+    for expected in [
+        format!("Using repository root {}", checkout.display()),
+        "Git checkout · default target develop (the remote's default branch)".into(),
+        "Publish remote · origin · github.com/Octo-Fixture/Sandbox".into(),
+        "Target branch develop".into(),
+        "Target branch main".into(),
+    ] {
+        assert!(shown.contains(&expected), "{expected}: {shown:?}");
+    }
+    assert!(
+        !shown
+            .iter()
+            .any(|s| s.starts_with("To save this repository"))
+    );
+    click(cx, handle, "target-branch-1");
+    assert_eq!(repository_field(cx, &view, "targetBranch"), "main");
+    click(cx, handle, "save-repository");
+    wait(cx, handle, &view, &events, |v, _| {
+        !v.busy && v.settings.repository != NEW
+    });
+    cx.read(|cx| {
+        let saved = &view.read(cx).workspace["repositories"][0];
+        assert_eq!(saved["name"], "Sandbox");
+        assert_eq!(saved["path"], checkout.to_str().unwrap());
+        assert_eq!(saved["targetBranch"], "main");
+    });
+    // The saved checkout is now refused for a new repository, with a remedy.
+    click(cx, handle, "new-repository");
+    inspect_typed(cx, handle, &view, &events, &checkout);
+    let shown = labels(cx, handle);
+    assert!(
+        shown
+            .iter()
+            .any(|s| s == "Can't use this folder: Sandbox already uses this checkout.")
+    );
+    assert!(
+        shown
+            .iter()
+            .any(|s| s == "Edit Sandbox in the list above, or retire it before adding it again.")
+    );
+}
+
+/// Cancelling the picker changes nothing; an unavailable picker says why and
+/// leaves the typed path as the way in (FOR-70).
+#[gpui::test]
+fn cancelled_or_unavailable_picker_keeps_the_typed_path(cx: &mut gpui::TestAppContext) {
+    let fixture = Fixture::start();
+    let checkout = fixture.root.path().join("typed");
+    git_checkout(&checkout);
+    let (handle, view, events) = open(cx, &fixture);
+    wait(cx, handle, &view, &events, |v, _| v.connected);
+    navigate(cx, handle, "repositories");
+    repository_text(cx, handle, &view, "name", "Kept name");
+    repository_text(cx, handle, &view, "path", "/typed/before/picking");
+    click(cx, handle, "choose-repository-folder");
+    cx.simulate_path_prompt_response(|_| None);
+    cx.run_until_parked();
+    assert!(
+        labels(cx, handle)
+            .iter()
+            .any(|s| s == "Folder choice cancelled. Nothing changed.")
+    );
+    assert_eq!(repository_field(cx, &view, "path"), "/typed/before/picking");
+    assert_eq!(repository_field(cx, &view, "name"), "Kept name");
+    cx.update(|cx| {
+        view.update(cx, |v, cx| {
+            v.folder_picked(Err("No file chooser portal found.".into()));
+            cx.notify();
+        })
+    });
+    assert!(labels(cx, handle).iter().any(|s| s
+        == "The system folder picker is unavailable: No file chooser portal found. Type the checkout path above and choose Inspect path."));
+    assert_eq!(repository_field(cx, &view, "path"), "/typed/before/picking");
+    inspect_typed(cx, handle, &view, &events, &checkout);
+    assert_eq!(repository_field(cx, &view, "name"), "Kept name");
+    assert_eq!(repository_field(cx, &view, "targetBranch"), "main");
+    assert!(
+        !labels(cx, handle)
+            .iter()
+            .any(|s| s.starts_with("To save this repository"))
+    );
+}
+
+/// A non-Git folder offers Initialize; declining writes nothing, and
+/// confirming creates one empty commit without committing existing files.
+#[gpui::test]
+fn initializing_a_plain_folder_requires_confirmation(cx: &mut gpui::TestAppContext) {
+    let fixture = Fixture::start();
+    let folder = std::fs::canonicalize(fixture.root.path())
+        .unwrap()
+        .join("fresh project");
+    std::fs::create_dir(&folder).unwrap();
+    std::fs::write(folder.join("notes.txt"), "existing").unwrap();
+    let (handle, view, events) = open(cx, &fixture);
+    wait(cx, handle, &view, &events, |v, _| v.connected);
+    navigate(cx, handle, "repositories");
+    inspect_typed(cx, handle, &view, &events, &folder);
+    assert_eq!(repository_field(cx, &view, "name"), "fresh project");
+    assert_eq!(repository_field(cx, &view, "targetBranch"), "main");
+    repository_text(cx, handle, &view, "targetBranch", "trunk");
+    assert!(labels(cx, handle).iter().any(|s| s
+        == "Initialize runs git init on branch trunk and creates one empty commit. Its 1 existing entries are not staged or committed."));
+    click(cx, handle, "initialize-repository");
+    click(cx, handle, "cancel");
+    cx.run_until_parked();
+    assert!(!folder.join(".git").exists(), "declining writes nothing");
+    click(cx, handle, "initialize-repository");
+    click(cx, handle, "ok");
+    wait(cx, handle, &view, &events, |v, _| {
+        !v.busy
+            && v.settings.repositories[NEW]
+                .folder
+                .view
+                .as_ref()
+                .is_some_and(|f| f["state"] == "repository")
+    });
+    cx.update_window(handle, |_, window, cx| window.render_frame(cx))
+        .unwrap();
+    let git = |args: &[&str]| {
+        String::from_utf8(
+            std::process::Command::new("git")
+                .arg("-C")
+                .arg(&folder)
+                .args(args)
+                .output()
+                .unwrap()
+                .stdout,
+        )
+        .unwrap()
+    };
+    assert_eq!(git(&["rev-list", "--count", "trunk"]).trim(), "1");
+    assert_eq!(git(&["ls-files", "--cached"]), "");
+    assert_eq!(git(&["status", "--porcelain"]).trim(), "?? notes.txt");
+    assert_eq!(repository_field(cx, &view, "targetBranch"), "trunk");
+    assert!(
+        !labels(cx, handle)
+            .iter()
+            .any(|s| s.starts_with("To save this repository"))
+    );
+    click(cx, handle, "save-repository");
+    wait(cx, handle, &view, &events, |v, _| {
+        !v.busy && v.settings.repository != NEW
+    });
+    cx.read(|cx| {
+        let saved = &view.read(cx).workspace["repositories"][0];
+        assert_eq!(saved["targetBranch"], "trunk");
+        assert_eq!(saved["name"], "fresh project");
+    });
 }
 
 #[gpui::test]
