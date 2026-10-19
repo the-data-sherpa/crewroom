@@ -19,6 +19,16 @@ Simulated (real SQLite, Git, tmux, OS processes and the production `crewroomd`; 
 
 Not executed: `npm run test:e2e` (left to the integrator) and the operator's on-screen check of the Settings selector and overrides.
 
+### Review fixes at `814f804` (2026-10-19)
+
+Code `814f804` on branch `for-79-review-fixes` (from `for-79-work` at `d0cebd9`). Three review findings fixed:
+
+- Saving launch details (queue with a launch, change a queued plan's launch, and a cancelled-run continuation) now checks role availability against the task's project roles, not the workspace catalog. `crewroom-core` `tests/project_settings.rs`: with `sre` disabled in the workspace, project Alpha enabling `sre` and disabling `reviewer`, an Alpha launch with `sre` is accepted and one with `reviewer` is refused as unavailable, both when queuing and when changing a queued plan's launch; project Beta inherits (refuses `sre`, accepts `reviewer`).
+- The coordinator's `list_roles` (`agent-roles`) now lists the run's project roles. `crewroom-runtime` catalog test: Alpha's listing includes the workspace-disabled `sre` and omits `reviewer`; Beta's listing is the reverse. The test exercises the listing helper over roles resolved for the run's project; it does not drive an authenticated agent host.
+- Deleting a principle is refused while workspace or project settings apply it, naming the scopes; after the setting is reset it can be deleted. `crewroom-core` `tests/project_settings.rs`.
+
+Checks at `814f804` through `system_limits.py run`, private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`: `cargo test --no-fail-fast -p crewroom-core -p crewroom-runtime -p crewroom-service` **491 passed / 3 failed** with `TMPDIR` inside the worktree (the shared `/tmp` quota was exhausted). The three failures were `repository_folders` tests that need a temp directory outside any Git checkout. Rerun with `TMPDIR` on a disk-backed directory outside any checkout, core `repository_folders` passes **6/6** and service `repository_folders` passes **1/1**. `npm test` **346/346** with the same outside `TMPDIR`; an earlier run with `TMPDIR` inside the worktree failed path-sensitive tests and hung in `supervision-hosts`. `npm run build` passes. Clippy `--all-targets` for core, runtime and service is clean, and rustfmt is clean on the changed files. The desktop crate was not rebuilt because no desktop code changed. Not executed: `npm run test:e2e` (integrator) and the daemon fixture tests.
+
 ## FOR-76 — Per-project run capacity (2026-10-19)
 
 Implementation `f51dedf` on branch `for-76-work` from main `9d409b5`. All checks below ran at `f51dedf` (the evidence commit changes only documentation) in a fresh worktree prepared with `python3 scripts/prepare_worktree.py --build-helpers`, a private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, and every test command wrapped by `scripts/system_limits.py` (FOR-68). Linux x86_64.
