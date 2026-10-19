@@ -37,6 +37,14 @@ Review fixes at `591968c` (parent `1efaf36`). Two blocking findings were fixed. 
 - The native adapters' `admitted_version` is unchanged. It reads the identity from the attempt's model, which now carries the re-probed identity, and still refuses a version or content that differs from that record (`runner::tests::launch_admits_listed_or_exactly_probed_versions`).
 - Checks at `591968c` (private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, wrapped by `scripts/system_limits.py`): `cargo test -p crewroom-core -p crewroom-runtime`: **372 passed / 0 failed / 3 ignored**. `cargo test -p crewroom-service`: **39/0/0**. `cargo clippy -p crewroom-core -p crewroom-runtime -p crewroom-service --all-targets -- -D warnings` and `cargo fmt --check` for core and runtime: clean. `npm test`: **345/345**. `npm run build`: passes. The desktop crate is not affected by this change and was not rerun. The live probe was not rerun. `npm run test:e2e` was not run (integrator).
 
+Integration on main (2026-10-19): rebased without code changes onto main `a1604dd`. The implementation `5d15a5f` is now `ac448e9`, its evidence commit `1efaf36` is `8ad9847`, the review fixes `591968c` are `2255765`, and their evidence commit is `abc7ea9`. Only `docs/status.md` and this file had conflicts; both tickets' entries are kept. The checks above ran at the pre-rebase revisions. Checks ran at `e1305c0` on main `5427823`, which has the same tree as `abc7ea9` on main `a1604dd` (main's two later commits add and remove one document) (private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, all through `scripts/system_limits.py run`, 1-minute load about 0.5–3.5):
+
+- `npm test`: **345/345**. `npm run build`: passes.
+- `npm run test:e2e`: **31/31** (worktree prepared with `scripts/prepare_worktree.py --build-helpers`).
+- `cargo test --no-fail-fast -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop`: **570 passed / 0 failed / 18 ignored** over 67 test binaries, including the desktop crate.
+- `cargo clippy -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop --all-targets -- -D warnings` and `cargo fmt --check` for these crates: clean.
+- Simulated/local only at integration: the live isolated probe was not rerun, and the operator service on port 4318 was not touched. Its restart with model selection checked in the restarted app remains (coordinator).
+
 ## FOR-70 — Add a repository by choosing a folder (2026-10-19)
 
 Implementation `4f9f295` on branch `for-70-repository-folder-picker` from main `a1faa87`. The core module is `crates/crewroom-core/src/repository_folders.rs`, and the service routes are `GET /api/repository-folders/inspect` and `POST /api/repository-folders/initialize`. The desktop flow is in `crates/crewroom-desktop/src/workbench/settings/repository_folder.rs`.
