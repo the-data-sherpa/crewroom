@@ -294,6 +294,12 @@ impl Scheduler {
         if self.0.workflow.busy(id) || self.0.launches.busy(id) {
             return Ok(());
         }
+        // FOR-76: a paused holder whose agents are confirmed stopped frees its
+        // slot (normally at pause completion; this also covers earlier pauses).
+        if self.store(|s| s.release_paused_coding_slot(id))? {
+            self.kick();
+            return Ok(());
+        }
         if present(&holder["schedule"]) && present(&holder["launch"]) && self.replay(holder)? {
             Self::wait(self.launch(holder.clone(), None)?).await?;
         } else if present(&holder["startRequest"])

@@ -538,12 +538,49 @@ impl Store {
                 run = s.change_run(run_id, Transition::ReviewRegressed)?;
             }
             run["schedule"] = json!({"id":id(),"at":s.time()});
-            if run["slotRelease"]["reason"] == "migration" {
+            if ["migration", "paused"]
+                .contains(&run["slotRelease"]["reason"].as_str().unwrap_or(""))
+            {
                 remove(&mut run, "slotRelease");
             }
             s.save_run(&run)?;
             s.occupy_slot(run_id)?;
             Ok(())
+        })
+    }
+    /// FOR-76: a coding run that is paused (desired and actual state) with
+    /// every agent's process ownership confirmed stopped frees its project
+    /// slot, so the next queued ticket can be admitted. Unconfirmed ownership
+    /// keeps the slot. Review-gate pauses (`review`, `validation`, `merged`)
+    /// are governed by their own release, and a comparison keeps its slot
+    /// until its result is committed. The run stays resumable: an explicit
+    /// Resume reclaims a slot, or waits with priority in its project when the
+    /// project is full. Returns whether the slot was released.
+    pub fn release_paused_coding_slot(&self, run_id: &str) -> Result<bool> {
+        self.transaction(|s| {
+            let mut run = s.get_run(run_id)?;
+            if !coding(&run)
+                || !s.holds_slot(run_id)?
+                || run["status"] != "paused"
+                || run["desiredState"] != "paused"
+                || run.get("resumeRequest").is_some_and(|v| !v.is_null())
+                || ["review", "validation", "merged"]
+                    .contains(&run["pauseReason"].as_str().unwrap_or(""))
+            {
+                return Ok(false);
+            }
+            let runtime = s.runtime(run_id)?;
+            let attempts = runtime["attempts"].as_array().unwrap();
+            if attempts
+                .iter()
+                .any(|a| a["state"] != "admitted" && a["ownership"] != "stopped")
+            {
+                return Ok(false);
+            }
+            run["slotRelease"] = json!({"reason":"paused","at":s.time()});
+            s.save_run(&run)?;
+            s.vacate_slot(run_id)?;
+            Ok(true)
         })
     }
     pub fn set_desired_state(&self, run_id: &str, desired: &str) -> Result<Value> {

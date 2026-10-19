@@ -5,9 +5,9 @@
 //! ticket's target repository. Each project admits up to its capacity
 //! (default 1) of coding runs. An optional workspace ceiling bounds the total.
 //! A run occupies capacity while it holds a slot (until review release,
-//! merge or cancellation) or while any of its agents' process ownership is
-//! not confirmed stopped, so a paused run whose ownership is unconfirmed keeps
-//! its slot. A start over capacity is queued with the reason rather than
+//! merge, cancellation, or a pause that confirms every agent stopped) or
+//! while any of its agents' process ownership is not confirmed stopped, so a
+//! paused run whose ownership is unconfirmed keeps its slot. A start over capacity is queued with the reason rather than
 //! refused, and the scheduler admits the next queued plan when a slot frees.
 //!
 //! The ticket claim is atomic: `coding_slots.task_id` is unique, so two runs

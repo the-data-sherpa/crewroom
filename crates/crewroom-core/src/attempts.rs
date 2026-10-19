@@ -518,7 +518,12 @@ impl Store {
                 .unwrap()
                 .iter()
                 .any(|a| a["state"] != "admitted" && a["ownership"] != "stopped");
-            s.change_run(run_id, Transition::FinishPause { unresolved })
+            let run = s.change_run(run_id, Transition::FinishPause { unresolved })?;
+            // FOR-76: a pause that confirms every agent stopped frees the slot.
+            if s.release_paused_coding_slot(run_id)? {
+                return s.get_run(run_id);
+            }
+            Ok(run)
         })
     }
 }

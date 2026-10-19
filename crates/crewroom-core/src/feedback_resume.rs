@@ -153,7 +153,11 @@ impl Store {
             if s.holds_slot(run_id)? || s.capacity_hold(&run)?.is_none() {
                 return Ok(false);
             }
-            if !coding(&run) || run["slotRelease"]["reason"] != "review" {
+            // FOR-76: a run that freed its slot while paused waits the same way.
+            if !coding(&run)
+                || !["review", "paused"]
+                    .contains(&run["slotRelease"]["reason"].as_str().unwrap_or(""))
+            {
                 return Ok(false);
             }
             if !["paused", "attention_required"].contains(&run["status"].as_str().unwrap_or(""))

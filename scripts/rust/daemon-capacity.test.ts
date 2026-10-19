@@ -9,7 +9,8 @@ import {seedRepository} from '../../tests/fixtures/repository';
 
 // FOR-76: per-project run capacity. Two projects run coding tickets at once with separate
 // coordinators, worktrees and supervision; a third ticket in a full project is queued with its
-// reason, survives a daemon restart, and starts by itself when its project's slot frees.
+// reason, survives a daemon restart, and starts by itself when its project's slot frees because the
+// holder paused with stopped ownership; the paused run's Resume then waits for the next free slot.
 // Agents are the scripted fixture runner with synthetic provider replies (simulated, not live).
 test('two projects execute concurrently and a queued ticket starts when its project frees a slot',{timeout:180000},async t=>{
  const f=await workflowFixture(t,'coding',0,false,{service:true});
@@ -49,12 +50,20 @@ test('two projects execute concurrently and a queued ticket starts when its proj
  await f.kill();await f.reopen();
  await running(a1.id);await running(b1.id);
  assert.equal((await plan(a2.id)).holdReason,'Waiting for a slot in Native workflow: 1 of 1 running');
- // Freeing the alpha slot admits the queued alpha ticket automatically; beta is unaffected.
- await client().request(`/api/runs/${a1.id}/cancel`,{});
+ // Pausing the alpha holder with its ownership confirmed stopped frees the alpha slot: the queued
+ // alpha ticket is admitted automatically; beta is unaffected.
+ await client().request(`/api/runs/${a1.id}/pause`,{});
  const next=await running(a2.id);assert.equal(next.attempts.length,1);
+ const paused=await state(a1.id);
+ assert.equal(paused.run.status,'paused');assert.equal(paused.run.pauseReason,'operator');assert.equal(paused.run.slotRelease.reason,'paused');
+ assert.ok(paused.attempts.every((a:any)=>a.ownership==='stopped'));
  assert.equal((await state(b1.id)).run.status,'running');
  const after=await client().request('/api/workspace');
  assert.deepEqual(new Set(after.queue.slots.map((s:any)=>s.runId)),new Set([b1.id,a2.id]));
- await client().request(`/api/runs/${a2.id}/cancel`,{});await client().request(`/api/runs/${b1.id}/cancel`,{});
+ // Resume while alpha is full waits; cancelling the new holder frees the slot and the paused run resumes.
+ await client().request(`/api/runs/${a1.id}/resume`,{});assert.equal((await state(a1.id)).run.resumeRequest.state,'queued');
+ await client().request(`/api/runs/${a2.id}/cancel`,{});
+ const resumed=await running(a1.id);assert.equal(resumed.run.slotRelease,undefined);
+ await client().request(`/api/runs/${a1.id}/cancel`,{});await client().request(`/api/runs/${b1.id}/cancel`,{});
  t.diagnostic(JSON.stringify({worktrees,hostPids:[alpha.attempts[0].hostPid,betaRun.attempts[0].hostPid,next.attempts[0].hostPid]}));
 });

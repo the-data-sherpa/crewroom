@@ -241,6 +241,78 @@ fn a_paused_run_with_unconfirmed_ownership_keeps_its_slot() {
 }
 
 #[test]
+fn a_paused_run_with_stopped_ownership_frees_its_slot_and_stays_resumable() {
+    let f = fixture();
+    let alpha = f.project("alpha");
+    let a1 = f.plan(&alpha, "Alpha one");
+    let a2 = f.plan(&alpha, "Alpha two");
+    let a3 = f.plan(&alpha, "Alpha three");
+    let run = f.store.claim_next_coding_slot().unwrap().unwrap();
+    assert_eq!(run["id"], a1["id"]);
+    let attempt = f.execute(id(&a1));
+    // An operator pause: still holding while the stop is unconfirmed.
+    f.store.request_pause(id(&a1)).unwrap();
+    f.store.begin_pause(id(&a1), None).unwrap();
+    assert!(!f.store.release_paused_coding_slot(id(&a1)).unwrap());
+    assert!(f.store.holds_slot(id(&a1)).unwrap());
+    f.store.record_ownership(&attempt, true, None).unwrap();
+    let paused = f.store.finish_pause(id(&a1)).unwrap();
+    assert_eq!(paused["status"], "paused");
+    assert_eq!(paused["pauseReason"], "operator");
+    assert_eq!(paused["slotRelease"]["reason"], "paused");
+    assert!(!f.store.holds_slot(id(&a1)).unwrap());
+    // The next queued ticket in the project is admitted.
+    assert_eq!(
+        f.store.claim_next_coding_slot().unwrap().unwrap()["id"],
+        a2["id"]
+    );
+    // Resume while the project is full queues the Resume ahead of new plans.
+    assert!(f.store.queue_review_resume(id(&a1)).unwrap());
+    assert!(f.store.get_run(id(&a1)).unwrap()["resumeRequest"].is_object());
+    assert!(f.store.reclaim_coding_slot(id(&a1), false).is_err());
+    f.store.set_desired_state(id(&a2), "cancelled").unwrap();
+    assert!(
+        f.store.claim_next_coding_slot().unwrap().is_none(),
+        "The queued Resume keeps priority over {}",
+        id(&a3)
+    );
+    assert!(!f.store.queue_review_resume(id(&a1)).unwrap());
+    f.store.reclaim_coding_slot(id(&a1), false).unwrap();
+    assert!(f.store.holds_slot(id(&a1)).unwrap());
+    assert!(
+        f.store
+            .get_run(id(&a1))
+            .unwrap()
+            .get("slotRelease")
+            .is_none()
+    );
+}
+
+#[test]
+fn a_transient_or_review_pause_keeps_its_slot() {
+    let f = fixture();
+    let alpha = f.project("alpha");
+    let a1 = f.plan(&alpha, "Alpha one");
+    f.plan(&alpha, "Alpha two");
+    f.store.claim_next_coding_slot().unwrap().unwrap();
+    let attempt = f.execute(id(&a1));
+    f.store.record_ownership(&attempt, true, None).unwrap();
+    // A stop while the run should keep running (recovery, rebrief) keeps it.
+    f.store.begin_pause(id(&a1), Some("recovery")).unwrap();
+    let stopped = f.store.finish_pause(id(&a1)).unwrap();
+    assert_eq!(stopped["status"], "paused");
+    assert_eq!(stopped["desiredState"], "running");
+    assert!(f.store.holds_slot(id(&a1)).unwrap());
+    // The human review gate has its own release.
+    f.store.set_desired_state(id(&a1), "paused").unwrap();
+    f.store.begin_pause(id(&a1), Some("validation")).unwrap();
+    f.store.finish_pause(id(&a1)).unwrap();
+    assert!(!f.store.release_paused_coding_slot(id(&a1)).unwrap());
+    assert!(f.store.holds_slot(id(&a1)).unwrap());
+    assert!(f.store.claim_next_coding_slot().unwrap().is_none());
+}
+
+#[test]
 fn a_queued_start_request_admits_no_agent_until_a_slot_frees() {
     let f = fixture();
     let alpha = f.project("alpha");
