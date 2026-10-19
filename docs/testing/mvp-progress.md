@@ -6,7 +6,7 @@ Historical revision IDs and source hashes below refer to the original private sn
 
 ## FOR-86 — Claude adapter admission test under load (2026-10-19)
 
-Code `fd6cb73` and `426fa01` on branch `for-86-work` from main `3f05023`; only `crates/crewroom-runtime/tests/claude_adapter.rs` changes. Private `CARGO_TARGET_DIR` in the worktree, every test command through `scripts/system_limits.py run`. All results use the fake Claude protocol peer (`tests/fixtures/claude-rpc.py`) and fake account metadata; nothing contacted a live service.
+Code `fd6cb73` and `426fa01` on branch `for-86-work` from main `3f05023` (rebased without code changes onto main `b71b476` as `8168ffa` and `71bacf3`); only `crates/crewroom-runtime/tests/claude_adapter.rs` changes. Private `CARGO_TARGET_DIR` in the worktree, every test command through `scripts/system_limits.py run`. All results use the fake Claude protocol peer (`tests/fixtures/claude-rpc.py`) and fake account metadata; nothing contacted a live service.
 
 **Cause, reproduced.** `Fixture::new` wrote the fake `claude` CLI with `std::fs::write` in the test process, and `open()` then executed it (`--version`, then the launch). Any spawn by a sibling test thread copies all open descriptors, `O_CLOEXEC` included, until its child execs. When one copy is a writer of the script, exec fails with `ETXTBSY`, and `open()` returns that error. Sixteen concurrent copies of the unchanged `claude_adapter` binary (load 23–40) failed 1 of 208 runs with `Io(Os { code: 26, kind: ExecutableFileBusy, message: "Text file busy" })` at an `open().unwrap()`. That run's panic was in `duplicate_terminal_…`; `alias_drift_and_changed_account_block_admission` unwraps the same `open()` for its `normal` fixture, so it fails in the same way. The FOR-75 panic text was not retained, so this is the cause the code and this reproduction support, not a recovered copy of that panic. A standalone probe (4 writer threads that write and exec a script, 4 threads spawning `/bin/true`) failed 245 of 8000 execs with in-process writes and 0 of 8000 when a separate process wrote the file. Before the 16-copy runs, the file alone at load 11–35 had passed 30 + 75 + 60 runs, and the test alone had passed 480, so the window is narrow.
 
@@ -22,7 +22,14 @@ Code `fd6cb73` and `426fa01` on branch `for-86-work` from main `3f05023`; only `
 | `npm test` | **346/346** |
 | `npm run build` | passes (existing chunk-size warning) |
 
-`npm run test:e2e` is left to the integrator. Follow-ups: FOR-89 (other test fixtures still write executables in-process), FOR-90 (the `close()` ownership report above).
+Follow-ups: FOR-89 (other test fixtures still write executables in-process), FOR-90 (the `close()` ownership report above).
+
+**Integration on main `b71b476`** (branch rebased; only `docs/status.md` and this file conflicted, both sides kept). Checks at `78e4b22`, all through `system_limits.py run` with a private `CARGO_TARGET_DIR`:
+
+- `npm test`: **346 passed / 0 failed**. `npm run build`: passes (existing chunk-size warning).
+- `npm run test:e2e` (after `prepare_worktree.py --build-helpers`): **31 passed**.
+- Four-crate `cargo test --locked --no-fail-fast -j6 ... -- --test-threads=4`: **684 passed, 0 failed, 18 ignored**; `alias_drift_and_changed_account_block_admission` passed.
+- `cargo clippy --locked` for the four crates `--all-targets -- -D warnings` and `cargo fmt --check`: clean.
 
 ## FOR-88 — Project job-model picker and project-aware role previews (2026-10-19)
 
