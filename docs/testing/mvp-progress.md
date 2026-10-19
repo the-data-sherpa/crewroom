@@ -4,6 +4,51 @@ The operator requested that each work item pass its checks before the next start
 
 Historical revision IDs and source hashes below refer to the original private snapshots before the FOR-17 history rewrite. Sanitized copies are not byte-identical evidence for rewritten revisions; replay requires the private archive. New validation is recorded separately.
 
+## FOR-90 — Runner close ownership report under heavy load (2026-10-19)
+
+Code `b4b246f` on branch `for-90-work` from main `860acac`; only `crates/crewroom-runtime/src/inspect.rs` changes. Private `CARGO_TARGET_DIR` in the worktree, and every test command ran through `scripts/system_limits.py run`. Linux x86_64, 16 CPUs. All runner results use the fake Claude protocol peer (`tests/fixtures/claude-rpc.py`). Nothing contacted a live service.
+
+**Stress recipe.** 16 concurrent copies of the `claude_adapter` test binary (`--test-threads=4`) per round, with 32 `sh` busy-loop burners. Load average was 136–150 by round 5. The diagnostics were temporary `eprintln!` lines on each uncertain path of `inspect` and on uncertain settle results, captured with `--nocapture`. They were removed before commit `b4b246f`.
+
+**Cause, confirmed from code and diagnostics.** Before this change, `inspect` ran `ps` first and then checked whether the lease was free. Under this load the listing (process start plus about 2 000 `/proc` entries) is slow, and the scoped `lsof` alone took up to 589 ms. A runner that exited during the listing therefore appeared in it, while the lease check that followed found its lock released, and the result was "A process survives without its inherited ownership lock." Diagnostic run with the old order: 160 runs, 35 observations of a free lease with a listed member. In **all 35**, `/proc/<pid>` was already gone when it was read straight after, so the process had finished exiting. It had not been stuck between releasing its files and becoming a zombie (the window the ticket suspected); that window was never observed. The settle then had to complete a re-inspection within its 1 s window. It cancelled any re-inspection still running at the deadline, so a slow listing left the stale first answer as the result. This is the FOR-90 failure. The same diagnostic run had one other `close()` failure, "The leader exited; surviving lock holders require reconciliation.", which is the same snapshot skew in the other direction.
+
+**Change.**
+- The lease is read **before** the process listing. A member listed after a free lease outlived the lock's release.
+- Members are classified from the kernel. On Linux, a member is exiting when `/proc/<pid>` is gone or every task in `/proc/<pid>/task/*/stat` is `Z`/`X` or has `PF_EXITING` (0x4) set. Unreadable entries count as running. On other systems, only a process that `kill(pid, 0)` reports as `ESRCH` counts, because `ps` already marks exiting processes with `E` there. When every listed member is exiting, with the lock free or held, the reason is "Every remaining process is exiting; ownership is not yet released." From then on the settle uses a 5 s window (`EXIT_WINDOW`) instead of 1 s, even if later inspections give another reason.
+- The settle window limits when a re-inspection may **start**. A re-inspection already running is no longer cancelled; it is limited by its own 5 s command timeouts.
+- Ownership assertions are not weakened. Only a completed fresh inspection that finds the group empty and the lock free reports `stopped`. A running member without the lock is still uncertain with the original reason and is never signalled.
+
+**Tests (unit, `inspect::tests`, real processes).** Each test uses a real `sleep` process as the recorded owner. Only the `PF_EXITING` reading is replaced, through a probe parameter, because a process cannot be held mid-exit reliably.
+- `a_member_exiting_after_its_lock_release_settles_stopped_past_the_window`: the member is reported exiting and is reaped 1.5 s later; the settle reports `stopped` after more than 1 s. When `EXIT_WINDOW` is set to 1 s, the test fails.
+- `an_exit_seen_holding_the_lock_keeps_the_longer_window_until_release`: the exiting member holds the lock, the group empties at 1.3 s, and the lock is released at 1.9 s; the result is `stopped`. When the longer window is not kept after the reason changes, the test fails.
+- `a_survivor_without_its_lock_stays_uncertain_and_is_never_signalled`: `stop_owned` on a running member without the lock returns uncertain with the survivor reason, in less than `EXIT_WINDOW`, and the process is still alive.
+- `task_stat_flags_and_state_decide_exiting`: parses `stat` lines whose command name contains spaces and parentheses.
+- `the_kernel_shows_a_running_process_as_not_exiting_and_a_dead_one_as_exiting`: a running child and the test process are not exiting; an unreaped zombie and a reaped PID are.
+
+**Stress results.**
+
+| Code | Runs | Failures | Notes |
+|---|---|---|---|
+| main `860acac` (unchanged) | 224 (14 rounds) | 0 | The original rate (1 of 240) is too low to show a before/after difference in this many runs |
+| Old order plus exiting classification (diagnostic) | 160 | 1 | "leader exited" skew; 35 free-lease observations, every member already gone |
+| Lease-first order with the 1 s cancelling settle (diagnostic) | 240 | 2 | Lease held when read, group empty when listed; the settle could not complete a re-inspection |
+| Lease-first order, settle not cancelled, window not kept (diagnostic) | 240 | 3 | The reason changed from exiting to "leader exited" after the 1 s mark, so the window shrank back |
+| Final (diagnostic build) | 240 | 0 | 0 uncertain settle results; no free-lease observation with a listed member |
+| Final `b4b246f` (no diagnostics) | 208 (13 rounds) | 0 | Load 136–150 |
+
+**Checks at `b4b246f`.**
+
+| Check | Result |
+|---|---|
+| `cargo test --locked --no-fail-fast -j6 -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop -- --test-threads=4` | **689 passed, 0 failed, 18 ignored**; `crewroom-runtime` lib 138 passed, 1 ignored |
+| `cargo clippy -p crewroom-runtime --all-targets -- -D warnings`; `cargo fmt -p crewroom-runtime -p crewroom-core -- --check` | clean |
+| `npm test` | **346/346** |
+| `npm run build` | passes (existing chunk-size warning) |
+
+`npm run test:e2e` was not run by the implementer; the integrator runs it.
+
+Follow-up: FOR-92. On Linux, a process whose thread-group leader called `exit` while other threads run is listed as `Zl` and filtered out as a zombie. A synthetic check showed `ZNl` with 2 tasks.
+
 ## FOR-89 — Test fixtures installed without an in-process writer (2026-10-19)
 
 Code `ab2d161` on branch `for-89-work` from main `860acac` (on main as `53ef179`; see the integration record below); tests and test support only. Private `CARGO_TARGET_DIR` in the worktree, `-j6`, `--test-threads=4`, and every test command run through `scripts/system_limits.py run`. All fixtures are simulated harness scripts with synthetic data. Nothing contacted a live service.
