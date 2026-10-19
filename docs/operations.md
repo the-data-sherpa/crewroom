@@ -111,7 +111,8 @@ The launcher requires explicit absolute data and role paths. The checkout wrappe
 | Native Principles | `principles.json` beside the role file; reusable guidance with per-principle revisions |
 | Native Playbooks | `playbooks.json` beside the role file; reusable checklists with per-playbook revisions |
 | Launcher/daemon `--port` | 4318; retain the same port for live-host reattachment |
-| `CREWROOM_RUNTIME_CONFIG` | Private regular JSON file owned by this user, mode 0600; absent means unavailable runner |
+| `CREWROOM_RUNTIME_CONFIG` | Private regular JSON file owned by this user, mode 0600. When set it is the active runner source and Settings → Runner shows it read-only; a broken file still fails the first start |
+| `<data>/runtime.json` | Runner configuration saved from **Settings → Runner** (FOR-83), mode 0600; used when `CREWROOM_RUNTIME_CONFIG` is unset. See [runner settings](#runner-settings). Neither source means an unavailable runner |
 | `CREWROOM_TMUX` | Optional trusted tmux executable; otherwise discovered on daemon PATH |
 | `<data>/jira.json` | Jira connection (site, cloud ID, account, optional delivery transitions) read by the native daemon; per-project filters live in `workflow.sqlite` |
 | `<data>/bitbucket.json` | Repository publication/hosted-check metadata read by the native daemon. An optional per-repository `remote` (HTTPS or SSH publish remote, no credentials) selects the publication provider; without it the entry is Bitbucket. A `github.com` remote publishes to GitHub; see [GitHub pull requests](#github-pull-requests). A remote on a host with no provider is shown as an unavailable publication provider. The legacy browser server rejects `remote` |
@@ -122,6 +123,16 @@ The launcher requires explicit absolute data and role paths. The checkout wrappe
 | `CREWROOM_GITHUB_TOKEN` | Optional github.com personal access token, read server-side; overrides the saved GitHub token and is reported as the active source |
 
 Legacy `CREWROOM_DATA_DIR`, `CREWROOM_PORT`, `CREWROOM_JIRA_CONFIG` and `CREWROOM_PUBLICATION_CONFIG` do not select these native settings. Changing the selected paths opens a different installation; it does not move or import existing data. Reopening a live daemon does not reload its environment.
+
+### Runner settings
+
+**Settings → Runner** lists what the agent runner needs and what this machine has. Each item reads **Ready**, **Missing** or **Failing**, with a fix: runtime root (a private folder; the tmux socket inside it must fit the Unix socket path limit), tmux, the Crewroom process helpers, Rust Agent Mail (an MCP handshake with the saved token; no message is sent), the Docker engine (`/_ping`), pinned check and evaluation images (`/images/<image>/json`), each harness (configured executable plus its latest model probe), OMP provider entries and execution profiles. Harnesses are individually optional; at least one must be ready. *Ready* means configured and reachable. Model access is confirmed only when an agent runs.
+
+The form edits the runtime root, Mail URL, project folder and token, Docker socket, evaluation image and harness paths. **Advanced (JSON)** holds every other runner key (`catalog`, `policy`, `models.providers`, `tools`, `hostPorts` and so on). The service validates the whole configuration before writing anything, then writes `<data>/runtime.json` owner-only (0600). The Mail token and each OMP provider `apiKey` go to the encrypted credential store (as `runner-mail` and `runner-provider-<name>`); the file holds only a `{"$crewroomSecret": "<name>"}` reference, and responses report only whether a secret is stored. Provider names must be lowercase letters, digits, `.`, `_` or `-`. Provider `headers` are refused here because they can carry credentials; keep them in a file selected by `CREWROOM_RUNTIME_CONFIG`.
+
+Saving applies the configuration without a manual stop and start when no run owns live agent processes: `crewroomd` closes the service and starts it again in the same process on the same port, and the app reconnects. While a run owns live processes (or is running or pausing), the configuration is saved but not applied, the page names those runs, and **Apply now** is offered once they are paused or finished; `POST /api/runner/apply` refuses until then. A service embedded by another program cannot reload itself and says that a stop and start is needed. If the saved configuration cannot be loaded or the runner does not start, the service stays reachable with the runner off and Settings → Runner shows the reason.
+
+When `CREWROOM_RUNTIME_CONFIG` is set, it stays the active source for headless use: Settings → Runner shows its path and prerequisites, never its secrets, and refuses edits. **Apply now** re-reads that file. Remove the variable and restart the service to manage the runner from the app.
 
 ### Stored credentials
 

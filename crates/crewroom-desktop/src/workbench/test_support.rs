@@ -186,7 +186,7 @@ fn service(
                 let runtime=json!({"root":hosts,"socket":hosts.join("tmux.sock"),"ompBinary":"/usr/bin/false", "mail":{"url":"http://127.0.0.1:9/mcp/","token":"synthetic-native-fixture","projectRoot":root,"retentionSeconds":86400,"atcDisabled":true}, "catalog":[{"provider":"fixture","id":"model","api":"openai-responses","inputs":["text"],"efforts":["low"],"tools":true}],"policy":{},"models":{"providers":{}}});
                 // Positive queued insertion validates real model policy and workflow state.
                 // No launch is saved; all executable paths fail closed if accidentally invoked.
-                crewroom_service::Service::start_with_options(&data,&roles,0,crewroom_service::ServiceOptions {runtime:execution.then_some(runtime),helper:"/usr/bin/false".into(),host:"/usr/bin/false".into(),tmux:"/usr/bin/false".into(),jira:None,publication:vec![],publication_unavailable:vec![],environment:json!({}),github:None}).await.unwrap()
+                crewroom_service::Service::start_with_options(&data,&roles,0,crewroom_service::ServiceOptions {runtime:execution.then_some(runtime),helper:"/usr/bin/false".into(),host:"/usr/bin/false".into(),tmux:"/usr/bin/false".into(),jira:None,publication:vec![],publication_unavailable:vec![],environment:json!({}),github:None,runner:Default::default()}).await.unwrap()
             } else {crewroom_service::Service::start(&data,&roles,0).await.unwrap()};
             send.send(service.info.clone()).unwrap();let _=stopped.await;service.close().await.unwrap();
         });
@@ -412,8 +412,8 @@ fn navigate_with(
                 act(cx, handle, "open-specialist-picker", keyboard);
             }
         }
-        "roles" | "models" | "principles" | "playbooks" | "repositories" | "learning"
-        | "import-jira" => {
+        "roles" | "models" | "runner" | "principles" | "playbooks" | "repositories"
+        | "learning" | "import-jira" => {
             if !present(cx, handle, target) {
                 act(cx, handle, "settings", keyboard);
             }

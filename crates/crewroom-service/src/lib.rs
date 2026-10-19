@@ -4,6 +4,7 @@ mod intake;
 mod jira_refresh;
 mod role_catalog;
 mod routes;
+mod runner;
 mod scheduler;
 mod ticket_sources;
 mod views;
@@ -12,6 +13,7 @@ use crewroom_runtime::providers::secrets::{Integration, SecretStore};
 use execution::Execution;
 pub use execution::ServiceOptions;
 pub use github::GitHubOptions;
+pub use runner::RunnerLoad;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use axum::{
@@ -66,6 +68,8 @@ struct AppState {
     secrets: SecretStore,
     /// GitHub personal-access-token connection and its last observed check.
     github: Arc<github::GitHub>,
+    /// Settings → Runner facts and the reload request channel (FOR-83).
+    runner: Arc<runner::RunnerState>,
 }
 #[derive(Clone)]
 struct Access(Arc<Mutex<Option<AuthorityState>>>);
@@ -233,6 +237,7 @@ impl Service {
             pid: std::process::id(),
         };
         let (changes, _) = watch::channel(0u64);
+        let runner = Arc::new(runner::RunnerState::new(&data, options.as_ref()));
         let inner = Arc::new(Mutex::new(Some(AuthorityState {
             authority: authority.clone(),
             store,
@@ -260,6 +265,7 @@ impl Service {
             stopping: Arc::new(AtomicBool::new(false)),
             secrets,
             github,
+            runner,
         };
         let app = Router::new()
             .route("/api/health", get(health))
@@ -358,6 +364,15 @@ impl Service {
             return Err(error.context(format!("Startup failed; cleanup: {cleanup:?}")));
         }
         Ok(server)
+    }
+    /// Requests to restart this service with the saved runner configuration
+    /// (FOR-83). Taking the receiver promises that the caller closes this
+    /// service and starts it again when the value changes; until then Settings
+    /// → Runner reports that a manual stop and start is needed.
+    pub fn reload_requests(&self) -> watch::Receiver<u64> {
+        let runner = &self.owner.as_ref().expect("Service owner").state.runner;
+        runner.supervised.store(true, Ordering::SeqCst);
+        runner.reload.subscribe()
     }
     pub async fn close(mut self) -> anyhow::Result<()> {
         let owner = self.owner.take().expect("Service owner");
@@ -663,6 +678,7 @@ async fn workspace_value(state: &AppState) -> Result<Value, ApiError> {
         }
     }
     value["modelDiscovery"] = model_discovery(state);
+    value["runner"] = runner::summary(state);
     ticket_sources::project(&mut value, &runs).await?;
     Ok(value)
 }
@@ -714,6 +730,9 @@ async fn read(
     }
     if path == "repository-folders/inspect" {
         return repository_folder(&state, None, query).await.map(Json);
+    }
+    if path == "runner" {
+        return runner::view(&state).await.map(Json);
     }
     if let Some(e) = &state.execution
         && let Some(value) = views::read(e, &path, &query).await?
@@ -791,7 +810,7 @@ async fn repository_folder(
 }
 fn unavailable() -> ApiError {
     Error::Conflict(
-        "Rust runner integration is not configured. No agent was started or stopped.".into(),
+        "Rust runner integration is not configured. No agent was started or stopped. Open Settings → Runner to configure it.".into(),
     )
     .into()
 }
@@ -803,6 +822,11 @@ async fn mutate(
     Path(path): Path<String>,
     Json(body): Json<Value>,
 ) -> Result<Json<Value>, ApiError> {
+    // Runner settings sit outside the workflow operation queue: a reload
+    // drains that queue while it closes the service.
+    if let Some(action) = path.strip_prefix("runner/") {
+        return runner::mutate(&state, action, body).await.map(Json);
+    }
     if let Some(e) = &state.execution {
         let owned = state.clone();
         let task = e.operations.enqueue(

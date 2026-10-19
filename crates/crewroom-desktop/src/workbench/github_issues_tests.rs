@@ -124,6 +124,7 @@ fn native_project_confirms_github_issues_sets_filters_and_syncs_truthfully(
             publication: vec![],
             publication_unavailable: vec![],
             environment: json!({}),
+            runner: Default::default(),
             github: Some(crewroom_service::GitHubOptions {
                 client: crewroom_runtime::providers::github::GitHubClient::new(Some(&origin))
                     .unwrap(),

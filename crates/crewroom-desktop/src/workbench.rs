@@ -105,6 +105,7 @@ enum Panel {
     Queue,
     Learning,
     NeedsYou,
+    Runner,
 }
 struct Draft {
     brief: Entity<TextareaState>,
@@ -357,6 +358,9 @@ impl Workbench {
                                 && t["sourceRevision"].as_u64() == Some(draft.source_revision)
                         })
                 });
+                if self.workspace["runner"] != value["runner"] {
+                    self.settings.runner.stale = true;
+                }
                 self.workspace = value;
                 self.refresh_comparison();
             }
@@ -367,6 +371,8 @@ impl Workbench {
                 }
                 if value {
                     self.connection_error.clear();
+                    // A runner reload restarts the service; re-read its view.
+                    self.settings.runner.stale = true;
                 }
             }
             Event::Live {
@@ -380,6 +386,8 @@ impl Workbench {
             } => {
                 if path.starts_with(settings::repository_folder::INSPECT) {
                     self.settings.inspected(&path, result);
+                } else if path == settings::runner::READ {
+                    self.settings.runner.read(result);
                 } else if path == "/comparisons" || path.starts_with("/comparisons/") {
                     self.comparison_read(&path, result);
                 } else if generation == self.observation.generation && path.ends_with("/feedback") {
@@ -455,6 +463,12 @@ impl Workbench {
                         }
                         .into();
                         self.error.clear();
+                        if path.starts_with("/runner/") {
+                            self.settings.runner.saved();
+                            if let Some(text) = value["notice"].as_str() {
+                                self.notice = text.into();
+                            }
+                        }
                         if let Some(text) = credentials::saved_notice(&path) {
                             self.notice = text.into();
                             if let Some(facts) = value.get("credentials") {
@@ -1182,6 +1196,10 @@ impl Render for Workbench {
                 ),
                 Panel::Models => (
                     settings(self.settings_nav(cx), self.models(window, cx)),
+                    None,
+                ),
+                Panel::Runner => (
+                    settings(self.settings_nav(cx), self.runner_panel(window, cx)),
                     None,
                 ),
                 Panel::Roles => (

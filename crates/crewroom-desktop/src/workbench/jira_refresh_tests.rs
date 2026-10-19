@@ -145,6 +145,7 @@ fn native_project_confirms_a_jira_site_sets_filters_and_refreshes_truthfully(
             publication: vec![],
             publication_unavailable: vec![],
             environment: json!({}),
+            runner: Default::default(),
             github: None,
         }
         },

@@ -19,7 +19,7 @@ pub const EXECUTABLES: [(Harness, &str); 3] = [
 
 pub const REASON: &str =
     "Agent runner is not configured, so this service cannot start agents or confirm model access.";
-pub const REMEDY: &str = "Create the private runtime configuration, set CREWROOM_RUNTIME_CONFIG for the service, then stop and restart the service. Until then you can save model choices; they are checked when the runner is configured.";
+pub const REMEDY: &str = "Open Settings → Runner to see what the runner needs and save its configuration (headless services can set CREWROOM_RUNTIME_CONFIG instead). Until then you can save model choices; they are checked when the runner is configured.";
 
 fn on_path(path: &str, name: &str) -> Option<std::path::PathBuf> {
     std::env::split_paths(path)

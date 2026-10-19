@@ -30,6 +30,7 @@ print(json.dumps({'models':[{'provider':'fixture','id':k,'selector':'fixture/'+k
         publication: vec![],
         publication_unavailable: vec![],
         environment: json!({"PATH":"/usr/bin:/bin","HOME":root}),
+        runner: Default::default(),
         github: None,
         runtime: Some(
             json!({"root":runtime,"socket":runtime.join("tmux.sock"),"ompBinary":binary,

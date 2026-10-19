@@ -55,6 +55,7 @@ fn options(_root: &Path) -> crewroom_service::ServiceOptions {
         publication: vec![],
         publication_unavailable: vec![],
         environment: json!({}),
+        runner: Default::default(),
         github: None,
     }
 }

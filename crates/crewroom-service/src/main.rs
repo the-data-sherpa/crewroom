@@ -78,7 +78,7 @@ fn main() -> anyhow::Result<()> {
         .block_on(run(data, roles, port, status))
 }
 
-async fn run(data: PathBuf, roles: PathBuf, port: u16, status: bool) -> anyhow::Result<()> {
+async fn run(data: PathBuf, roles: PathBuf, mut port: u16, status: bool) -> anyhow::Result<()> {
     if status {
         use std::os::unix::fs::MetadataExt;
         let path = data.join("native-connection.json");
@@ -129,10 +129,60 @@ async fn run(data: PathBuf, roles: PathBuf, port: u16, status: bool) -> anyhow::
     // Signals received during initialization remain pending until owned cleanup runs.
     let mut terminate = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())?;
     let mut interrupt = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::interrupt())?;
-    let options = crewroom_service::ServiceOptions::from_environment(&data)?;
-    let server =
-        crewroom_service::Service::start_with_options(&data, &roles, port, options).await?;
-    println!("Crewroom Rust service listening on {}", server.info.origin);
-    tokio::select! { _ = interrupt.recv() => {}, _ = terminate.recv() => {} }
-    server.close().await
+    let mut options = crewroom_service::ServiceOptions::from_environment(&data)?;
+    // A broken CREWROOM_RUNTIME_CONFIG still fails the first start (headless
+    // contract); every other runner failure keeps the service reachable.
+    let mut strict = options.runner.source == "environment";
+    loop {
+        let server = start(&data, &roles, port, options, strict).await?;
+        strict = false;
+        // Keep the bound port (also when started with --port 0) so clients
+        // reconnect to the same origin.
+        port = server
+            .info
+            .origin
+            .rsplit_once(':')
+            .and_then(|(_, p)| p.parse().ok())
+            .unwrap_or(port);
+        println!("Crewroom Rust service listening on {}", server.info.origin);
+        // Settings → Runner asks for a reload only when no run owns live
+        // processes (FOR-83). The service closes completely, then starts again
+        // on the same port with the saved runner configuration.
+        let mut reload = server.reload_requests();
+        tokio::select! {
+            _ = interrupt.recv() => return server.close().await,
+            _ = terminate.recv() => return server.close().await,
+            changed = reload.changed() => {
+                if changed.is_err() {
+                    return server.close().await;
+                }
+            }
+        }
+        println!("Reloading the runner configuration.");
+        server.close().await?;
+        options = crewroom_service::ServiceOptions::for_reload(&data)?;
+    }
+}
+
+/// Starts the service; a runner that fails to start leaves the service
+/// reachable with the runner off and the reason shown in Settings → Runner.
+async fn start(
+    data: &std::path::Path,
+    roles: &std::path::Path,
+    port: u16,
+    options: crewroom_service::ServiceOptions,
+    strict: bool,
+) -> anyhow::Result<crewroom_service::Service> {
+    if options.runtime.is_none() || strict {
+        return crewroom_service::Service::start_with_options(data, roles, port, options).await;
+    }
+    match crewroom_service::Service::start_with_options(data, roles, port, options).await {
+        Ok(server) => Ok(server),
+        Err(error) => {
+            eprintln!("Runner did not start; starting without it: {error:#}");
+            let fallback = crewroom_service::ServiceOptions::for_reload(data)?
+                .without_runner(format!("The runner did not start: {error:#}"));
+            crewroom_service::Service::start_with_options(data, roles, port, fallback).await
+        }
+    }
 }

@@ -48,28 +48,34 @@ pub struct ServiceOptions {
     /// GitHub API origin and token override; `None` uses github.com and
     /// `CREWROOM_GITHUB_TOKEN`.
     pub github: Option<crate::GitHubOptions>,
+    /// Where `runtime` came from, and why it is absent when it failed to load
+    /// (FOR-83). Embedding programs that pass `runtime` directly use the default.
+    pub runner: crate::runner::RunnerLoad,
 }
 impl ServiceOptions {
+    /// Startup options. A broken `CREWROOM_RUNTIME_CONFIG` fails startup, as
+    /// before; a broken Settings → Runner file leaves the runner off with its
+    /// reason shown.
     pub fn from_environment(data: &Path) -> anyhow::Result<Self> {
+        Self::load(data, true)
+    }
+    /// Options for a requested reload: any runner configuration problem leaves
+    /// the runner off with its reason shown, so the service stays reachable.
+    pub fn for_reload(data: &Path) -> anyhow::Result<Self> {
+        Self::load(data, false)
+    }
+    /// The same options with the runner off, recording why.
+    pub fn without_runner(mut self, error: String) -> Self {
+        self.runtime = None;
+        self.runner.error = Some(error);
+        self
+    }
+    fn load(data: &Path, strict: bool) -> anyhow::Result<Self> {
         let executable = std::env::current_exe()?;
         let bin = executable
             .parent()
             .ok_or_else(|| anyhow::anyhow!("Missing daemon installation directory"))?;
-        let runtime = std::env::var_os("CREWROOM_RUNTIME_CONFIG")
-            .map(|path| -> anyhow::Result<Value> {
-                use std::os::unix::fs::MetadataExt;
-                let meta = std::fs::symlink_metadata(&path)?;
-                // SAFETY: geteuid has no preconditions.
-                anyhow::ensure!(
-                    meta.is_file()
-                        && !meta.file_type().is_symlink()
-                        && meta.uid() == unsafe { libc::geteuid() }
-                        && meta.mode() & 0o077 == 0,
-                    "Runtime configuration must be a private file owned by this user."
-                );
-                Ok(serde_json::from_slice(&std::fs::read(path)?)?)
-            })
-            .transpose()?;
+        let (runner, runtime) = crate::runner::load(data, strict)?;
         let secrets = crewroom_runtime::providers::secrets::SecretStore::at(data);
         let jira = config::load_jira_connection(&data.join("jira.json"), secrets.clone())?
             .map(|c| JiraClient::new(&c.source, c.credentials, None))
@@ -113,6 +119,7 @@ impl ServiceOptions {
             publication_unavailable: configured.unavailable,
             environment: json!(std::env::vars().collect::<std::collections::BTreeMap<_, _>>()),
             github: None,
+            runner,
         })
     }
 }

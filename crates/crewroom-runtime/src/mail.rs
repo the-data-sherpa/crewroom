@@ -318,6 +318,11 @@ impl MailClient {
         .await
         .map_err(|_| MailError::Timeout)?
     }
+    /// Read-only readiness check (FOR-83): the MCP handshake only, with no tool
+    /// call, so no message, agent or project is created.
+    pub async fn probe(&self) -> Result<()> {
+        self.initialize(Instant::now() + self.inner.budget).await
+    }
     pub async fn call(&self, name: &str, args: Value) -> Result<Value> {
         self.call_before(name, args, Instant::now() + self.inner.budget)
             .await

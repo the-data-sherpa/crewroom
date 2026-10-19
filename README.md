@@ -64,7 +64,7 @@ Reuse the printed `Crewroom.app/Contents/MacOS/crewroom-launcher` with explicit 
 
 Agent work requires a configured OMP, [Codex](docs/testing/mh2-runtime-acceptance.md) or [Claude Code](docs/testing/mh3-runtime-acceptance.md) harness, tmux, separately managed Rust Agent Mail, authenticated model access, and Docker with the required pinned local images. Jira intake and Bitbucket publication need their own account configuration. GitHub hosting for this repository does not add a GitHub PR adapter.
 
-The service reads private runtime JSON selected by `CREWROOM_RUNTIME_CONFIG`. Provider metadata lives in `<data>/jira.json` and `<data>/bitbucket.json`; credentials stay server-side. Follow the [configuration inventory](docs/operations.md#configuration-inventory) and [Linux provider guidance](docs/linux.md#execution-and-provider-access). A running daemon retains its original environment and configuration until a stopped restart.
+Configure the agent runner in **Settings → Runner**, which lists each prerequisite and saves a private runtime configuration; headless services can instead select private runtime JSON with `CREWROOM_RUNTIME_CONFIG`. Provider metadata lives in `<data>/jira.json` and `<data>/bitbucket.json`; credentials stay server-side. Follow the [configuration inventory](docs/operations.md#configuration-inventory) and [Linux provider guidance](docs/linux.md#execution-and-provider-access). A running daemon retains its original environment until a stopped restart; Settings → Runner reloads the runner configuration in place when no run owns live processes.
 
 ## Documentation and contributions
 

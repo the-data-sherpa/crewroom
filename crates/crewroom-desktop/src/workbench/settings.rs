@@ -10,6 +10,7 @@ mod playbooks;
 mod principles;
 pub(super) mod repository_folder;
 mod roles;
+pub(super) mod runner;
 
 pub(super) const NEW: &str = "__new";
 #[derive(Default)]
@@ -36,6 +37,7 @@ pub(super) struct Settings {
     repositories: HashMap<String, RepositoryDraft>,
     submitted_role: String,
     saved: Option<(String, Value)>,
+    pub(super) runner: runner::RunnerPage,
 }
 struct RoleDraft {
     fields: Fields,
@@ -234,6 +236,7 @@ impl Settings {
             || self.roles.values().any(|d| d.dirty(cx))
             || self.repositories.values().any(|d| d.dirty(cx))
             || self.models.as_ref().is_some_and(|d| d.dirty(cx))
+            || self.runner.unsaved(cx)
     }
     pub(super) fn saved(&mut self, path: &str, value: &Value) {
         if path == "/learning" || path == "/role-drafts" {

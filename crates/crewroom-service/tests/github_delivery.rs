@@ -20,6 +20,7 @@ fn options() -> ServiceOptions {
         publication: vec![],
         publication_unavailable: vec![],
         environment: json!({}),
+        runner: Default::default(),
         github: Some(GitHubOptions {
             // Nothing in this test reaches GitHub; the loopback origin is unused.
             client: GitHubClient::new(Some("http://127.0.0.1:9/")).unwrap(),

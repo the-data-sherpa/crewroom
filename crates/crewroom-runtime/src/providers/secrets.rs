@@ -202,10 +202,42 @@ impl SecretStore {
     }
     /// Decrypts one integration's stored token in memory.
     pub fn token(&self, integration: Integration) -> StoredToken {
+        self.stored(integration.id())
+    }
+    /// Decrypts one runner secret (FOR-83), such as the Rust Mail token or an
+    /// OMP provider key, in memory. Never logged or projected.
+    pub fn runner_secret(&self, id: &str) -> StoredToken {
+        if runner_id(id).is_err() {
+            return StoredToken::Unreadable;
+        }
+        self.stored(id)
+    }
+    /// Encrypts and stores one runner secret. The install key is created only
+    /// when no other encrypted value would be orphaned.
+    pub fn save_runner_secret(&self, id: &str, value: &str) -> Result<()> {
+        runner_id(id)?;
+        let value = validate(value)?;
+        let _guard = WRITES.lock().map_err(|_| poisoned())?;
+        let mut document = self.document()?;
+        let key = self.writable_key(&mut document, false)?;
+        document[id] = json!({"token": seal(&key, id, &value)?});
+        self.write(&document)
+    }
+    /// Removes one runner secret; other values and the key remain.
+    pub fn clear_runner_secret(&self, id: &str) -> Result<()> {
+        runner_id(id)?;
+        let _guard = WRITES.lock().map_err(|_| poisoned())?;
+        let mut document = self.document()?;
+        if document.as_object_mut().unwrap().remove(id).is_some() {
+            self.write(&document)?;
+        }
+        Ok(())
+    }
+    fn stored(&self, id: &str) -> StoredToken {
         let Ok(document) = self.document() else {
             return StoredToken::Unreadable;
         };
-        let Some(value) = document[integration.id()].get("token") else {
+        let Some(value) = document[id].get("token") else {
             return StoredToken::Missing;
         };
         let Some(sealed) = value.as_str() else {
@@ -214,7 +246,7 @@ impl SecretStore {
         let KeyState::Present(key) = self.key() else {
             return StoredToken::Unreadable;
         };
-        match open(&key, integration, sealed) {
+        match open(&key, id, sealed) {
             Some(token) => StoredToken::Present(token),
             None => StoredToken::Unreadable,
         }
@@ -231,7 +263,27 @@ impl SecretStore {
         let token = validate(token)?;
         let _guard = WRITES.lock().map_err(|_| poisoned())?;
         let mut document = self.document()?;
-        let key = match self.key() {
+        let key = self.writable_key(&mut document, replace_unreadable)?;
+        if replace_unreadable {
+            for other in Integration::ALL {
+                if other != integration
+                    && let Some(sealed) = document[other.id()]["token"].as_str()
+                    && open(&key, other.id(), sealed).is_none()
+                {
+                    document.as_object_mut().unwrap().remove(other.id());
+                }
+            }
+        }
+        document[integration.id()] = json!({"token": seal(&key, integration.id(), &token)?});
+        self.write(&document)
+    }
+    /// The install key for a write. Callers hold `WRITES`.
+    fn writable_key(
+        &self,
+        document: &mut Value,
+        replace_unreadable: bool,
+    ) -> Result<Zeroizing<[u8; KEY_BYTES]>> {
+        Ok(match self.key() {
             KeyState::Present(key) => key,
             KeyState::Invalid => {
                 return Err(Error::Conflict(format!(
@@ -247,7 +299,7 @@ impl SecretStore {
                 }
                 if orphaned {
                     // Without the key every encrypted value is unreadable.
-                    document = json!({});
+                    *document = json!({});
                 }
                 self.create_key()?;
                 match self.key() {
@@ -259,19 +311,7 @@ impl SecretStore {
                     }
                 }
             }
-        };
-        if replace_unreadable {
-            for other in Integration::ALL {
-                if other != integration
-                    && let Some(sealed) = document[other.id()]["token"].as_str()
-                    && open(&key, other, sealed).is_none()
-                {
-                    document.as_object_mut().unwrap().remove(other.id());
-                }
-            }
-        }
-        document[integration.id()] = json!({"token": seal(&key, integration, &token)?});
-        self.write(&document)
+        })
     }
     /// Removes one integration's stored token. Other values and the key remain.
     pub fn clear(&self, integration: Integration) -> Result<()> {
@@ -342,15 +382,29 @@ fn validate(token: &str) -> Result<Zeroizing<String>> {
     }
     Ok(Zeroizing::new(token.to_owned()))
 }
-fn aad(integration: Integration) -> Vec<u8> {
-    format!("crewroom:v1:{}", integration.id()).into_bytes()
+/// Runner secret ids are `runner-` followed by lowercase letters, digits,
+/// `.`, `_` or `-`, so they never collide with an integration id.
+fn runner_id(id: &str) -> Result<()> {
+    let rest = id.strip_prefix("runner-").unwrap_or("");
+    if rest.is_empty()
+        || id.len() > 128
+        || !rest
+            .bytes()
+            .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b"._-".contains(&b))
+    {
+        return Err(Error::Invalid("Invalid runner secret name.".into()));
+    }
+    Ok(())
 }
-fn seal(key: &[u8; KEY_BYTES], integration: Integration, token: &str) -> Result<String> {
+fn aad(id: &str) -> Vec<u8> {
+    format!("crewroom:v1:{id}").into_bytes()
+}
+fn seal(key: &[u8; KEY_BYTES], id: &str, token: &str) -> Result<String> {
     let cipher = XChaCha20Poly1305::new(key.into());
     let mut nonce = [0u8; NONCE_BYTES];
     getrandom::getrandom(&mut nonce)
         .map_err(|_| Error::Conflict("The system random source is unavailable.".into()))?;
-    let aad = aad(integration);
+    let aad = aad(id);
     let ciphertext = cipher
         .encrypt(
             XNonce::from_slice(&nonce),
@@ -364,13 +418,13 @@ fn seal(key: &[u8; KEY_BYTES], integration: Integration, token: &str) -> Result<
     sealed.extend_from_slice(&ciphertext);
     Ok(format!("{PREFIX}{}", URL_SAFE_NO_PAD.encode(sealed)))
 }
-fn open(key: &[u8; KEY_BYTES], integration: Integration, value: &str) -> Option<Zeroizing<String>> {
+fn open(key: &[u8; KEY_BYTES], id: &str, value: &str) -> Option<Zeroizing<String>> {
     let bytes = URL_SAFE_NO_PAD.decode(value.strip_prefix(PREFIX)?).ok()?;
     if bytes.len() <= NONCE_BYTES {
         return None;
     }
     let (nonce, ciphertext) = bytes.split_at(NONCE_BYTES);
-    let aad = aad(integration);
+    let aad = aad(id);
     let plain = Zeroizing::new(
         XChaCha20Poly1305::new(key.into())
             .decrypt(
@@ -589,5 +643,44 @@ mod tests {
         let partial = SecretStore::open(partial.path()).unwrap();
         assert!(!partial.secret_path().exists());
         assert_eq!(partial.token(Integration::Jira), StoredToken::Unreadable);
+    }
+
+    #[test]
+    fn runner_secrets_are_encrypted_bound_to_their_name_and_kept_apart() {
+        let root = tempfile::tempdir().unwrap();
+        let store = SecretStore::open(root.path()).unwrap();
+        store.save(Integration::Jira, TOKEN, false).unwrap();
+        store
+            .save_runner_secret("runner-mail", "synthetic-runner-mail")
+            .unwrap();
+        assert_eq!(
+            present(store.runner_secret("runner-mail")),
+            "synthetic-runner-mail"
+        );
+        assert_eq!(present(store.token(Integration::Jira)), TOKEN);
+        let file = std::fs::read_to_string(store.credentials_path()).unwrap();
+        assert!(!file.contains("synthetic-runner-mail"));
+        assert_eq!(mode(&store.credentials_path()), 0o600);
+        // A value moved under another name does not decrypt.
+        let mut document: Value = serde_json::from_str(&file).unwrap();
+        document["runner-provider-x"] = document["runner-mail"].clone();
+        std::fs::write(store.credentials_path(), document.to_string()).unwrap();
+        assert_eq!(
+            store.runner_secret("runner-provider-x"),
+            StoredToken::Unreadable
+        );
+        for bad in [
+            "jira",
+            "runner-",
+            "runner-UPPER",
+            "other-mail",
+            "runner-a b",
+        ] {
+            assert!(store.save_runner_secret(bad, "value").is_err(), "{bad}");
+            assert_eq!(store.runner_secret(bad), StoredToken::Unreadable, "{bad}");
+        }
+        store.clear_runner_secret("runner-mail").unwrap();
+        assert_eq!(store.runner_secret("runner-mail"), StoredToken::Missing);
+        assert_eq!(present(store.token(Integration::Jira)), TOKEN);
     }
 }

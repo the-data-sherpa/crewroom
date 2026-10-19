@@ -155,6 +155,7 @@ fn native_settings_connect_github_with_a_validated_token_and_disconnect(
             publication: vec![],
             publication_unavailable: vec![],
             environment: json!({}),
+            runner: Default::default(),
             github: Some(crewroom_service::GitHubOptions {
                 client: crewroom_runtime::providers::github::GitHubClient::new(Some(&origin))
                     .unwrap(),

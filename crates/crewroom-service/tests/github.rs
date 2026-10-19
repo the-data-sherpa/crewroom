@@ -114,6 +114,7 @@ fn options(origin: &str, environment: &Environment) -> ServiceOptions {
         publication: vec![],
         publication_unavailable: vec![],
         environment: json!({}),
+        runner: Default::default(),
         github: Some(GitHubOptions {
             client: GitHubClient::new(Some(origin)).unwrap(),
             environment: Arc::new(move || environment.lock().unwrap().clone()),

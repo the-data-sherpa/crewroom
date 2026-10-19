@@ -140,6 +140,7 @@ fn options(data: &Path, origin: &str) -> ServiceOptions {
         publication: vec![],
         publication_unavailable: vec![],
         environment: json!({}),
+        runner: Default::default(),
         github: None,
     }
 }

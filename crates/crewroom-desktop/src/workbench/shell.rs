@@ -258,6 +258,7 @@ impl Workbench {
             Panel::NeedsYou => "needs-you".into(),
             Panel::Roles
             | Panel::Models
+            | Panel::Runner
             | Panel::Principles
             | Panel::Playbooks
             | Panel::Repositories
@@ -463,6 +464,7 @@ impl Workbench {
         for (id, label, panel) in [
             ("roles", "Agent roles", Panel::Roles),
             ("models", "Models & budget", Panel::Models),
+            ("runner", "Runner", Panel::Runner),
             ("principles", "Principles", Panel::Principles),
             ("playbooks", "Playbooks", Panel::Playbooks),
             ("repositories", "Projects", Panel::Repositories),

@@ -99,6 +99,7 @@ fn options(origin: Option<&str>) -> ServiceOptions {
         publication: vec![],
         publication_unavailable: vec![],
         environment: json!({}),
+        runner: Default::default(),
         github: None,
     }
 }

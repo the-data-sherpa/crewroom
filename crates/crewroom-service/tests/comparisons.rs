@@ -51,6 +51,7 @@ async fn comparison_preflight_is_readonly_and_ordinary_saves_work_for_all_instru
             publication: vec![],
             publication_unavailable: vec![],
             environment: json!({}),
+            runner: Default::default(),
             github: None,
         },
     )

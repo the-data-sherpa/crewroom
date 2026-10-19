@@ -72,6 +72,7 @@ print(json.dumps({'models':[{'provider':'fixture','id':'model','selector':'fixtu
         publication: vec![],
         publication_unavailable: vec![],
         environment: json!({"PATH":"/usr/bin:/bin","HOME":root}),
+        runner: Default::default(),
         github: None,
     }
 }
