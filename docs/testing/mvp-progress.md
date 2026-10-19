@@ -47,6 +47,18 @@ Code `b4b246f` on branch `for-90-work` from main `860acac`; only `crates/crewroo
 
 `npm run test:e2e` was not run by the implementer; the integrator runs it.
 
+**Review fix at `e4bc3ab`.** Review found a regression in `b4b246f`. The new exiting early return ran before the unscoped `lsof` holder scan, and only the first inspection of a settle scans. When the listed group was exiting and a process that had escaped the group (with `setsid`, say) still held the inherited lease, the uncertain result named only the group, not the holder that reconciliation needs. The state stayed `uncertain`, so this never produced a false `stopped`. The exiting branch now adds the unscoped holders when the lease is held and scanning is allowed. New unit test `an_escaped_holder_of_an_exiting_group_is_reported_for_reconciliation`: the recorded owner is reported exiting throughout, and a `sleep` in its own process group holds the inherited lease. It failed 3 of 3 runs without the fix (holder missing from `members`) and passes 3 of 3 with it (about 5 s each, the exit window).
+
+| Check at `e4bc3ab` | Result |
+|---|---|
+| Four-crate `cargo test` (command above) | **690 passed, 0 failed, 18 ignored**; `crewroom-runtime` lib 139 passed, 1 ignored |
+| `cargo clippy -p crewroom-runtime --all-targets -- -D warnings`; `cargo fmt -p crewroom-runtime -p crewroom-core -- --check` | clean |
+| `npm test` | **346/346** |
+| `npm run build` | passes (existing chunk-size warning) |
+| `tsx --test --test-name-pattern="escaped inherited lease" scripts/rust/process-extra.test.ts` (helper built from `e4bc3ab`) | 1/1 |
+
+The heavy-load stress rounds were not repeated for this fix. It changes only the exiting branch with a held lease and adds one `lsof` call there on the first inspection.
+
 Follow-up: FOR-92. On Linux, a process whose thread-group leader called `exit` while other threads run is listed as `Zl` and filtered out as a zombie. A synthetic check showed `ZNl` with 2 tasks.
 
 ## FOR-89 — Test fixtures installed without an in-process writer (2026-10-19)
