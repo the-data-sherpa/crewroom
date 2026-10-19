@@ -140,3 +140,120 @@ fn runner_page_lists_prerequisites_and_saves_the_configuration_privately(
     let stored = std::fs::read_to_string(root.join("data/credentials.json")).unwrap();
     assert!(!stored.contains(MAIL) && !stored.contains(KEY));
 }
+
+/// An embedded runner whose fixture OMP lists one model. Discovery metadata
+/// only: no model runs.
+fn discovering(root: &std::path::Path) -> crewroom_service::ServiceOptions {
+    let binary = root.join("omp.py");
+    if !binary.exists() {
+        std::fs::write(&binary, r#"#!/usr/bin/python3
+import sys,json
+if '--version' in sys.argv:
+ print('omp/18.4.12');sys.exit()
+assert sys.argv[1:]==['models','--json','--no-extensions']
+print(json.dumps({'models':[{'provider':'fixture','id':'model','selector':'fixture/model','name':'Example','thinking':['low','high'],'input':['text']}]}))
+"#).unwrap();
+        std::fs::set_permissions(&binary, std::fs::Permissions::from_mode(0o700)).unwrap();
+    }
+    let helpers = crewroom_runtime::test_binaries::ensure(
+        &crewroom_runtime::test_binaries::profile_dir_of_current_test(),
+    );
+    let runtime = root.join("runtime");
+    crewroom_service::ServiceOptions {
+        helper: helpers.process,
+        host: helpers.host,
+        tmux: "/usr/bin/tmux".into(),
+        jira: None,
+        publication: vec![],
+        publication_unavailable: vec![],
+        environment: json!({"PATH":"/usr/bin:/bin","HOME":root}),
+        runner: Default::default(),
+        github: None,
+        runtime: Some(
+            json!({"root":runtime,"socket":runtime.join("tmux.sock"),"ompBinary":binary,
+            "mail":{"atcDisabled":true,"retentionSeconds":600,"projectRoot":root,"url":"http://127.0.0.1:9/mcp/","token":MAIL},
+            "models":{"providers":{"fixture":{"baseUrl":"http://127.0.0.1:9","api":"openai-responses","apiKey":KEY}}},
+            "policy":{},"catalog":[]}),
+        ),
+    }
+}
+
+#[gpui::test]
+fn discovered_models_are_approved_with_chosen_efforts_and_removed(cx: &mut gpui::TestAppContext) {
+    let fixture = Fixture::configured(|_, _| {}, discovering);
+    let root = std::fs::canonicalize(fixture.root.path()).unwrap();
+    let (status, saved) = fixture.post(
+        "/runner/settings",
+        json!({"fields":{"root":root.join("runtime"),"mailUrl":"http://127.0.0.1:9/mcp/","mailProjectRoot":root,"ompBinary":root.join("omp.py")},
+            "advanced":{"catalog":[],"policy":{},"models":{"providers":{"fixture":{"baseUrl":"http://127.0.0.1:9","api":"openai-responses","apiKey":KEY}}}},
+            "secrets":{"mail":MAIL}}),
+    );
+    assert_eq!(status, 200, "{saved}");
+    let (status, refreshed) = fixture.post("/model-catalog/refresh", json!({}));
+    assert_eq!(status, 200, "{refreshed}");
+    for _ in 0..200 {
+        if fixture.get("/model-catalog")["state"] != "refreshing" {
+            break;
+        }
+        std::thread::sleep(std::time::Duration::from_millis(25));
+    }
+    let (h, v, e) = open(cx, &fixture);
+    wait(cx, h, &v, &e, |v, _| v.connected);
+    navigate(cx, h, "runner");
+    let listed = |v: &Workbench| match &v.settings.runner.view {
+        Some(Ok(view)) => view["profiles"]["harnesses"][0]["offerings"][0].clone(),
+        _ => Value::Null,
+    };
+    wait(cx, h, &v, &e, move |v, _| listed(v)["selector"] == "model");
+    let text = screen_text(cx, h);
+    assert!(
+        text.iter()
+            .any(|l| l == "Example · fixture/model · Not approved"),
+        "{text:?}"
+    );
+    assert!(
+        text.iter()
+            .any(|l| l.starts_with("Codex is not configured for the runner")),
+        "{text:?}"
+    );
+    // Nothing is chosen for the operator: approving needs an effort.
+    click(cx, h, "profile-omp-0-approve");
+    assert!(!cx.read(|cx| v.read(cx).busy));
+    click(cx, h, "profile-omp-0-effort-high");
+    assert!(
+        screen_text(cx, h)
+            .iter()
+            .any(|l| l == "Effort high · chosen")
+    );
+    click(cx, h, "profile-omp-0-approve");
+    wait(cx, h, &v, &e, move |v, _| {
+        !v.busy && listed(v)["profile"]["efforts"] == json!(["high"])
+    });
+    let text = screen_text(cx, h);
+    assert!(
+        text.iter()
+            .any(|l| l == "Example · fixture/model · Approved for efforts high"),
+        "{text:?}"
+    );
+    cx.read(|cx| {
+        assert!(
+            v.read(cx).notice.contains("stop and start the service"),
+            "{}",
+            v.read(cx).notice
+        )
+    });
+    let file = root.join("data/runtime.json");
+    let written: Value = serde_json::from_slice(&std::fs::read(&file).unwrap()).unwrap();
+    assert_eq!(
+        written["catalog"],
+        json!([{"provider":"fixture","id":"model","api":"openai-responses","inputs":["text"],"efforts":["high"],"tools":true}])
+    );
+    let text = std::fs::read_to_string(&file).unwrap();
+    assert!(!text.contains(MAIL) && !text.contains(KEY));
+    click(cx, h, "profile-omp-0-remove");
+    wait(cx, h, &v, &e, move |v, _| {
+        !v.busy && listed(v)["selector"] == "model" && listed(v)["profile"].is_null()
+    });
+    let written: Value = serde_json::from_slice(&std::fs::read(&file).unwrap()).unwrap();
+    assert_eq!(written["catalog"], json!([]));
+}

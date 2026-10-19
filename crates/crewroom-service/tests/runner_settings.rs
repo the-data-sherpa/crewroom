@@ -252,6 +252,22 @@ async fn environment_configuration_stays_active_and_read_only() {
     );
     let (status, refused) = post(&info, "/runner/settings", settings(&root)).await;
     assert_eq!(status, 409, "{refused}");
+    // Approving a model is a runner change too: refused while the
+    // environment selects the configuration.
+    let (status, refused) = post(
+        &info,
+        "/runner/profile",
+        json!({"harness":"codex","provider":"codex","selector":"model","approve":true,"efforts":["low"]}),
+    )
+    .await;
+    assert_eq!(status, 409, "{refused}");
+    assert!(
+        refused["error"]
+            .as_str()
+            .unwrap()
+            .contains("CREWROOM_RUNTIME_CONFIG"),
+        "{refused}"
+    );
     assert!(!root.join("data/runtime.json").exists());
 }
 
@@ -314,4 +330,125 @@ async fn an_embedded_service_saves_but_states_that_a_restart_is_needed() {
         .unwrap();
     assert_eq!(response.status().as_u16(), 403);
     service.close().await.unwrap();
+}
+
+/// A fixture OMP that lists one model from the `fixture` provider. It never
+/// runs a model; discovery metadata only.
+fn fixture_omp(root: &Path) -> std::path::PathBuf {
+    let binary = root.join("omp.py");
+    std::fs::write(
+        &binary,
+        r#"#!/usr/bin/python3
+import json,sys
+if '--version' in sys.argv:
+ print('omp/18.4.12');sys.exit(0)
+assert sys.argv[1:]==['models','--json','--no-extensions']
+print(json.dumps({'models':[{'provider':'fixture','id':'model','selector':'fixture/model','name':'Example','thinking':['low','high','xhigh'],'input':['text']}]}))
+"#,
+    )
+    .unwrap();
+    std::fs::set_permissions(&binary, std::fs::Permissions::from_mode(0o700)).unwrap();
+    binary
+}
+async fn refreshed(info: &ConnectionInfo) {
+    let (status, body) = post(info, "/model-catalog/refresh", json!({})).await;
+    assert_eq!(status, 200, "{body}");
+    for _ in 0..200 {
+        let (view, _) = get(info, "/model-catalog").await;
+        if view["state"] != "refreshing" {
+            return;
+        }
+        tokio::time::sleep(Duration::from_millis(25)).await;
+    }
+    panic!("Discovery did not finish");
+}
+fn offering<'a>(view: &'a Value, harness: &str) -> &'a Value {
+    view["profiles"]["harnesses"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|h| h["harness"] == harness)
+        .and_then(|h| h["offerings"].as_array().unwrap().first())
+        .unwrap_or_else(|| panic!("no {harness} offering: {}", view["profiles"]))
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn discovered_models_are_approved_explicitly_and_applied_by_a_reload() {
+    let root = tempfile::tempdir().unwrap();
+    let root = std::fs::canonicalize(root.path()).unwrap();
+    let omp = fixture_omp(&root);
+    let _daemon = spawn(&root, None);
+    let info = connect(&root, None).await;
+    // Nothing to approve into before a configuration exists.
+    let approve = json!({"harness":"omp","provider":"fixture","selector":"model","approve":true,"efforts":["high"]});
+    let (status, refused) = post(&info, "/runner/profile", approve.clone()).await;
+    assert_eq!(status, 409, "{refused}");
+    let mut body = settings(&root);
+    body["fields"]["ompBinary"] = json!(omp);
+    body["advanced"]["catalog"] = json!([]);
+    let (status, saved) = post(&info, "/runner/settings", body).await;
+    assert_eq!(status, 200, "{saved}");
+    let info = connect(&root, Some(&info.token)).await;
+    refreshed(&info).await;
+    let (view, _) = get(&info, "/runner").await;
+    assert_eq!(view["active"], true, "{view}");
+    assert_eq!(prerequisite(&view, "profiles")["state"], "missing");
+    let listed = offering(&view, "omp");
+    assert_eq!(listed["selector"], "model", "{listed}");
+    assert_eq!(listed["advertisedEfforts"], json!(["low", "high", "xhigh"]));
+    assert_eq!(listed["profile"], Value::Null, "discovery approves nothing");
+    assert_eq!(listed["approvable"], true, "{listed}");
+    // Efforts outside the advertised set are refused before anything is written.
+    let mut outside = approve.clone();
+    outside["efforts"] = json!(["max"]);
+    let (status, refused) = post(&info, "/runner/profile", outside).await;
+    assert_eq!(status, 400, "{refused}");
+
+    let (status, saved) = post(&info, "/runner/profile", approve).await;
+    assert_eq!(status, 200, "{saved}");
+    assert_eq!(saved["applying"], true, "{saved}");
+    assert!(
+        saved["notice"]
+            .as_str()
+            .unwrap()
+            .starts_with("Execution profiles saved")
+    );
+    let written = std::fs::read_to_string(root.join("data/runtime.json")).unwrap();
+    assert!(!written.contains(MAIL_SECRET) && !written.contains(PROVIDER_SECRET));
+    assert_eq!(mode(&root.join("data/runtime.json")), 0o600);
+    let info = connect(&root, Some(&info.token)).await;
+    refreshed(&info).await;
+    let (view, text) = get(&info, "/runner").await;
+    assert!(!text.contains(MAIL_SECRET) && !text.contains(PROVIDER_SECRET));
+    assert_eq!(view["active"], true, "{view}");
+    assert_eq!(
+        view["secrets"],
+        json!({"mail":"stored","providers":{"fixture":"stored"}}),
+        "secrets survive a profile change"
+    );
+    assert_eq!(
+        view["advanced"]["catalog"],
+        json!([{"provider":"fixture","id":"model","api":"openai-responses","inputs":["text"],"efforts":["high"],"tools":true}])
+    );
+    assert_eq!(
+        offering(&view, "omp")["profile"],
+        json!({"efforts":["high"],"api":"openai-responses"})
+    );
+    assert_eq!(prerequisite(&view, "profiles")["state"], "ready");
+    // The running runner now pairs the offering with its profile; access is
+    // configured, never reported as proven inference.
+    let (catalog, _) = get(&info, "/model-catalog").await;
+    let route = &catalog["offerings"][0]["offering"];
+    assert!(route["executionProfile"].is_string(), "{catalog}");
+    assert_eq!(route["capabilities"]["efforts"], json!(["high"]));
+    assert_eq!(route["inference"], Value::Null);
+
+    let remove = json!({"harness":"omp","provider":"fixture","selector":"model","approve":false});
+    let (status, saved) = post(&info, "/runner/profile", remove.clone()).await;
+    assert_eq!(status, 200, "{saved}");
+    let info = connect(&root, Some(&info.token)).await;
+    let (view, _) = get(&info, "/runner").await;
+    assert_eq!(view["advanced"]["catalog"], json!([]), "{view}");
+    let (status, refused) = post(&info, "/runner/profile", remove).await;
+    assert_eq!(status, 404, "{refused}");
 }

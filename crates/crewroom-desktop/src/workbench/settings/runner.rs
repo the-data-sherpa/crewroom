@@ -120,6 +120,9 @@ pub(in crate::workbench) struct RunnerPage {
     pub form: Option<RunnerForm>,
     /// The view the form was built from.
     form_source: Value,
+    /// Efforts the operator picked per offering (FOR-87), keyed by
+    /// harness, provider and selector. Absent: the saved profile's efforts.
+    pub efforts: std::collections::HashMap<String, Vec<String>>,
 }
 impl RunnerPage {
     pub(in crate::workbench) fn read(&mut self, result: Result<Value, String>) {
@@ -133,7 +136,64 @@ impl RunnerPage {
     pub(in crate::workbench) fn saved(&mut self) {
         self.form = None;
         self.stale = true;
+        self.efforts.clear();
     }
+    /// The efforts shown as chosen for an offering.
+    fn chosen(&self, offering: &Value) -> Vec<String> {
+        self.efforts
+            .get(&offering_key(offering))
+            .cloned()
+            .unwrap_or_else(|| {
+                offering["profile"]["efforts"]
+                    .as_array()
+                    .into_iter()
+                    .flatten()
+                    .filter_map(|e| e.as_str().map(str::to_owned))
+                    .collect()
+            })
+    }
+}
+fn offering_key(offering: &Value) -> String {
+    format!(
+        "{}\u{1f}{}\u{1f}{}",
+        string(offering, "harness"),
+        string(offering, "provider"),
+        string(offering, "selector")
+    )
+}
+fn strings(value: &Value) -> Vec<String> {
+    value
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|e| e.as_str().map(str::to_owned))
+        .collect()
+}
+/// One offering line, readable without colour: whether agents may run on it.
+pub(in crate::workbench) fn offering_line(offering: &Value) -> String {
+    let mut line = format!(
+        "{} · {}/{}",
+        offering["displayName"].as_str().unwrap_or(""),
+        offering["provider"].as_str().unwrap_or(""),
+        offering["selector"].as_str().unwrap_or("")
+    );
+    if let Some(model) = offering["resolvedModel"].as_str()
+        && model != offering["selector"].as_str().unwrap_or("")
+    {
+        line.push_str(&format!(" · reports {model}"));
+    }
+    if offering["profile"].is_object() {
+        line.push_str(&format!(
+            " · Approved for efforts {}",
+            strings(&offering["profile"]["efforts"]).join(", ")
+        ));
+    } else {
+        line.push_str(" · Not approved");
+    }
+    if offering["fresh"] != true {
+        line.push_str(" · discovery is stale");
+    }
+    line
 }
 fn state_tone(state: &str) -> u32 {
     match state {
@@ -327,6 +387,7 @@ impl Workbench {
             list = list.child(row);
         }
         panel = panel.child(list);
+        let profiles = self.profiles_section(&view, cx);
         let editable = view["editable"] == true;
         let mut form = section("Runner configuration").child(hint(
             "Saved owner-only on this machine. The Mail token and provider keys are stored encrypted and never shown again.",
@@ -415,8 +476,180 @@ impl Workbench {
                         })),
                 ),
             );
-        div().flex().flex_col().gap_4().child(panel).child(form)
+        div()
+            .flex()
+            .flex_col()
+            .gap_4()
+            .child(panel)
+            .child(profiles)
+            .child(form)
     }
+    /// FOR-87: discovered offerings per configured harness. The operator
+    /// approves each one explicitly with efforts from its advertised set.
+    fn profiles_section(&self, view: &Value, cx: &mut Context<Self>) -> Div {
+        let listing = &view["profiles"];
+        let mut section = section("Execution profiles")
+            .child(hint(listing["note"].as_str().unwrap_or(
+            "Approving lets agents run on a model. Access is confirmed only when an agent runs.",
+        )));
+        let dirty = self.settings.runner.unsaved(cx);
+        let locked = self.blocked() || view["editable"] != true || dirty;
+        if let Some(reason) = view["editReason"].as_str() {
+            section = section.child(named_hint("runner-profiles-read-only", reason.to_owned()));
+        } else if dirty {
+            section = section.child(named_hint(
+                "runner-profiles-unsaved",
+                "Save or undo the runner configuration changes below before approving models.",
+            ));
+        }
+        if listing["discovery"] == "unavailable" {
+            section = section.child(named_hint(
+                "runner-profiles-discovery",
+                format!(
+                    "Model discovery is unavailable: {}",
+                    listing["discoveryReason"].as_str().unwrap_or("")
+                ),
+            ));
+        }
+        for harness in records(listing, "harnesses") {
+            let name = string(&harness, "harness");
+            section = section.child(crate::accessibility::text(
+                harness["label"].as_str().unwrap_or("").to_owned(),
+            ));
+            if let Some(note) = harness["note"].as_str() {
+                section = section.child(named_hint(
+                    format!("runner-profiles-note-{name}"),
+                    note.to_owned(),
+                ));
+            }
+            for (index, offering) in records(&harness, "offerings").into_iter().enumerate() {
+                let id = format!("profile-{name}-{index}");
+                let chosen = self.settings.runner.chosen(&offering);
+                let mut row = div()
+                    .id(SharedString::from(id.clone()))
+                    .p_3()
+                    .border_1()
+                    .border_color(rgb(0x293642))
+                    .rounded_md()
+                    .flex()
+                    .flex_col()
+                    .gap_1()
+                    .child(crate::accessibility::named(
+                        format!("{id}-line"),
+                        offering_line(&offering),
+                    ));
+                if let Some(reason) = offering["reason"].as_str() {
+                    row = row.child(named_hint(
+                        format!("{id}-reason"),
+                        format!("Cannot approve: {reason}"),
+                    ));
+                }
+                let approvable = offering["approvable"] == true;
+                let mut efforts = div().flex().flex_wrap().gap_2();
+                for effort in strings(&offering["advertisedEfforts"]) {
+                    let picked = chosen.contains(&effort);
+                    let target = offering.clone();
+                    let toggled = effort.clone();
+                    efforts = efforts.child(
+                        Button::new(SharedString::from(format!("{id}-effort-{effort}")))
+                            .label(if picked {
+                                format!("Effort {effort} · chosen")
+                            } else {
+                                format!("Effort {effort}")
+                            })
+                            .selected(picked)
+                            .disabled(locked || !approvable)
+                            .on_click(cx.listener(move |this, _, _, cx| {
+                                let page = &mut this.settings.runner;
+                                let mut next = page.chosen(&target);
+                                if let Some(at) = next.iter().position(|e| *e == toggled) {
+                                    next.remove(at);
+                                } else {
+                                    next.push(toggled.clone());
+                                }
+                                page.efforts.insert(offering_key(&target), next);
+                                cx.notify();
+                            })),
+                    );
+                }
+                let approved = offering["profile"].is_object();
+                let target = offering.clone();
+                efforts = efforts.child(
+                    Button::new(SharedString::from(format!("{id}-approve")))
+                        .primary()
+                        .label(if approved {
+                            "Update approval"
+                        } else {
+                            "Approve for agents"
+                        })
+                        .disabled(locked || !approvable || chosen.is_empty())
+                        .on_click(cx.listener(move |this, _, _, cx| {
+                            let efforts = this.settings.runner.chosen(&target);
+                            this.send(
+                                "/runner/profile".into(),
+                                json!({"harness":target["harness"],"provider":target["provider"],
+                                    "selector":target["selector"],"approve":true,"efforts":efforts}),
+                                false,
+                                cx,
+                            )
+                        })),
+                );
+                if approved {
+                    efforts = efforts.child(remove_button(
+                        &format!("{id}-remove"),
+                        &offering,
+                        locked,
+                        cx,
+                    ));
+                }
+                section = section.child(row.child(efforts));
+            }
+        }
+        let unmatched = records(listing, "unmatched");
+        if !unmatched.is_empty() {
+            section = section.child(crate::accessibility::text(
+                "Saved profiles that discovery did not list",
+            ));
+        }
+        for (index, profile) in unmatched.into_iter().enumerate() {
+            let id = format!("profile-unmatched-{index}");
+            section = section.child(
+                div()
+                    .flex()
+                    .flex_wrap()
+                    .gap_2()
+                    .child(crate::accessibility::named(
+                        format!("{id}-line"),
+                        format!(
+                            "{} · {}/{} · efforts {}",
+                            profile["harness"].as_str().unwrap_or("unknown harness"),
+                            profile["provider"].as_str().unwrap_or(""),
+                            profile["selector"].as_str().unwrap_or(""),
+                            strings(&profile["efforts"]).join(", ")
+                        ),
+                    ))
+                    .when(profile["harness"].is_string(), |row| {
+                        row.child(remove_button(&format!("{id}-remove"), &profile, locked, cx))
+                    }),
+            );
+        }
+        section
+    }
+}
+fn remove_button(id: &str, target: &Value, locked: bool, cx: &mut Context<Workbench>) -> Button {
+    let target = target.clone();
+    Button::new(SharedString::from(id.to_owned()))
+        .label("Remove approval")
+        .disabled(locked)
+        .on_click(cx.listener(move |this, _, _, cx| {
+            this.send(
+                "/runner/profile".into(),
+                json!({"harness":target["harness"],"provider":target["provider"],
+                    "selector":target["selector"],"approve":false}),
+                false,
+                cx,
+            )
+        }))
 }
 #[cfg(test)]
 mod tests;

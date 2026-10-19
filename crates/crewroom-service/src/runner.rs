@@ -40,6 +40,11 @@ pub const FORM_KEYS: [&str; 8] = [
     "claudeCode",
 ];
 const PROBE: Duration = Duration::from_secs(2);
+/// Serializes writes of the settings file, so a profile change and a form
+/// save never interleave their read and write.
+static SAVING: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
+mod profiles;
 
 /// Where this process's runner configuration came from, and why it is not
 /// running when it failed to load.
@@ -623,10 +628,9 @@ fn harness_items(config: Option<&Value>, catalog: &Value) -> Vec<Value> {
             .cloned()
             .unwrap_or(Value::Null);
         let version = entry["identity"]["version"].as_str();
-        let configured = config.is_some_and(|c| match key {
-            "omp" => c["ompBinary"].as_str().is_some_and(|s| !s.is_empty()),
-            "codex" => c["codex"]["binary"].is_string() && c["codex"]["authFile"].is_string(),
-            _ => c["claudeCode"]["binary"].is_string() && c["claudeCode"]["home"].is_string(),
+        let configured = config.is_some_and(|c| {
+            crewroom_runtime::model_catalog::Harness::from_kind(key)
+                .is_some_and(|h| profiles::harness_configured(c, &h))
         });
         let id = format!("harness-{key}");
         let found = match (entry["outcome"].as_str(), version) {
@@ -762,7 +766,7 @@ fn profiles_item(config: Option<&Value>) -> Value {
             "Execution profiles",
             "missing",
             "No verified execution profile is configured, so no listed model can run.",
-            Some("Add one profile per model under Advanced → catalog, for example {\"adapter\":\"codex\",\"provider\":\"codex\",\"id\":\"MODEL\",\"api\":\"codex-app-server\",\"inputs\":[\"text\"],\"efforts\":[\"low\"],\"tools\":true}.".into()),
+            Some("Approve a discovered model under Execution profiles on this page and choose its efforts. Profiles can also be written under Advanced → catalog.".into()),
             true,
         )
     } else {
@@ -981,6 +985,7 @@ pub(crate) async fn view(state: &AppState) -> std::result::Result<Value, ApiErro
         "advanced": advanced(&shown),
         "secrets": sources,
         "prerequisites": prerequisites,
+        "profiles": profiles::listing(config.as_ref(), &catalog),
     }))
 }
 
@@ -1009,6 +1014,10 @@ fn provider_name(name: &str) -> Result<()> {
 /// secrets to the encrypted store and the file owner-only. Nothing is written
 /// when validation fails.
 pub(crate) fn save(data: &Path, body: &Value) -> Result<()> {
+    let _saving = SAVING.lock().unwrap_or_else(|e| e.into_inner());
+    save_unlocked(data, body)
+}
+fn save_unlocked(data: &Path, body: &Value) -> Result<()> {
     let object = body
         .as_object()
         .ok_or_else(|| invalid("Send the runner settings as an object."))?;
@@ -1247,7 +1256,53 @@ pub(crate) async fn request_reload(state: &AppState) -> std::result::Result<bool
     Ok(true)
 }
 
-/// `POST /api/runner/settings` and `POST /api/runner/apply`.
+/// Approves or removes one execution profile and saves the configuration
+/// through the same validation as the form. Only a settings-file
+/// configuration changes; an environment-selected one stays read-only.
+fn save_profile(data: &Path, body: &Value, catalog: &Value) -> Result<()> {
+    let request = profiles::request(body)?;
+    let _saving = SAVING.lock().unwrap_or_else(|e| e.into_inner());
+    let path = match locate(data) {
+        ("environment", path) => {
+            return Err(conflict(format!(
+                "{ENVIRONMENT} selects {} for this service. Edit that file, or remove {ENVIRONMENT} from the service environment and restart it to manage the runner here.",
+                path.map(|p| p.display().to_string()).unwrap_or_default()
+            )));
+        }
+        (_, Some(path)) => path,
+        (_, None) => {
+            return Err(conflict(
+                "Save the runner configuration in Settings → Runner before approving models.",
+            ));
+        }
+    };
+    let existing = read_private(&path).map_err(conflict)?;
+    let next = profiles::change(&existing, &request, catalog)?;
+    save_unlocked(data, &next)
+}
+
+/// After a successful save: reload in place when safe, else say why not.
+async fn applied(state: &AppState, what: &str) -> std::result::Result<Value, ApiError> {
+    let applying = request_reload(state).await?;
+    let notice = if applying {
+        format!(
+            "{what} saved privately. The service is reloading the runner to apply them; this window reconnects automatically."
+        )
+    } else if !state.runner.supervised.load(Ordering::SeqCst) {
+        format!(
+            "{what} saved privately. This service cannot reload itself: stop and start the service to apply them."
+        )
+    } else {
+        format!(
+            "{what} saved privately. They apply when no run owns live agent processes; then choose Apply now."
+        )
+    };
+    state.changes.send_modify(|v| *v = v.saturating_add(1));
+    Ok(json!({"saved":true,"applying":applying,"notice":notice}))
+}
+
+/// `POST /api/runner/settings`, `POST /api/runner/profile` and
+/// `POST /api/runner/apply`.
 pub(crate) async fn mutate(
     state: &AppState,
     action: &str,
@@ -1259,16 +1314,17 @@ pub(crate) async fn mutate(
             tokio::task::spawn_blocking(move || save(&data, &body))
                 .await
                 .map_err(|_| ApiError::from(conflict("Runner settings save was interrupted.")))??;
-            let applying = request_reload(state).await?;
-            let notice = if applying {
-                "Runner settings saved privately. The service is reloading the runner to apply them; this window reconnects automatically."
-            } else if !state.runner.supervised.load(Ordering::SeqCst) {
-                "Runner settings saved privately. This service cannot reload itself: stop and start the service to apply them."
-            } else {
-                "Runner settings saved privately. They apply when no run owns live agent processes; then choose Apply now."
-            };
-            state.changes.send_modify(|v| *v = v.saturating_add(1));
-            Ok(json!({"saved":true,"applying":applying,"notice":notice}))
+            applied(state, "Runner settings").await
+        }
+        "profile" => {
+            let data = state.runner.data.clone();
+            let catalog = crate::model_discovery(state);
+            tokio::task::spawn_blocking(move || save_profile(&data, &body, &catalog))
+                .await
+                .map_err(|_| {
+                    ApiError::from(conflict("Execution profile save was interrupted."))
+                })??;
+            applied(state, "Execution profiles").await
         }
         "apply" => {
             if body != json!({}) {
