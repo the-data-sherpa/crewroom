@@ -1,7 +1,9 @@
 //! Connect discovered metadata to the existing runtime's verified profiles.
 use super::*;
 use crate::model_catalog::{
-    Access, BillingRoute, Equivalence, Harness, billing, discovery,
+    Access, BillingRoute, Equivalence, Harness, billing, bundled,
+    capabilities::{Capability, HarnessCapabilities},
+    discovery, harness_facts, login,
     policy::{self, Route},
     store::{Snapshot, Source},
 };
@@ -9,6 +11,21 @@ use crate::model_catalog::{
 #[cfg(test)]
 #[path = "catalog_tests.rs"]
 mod tests;
+
+/// FOR-73 hold: operator steering reaches a running turn only when the
+/// frozen harness capability record supports it. `None` means the steering
+/// waits and is delivered as ordinary input once the agent is idle.
+pub(super) fn steering_mode(model: &Value) -> Option<&'static str> {
+    HarnessCapabilities::for_model(model)
+        .allows(Capability::SteerMidTurn)
+        .then_some("steer")
+}
+/// FOR-73 degraded mode: a replacement resumes the harness session only when
+/// the frozen record supports it; otherwise it starts a fresh session from
+/// Crewroom's durable record.
+pub(super) fn resumes_session(model: &Value) -> bool {
+    HarnessCapabilities::for_model(model).allows(Capability::SessionResume)
+}
 
 impl RuntimeConfig {
     pub(super) fn verify_team_admission(&self, proposal: &Value) -> Result<()> {
@@ -107,7 +124,14 @@ impl RuntimeConfig {
                                 }))
                     })
                 });
+            // FOR-73: one capability record per discovered harness version.
+            let record = entry
+                .identity
+                .as_ref()
+                .and_then(|i| HarnessCapabilities::for_identity(&entry.harness, i));
             for discovered in &entry.offerings {
+                // Bundled facts fill capabilities live discovery left unknown.
+                let discovered = &bundled::merge(discovered);
                 let matches: Vec<_> = self
                     .catalog
                     .iter()
@@ -150,17 +174,43 @@ impl RuntimeConfig {
                     .detect(&discovered.harness, &discovered.provider)
                     .routes
                 {
-                    routes.push(Route {
-                        offering: policy::with_profile(
+                    let mut item = Route::new(
+                        policy::with_profile(
                             &discovered.with_billing(route),
                             matches.first().copied().filter(|_| executable),
                             access.clone(),
                         ),
-                        advertised: discovered.capabilities.clone(),
+                        discovered.capabilities.clone(),
                         fresh,
-                        identity: entry.identity.clone(),
-                        configuration_revision: entry.configuration_revision.clone(),
-                    });
+                        entry.identity.clone(),
+                        entry.configuration_revision.clone(),
+                    );
+                    item.harness_capabilities = record.clone();
+                    routes.push(item);
+                }
+            }
+            // FOR-73: models from the operator's OMP login whose provider is
+            // not runner-configured stay listed with why they cannot launch.
+            if let Some(listing) = &entry.login {
+                for (discovered, blocker) in login::unlaunchable(listing, &self.models["providers"])
+                {
+                    let discovered = bundled::merge(discovered);
+                    let mut item = Route::new(
+                        policy::with_profile(
+                            &discovered.with_billing(BillingRoute::Unknown),
+                            None,
+                            Access::Unavailable,
+                        ),
+                        discovered.capabilities.clone(),
+                        fresh,
+                        entry.identity.clone(),
+                        entry.configuration_revision.clone(),
+                    );
+                    item.harness_capabilities = record.clone();
+                    item.launch_blocker = Some(blocker);
+                    if !routes.iter().any(|r| r.offering.key == item.offering.key) {
+                        routes.push(item);
+                    }
                 }
             }
         }
@@ -270,6 +320,17 @@ impl RuntimeConfig {
                     "Launch held: {why} and its re-probe produced no compatibility receipt. Refresh models, then re-admit the assignment."
                 ))
             })?;
+        // FOR-73: the new version's capability record is consulted before
+        // launch; a capability whose fallback is refusal holds the launch.
+        if let Some(record) = HarnessCapabilities::for_identity(harness, &identity) {
+            let refusals = record.refusals();
+            if !refusals.is_empty() {
+                return Err(conflict(&format!(
+                    "Launch held: the {label} executable changed after admission ({admitted}). {} Refresh models, then re-admit the assignment.",
+                    refusals.join(" ")
+                )));
+            }
+        }
         if !receipt
             .offerings
             .iter()
@@ -289,6 +350,11 @@ impl RuntimeConfig {
         });
         let mut next = model.clone();
         next["selection"]["identity"] = json!(identity);
+        // The launch runs with the new version's record, not the admitted one.
+        let capabilities = HarnessCapabilities::for_identity(harness, &identity);
+        next["selection"]["harnessCapabilities"] = json!(capabilities);
+        next["selection"]["degradedModes"] =
+            json!(capabilities.map(|c| c.notes()).unwrap_or_default());
         Ok(Some((next, record)))
     }
     pub(crate) fn verify_frozen_catalog_route(&self, model: &Value) -> Result<()> {
@@ -434,6 +500,7 @@ impl<S: StoreAccess> Workflow<S> {
                         if entry["configured"] == true {
                             entry["billing"] = sources.summary(&saved.harness);
                         }
+                        harness_facts(entry, saved, &self.0.config.models["providers"]);
                         entry["fresh"] = json!(
                             saved.fresh(
                                 crate::model_catalog::store::now(),

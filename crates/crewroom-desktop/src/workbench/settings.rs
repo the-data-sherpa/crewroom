@@ -21,6 +21,8 @@ pub(super) struct Settings {
     draft_description: Option<Fields>,
     models: Option<models::ModelDraft>,
     pickers: HashMap<String, model_picker::Picker>,
+    /// FOR-73: legacy models are collapsed in the picker until expanded.
+    show_legacy_models: bool,
     playbook: String,
     playbooks: HashMap<String, playbooks::PlaybookDraft>,
     principle: String,

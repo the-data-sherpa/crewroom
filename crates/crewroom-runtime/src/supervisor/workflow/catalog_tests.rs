@@ -63,6 +63,7 @@ fn fixture() -> (tempfile::TempDir, RuntimeConfig, Vec<Value>) {
             billing: None,
         }],
         error: None,
+        login: None,
     };
     write_private(
         &path.join("catalog.json"),
@@ -509,6 +510,27 @@ async fn passing_reprobe_of_a_changed_executable_lets_the_launch_proceed() {
     assert_eq!(receipt["admittedBinarySha256"], admitted_sha);
     assert_eq!(receipt["version"], "omp/19.0.1");
     assert_eq!(receipt["compatibility"], "compatible (probed 19.0.1)");
+    // FOR-73: the launch runs with the new version's capability record, and
+    // its fallbacks take effect: steering is held and resume is degraded.
+    assert_eq!(
+        model["selection"]["harnessCapabilities"]["basis"],
+        "verified"
+    );
+    assert_eq!(next["selection"]["harnessCapabilities"]["basis"], "probed");
+    assert_eq!(
+        next["selection"]["harnessCapabilities"]["version"],
+        "omp/19.0.1"
+    );
+    assert!(
+        next["selection"]["degradedModes"][0]
+            .as_str()
+            .unwrap()
+            .starts_with("Steering waits until the current turn ends")
+    );
+    assert_eq!(super::steering_mode(&model), Some("steer"));
+    assert_eq!(super::steering_mode(&next), None);
+    assert!(super::resumes_session(&model));
+    assert!(!super::resumes_session(&next));
     // Only the executable identity changed; the frozen route still verifies.
     for key in [
         "offering",

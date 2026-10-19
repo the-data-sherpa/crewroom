@@ -17,6 +17,53 @@ pub struct Route {
     pub fresh: bool,
     pub identity: Option<discovery::Identity>,
     pub configuration_revision: Option<String>,
+    /// FOR-73: what this route's harness version supports. None when the
+    /// version may not launch (its offering then has no execution profile).
+    pub harness_capabilities: Option<capabilities::HarnessCapabilities>,
+    /// FOR-73: why a listed model can never launch through this service
+    /// (for example, an OMP login provider the gateway does not support).
+    pub launch_blocker: Option<String>,
+}
+impl Route {
+    /// A route with only its discovery facts; capability record and launch
+    /// blocker are added by the caller when known.
+    pub fn new(
+        offering: Offering,
+        advertised: Capabilities,
+        fresh: bool,
+        identity: Option<discovery::Identity>,
+        configuration_revision: Option<String>,
+    ) -> Self {
+        Self {
+            offering,
+            advertised,
+            fresh,
+            identity,
+            configuration_revision,
+            harness_capabilities: None,
+            launch_blocker: None,
+        }
+    }
+    /// Every reason this route cannot run at `effort`: a launch blocker
+    /// alone (it is the cause), else the admission predicate plus the
+    /// capability refusals of its harness version.
+    pub fn blockers(&self, effort: &str, requirements: &Value) -> Vec<String> {
+        if let Some(blocker) = &self.launch_blocker {
+            return vec![blocker.clone()];
+        }
+        let mut reasons = self.offering.blockers(self.fresh, effort, requirements);
+        if let Some(record) = &self.harness_capabilities {
+            reasons.extend(record.refusals());
+        }
+        reasons
+    }
+    /// Holds and degraded modes that apply when this route runs.
+    pub fn notes(&self) -> Vec<String> {
+        self.harness_capabilities
+            .as_ref()
+            .map(capabilities::HarnessCapabilities::notes)
+            .unwrap_or_default()
+    }
 }
 
 /// Profile capabilities can supply known adapter tools/inputs when metadata
@@ -108,7 +155,7 @@ pub fn resolve(
             .iter()
             .find(|r| r.offering.key == choice.key)
             .unwrap();
-        let reasons = choice.blockers(route.fresh, intent.effort, requirements);
+        let reasons = route.blockers(intent.effort, requirements);
         if !reasons.is_empty() {
             blockers.push(format!("{}: {}", choice.display_name, reasons.join(" ")));
             continue;
@@ -126,6 +173,7 @@ pub fn resolve(
             "effortSource":if role["effort"].as_str().is_some_and(|s|!["","default"].contains(&s)){"role_override"}else{"job_budget"},
             "requestedEffort":intent.effort,"billingRoute":choice.billing,"offering":choice,"advertisedCapabilities":route.advertised,
             "identity":route.identity,"configurationRevision":route.configuration_revision,"catalogRevision":catalog_revision,
+            "harnessCapabilities":route.harness_capabilities,"degradedModes":route.notes(),
             "policyRevision":policy_revision,"roleRevision":role_revision,"reason":reason});
         selection["previewRevision"] = json!(digest(&selection));
         return Ok(
@@ -167,11 +215,16 @@ pub fn choices(routes: &[Route], groups: &[Equivalence], requirements: &Value) -
         .iter()
         .map(|r| {
             let billing = r.offering.billing.unwrap_or(BillingRoute::Unknown);
-            (
-                json!({"key":r.offering.key,"displayName":r.offering.display_name,
-                    "label":r.offering.label(),"billingRoute":billing}),
-                vec![r],
-            )
+            let mut header = json!({"key":r.offering.key,"displayName":r.offering.display_name,
+                "label":r.offering.label(),"billingRoute":billing,"harness":r.offering.harness,
+                "efforts":r.offering.capabilities.efforts,
+                "source":if r.launch_blocker.is_some() {"omp-login"} else {"runner"}});
+            if let (Some(target), Value::Object(facts)) =
+                (header.as_object_mut(), bundled::facts(&r.offering))
+            {
+                target.extend(facts);
+            }
+            (header, vec![r])
         })
         .collect();
     for g in groups {
@@ -185,13 +238,22 @@ pub fn choices(routes: &[Route], groups: &[Equivalence], requirements: &Value) -
         for effort in ["off", "minimal", "low", "medium", "high", "xhigh", "max"] {
             let mut reasons = Vec::new();
             let mut selected = None;
+            // `blockers` are the bare reasons, deduplicated, so a client can
+            // show reasons shared by every choice once instead of per row.
+            let mut bare: Vec<String> = Vec::new();
             for route in &candidates {
-                let blocked = route.offering.blockers(route.fresh, effort, requirements);
+                let blocked = route.blockers(effort, requirements);
                 if blocked.is_empty() { selected = Some(route.offering.key.clone()); break; }
+                for reason in &blocked {
+                    if !bare.contains(reason) { bare.push(reason.clone()); }
+                }
                 reasons.extend(blocked.into_iter().map(|reason| format!("{} / {} / {}: {reason}", route.offering.harness.as_str(), route.offering.provider, route.offering.billing.unwrap_or(BillingRoute::Unknown).as_str())));
             }
-            eligibility[effort] = json!({"eligible":selected.is_some(),"routeKey":selected,"reasons":if selected.is_some() { vec![] } else { reasons }});
+            let eligible = selected.is_some();
+            eligibility[effort] = json!({"eligible":eligible,"routeKey":selected,"reasons":if eligible { vec![] } else { reasons },"blockers":if eligible { vec![] } else { bare }});
         }
+        // Holds and degraded modes of the first route, in operator words.
+        choice["degradedModes"] = json!(candidates.first().map(|r| r.notes()).unwrap_or_default());
         choice["routes"] = json!(candidates.iter().map(|r| &r.offering).collect::<Vec<_>>());
         choice["eligibility"] = eligibility;
         choice

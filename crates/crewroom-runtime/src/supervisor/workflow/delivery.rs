@@ -154,6 +154,15 @@ impl<S: StoreAccess> Workflow<S> {
         if !self.0.hosts.observes(attempt) {
             return Ok(());
         }
+        // FOR-73: the coordinator's harness capability record decides whether
+        // steering may reach a running turn; otherwise it is held until idle.
+        let model = array(&runtime["attempts"])
+            .iter()
+            .find(|a| a["id"] == attempt)
+            .map(|a| &a["model"])
+            .filter(|m| !m.is_null())
+            .unwrap_or(&coordinator["model"]);
+        let mode = super::catalog::steering_mode(model);
         for message in self
             .store(|s| s.steering(run))?
             .iter()
@@ -162,11 +171,23 @@ impl<S: StoreAccess> Workflow<S> {
             if !self.can_deliver(run)? {
                 return Ok(());
             }
+            if mode.is_none()
+                && !idle(
+                    &self
+                        .0
+                        .hosts
+                        .request(attempt, &json!({"op":"state"}))
+                        .await?,
+                )
+            {
+                // Held: delivered on a later pass once the turn has ended.
+                break;
+            }
             let id = format!("steering:{}", text(message, "id")?);
             let input = host_input(
                 &id,
                 &json!({"instruction":"Reconcile this operator instruction and report its disposition through steering_receipt.","steering":message}),
-                Some("steer"),
+                mode,
             )?;
             self.store(|s| s.dispatch_steering(attempt, &[text(message, "id")?.into()], &id))?;
             self.0.hosts.request(attempt, &input).await?;

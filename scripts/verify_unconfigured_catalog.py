@@ -7,6 +7,9 @@ no CREWROOM_RUNTIME_CONFIG. Discovery is metadata only: no agent, assignment
 or inference starts. The report holds harness states, versions, offering
 counts, causes and remedies; it never contains tokens or account data.
 
+FOR-73: the report adds each harness version's capability record, the OMP
+login listing (counts and launchability only) and bundled-fact coverage.
+
 FOR-69: each harness row also reports its version basis (`verified` or
 `compatible (probed <version>)`), and the check saves one listed model per
 harness as a job selection in the disposable data directory and reads it back.
@@ -92,6 +95,29 @@ def main():
                                            for h in ('omp', 'codex', 'claude-code')},
                              'eligibleAtLow': sum(1 for c in choices if c['eligibility']['low']['eligible']),
                              'sampleKeys': [c['key'] for c in choices[:6]]}
+        # FOR-73: capability record, OMP login listing and bundled facts.
+        report['for73'] = {
+            'harnesses': [{'harness': h['harness'],
+                           'capabilityBasis': (h.get('capabilities') or {}).get('basis'),
+                           'refusals': len(h.get('refusals') or []),
+                           'degradedModes': h.get('degradedModes') or [],
+                           'needsUpdate': len(h.get('needsUpdate') or []),
+                           'login': {k: (h.get('login') or {}).get(k)
+                                     for k in ('outcome', 'models', 'launchable', 'error')}
+                                    if h.get('login') else None}
+                          for h in catalog['harnesses']],
+            'choices': {'ompLogin': sum(1 for c in choices if c.get('source') == 'omp-login'),
+                        'legacy': sum(1 for c in choices if c.get('status') == 'legacy'),
+                        'bundledFacts': sum(1 for c in choices if c.get('facts') == 'bundled'),
+                        'liveOnly': sum(1 for c in choices if c.get('facts') == 'live-only'),
+                        'loginBlockerShape': sorted({
+                            'subscription sign-in' if 'subscription sign-in' in b else
+                            'not in runner configuration' if 'only API-key providers' in b else 'other'
+                            for c in choices if c.get('source') == 'omp-login'
+                            for b in c['eligibility']['low'].get('blockers', [])})},
+            'credentialShapedText': any(n in json.dumps(catalog)
+                                        for n in ('apiKey', 'api_key', 'Bearer ', 'refresh_token')),
+        }
         workspace = request(info, 'workspace')
         # Select one listed model per harness for a job, as the picker does.
         picked = {}
@@ -108,7 +134,8 @@ def main():
         report['runs'] = len(workspace['runs'])
         report['passed'] = (catalog['runner']['configured'] is False and catalog['selection'] == 'intent'
                             and report['runs'] == 0 and len(choices) > 0
-                            and report['selection']['readBack'] == picked)
+                            and report['selection']['readBack'] == picked
+                            and not report['for73']['credentialShapedText'])
     except Exception as error:  # Retain the failure in the report.
         report['error'] = f'{type(error).__name__}: {error}'
     finally:

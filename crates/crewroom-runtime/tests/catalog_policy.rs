@@ -11,8 +11,8 @@ fn route(harness: Harness, selector: &str) -> Route {
         inputs: Some(vec!["text".into()]),
         tools: Some(true),
     };
-    Route {
-        offering: Offering {
+    Route::new(
+        Offering {
             key: offering_key(&harness, &provider, selector),
             harness,
             provider,
@@ -26,11 +26,11 @@ fn route(harness: Harness, selector: &str) -> Route {
             inference: None,
             billing: None,
         },
-        advertised: capabilities,
-        fresh: true,
-        identity: None,
-        configuration_revision: Some("configuration".into()),
-    }
+        capabilities,
+        true,
+        None,
+        Some("configuration".into()),
+    )
 }
 fn policy(key: &str) -> Value {
     json!({"jobs":{"code":key,"judgment":key,"review":key,"fast":key},"budget":"large","revision":1})
@@ -248,4 +248,128 @@ fn picker_eligibility_matches_admission_for_each_effort_and_equivalent_route() {
             }
         }
     }
+}
+
+fn probe(harness: &Harness, version: &str, full: bool) -> compatibility::ProbeReceipt {
+    let mut receipt = compatibility::ProbeReceipt::new(
+        harness,
+        version,
+        std::path::Path::new("/fixture/bin"),
+        "abc",
+        1,
+    );
+    if !full {
+        receipt.checks.truncate(2);
+    }
+    receipt
+}
+
+#[test]
+fn admission_freezes_the_capability_record_and_states_its_fallbacks() {
+    let mut candidate = route(Harness::ClaudeCode, "sonnet");
+    candidate.harness_capabilities = Some(capabilities::HarnessCapabilities::probed(&probe(
+        &Harness::ClaudeCode,
+        "3.0.0 (Claude Code)",
+        true,
+    )));
+    let key = candidate.offering.key.clone();
+    let role = json!({"enabled":true,"model":key,"effort":"low"});
+    let requirements = json!({"tools":true,"inputs":["text"]});
+    let result = resolve(
+        &role,
+        &policy(&key),
+        &requirements,
+        &[candidate.clone()],
+        &[],
+        1,
+    )
+    .expect("a probed version still runs");
+    let selection = &result["selection"];
+    assert_eq!(selection["harnessCapabilities"]["basis"], "probed");
+    let notes: Vec<_> = selection["degradedModes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|n| n.as_str().unwrap())
+        .collect();
+    assert!(notes[0].starts_with("Steering waits until the current turn ends"));
+    assert!(
+        notes
+            .iter()
+            .any(|n| n.starts_with("A replacement agent starts a fresh session"))
+    );
+    assert!(
+        notes
+            .iter()
+            .any(|n| n.starts_with("Cost is a list-price estimate"))
+    );
+    let choice = &choices(&[candidate], &[], &requirements).unwrap()[0];
+    assert_eq!(choice["degradedModes"], selection["degradedModes"]);
+    assert_eq!(choice["harness"], "claude-code");
+    assert_eq!(choice["source"], "runner");
+    assert_eq!(choice["eligibility"]["low"]["eligible"], true);
+}
+
+#[test]
+fn a_capability_refusal_blocks_admission_and_the_picker_alike() {
+    let mut candidate = route(Harness::Codex, "one");
+    candidate.harness_capabilities = Some(capabilities::HarnessCapabilities::probed(&probe(
+        &Harness::Codex,
+        "codex-cli 1.0.0",
+        false,
+    )));
+    let key = candidate.offering.key.clone();
+    let role = json!({"enabled":true,"model":key,"effort":"low"});
+    let requirements = json!({"tools":true,"inputs":["text"]});
+    let refused = resolve(
+        &role,
+        &policy(&key),
+        &requirements,
+        &[candidate.clone()],
+        &[],
+        1,
+    )
+    .unwrap_err()
+    .to_string();
+    assert!(refused.contains("gated host tools"), "{refused}");
+    let choice = &choices(&[candidate], &[], &requirements).unwrap()[0];
+    assert_eq!(choice["eligibility"]["low"]["eligible"], false);
+    let blockers = choice["eligibility"]["low"]["blockers"].as_array().unwrap();
+    assert_eq!(blockers.len(), 1, "bare reasons, without the route prefix");
+    assert!(
+        blockers[0]
+            .as_str()
+            .unwrap()
+            .starts_with("Codex codex-cli 1.0.0")
+    );
+}
+
+#[test]
+fn a_login_launch_blocker_is_the_only_reason_shown() {
+    let mut candidate = route(Harness::Omp, "login-model");
+    candidate.launch_blocker = Some("Listed by your OMP login (zai).".into());
+    candidate.fresh = false;
+    let requirements = json!({"tools":true,"inputs":["text"]});
+    let choice = &choices(&[candidate], &[], &requirements).unwrap()[0];
+    assert_eq!(choice["source"], "omp-login");
+    for effort in ["low", "high"] {
+        assert_eq!(
+            choice["eligibility"][effort]["blockers"],
+            json!(["Listed by your OMP login (zai)."])
+        );
+    }
+}
+
+#[test]
+fn choices_carry_bundled_status_and_unknown_capabilities() {
+    let mut legacy = route(Harness::Codex, "gpt-5.5");
+    legacy.offering.capabilities.tools = None;
+    let unknown = route(Harness::Codex, "not-in-the-file");
+    let rows = choices(&[legacy, unknown], &[], &json!({})).unwrap();
+    assert_eq!(rows[0]["status"], "legacy");
+    assert_eq!(rows[0]["facts"], "bundled");
+    assert_eq!(rows[0]["unknownCapabilities"], json!(["tools"]));
+    assert_eq!(rows[1]["status"], Value::Null);
+    assert_eq!(rows[1]["facts"], "live-only");
+    assert_eq!(rows[1]["efforts"][2], "low");
 }

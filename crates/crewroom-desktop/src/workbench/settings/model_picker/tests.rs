@@ -56,11 +56,15 @@ fn native_catalog_search_disabled_routes_drafts_and_restart(cx: &mut gpui::TestA
         assert_eq!(
             p.choices
                 .iter()
-                .filter(|c| c.label == "OMP · Shared label · unknown billing")
+                .filter(|c| c
+                    .label
+                    .starts_with("Shared label · fixture · unknown billing · "))
                 .count(),
             3,
-            "harness, model and billing route; a gateway provider is unknown"
+            "model, route and efforts under the OMP group; a gateway provider is unknown"
         );
+        assert_eq!(p.choices[0].label, "OMP");
+        assert!(p.choices[0].header && p.choices[0].blocked);
         let unavailable = p
             .choices
             .iter()
@@ -439,14 +443,26 @@ fn unconfigured_runner_lists_installed_models_and_explains_each_cause(
                 .find(|c| c.key == key)
                 .unwrap_or_else(|| panic!("{job} lacks the installed Codex model"));
             assert!(!choice.blocked, "intent choices stay selectable");
-            assert_eq!(choice.label, "Codex · Fixture model · subscription");
+            // FOR-73: one line per model (name · route · efforts) under its
+            // harness group; the intent note is shown once, not per row.
+            assert_eq!(
+                choice.label,
+                "Fixture model · subscription · low, medium, high, xhigh"
+            );
             assert!(
-                choice
+                !choice
                     .detail
                     .contains("checked when the runner is configured"),
                 "{}",
                 choice.detail
             );
+            let groups: Vec<_> = pickers[&format!("job-{job}")]
+                .choices
+                .iter()
+                .filter(|c| c.header)
+                .map(|c| c.label.as_str())
+                .collect();
+            assert_eq!(groups, ["Codex"]);
         }
         let legacy = pickers["job-judgment"]
             .choices
@@ -458,6 +474,7 @@ fn unconfigured_runner_lists_installed_models_and_explains_each_cause(
     });
     let after = labels(cx, h);
     for expected in [
+        "Choices are saved as your intent and checked when the runner is configured.",
         "OMP lists models only from providers defined in the runner configuration",
         "codex · success · verified",
         "Billing (codex): subscription · Codex auth.json has a ChatGPT login",
@@ -562,7 +579,7 @@ fn pre_billing_selections_show_their_only_route(cx: &mut gpui::TestAppContext) {
         assert!(
             !p.choices
                 .iter()
-                .any(|c| c.blocked && !c.key.ends_with(":unsupported:unknown")),
+                .any(|c| c.blocked && !c.header && !c.key.ends_with(":unsupported:unknown")),
             "no unavailable saved selection: {:?}",
             p.choices.iter().map(|c| &c.label).collect::<Vec<_>>()
         );
@@ -572,7 +589,13 @@ fn pre_billing_selections_show_their_only_route(cx: &mut gpui::TestAppContext) {
             Some(routed)
         );
         let shown = p.choices.iter().find(|c| c.key == routed).unwrap();
-        assert_eq!(shown.label, "OMP · Shared label · unknown billing");
+        assert!(
+            shown
+                .label
+                .starts_with("Shared label · fixture · unknown billing · "),
+            "{}",
+            shown.label
+        );
     });
     let models = labels(cx, h);
     assert!(
@@ -635,4 +658,139 @@ fn pre_billing_selection_with_several_routes_needs_a_route_choice() {
     assert!(saved_rows("offering:codex:codex:fixture:api", &rows).is_empty());
     assert!(saved_rows("offering:codex:codex:fix", &rows).is_empty());
     assert!(saved_rows("", &rows).is_empty());
+}
+
+/// FOR-73: rows are one line per model, grouped by harness; legacy models are
+/// collapsed; reasons shared by every model appear once with their remedy;
+/// a model missing only for version reasons names the release.
+#[test]
+fn picker_listing_groups_collapses_and_states_shared_reasons_once() {
+    let blocked = |reasons: &[&str]| json!({"high":{"eligible":false,"blockers":reasons}});
+    let shared = "Model access is unavailable or unverified.";
+    let row = |key: &str, harness: &str, name: &str, status: Value, reasons: &[&str]| {
+        json!({"key":key,"harness":harness,"displayName":name,"billingRoute":"subscription",
+            "efforts":["low","high"],"status":status,"source":"runner","unknownCapabilities":[],
+            "routes":[{"harness":harness,"provider":harness,"selector":name,"billing":"subscription"}],
+            "eligibility":blocked(reasons)})
+    };
+    let mut login = row(
+        "login",
+        "omp",
+        "GLM-5",
+        Value::Null,
+        &["Listed by your OMP login (zai)."],
+    );
+    login["source"] = json!("omp-login");
+    login["routes"][0]["provider"] = json!("zai");
+    login["unknownCapabilities"] = json!(["tools"]);
+    let catalog = json!({
+        "runner": {"configured": true},
+        "choices": [
+            row("claude", "claude-code", "Sonnet", json!("current"), &[shared]),
+            row("new", "codex", "GPT-6-Astra", json!("current"), &[shared, "Effort high is unsupported or unknown."]),
+            row("old", "codex", "GPT-5.5", json!("legacy"), &[shared]),
+            login,
+        ],
+        "harnesses": [{"harness":"claude-code","needsUpdate":[{"harness":"claude-code","provider":"claude-code",
+            "selector":"fable","displayName":"Fable","status":"current","efforts":["low"],"minimumHarnessVersion":"2.1.303",
+            "reason":"Listed by Claude Code 2.1.303 or newer; this service runs 2.1.296 (Claude Code). Update Claude Code yourself, then refresh models. Crewroom never updates harnesses."}]}],
+    });
+    let collapsed = listing(&catalog, "high", false, &[]);
+    let labels: Vec<_> = collapsed.choices.iter().map(|c| c.label.as_str()).collect();
+    assert_eq!(
+        labels,
+        [
+            "Codex",
+            "GPT-6-Astra · subscription · low, high",
+            "Claude Code",
+            "Sonnet · subscription · low, high",
+            "Fable · needs Claude Code 2.1.303 or newer · low",
+            "OMP",
+            "GLM-5 · zai login · low, high",
+        ]
+    );
+    assert_eq!(collapsed.legacy, 1);
+    // The shared reason is stated once, with its remedy, and not per row.
+    assert_eq!(
+        collapsed.shared,
+        [format!(
+            "Applies to every listed model: {shared} Fix: Check each harness login in the runner configuration, then refresh models."
+        )]
+    );
+    let detail = |key: &str| {
+        collapsed
+            .choices
+            .iter()
+            .find(|c| c.key == key)
+            .unwrap()
+            .detail
+            .clone()
+    };
+    assert_eq!(detail("new"), "Effort high is unsupported or unknown.");
+    assert_eq!(detail("claude"), "");
+    assert_eq!(
+        detail("login"),
+        "Unknown: tools (not in Crewroom's reviewed model facts). Listed by your OMP login (zai)."
+    );
+    let update = collapsed
+        .choices
+        .iter()
+        .find(|c| c.key.starts_with("needs-update:"))
+        .unwrap();
+    assert!(update.blocked);
+    assert!(update.detail.contains("never updates harnesses"));
+    assert!(
+        collapsed
+            .choices
+            .iter()
+            .filter(|c| c.header)
+            .all(|c| c.blocked)
+    );
+    assert!(
+        collapsed
+            .choices
+            .iter()
+            .filter(|c| c.header)
+            .all(|c| !c.matches("codex"))
+    );
+    // Expanded, or kept because it is the saved selection, the legacy row
+    // follows the current rows of its harness.
+    for expanded in [
+        listing(&catalog, "high", true, &[]),
+        listing(&catalog, "high", false, &["old".into()]),
+    ] {
+        let codex: Vec<_> = expanded
+            .choices
+            .iter()
+            .take(3)
+            .map(|c| c.label.as_str())
+            .collect();
+        assert_eq!(
+            codex,
+            [
+                "Codex",
+                "GPT-6-Astra · subscription · low, high",
+                "GPT-5.5 · subscription · low, high · legacy"
+            ]
+        );
+    }
+    // Without a runner, the shared reason's remedy is the runner remedy.
+    let mut unconfigured = catalog.clone();
+    unconfigured["runner"] = json!({"configured":false,"remedy":"Configure the runner."});
+    unconfigured["selection"] = json!("intent");
+    let intent = listing(&unconfigured, "high", false, &[]);
+    assert!(intent.intent);
+    assert!(intent.shared[0].ends_with("Fix: Configure the runner."));
+    assert!(
+        !intent
+            .choices
+            .iter()
+            .find(|c| c.key == "new")
+            .unwrap()
+            .blocked
+    );
+    // An eligible model leaves nothing shared.
+    let mut eligible = catalog.clone();
+    eligible["choices"][0]["eligibility"]["high"] = json!({"eligible":true,"blockers":[]});
+    assert!(listing(&eligible, "high", false, &[]).shared.is_empty());
 }

@@ -275,6 +275,20 @@ impl Store {
             } else {
                 return Err(conflict("A re-probe needs a frozen catalog selection."));
             }
+            // FOR-73: the harness capability record and its stated fallbacks
+            // follow the executable identity, so they may change with it.
+            if let Some(selection) = unchanged["selection"].as_object_mut() {
+                for key in ["harnessCapabilities", "degradedModes"] {
+                    match current["selection"].get(key) {
+                        Some(frozen) => {
+                            selection.insert(key.into(), frozen.clone());
+                        }
+                        None => {
+                            selection.remove(key);
+                        }
+                    }
+                }
+            }
             if unchanged != current
                 || current["selection"]["identity"]["version"] != receipt["admittedVersion"]
                 || current["selection"]["identity"]["binarySha256"]

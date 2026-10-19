@@ -47,9 +47,9 @@ The assignment journal binds account digest, assignment, route/profile and tool 
 
 ## Accounting and enforcement
 
-Claude's cumulative `modelUsage` tokens and list-price estimate are durable and deduplicated across turns and attempts. Recovered increments are attributed when first observed. Repeated snapshots do not add another charge; wrong-session/source reports are ignored by projections, and decreasing native counters fail the adapter contract. Missing counters, native request counts and provider/subscription billing remain unavailable. An absent reasoning counter is not measured zero.
+Claude's cumulative `modelUsage` tokens and list-price estimate are durable and deduplicated across turns and attempts. Recovered increments are attributed when first observed. Repeated snapshots do not add another charge; wrong-session/source reports are ignored by projections, and decreasing native counters fail the adapter contract. Missing counters and provider/subscription billing remain unavailable. An absent reasoning counter is not measured zero.
 
-Cost is a **list-price estimate**, not subscription charges or provider billing. Native request counts, pre-request budget enforcement and hard output/spend guarantees are unavailable. Compaction is harness-managed. Existing Crewroom active-time limits, authorization, pause/cancel and owned-process cleanup still apply. OMP gateway enforcement is unchanged.
+What each Claude Code version supports (host tools, steering, interruption, session resume, effort, token accounting, request counts, cost and pre-request budget) is the typed harness capability record in [`model_catalog/capabilities.rs`](../../crates/crewroom-runtime/src/model_catalog/capabilities.rs) (FOR-73), with the fallback for each missing capability; this contract does not restate it. Beyond that record: cost is never subscription charges or provider billing, hard output/spend guarantees are unavailable, and compaction is harness-managed. Existing Crewroom active-time limits, authorization, pause/cancel and owned-process cleanup still apply. OMP gateway enforcement is unchanged.
 
 ## Reproduction and evidence
 

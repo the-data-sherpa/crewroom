@@ -9,10 +9,13 @@ use std::collections::HashSet;
 pub use billing::BillingRoute;
 
 pub mod billing;
+pub mod bundled;
+pub mod capabilities;
 pub mod codex_protocol;
 pub mod compatibility;
 pub mod discovery;
 pub mod known_broken;
+pub mod login;
 pub mod policy;
 mod probe;
 pub mod store;
@@ -347,4 +350,26 @@ pub fn find<'a>(selection: &str, offerings: &'a [Offering]) -> Result<Option<&'a
                 .join(" and ")
         ))),
     }
+}
+
+/// FOR-73 facts for one harness row of a catalog view: the capability record
+/// of its discovered version with the fallbacks in operator words, bundled
+/// models the installed version predates, and (OMP) a summary of the login
+/// listing in place of the raw listing.
+pub fn harness_facts(entry: &mut Value, saved: &store::HarnessSnapshot, runner_providers: &Value) {
+    let record = saved
+        .identity
+        .as_ref()
+        .and_then(|i| capabilities::HarnessCapabilities::for_identity(&saved.harness, i));
+    entry["capabilities"] = json!(record);
+    entry["refusals"] = json!(record.as_ref().map(|r| r.refusals()).unwrap_or_default());
+    entry["degradedModes"] = json!(record.as_ref().map(|r| r.notes()).unwrap_or_default());
+    entry["needsUpdate"] = json!(
+        saved
+            .identity
+            .as_ref()
+            .map(|i| bundled::needs_update(&saved.harness, &i.version, &saved.offerings))
+            .unwrap_or_default()
+    );
+    entry["login"] = login::summary(saved.login.as_ref(), runner_providers);
 }

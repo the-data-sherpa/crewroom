@@ -135,11 +135,13 @@ impl<S: StoreAccess> Workflow<S> {
         options.runtime.jobs_path = Some(options.roles.with_file_name("model-jobs.json"));
         let changed = Arc::new(changed);
         let catalog_changed = changed.clone();
-        options.runtime.discovery = Some(crate::model_catalog::store::Catalog::open(
+        options.runtime.discovery = Some(crate::model_catalog::store::Catalog::open_with_login(
             &options.runtime.root.join("model-catalog"),
             options
                 .runtime
                 .discovery_sources(&options.helper, &options.environment),
+            // FOR-73: the operator's OMP login in the service's HOME.
+            crate::model_catalog::login::home(&options.environment),
             move || catalog_changed(""),
         )?);
         let callback = Arc::new(OnceLock::<Weak<Inner<S>>>::new());

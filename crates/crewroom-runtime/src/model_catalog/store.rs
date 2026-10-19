@@ -51,6 +51,10 @@ pub struct HarnessSnapshot {
     pub configuration_revision: Option<String>,
     pub offerings: Vec<Offering>,
     pub error: Option<String>,
+    /// FOR-73: OMP only. Models the operator's own OMP login lists, kept
+    /// apart from the runner-configured offerings above.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub login: Option<super::login::Listing>,
 }
 impl HarnessSnapshot {
     pub fn fresh(&self, now: u64, configuration_revision: &str) -> bool {
@@ -126,6 +130,7 @@ impl Default for Snapshot {
                     configuration_revision: None,
                     offerings: Vec::new(),
                     error: None,
+                    login: None,
                 })
                 .collect(),
             probes: Vec::new(),
@@ -148,6 +153,14 @@ impl Snapshot {
                 return Err(conflict("Invalid catalog harness identity."));
             }
             validate_contract(&entry.offerings, &[])?;
+            if let Some(login) = &entry.login {
+                if entry.harness != Harness::Omp
+                    || login.offerings.iter().any(|o| o.harness != Harness::Omp)
+                {
+                    return Err(conflict("Invalid catalog harness identity."));
+                }
+                validate_contract(&login.offerings, &[])?;
+            }
         }
         if self.probes.len() > compatibility::MAX_RECEIPTS || self.probes.iter().any(|p| !p.valid())
         {
@@ -175,6 +188,23 @@ impl Snapshot {
             .len()
             .saturating_sub(compatibility::MAX_RECEIPTS);
         self.probes.drain(..excess);
+        Ok(())
+    }
+    /// Attach a login listing to the OMP entry of the running refresh.
+    fn record_login(&mut self, generation: u64, listing: super::login::Listing) -> Result<()> {
+        if self.generation != generation || self.state != "refreshing" {
+            return Err(conflict("A newer catalog refresh superseded this result."));
+        }
+        let entry = self
+            .harnesses
+            .iter_mut()
+            .find(|v| v.harness == Harness::Omp)
+            .ok_or_else(|| conflict("Unknown catalog harness."))?;
+        if listing.offerings.iter().any(|o| o.harness != Harness::Omp) {
+            return Err(conflict("Invalid OMP login listing."));
+        }
+        validate_contract(&listing.offerings, &[])?;
+        entry.login = Some(listing);
         Ok(())
     }
     fn advance(&mut self) -> Result<()> {
@@ -289,6 +319,8 @@ struct Inner {
     path: PathBuf,
     processes: PathBuf,
     sources: Vec<Source>,
+    /// FOR-73: HOME whose OMP login is listed during a refresh.
+    login_home: Option<PathBuf>,
     state: Mutex<State>,
     cancel: CancellationToken,
     changed: Arc<dyn Fn() + Send + Sync>,
@@ -306,6 +338,15 @@ impl Catalog {
     pub fn open(
         root: &Path,
         sources: Vec<Source>,
+        changed: impl Fn() + Send + Sync + 'static,
+    ) -> Result<Self> {
+        Self::open_with_login(root, sources, None, changed)
+    }
+    /// As `open`, also listing the OMP login in `login_home` on refresh.
+    pub fn open_with_login(
+        root: &Path,
+        sources: Vec<Source>,
+        login_home: Option<PathBuf>,
         changed: impl Fn() + Send + Sync + 'static,
     ) -> Result<Self> {
         use std::os::unix::fs::{DirBuilderExt, MetadataExt};
@@ -365,6 +406,7 @@ impl Catalog {
             path,
             processes: root.join("processes"),
             sources,
+            login_home,
             state: Mutex::new(State {
                 snapshot,
                 persistence_error,
@@ -493,10 +535,17 @@ impl Catalog {
                 } else {
                     Err("Harness is not configured.".into())
                 };
+                let login = match (&harness, source, &this.0.login_home) {
+                    (Harness::Omp, Some(source), Some(home)) if recovery.is_ok() => {
+                        Some(this.list_login(&source.config, home, generation).await)
+                    }
+                    _ => None,
+                };
                 let mut state = this.0.state.lock().unwrap();
                 let mut next = state.snapshot.clone();
-                let recorded = next
-                    .record(generation, &harness, configuration, result, now())
+                let recorded = login
+                    .map_or(Ok(()), |listing| next.record_login(generation, listing))
+                    .and_then(|()| next.record(generation, &harness, configuration, result, now()))
                     .and_then(|()| this.persist(&mut state, next));
                 if recorded.is_err() {
                     state.persistence_error = true;
@@ -512,6 +561,48 @@ impl Catalog {
         drop(state);
         (self.0.changed)();
         Ok(self.view(now()))
+    }
+    /// FOR-73: list the operator's OMP login. A failure is recorded on the
+    /// listing and never fails the runner-configured OMP refresh.
+    async fn list_login(
+        &self,
+        config: &Config,
+        home: &Path,
+        generation: u64,
+    ) -> super::login::Listing {
+        let root = self
+            .0
+            .processes
+            .join(format!("refresh-{generation}"))
+            .join("omp-login");
+        let listed = super::login::discover(
+            config,
+            home,
+            &root,
+            now(),
+            &self.0.cancel,
+            Duration::from_secs(30),
+        )
+        .await;
+        match listed {
+            Ok(offerings) => super::login::Listing {
+                outcome: Outcome::Success,
+                observed_at: now(),
+                offerings,
+                error: None,
+            },
+            Err(error) => super::login::Listing {
+                outcome: Outcome::Error,
+                observed_at: now(),
+                offerings: Vec::new(),
+                error: Some(match error {
+                    crewroom_core::Error::Conflict(message) => {
+                        format!("Your OMP login's models could not be listed: {message}")
+                    }
+                    _ => "Your OMP login's models could not be listed.".into(),
+                }),
+            },
+        }
     }
     /// FOR-69 launch-time re-probe of one harness's current executable. The
     /// probe receipt is retained like a refresh's; the catalog entry's
@@ -572,8 +663,14 @@ impl Catalog {
             if !run.file_type()?.is_dir() {
                 return Err(conflict("Invalid discovery recovery directory."));
             }
-            for harness in ["omp", "codex", "claude-code"] {
-                for command in ["version", "metadata", "probe-catalog", "probe-handshake"] {
+            for harness in ["omp", "codex", "claude-code", "omp-login"] {
+                for command in [
+                    "version",
+                    "metadata",
+                    "probe-catalog",
+                    "probe-handshake",
+                    "login",
+                ] {
                     let root = run.path().join(harness).join(command);
                     if root.exists() && crate::stop_owned(&root).await.state != "stopped" {
                         return Err(conflict(

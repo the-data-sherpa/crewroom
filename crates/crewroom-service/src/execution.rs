@@ -233,13 +233,15 @@ impl Execution {
         // operator can record intent. The runner re-checks before admission.
         let discovery = if options.runtime.is_none() {
             let push = changes.clone();
-            Some(Catalog::open(
+            Some(Catalog::open_with_login(
                 &data.join("model-catalog"),
                 unconfigured::sources(
                     &std::fs::canonicalize(&options.helper)?,
                     // The service's own PATH; none means no harness is found.
                     options.environment["PATH"].as_str().unwrap_or(""),
                 ),
+                // FOR-73: the operator's OMP login in the service's HOME.
+                crewroom_runtime::model_catalog::login::home(&options.environment),
                 move || {
                     push.send_modify(|v| {
                         *v = v.saturating_add(1);

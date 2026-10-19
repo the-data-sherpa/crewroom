@@ -87,29 +87,58 @@ pub fn view(catalog: &Catalog, billing: &billing::Sources, now: u64) -> Value {
         .collect();
     match catalog.snapshot() {
         Ok(snapshot) => {
-            let routes: Vec<Route> = snapshot
-                .harnesses
-                .iter()
-                .flat_map(|entry| {
-                    entry.offerings.iter().flat_map(|discovered| {
-                        billing
-                            .detect(&discovered.harness, &discovered.provider)
-                            .routes
-                            .into_iter()
-                            .map(|route| Route {
-                                offering: policy::with_profile(
-                                    &discovered.with_billing(route),
-                                    None,
-                                    Access::Unknown,
-                                ),
-                                advertised: discovered.capabilities.clone(),
-                                fresh: fresh.get(entry.harness.as_str()).copied().unwrap_or(false),
-                                identity: entry.identity.clone(),
-                                configuration_revision: entry.configuration_revision.clone(),
-                            })
-                    })
-                })
-                .collect();
+            let mut routes: Vec<Route> = Vec::new();
+            for entry in &snapshot.harnesses {
+                let record = entry.identity.as_ref().and_then(|i| {
+                    capabilities::HarnessCapabilities::for_identity(&entry.harness, i)
+                });
+                let is_fresh = fresh.get(entry.harness.as_str()).copied().unwrap_or(false);
+                for discovered in &entry.offerings {
+                    // Bundled facts fill capabilities discovery left unknown.
+                    let discovered = bundled::merge(discovered);
+                    for route in billing
+                        .detect(&discovered.harness, &discovered.provider)
+                        .routes
+                    {
+                        let mut item = Route::new(
+                            policy::with_profile(
+                                &discovered.with_billing(route),
+                                None,
+                                Access::Unknown,
+                            ),
+                            discovered.capabilities.clone(),
+                            is_fresh,
+                            entry.identity.clone(),
+                            entry.configuration_revision.clone(),
+                        );
+                        item.harness_capabilities = record.clone();
+                        routes.push(item);
+                    }
+                }
+                // FOR-73: the operator's OMP login. Without a runner no
+                // provider is gateway-configured, so each states its reason.
+                if let Some(listing) = &entry.login {
+                    for (discovered, blocker) in login::unlaunchable(listing, &json!({})) {
+                        let discovered = bundled::merge(discovered);
+                        let mut item = Route::new(
+                            policy::with_profile(
+                                &discovered.with_billing(BillingRoute::Unknown),
+                                None,
+                                Access::Unavailable,
+                            ),
+                            discovered.capabilities.clone(),
+                            is_fresh,
+                            entry.identity.clone(),
+                            entry.configuration_revision.clone(),
+                        );
+                        item.harness_capabilities = record.clone();
+                        item.launch_blocker = Some(blocker);
+                        if !routes.iter().any(|r| r.offering.key == item.offering.key) {
+                            routes.push(item);
+                        }
+                    }
+                }
+            }
             let requirements = json!({"inputs":["text"],"tools":true});
             match policy::choices(&routes, &[], &requirements) {
                 Ok(choices) => view["choices"] = choices,
@@ -141,10 +170,13 @@ pub fn view(catalog: &Catalog, billing: &billing::Sources, now: u64) -> Value {
                     entry["billing"] = billing.summary(&saved.harness);
                 }
                 if catalog.source(&saved.harness).is_some() && saved.harness == Harness::Omp {
-                    entry["note"] = json!(
+                    entry["note"] = json!(if saved.login.is_some() {
+                        "Runner-configured OMP providers are listed once the runner is configured. Models from your OMP login are listed with the reason each cannot launch."
+                    } else {
                         "OMP lists models only from providers defined in the runner configuration. Configure the runner to list OMP models."
-                    );
+                    });
                 }
+                harness_facts(entry, saved, &json!({}));
             }
         }
         Err(error) => {
@@ -210,5 +242,89 @@ mod tests {
                 .unwrap()
                 .contains("`claude`")
         );
+    }
+
+    #[test]
+    fn omp_login_models_are_listed_with_their_reason_and_no_credentials() {
+        use std::os::unix::fs::DirBuilderExt;
+        let root = tempfile::tempdir().unwrap();
+        let dir = root.path().join("catalog");
+        std::fs::DirBuilder::new().mode(0o700).create(&dir).unwrap();
+        // Discovery keeps identity and capability fields only; a
+        // credential-shaped field in the harness output never survives.
+        let rows = json!([
+            {"provider":"openai-codex","id":"gpt-6-astra","selector":"openai-codex/gpt-6-astra","name":"GPT-6 Astra",
+             "thinking":["low","high"],"input":["text"],"apiKey":"login-secret-canary"},
+            {"provider":"zai","id":"glm-5","selector":"zai/glm-5","name":"GLM-5","thinking":["high"],"input":["text"]}
+        ]);
+        let mut snapshot = super::super::store::Snapshot::default();
+        snapshot.harnesses[0].login = Some(login::Listing {
+            outcome: super::super::store::Outcome::Success,
+            observed_at: 1,
+            offerings: discovery::normalize(&Harness::Omp, &rows, 1).unwrap(),
+            error: None,
+        });
+        crewroom_core::authority::write_private(
+            &dir.join("catalog.json"),
+            &serde_json::to_vec(&snapshot).unwrap(),
+        )
+        .unwrap();
+        let catalog = Catalog::open(&dir, vec![], || {}).unwrap();
+        let view = view(&catalog, &billing::Sources::default(), 100);
+        assert!(!view.to_string().contains("login-secret-canary"));
+        let choices = view["choices"].as_array().unwrap();
+        assert_eq!(choices.len(), 2);
+        for choice in choices {
+            assert_eq!(choice["source"], "omp-login");
+            let blockers = choice["eligibility"]["high"]["blockers"]
+                .as_array()
+                .unwrap();
+            assert_eq!(blockers.len(), 1);
+            assert!(
+                blockers[0]
+                    .as_str()
+                    .unwrap()
+                    .contains("only API-key providers")
+            );
+        }
+        assert!(
+            choices[0]["eligibility"]["high"]["blockers"][0]
+                .as_str()
+                .unwrap()
+                .contains("subscription sign-in")
+        );
+        // Bundled facts fill the unreported tool capability.
+        assert_eq!(choices[0]["facts"], "bundled");
+        assert_eq!(choices[0]["unknownCapabilities"], json!([]));
+        assert_eq!(choices[1]["facts"], "live-only");
+        assert_eq!(choices[1]["unknownCapabilities"], json!(["tools"]));
+        let omp = &view["harnesses"][0];
+        assert_eq!(omp["login"]["models"], 2);
+        assert_eq!(omp["login"]["launchable"], 0);
+        assert!(
+            omp["login"]["offerings"].is_null(),
+            "raw listing stays server-side"
+        );
+    }
+
+    #[test]
+    fn a_login_listing_is_omp_only() {
+        let mut snapshot = super::super::store::Snapshot::default();
+        snapshot.harnesses[1].login = Some(login::Listing {
+            outcome: super::super::store::Outcome::Success,
+            observed_at: 1,
+            offerings: vec![],
+            error: None,
+        });
+        use std::os::unix::fs::DirBuilderExt;
+        let root = tempfile::tempdir().unwrap();
+        let dir = root.path().join("catalog");
+        std::fs::DirBuilder::new().mode(0o700).create(&dir).unwrap();
+        crewroom_core::authority::write_private(
+            &dir.join("catalog.json"),
+            &serde_json::to_vec(&snapshot).unwrap(),
+        )
+        .unwrap();
+        assert!(Catalog::open(&dir, vec![], || {}).is_err());
     }
 }
