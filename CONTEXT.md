@@ -16,6 +16,10 @@ _Avoid_: Run, agent assignment
 One local checkout that Crewroom works in, together with its ticket source, checks, instruction files and branch prefix. The workbench groups tickets by project; a ticket without one is **Unassigned**. The service and stored data call a project a *repository*.
 _Avoid_: Jira project, workspace
 
+**Snooze / Settle**:
+The operator's presentation of a ticket in the sidebar. A snoozed ticket sits on its project's **Snoozed** shelf until a time or a watched event (a PR review, CI finishing, a source status change) and then returns with the reason it woke; it returns at once if it needs the operator. A settled ticket sits on the **Settled** shelf until un-settled. Neither pauses, cancels or changes a run, workflow state or source status.
+_Avoid_: Pause, cancel, close
+
 **Target repository**:
 The project assigned to a ticket as the destination for its coding work. In the workbench this is the ticket's project.
 _Avoid_: Jira project

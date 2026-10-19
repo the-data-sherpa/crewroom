@@ -7,7 +7,7 @@ use super::*;
 use gpui_kit::{self as gpui, AnyWindowHandle, test::TestWindowExt};
 use gpui_kit::{Bounds, WindowBounds, WindowOptions, point, size};
 
-fn open_injected(
+pub(super) fn open_injected(
     cx: &mut gpui::TestAppContext,
     workspace: Value,
     descriptor: Option<&std::path::Path>,
@@ -39,13 +39,13 @@ fn open_injected(
     })
 }
 
-fn render(cx: &mut gpui::TestAppContext, h: AnyWindowHandle) {
+pub(super) fn render(cx: &mut gpui::TestAppContext, h: AnyWindowHandle) {
     cx.run_until_parked();
     cx.update_window(h, |_, window, cx| window.render_frame(cx))
         .unwrap();
 }
 
-fn present(cx: &mut gpui::TestAppContext, h: AnyWindowHandle, id: &str) -> bool {
+pub(super) fn present(cx: &mut gpui::TestAppContext, h: AnyWindowHandle, id: &str) -> bool {
     cx.update_window(h, |_, window, cx| {
         window.render_frame(cx);
         window.try_find(SharedString::from(id.to_owned())).is_some()
@@ -53,7 +53,7 @@ fn present(cx: &mut gpui::TestAppContext, h: AnyWindowHandle, id: &str) -> bool 
     .unwrap()
 }
 
-fn press(cx: &mut gpui::TestAppContext, h: AnyWindowHandle, id: &str) {
+pub(super) fn press(cx: &mut gpui::TestAppContext, h: AnyWindowHandle, id: &str) {
     cx.update_window(h, |_, window, cx| {
         window.render_frame(cx);
         window.click(SharedString::from(id.to_owned()), cx);
@@ -62,7 +62,7 @@ fn press(cx: &mut gpui::TestAppContext, h: AnyWindowHandle, id: &str) {
     .unwrap();
 }
 
-fn top(cx: &mut gpui::TestAppContext, h: AnyWindowHandle, id: &str) -> gpui::Pixels {
+pub(super) fn top(cx: &mut gpui::TestAppContext, h: AnyWindowHandle, id: &str) -> gpui::Pixels {
     cx.update_window(h, |_, window, cx| {
         window.render_frame(cx);
         window
@@ -74,7 +74,7 @@ fn top(cx: &mut gpui::TestAppContext, h: AnyWindowHandle, id: &str) -> gpui::Pix
     .unwrap()
 }
 
-fn task(id: &str, project: Option<&str>) -> Value {
+pub(super) fn task(id: &str, project: Option<&str>) -> Value {
     let mut t = json!({"id":id,"key":format!("SIM-{id}"),"source":"local","title":format!("Ticket {id}"),"brief":"","criteria":[],"revision":1,"sourceRevision":1});
     if let Some(project) = project {
         t["repositoryId"] = json!(project);
@@ -82,7 +82,7 @@ fn task(id: &str, project: Option<&str>) -> Value {
     t
 }
 
-fn workspace() -> Value {
+pub(super) fn workspace() -> Value {
     json!({
         "repositories":[
             {"id":"alpha","name":"Alpha app","path":"/synthetic/alpha","targetBranch":"main","retiredAt":null,

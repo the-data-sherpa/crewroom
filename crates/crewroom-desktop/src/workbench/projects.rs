@@ -7,6 +7,7 @@
 //! Each row keeps source status, workflow state and agent activity as separate facts; the
 //! section a ticket sits in is derived from workflow state and pending decisions only.
 use super::navigation::{ProjectPrefs, UNASSIGNED};
+use super::shelves::Shelf;
 use super::*;
 use gpui_kit::Stateful;
 
@@ -68,6 +69,8 @@ struct Group {
     key: String,
     project: Option<Value>,
     rows: Vec<(Value, Option<Value>, Section)>,
+    /// Snoozed and settled tickets (FOR-78), kept out of the four sections.
+    shelved: Vec<(Value, Option<Value>, Shelf)>,
 }
 
 impl Workbench {
@@ -144,20 +147,24 @@ impl Workbench {
                 key: string(&p, "id"),
                 project: Some(p),
                 rows: vec![],
+                shelved: vec![],
             })
             .collect();
         let mut unassigned = Group {
             key: UNASSIGNED.into(),
             project: None,
             rows: vec![],
+            shelved: vec![],
         };
         for task in records(&self.workspace, "tasks") {
-            let run = self.current_run(&string(&task, "id"));
+            let id = string(&task, "id");
+            let run = self.current_run(&id);
             let section = self.section(&task, run.as_ref());
-            let row = (task.clone(), run, section);
+            let shelf = self.shelf_of(&id, section);
             let target = task["repositoryId"].as_str().filter(|id| !id.is_empty());
-            if let Some(group) = groups.iter_mut().find(|g| Some(g.key.as_str()) == target) {
-                group.rows.push(row);
+            let group = if let Some(i) = groups.iter().position(|g| Some(g.key.as_str()) == target)
+            {
+                &mut groups[i]
             } else if let Some(retired) = target
                 .and_then(|id| repositories.iter().find(|r| r["id"] == id))
                 .cloned()
@@ -166,13 +173,19 @@ impl Workbench {
                 groups.push(Group {
                     key: string(&retired, "id"),
                     project: Some(retired),
-                    rows: vec![row],
+                    rows: vec![],
+                    shelved: vec![],
                 });
+                groups.last_mut().unwrap()
             } else {
-                unassigned.rows.push(row);
+                &mut unassigned
+            };
+            match shelf {
+                Some(shelf) => group.shelved.push((task, run, shelf)),
+                None => group.rows.push((task, run, section)),
             }
         }
-        if !unassigned.rows.is_empty() {
+        if !unassigned.rows.is_empty() || !unassigned.shelved.is_empty() {
             groups.push(unassigned);
         }
         for group in &mut groups {
@@ -219,7 +232,7 @@ impl Workbench {
                 if collapsed {
                     return column;
                 }
-                if group.rows.is_empty() {
+                if group.rows.is_empty() && group.shelved.is_empty() {
                     column = column.child(
                         named_hint(
                             format!("project-{key}-empty"),
@@ -248,6 +261,25 @@ impl Workbench {
                         ));
                     }
                 }
+                // Shelves start collapsed; each project remembers which are open.
+                for shelf in [Shelf::Snoozed, Shelf::Settled] {
+                    let rows: Vec<_> = group.shelved.iter().filter(|r| r.2 == shelf).collect();
+                    if rows.is_empty() {
+                        continue;
+                    }
+                    let (open, header) = self.shelf_header(&key, shelf, rows.len(), cx);
+                    column = column.child(div().pt_1().flex().child(header));
+                    if open {
+                        for (task, run, _) in rows {
+                            column = column.child(self.ticket_row(
+                                task,
+                                run.as_ref(),
+                                group.project.as_ref(),
+                                cx,
+                            ));
+                        }
+                    }
+                }
                 column
             })
             .collect()
@@ -270,10 +302,13 @@ impl Workbench {
             .project
             .as_ref()
             .is_some_and(|p| !p["retiredAt"].is_null());
+        // Snoozed and settled tickets still run; the indicator counts them too.
         let running = group
             .rows
             .iter()
-            .filter(|(_, run, _)| Self::group(run.as_ref()) == shell::Group::Active)
+            .map(|(_, run, _)| run)
+            .chain(group.shelved.iter().map(|(_, run, _)| run))
+            .filter(|run| Self::group(run.as_ref()) == shell::Group::Active)
             .count();
         let title = div()
             .flex()

@@ -92,6 +92,13 @@ pub(super) fn workspace(e: &Execution, v: &mut Value) -> Result<()> {
             }
         }
     }
+    if let Some(list) = v["runs"].as_array_mut() {
+        for run in list {
+            if let Some(state) = run["id"].as_str().and_then(|id| runs.get(id)) {
+                run["publicationWatch"] = publication_watch(&state.publication);
+            }
+        }
+    }
     if let Some(repos) = v["repositories"].as_array_mut() {
         for r in repos {
             let path = std::path::PathBuf::from(r["path"].as_str().unwrap_or(""));
@@ -160,6 +167,54 @@ pub(super) fn landed_entry(run: &Value, publication: &Value) -> Option<Value> {
             "kind":"research","runId":run["id"],"taskId":run["taskId"],
             "researchRevision":outcome["revision"],"at":outcome["completedAt"],
         })
+    })
+}
+/// The facts an operator can snooze a ticket until (FOR-78), from the run's last recorded
+/// publication: the PR feedback ids read so far and the state of its hosted checks. Null
+/// without a confirmed PR. Recorded observations only; nothing here asks the provider.
+pub(super) fn publication_watch(p: &Value) -> Value {
+    if p["pr"]["state"] != "confirmed" {
+        return Value::Null;
+    }
+    let feedback: Vec<String> = array(&p["feedback"]["comments"])
+        .iter()
+        .map(|c| format!("{}:{}", c["kind"].as_str().unwrap_or("comment"), c["id"]))
+        .collect();
+    let observed = &p["observation"];
+    let ci = if observed.is_object() {
+        let keys = array(&p["policy"]["statusKeys"]);
+        let pipelines = array(&observed["pipelines"]);
+        let statuses: Vec<&Value> = array(&observed["statuses"])
+            .iter()
+            .filter(|s| keys.is_empty() || keys.contains(&s["key"]))
+            .collect();
+        let running = pipelines.iter().any(|p| {
+            ["PENDING", "IN_PROGRESS"].contains(&p["state"]["name"].as_str().unwrap_or(""))
+        }) || statuses.iter().any(|s| s["state"] == "INPROGRESS");
+        let state = if running {
+            "running"
+        } else if pipelines.is_empty() && statuses.is_empty() {
+            "none"
+        } else {
+            "finished"
+        };
+        let passed = pipelines.iter().all(|p| {
+            p["state"]["name"] == "COMPLETED" && p["state"]["result"]["name"] == "SUCCESSFUL"
+        }) && statuses.iter().all(|s| s["state"] == "SUCCESSFUL");
+        let mut ci = json!({"state":state,"head":observed["pr"]["source"]["commit"]["hash"]});
+        if state == "finished" {
+            ci["outcome"] = json!(if passed { "passed" } else { "failed" });
+        }
+        ci
+    } else {
+        json!({"state":"unobserved"})
+    };
+    json!({
+        "pr": p["pr"]["id"],
+        "providerState": p["pr"]["providerState"],
+        "feedbackRead": p["feedback"].is_object(),
+        "feedback": feedback,
+        "ci": ci,
     })
 }
 pub(super) fn after(q: &HashMap<String, String>) -> Result<u64> {
@@ -383,12 +438,9 @@ async fn result(e: &Execution, id: &str) -> Result<Value> {
     value["publication"] = e.publication.view(id).await?;
     Ok(value)
 }
-
 #[cfg(test)]
 mod tests {
-    use super::landed_entry;
-    use serde_json::json;
-
+    use super::*;
     #[test]
     fn landed_names_the_published_revision_and_skips_unconfirmed_work() {
         let run = json!({"id":"r","taskId":"t","purpose":"coding","status":"paused"});
@@ -411,5 +463,40 @@ mod tests {
         let entry = landed_entry(&research, &serde_json::Value::Null).unwrap();
         assert_eq!(entry["kind"], "research");
         assert_eq!(entry["researchRevision"], 3);
+    }
+    #[test]
+    fn publication_watch_reports_recorded_feedback_and_hosted_check_state() {
+        assert!(publication_watch(&Value::Null).is_null());
+        assert!(publication_watch(&json!({"pr":{"state":"uncertain"}})).is_null());
+        let mut p = json!({
+            "pr":{"state":"confirmed","id":7,"providerState":"OPEN"},
+            "policy":{"statusKeys":["build"]},
+        });
+        assert_eq!(
+            publication_watch(&p),
+            json!({"pr":7,"providerState":"OPEN","feedbackRead":false,"feedback":[],"ci":{"state":"unobserved"}})
+        );
+        p["feedback"] = json!({"comments":[{"kind":"review","id":3},{"id":"c1"}]});
+        p["observation"] = json!({
+            "pr":{"source":{"commit":{"hash":"abc"}}},
+            "pipelines":[{"state":{"name":"IN_PROGRESS"}}],
+            "statuses":[{"key":"build","state":"SUCCESSFUL"},{"key":"other","state":"FAILED"}]
+        });
+        let watch = publication_watch(&p);
+        assert_eq!(watch["feedback"], json!(["review:3", "comment:\"c1\""]));
+        assert_eq!(watch["feedbackRead"], true);
+        assert_eq!(watch["ci"], json!({"state":"running","head":"abc"}));
+        p["observation"]["pipelines"][0]["state"] =
+            json!({"name":"COMPLETED","result":{"name":"SUCCESSFUL"}});
+        // Only the policy's status keys count; "other" is not one of them.
+        assert_eq!(
+            publication_watch(&p)["ci"],
+            json!({"state":"finished","head":"abc","outcome":"passed"})
+        );
+        p["observation"]["statuses"][0]["state"] = json!("FAILED");
+        assert_eq!(publication_watch(&p)["ci"]["outcome"], "failed");
+        p["observation"]["pipelines"] = json!([]);
+        p["observation"]["statuses"] = json!([]);
+        assert_eq!(publication_watch(&p)["ci"]["state"], "none");
     }
 }

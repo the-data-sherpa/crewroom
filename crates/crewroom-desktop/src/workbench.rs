@@ -65,6 +65,9 @@ mod results;
 mod run_actions;
 mod settings;
 mod shell;
+mod shelves;
+#[cfg(test)]
+mod shelves_tests;
 #[cfg(test)]
 mod test_support;
 #[cfg(test)]
@@ -176,6 +179,8 @@ pub struct Workbench {
     reset_import: bool,
     /// The project a ticket created from New ticket targets; `None` leaves it unassigned.
     new_project: Option<String>,
+    /// Snooze choices, Undo and wake timers for the sidebar shelves (FOR-78).
+    shelf: shelves::ShelfState,
     _events: Option<gpui_kit::Task<()>>,
     /// Keeps the Overview's elapsed times current between service updates (FOR-77).
     _ticker: Option<gpui_kit::Task<()>>,
@@ -342,6 +347,7 @@ impl Workbench {
             reset_new: false,
             reset_import: false,
             new_project: None,
+            shelf: Default::default(),
             _events: task,
             _ticker: ticker,
         }
@@ -373,6 +379,7 @@ impl Workbench {
                 }
                 self.workspace = value;
                 self.refresh_comparison();
+                self.wake_snoozed(cx);
             }
             Event::Connected(value) => {
                 self.connected = value;

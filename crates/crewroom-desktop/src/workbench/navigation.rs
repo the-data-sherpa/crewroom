@@ -18,6 +18,10 @@ pub(super) struct Saved {
     /// The Overview's no-progress thresholds (FOR-77). Older files read with the defaults.
     #[serde(default)]
     pub overview: OverviewPrefs,
+    /// Snoozed and settled tickets (FOR-78): operator presentation only. Files written before
+    /// FOR-78 read with empty shelves.
+    #[serde(default)]
+    pub shelves: Shelves,
 }
 /// Minutes without observed progress before a running run is flagged in Running, and before
 /// it is also listed under Needs you. A display preference of this machine only.
@@ -45,6 +49,50 @@ impl OverviewPrefs {
             promote_minutes: self.promote_minutes.clamp(stale + 1, MAX_STALE_MINUTES),
         }
     }
+}
+/// Where the operator put tickets aside. Never a run, workflow or source fact: a snoozed or
+/// settled ticket keeps running, and its source and workflow state are shown unchanged.
+#[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize, PartialEq)]
+pub(super) struct Shelves {
+    #[serde(default)]
+    pub snoozed: Vec<Snooze>,
+    #[serde(default)]
+    pub settled: Vec<String>,
+    /// Tickets that returned from Snoozed, with the reason, until the operator dismisses it.
+    #[serde(default)]
+    pub woke: Vec<Woke>,
+    /// Shelves the operator expanded, as `<group>/snoozed` or `<group>/settled`; collapsed
+    /// otherwise.
+    #[serde(default)]
+    pub open: Vec<String>,
+}
+#[derive(Clone, Copy, Debug, serde::Serialize, serde::Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub(super) enum Watch {
+    /// A PR review or comment the ticket's PR did not have when snoozed.
+    Review,
+    /// Hosted checks on the ticket's PR finish.
+    Ci,
+    /// The ticket's source status changes.
+    Source,
+}
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub(super) struct Snooze {
+    pub task: String,
+    /// RFC 3339; the ticket wakes once this time has passed.
+    #[serde(default)]
+    pub until: Option<String>,
+    #[serde(default)]
+    pub event: Option<Watch>,
+    /// What the watched fact looked like when snoozed.
+    #[serde(default)]
+    pub baseline: Value,
+}
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize, PartialEq)]
+pub(super) struct Woke {
+    pub task: String,
+    pub reason: String,
 }
 /// Project ids in the operator's order, collapsed groups ([`UNASSIGNED`] included) and the
 /// project New ticket and Import act in by default. Only ids; never project configuration.
@@ -127,6 +175,49 @@ impl Navigation {
         saved.overview = saved.overview.bounded();
         self.save(saved)
     }
+    /// Changes only the shelves, keeping everything else.
+    pub fn update_shelves(&mut self, change: impl FnOnce(&mut Shelves)) -> Result<(), String> {
+        let mut saved = self.saved.clone();
+        change(&mut saved.shelves);
+        let shelves = &mut saved.shelves;
+        let mut seen = std::collections::HashSet::new();
+        shelves.snoozed.retain(|s| {
+            valid_id(&s.task)
+                && (s.until.is_some() || s.event.is_some())
+                && seen.insert(s.task.clone())
+        });
+        let mut seen = std::collections::HashSet::new();
+        shelves.woke.retain(|w| {
+            valid_id(&w.task) && w.reason.len() <= REASON && seen.insert(w.task.clone())
+        });
+        for list in [&mut shelves.settled, &mut shelves.open] {
+            let mut seen = std::collections::HashSet::new();
+            list.retain(|id| valid_id(id) && seen.insert(id.clone()));
+            list.truncate(PROJECT_IDS);
+        }
+        shelves.snoozed.truncate(PROJECT_IDS);
+        shelves.woke.truncate(PROJECT_IDS);
+        self.save(saved)
+    }
+}
+/// The longest wake reason kept.
+const REASON: usize = 256;
+fn valid_shelves(s: &Shelves) -> bool {
+    s.snoozed.len() <= PROJECT_IDS
+        && s.woke.len() <= PROJECT_IDS
+        && [&s.settled, &s.open]
+            .iter()
+            .all(|list| list.len() <= PROJECT_IDS && list.iter().all(|v| valid_id(v)))
+        && s.snoozed.iter().all(|z| {
+            valid_id(&z.task)
+                && (z.until.is_some() || z.event.is_some())
+                && z.until
+                    .as_deref()
+                    .is_none_or(|t| chrono::DateTime::parse_from_rfc3339(t).is_ok())
+        })
+        && s.woke
+            .iter()
+            .all(|w| valid_id(&w.task) && w.reason.len() <= REASON)
 }
 fn valid_id(id: &str) -> bool {
     !id.is_empty() && id.len() <= 256
@@ -136,7 +227,8 @@ fn read(path: &Path) -> Option<Saved> {
     // SAFETY: geteuid has no preconditions.
     if !metadata.is_file()
         || metadata.file_type().is_symlink()
-        || metadata.len() > 65536
+        // Shelves (FOR-78) hold up to 200 snoozes with their baselines.
+        || metadata.len() > 262144
         || metadata.mode() & 0o077 != 0
         || metadata.uid() != unsafe { libc::geteuid() }
     {
@@ -156,6 +248,7 @@ fn read(path: &Path) -> Option<Saved> {
         || [&saved.projects.order, &saved.projects.collapsed]
             .iter()
             .any(|list| list.len() > PROJECT_IDS || list.iter().any(|v| !valid_id(v)))
+        || !valid_shelves(&saved.shelves)
     {
         return None;
     }
@@ -174,6 +267,7 @@ impl Workbench {
             tab: self.tab.into(),
             projects: self.navigation.saved().projects.clone(),
             overview: self.navigation.saved().overview,
+            shelves: self.navigation.saved().shelves.clone(),
         };
         if let Err(error) = self.navigation.save(saved) {
             self.notice = format!(
@@ -199,6 +293,7 @@ mod tests {
             tab: "History".into(),
             projects: Default::default(),
             overview: Default::default(),
+            shelves: Default::default(),
         };
         n.save(saved.clone()).unwrap();
         assert!(Navigation::new(Some(&descriptor)).saved() == &saved);
@@ -208,6 +303,46 @@ mod tests {
         assert!(read(&path).is_none());
         std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o600)).unwrap();
         std::fs::write(&path, b"{broken").unwrap();
+        assert!(read(&path).is_none());
+    }
+    #[test]
+    fn shelves_read_back_and_a_malformed_snooze_keeps_the_file_out() {
+        let root = tempfile::tempdir().unwrap();
+        let descriptor = root.path().join("native-connection.json");
+        let path = root.path().join("native-ui-state.json");
+        // A file written before FOR-78 has no shelves and still reads.
+        crewroom_core::authority::write_private(&path, br#"{"tab":"Brief","task":"t"}"#).unwrap();
+        let mut n = Navigation::new(Some(&descriptor));
+        assert_eq!(n.saved().shelves, Shelves::default());
+        n.update_shelves(|s| {
+            s.snoozed.push(Snooze {
+                task: "t".into(),
+                until: None,
+                event: Some(Watch::Ci),
+                baseline: json!({"state":"running"}),
+            });
+            // Neither a time nor an event: dropped.
+            s.snoozed.push(Snooze {
+                task: "u".into(),
+                until: None,
+                event: None,
+                baseline: Value::Null,
+            });
+            s.settled = vec!["v".into(), "v".into(), String::new()];
+        })
+        .unwrap();
+        let shelves = Navigation::new(Some(&descriptor)).saved().shelves.clone();
+        assert_eq!(shelves.snoozed.len(), 1);
+        assert_eq!(shelves.settled, ["v"]);
+        assert_eq!(
+            Navigation::new(Some(&descriptor)).saved().task.as_deref(),
+            Some("t")
+        );
+        crewroom_core::authority::write_private(
+            &path,
+            br#"{"tab":"Brief","shelves":{"snoozed":[{"task":"t","until":"not a time"}]}}"#,
+        )
+        .unwrap();
         assert!(read(&path).is_none());
     }
     #[test]

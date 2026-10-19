@@ -17,7 +17,7 @@ pub(super) enum Group {
     Other,
 }
 
-fn chip(id: String, value: impl Into<SharedString>, tone: u32) -> Div {
+pub(super) fn chip(id: String, value: impl Into<SharedString>, tone: u32) -> Div {
     div()
         .px_1p5()
         .rounded_sm()
@@ -204,6 +204,7 @@ impl Workbench {
                     .child(chip(format!("row-activity-{id}"), activity, activity_tone)),
             )
             .children(self.row_action(task, run, project, cx))
+            .child(self.shelf_controls(task, run, cx))
     }
 
     /// Start for a ticket in an active project with no unfinished run; Choose a project for a
@@ -380,6 +381,8 @@ impl Workbench {
             )
             .child(self.overview_entry(cx))
             .child(self.needs_entry(cx))
+            // Outside the scrolling list, so Undo stays in view after a shelf action.
+            .children(self.undo_bar(cx))
             .child(crate::accessibility::focus_region(
                 tickets,
                 &self.tickets_focus,
