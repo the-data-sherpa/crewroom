@@ -10,7 +10,7 @@ pub(super) struct Planning {
 fn open_run(run: &Value) -> bool {
     !["cancelled", "closed", "completed"].contains(&run["status"].as_str().unwrap_or(""))
 }
-fn hold_reason(plan: &Value, workspace: &Value) -> String {
+pub(super) fn hold_reason(plan: &Value, workspace: &Value) -> String {
     plan["holdReason"]
         .as_str()
         .map(str::to_owned)

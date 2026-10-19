@@ -52,6 +52,42 @@ pub fn compact_observation(event: &Value) -> Value {
     compact
 }
 impl Store {
+    /// The latest progress observed for a run (FOR-77): agent output, a peer message or a
+    /// repository checkpoint (commit), else the run's start. Recorded facts only; it never
+    /// calls a model and says nothing about whether the run has failed.
+    pub fn run_progress(&self, run_id: &str) -> Result<Value> {
+        let run = self.get_run(run_id)?;
+        let output: Option<String> = self.db.query_row("SELECT MAX(json_extract(a.data,'$.lastEventAt')) FROM attempts a JOIN assignments s ON a.assignment_id=s.id WHERE s.run_id=?",[run_id],|r| r.get(0))?;
+        let message: Option<String> = self.db.query_row(
+            "SELECT MAX(json_extract(data,'$.createdAt')) FROM peer_messages WHERE run_id=?",
+            [run_id],
+            |r| r.get(0),
+        )?;
+        let commit = self.repository_work(run_id)?.and_then(|work| {
+            work["checkpoints"]
+                .as_array()?
+                .iter()
+                .filter_map(|c| c["at"].as_str())
+                .max()
+                .map(str::to_owned)
+        });
+        let start = run["startedAt"].as_str().map(str::to_owned);
+        // Timestamps are RFC 3339 UTC with milliseconds, so text order is time order. On a
+        // tie the later entry wins, so agent output is named before a commit or the start.
+        let latest = [
+            ("run start", start),
+            ("commit", commit),
+            ("agent message", message),
+            ("agent output", output),
+        ]
+        .into_iter()
+        .filter_map(|(source, at)| at.map(|at| (source, at)))
+        .max_by(|a, b| a.1.cmp(&b.1));
+        Ok(match latest {
+            Some((source, at)) => json!({"lastAt":at,"source":source}),
+            None => json!({"lastAt":null,"source":null}),
+        })
+    }
     pub fn agent_events(&self, run_id: &str) -> Result<Vec<Value>> {
         let mut query = self.db.prepare("SELECT e.attempt_id,e.sequence,e.data FROM agent_events e JOIN attempts a ON e.attempt_id=a.id JOIN assignments s ON a.assignment_id=s.id WHERE s.run_id=? ORDER BY e.rowid")?;
         query
@@ -159,6 +195,8 @@ impl Store {
                 }
                 if event["type"] == "prompt_result" && event["status"] == "error" { attempt["state"] = json!("failed"); }
             }
+            // The latest observed agent output, for the Overview's no-progress flag (FOR-77).
+            attempt["lastEventAt"] = json!(s.time());
             s.save_attempt(&attempt)?;
             if event["type"] == "agent_start" { s.change_run(&run_id,Transition::AgentStart)?; }
             if ["agent_start","session_settled","tool_started","tool_receipt_reused","tool_exited","process_exit","model_policy_rejected","prompt_result"].contains(&event["type"].as_str().unwrap_or("")) { s.account_time_in_transaction(&run_id)?; }

@@ -45,6 +45,9 @@ mod navigation;
 mod navigation_cue_tests;
 mod needs;
 mod observation;
+mod overview;
+#[cfg(test)]
+mod overview_tests;
 #[cfg(test)]
 mod plan_authoring_tests;
 #[cfg(test)]
@@ -106,6 +109,8 @@ enum Panel {
     Learning,
     NeedsYou,
     Runner,
+    /// The home screen across projects (FOR-77).
+    Overview,
 }
 struct Draft {
     brief: Entity<TextareaState>,
@@ -171,6 +176,8 @@ pub struct Workbench {
     /// The project a ticket created from New ticket targets; `None` leaves it unassigned.
     new_project: Option<String>,
     _events: Option<gpui_kit::Task<()>>,
+    /// Keeps the Overview's elapsed times current between service updates (FOR-77).
+    _ticker: Option<gpui_kit::Task<()>>,
     _focus_lost: gpui_kit::Subscription,
 }
 /// Shown until the first workspace snapshot, in place of empty or unconfigured facts.
@@ -264,6 +271,7 @@ impl Workbench {
         let focus = cx.focus_handle();
         window.focus(&focus, cx);
         let descriptor = client.as_ref().map(Client::descriptor_path);
+        let ticker = client.is_some().then(|| Self::overview_ticker(cx));
         let navigation = navigation::Navigation::new(descriptor.as_deref());
         let saved = navigation.saved().clone();
         let tab = match saved.tab.as_str() {
@@ -334,6 +342,7 @@ impl Workbench {
             reset_import: false,
             new_project: None,
             _events: task,
+            _ticker: ticker,
         }
     }
     /// The workspace starts as an empty object; every service snapshot has fields.
@@ -1208,6 +1217,7 @@ impl Render for Workbench {
                 ),
                 Panel::Queue => (self.queue_panel(cx), None),
                 Panel::NeedsYou => (self.needs_panel(window, cx), None),
+                Panel::Overview => (self.overview_panel(cx), None),
                 Panel::Learning => (
                     settings(self.settings_nav(cx), self.learning_panel(window, cx)),
                     None,
@@ -1221,36 +1231,8 @@ impl Render for Workbench {
                     } else if self.workspace_loaded() && self.ordered_projects().is_empty() {
                         (self.empty_workspace(cx), None)
                     } else {
-                        (
-                            section("Choose what to work on")
-                                .child(hint("Select a ticket, or create one to shape its brief."))
-                                .child(
-                                    div()
-                                        .flex()
-                                        .flex_wrap()
-                                        .gap_2()
-                                        .child(
-                                            Button::new("empty-new")
-                                                .primary()
-                                                .label("Create a ticket")
-                                                .on_click(cx.listener(|this, _, _, cx| {
-                                                    this.panel = Panel::New;
-                                                    this.navigation_open = false;
-                                                    cx.notify();
-                                                })),
-                                        )
-                                        .child(
-                                            Button::new("empty-import")
-                                                .label("Import from Jira")
-                                                .on_click(cx.listener(|this, _, _, cx| {
-                                                    this.panel = Panel::Import;
-                                                    this.navigation_open = false;
-                                                    cx.notify();
-                                                })),
-                                        ),
-                                ),
-                            None,
-                        )
+                        // With no ticket chosen, the home screen is the Overview (FOR-77).
+                        (self.overview_panel(cx), None)
                     }
                 }
             }

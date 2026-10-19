@@ -36,6 +36,10 @@ _Avoid_: Jira status, agent activity
 The observed execution activity of an agent assigned to work.
 _Avoid_: Workflow state, Jira status
 
+**No progress**:
+A running run for which no agent output, peer message or repository checkpoint has been observed for a configured time. It is a separate flag computed from recorded events, not a workflow state, an agent activity or a failure.
+_Avoid_: Stalled, failed, hung
+
 **Refinement**:
 Locally developed requirements, acceptance criteria, notes, and decisions that supplement a ticket's source content.
 _Avoid_: Imported description

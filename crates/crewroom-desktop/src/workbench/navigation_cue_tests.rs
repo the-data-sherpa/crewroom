@@ -83,6 +83,7 @@ fn every_panel_has_exactly_one_selected_sidebar_control(cx: &mut gpui::TestAppCo
         (Panel::New, None, "new-ticket", "New ticket"),
         (Panel::Queue, None, "queue", "Coding queue"),
         (Panel::NeedsYou, None, "needs-you", "Needs you · 0"),
+        (Panel::Overview, None, "overview", "Overview"),
         (Panel::Roles, None, "settings", "⚙ Settings"),
         (Panel::Import, None, "settings", "⚙ Settings"),
     ];
@@ -106,13 +107,17 @@ fn every_panel_has_exactly_one_selected_sidebar_control(cx: &mut gpui::TestAppCo
         })
         .unwrap();
     }
-    // Before a ticket is chosen, no ticket row claims the selection.
+    // Before a ticket is chosen, no ticket row claims the selection: the home screen is the
+    // Overview (FOR-77).
     view.update(cx, |v, cx| {
         v.panel = Panel::Ticket;
         v.selected = None;
         cx.notify();
     });
-    assert_eq!(view.read_with(cx, |v, _| v.sidebar_current()), None);
+    assert_eq!(
+        view.read_with(cx, |v, _| v.sidebar_current()).as_deref(),
+        Some("overview")
+    );
 }
 
 #[gpui::test]

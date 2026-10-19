@@ -40,6 +40,8 @@ pub(super) fn commands(events: &[Value]) -> Value {
 pub(super) fn workspace(e: &Execution, v: &mut Value) -> Result<()> {
     let mut activity = Vec::new();
     let mut runs = HashMap::new();
+    let mut landed = Vec::new();
+    let mut progress = serde_json::Map::new();
     for run in array(&v["runs"]) {
         let id = text(run, "id")?;
         let state = if let Some(w) = &e.workflow {
@@ -51,6 +53,12 @@ pub(super) fn workspace(e: &Execution, v: &mut Value) -> Result<()> {
             .store
             .with_store(|s| s.publication(id))?
             .unwrap_or(Value::Null);
+        if let Some(entry) = landed_entry(run, &publication) {
+            landed.push(entry);
+        }
+        if !["cancelled", "closed", "completed"].contains(&run["status"].as_str().unwrap_or("")) {
+            progress.insert(id.to_owned(), e.store.with_store(|s| s.run_progress(id))?);
+        }
         runs.insert(
             id.to_owned(),
             needs::RunState {
@@ -100,6 +108,11 @@ pub(super) fn workspace(e: &Execution, v: &mut Value) -> Result<()> {
         }
     }
     v["activity"] = json!(activity);
+    // FOR-77 Overview: observed progress per unfinished run, and recently landed work.
+    v["runProgress"] = Value::Object(progress);
+    landed.sort_by(|a, b| b["at"].as_str().cmp(&a["at"].as_str()));
+    landed.truncate(20);
+    v["landed"] = json!(landed);
     v["capabilities"]["execution"] =
         json!(e.workflow.is_some() && e.ready.load(std::sync::atomic::Ordering::SeqCst));
     v["capabilities"]["publication"] = json!(!e.publication_paths.is_empty());
@@ -126,6 +139,28 @@ pub(super) fn workspace(e: &Execution, v: &mut Value) -> Result<()> {
     v["githubUpdates"] = json!(e.store.with_store(|s| s.github_updates(None))?);
     v["needsYou"] = json!(needs::needs_you(v, &runs));
     Ok(())
+}
+/// One Overview "Landed" entry (FOR-77): a confirmed PR, or a completed research run, with
+/// the revision its evidence covers. A published PR covers the locally validated candidate
+/// head it was published from; nothing else is claimed.
+pub(super) fn landed_entry(run: &Value, publication: &Value) -> Option<Value> {
+    if publication["pr"]["state"] == "confirmed" {
+        let merged = present(&publication["merged"]);
+        return Some(json!({
+            "kind":"pr","runId":run["id"],"taskId":run["taskId"],
+            "pr":publication["pr"]["id"],"url":publication["pr"]["url"],
+            "providerState":publication["pr"]["providerState"],"merged":merged,
+            "revision":publication["revision"]["head"],
+            "at":Some(&publication["merged"]["observedAt"]).filter(|at| at.is_string()).unwrap_or(&publication["createdAt"]),
+        }));
+    }
+    let outcome = &run["researchOutcome"];
+    (run["status"] == "completed" && outcome.is_object()).then(|| {
+        json!({
+            "kind":"research","runId":run["id"],"taskId":run["taskId"],
+            "researchRevision":outcome["revision"],"at":outcome["completedAt"],
+        })
+    })
 }
 pub(super) fn after(q: &HashMap<String, String>) -> Result<u64> {
     q.get("after")
@@ -347,4 +382,34 @@ async fn result(e: &Execution, id: &str) -> Result<Value> {
     };
     value["publication"] = e.publication.view(id).await?;
     Ok(value)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::landed_entry;
+    use serde_json::json;
+
+    #[test]
+    fn landed_names_the_published_revision_and_skips_unconfirmed_work() {
+        let run = json!({"id":"r","taskId":"t","purpose":"coding","status":"paused"});
+        let open = json!({"createdAt":"2026-10-19T08:00:00.000Z","revision":{"base":"b1","head":"h1"},"pr":{"state":"confirmed","id":7,"url":"https://example.invalid/pr/7","providerState":"OPEN"}});
+        let entry = landed_entry(&run, &open).unwrap();
+        assert_eq!(entry["kind"], "pr");
+        assert_eq!(entry["revision"], "h1");
+        assert_eq!(entry["merged"], false);
+        assert_eq!(entry["at"], "2026-10-19T08:00:00.000Z");
+        let mut merged = open.clone();
+        merged["merged"] = json!({"commit":"m1","observedAt":"2026-10-19T09:00:00.000Z"});
+        let entry = landed_entry(&run, &merged).unwrap();
+        assert_eq!(entry["merged"], true);
+        assert_eq!(entry["at"], "2026-10-19T09:00:00.000Z");
+        // An uncertain PR is a Needs you item, not landed work.
+        let mut uncertain = open;
+        uncertain["pr"]["state"] = json!("uncertain");
+        assert!(landed_entry(&run, &uncertain).is_none());
+        let research = json!({"id":"q","taskId":"t","purpose":"research","status":"completed","researchOutcome":{"revision":3,"completedAt":"2026-10-19T07:00:00.000Z"}});
+        let entry = landed_entry(&research, &serde_json::Value::Null).unwrap();
+        assert_eq!(entry["kind"], "research");
+        assert_eq!(entry["researchRevision"], 3);
+    }
 }

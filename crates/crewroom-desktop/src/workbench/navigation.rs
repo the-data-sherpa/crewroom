@@ -15,6 +15,36 @@ pub(super) struct Saved {
     /// collapsed groups. Files written before FOR-75 read with none of these set.
     #[serde(default)]
     pub projects: ProjectPrefs,
+    /// The Overview's no-progress thresholds (FOR-77). Older files read with the defaults.
+    #[serde(default)]
+    pub overview: OverviewPrefs,
+}
+/// Minutes without observed progress before a running run is flagged in Running, and before
+/// it is also listed under Needs you. A display preference of this machine only.
+#[derive(Clone, Copy, Debug, serde::Serialize, serde::Deserialize, PartialEq)]
+#[serde(default)]
+pub(super) struct OverviewPrefs {
+    pub stale_minutes: u32,
+    pub promote_minutes: u32,
+}
+impl Default for OverviewPrefs {
+    fn default() -> Self {
+        Self {
+            stale_minutes: 20,
+            promote_minutes: 60,
+        }
+    }
+}
+/// The flag threshold stays within a day, and promotion always comes strictly later.
+pub(super) const MAX_STALE_MINUTES: u32 = 24 * 60;
+impl OverviewPrefs {
+    pub(super) fn bounded(self) -> Self {
+        let stale = self.stale_minutes.clamp(1, MAX_STALE_MINUTES - 1);
+        Self {
+            stale_minutes: stale,
+            promote_minutes: self.promote_minutes.clamp(stale + 1, MAX_STALE_MINUTES),
+        }
+    }
 }
 /// Project ids in the operator's order, collapsed groups ([`UNASSIGNED`] included) and the
 /// project New ticket and Import act in by default. Only ids; never project configuration.
@@ -87,6 +117,16 @@ impl Navigation {
         }
         self.save(saved)
     }
+    /// Changes only the Overview thresholds, kept within their bounds.
+    pub fn update_overview(
+        &mut self,
+        change: impl FnOnce(&mut OverviewPrefs),
+    ) -> Result<(), String> {
+        let mut saved = self.saved.clone();
+        change(&mut saved.overview);
+        saved.overview = saved.overview.bounded();
+        self.save(saved)
+    }
 }
 fn valid_id(id: &str) -> bool {
     !id.is_empty() && id.len() <= 256
@@ -133,6 +173,7 @@ impl Workbench {
             candidate: self.observation.candidate.clone(),
             tab: self.tab.into(),
             projects: self.navigation.saved().projects.clone(),
+            overview: self.navigation.saved().overview,
         };
         if let Err(error) = self.navigation.save(saved) {
             self.notice = format!(
@@ -157,6 +198,7 @@ mod tests {
             candidate: None,
             tab: "History".into(),
             projects: Default::default(),
+            overview: Default::default(),
         };
         n.save(saved.clone()).unwrap();
         assert!(Navigation::new(Some(&descriptor)).saved() == &saved);
@@ -182,6 +224,24 @@ mod tests {
         let mut n = Navigation::new(Some(&descriptor));
         assert_eq!(n.saved().task.as_deref(), Some("task"));
         assert_eq!(n.saved().projects, ProjectPrefs::default());
+        assert_eq!(n.saved().overview, OverviewPrefs::default());
+        // Overview thresholds (FOR-77) are bounded, promotion stays later, and they reopen.
+        n.update_overview(|o| {
+            o.stale_minutes = 45;
+            o.promote_minutes = 30;
+        })
+        .unwrap();
+        assert_eq!(
+            Navigation::new(Some(&descriptor)).saved().overview,
+            OverviewPrefs {
+                stale_minutes: 45,
+                promote_minutes: 46
+            }
+        );
+        n.update_overview(|o| o.stale_minutes = 0).unwrap();
+        assert_eq!(n.saved().overview.stale_minutes, 1);
+        n.update_overview(|o| *o = OverviewPrefs::default())
+            .unwrap();
         n.update_projects(|p| {
             p.current = Some("b".into());
             p.order = vec!["b".into(), "a".into(), "b".into(), String::new()];

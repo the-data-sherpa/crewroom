@@ -249,10 +249,15 @@ impl Workbench {
     }
 
     /// The one sidebar control that names the current panel. Every control's selected state comes
-    /// from here, so a panel never shows two or none; it is `None` only before a ticket is chosen.
+    /// from here, so a panel never shows two or none. Before a ticket is chosen the ticket panel
+    /// shows the Overview home screen, so Overview is current.
     pub(super) fn sidebar_current(&self) -> Option<String> {
         Some(match self.panel {
-            Panel::Ticket => format!("ticket-{}", self.selected.as_ref()?),
+            Panel::Ticket => match &self.selected {
+                Some(id) => format!("ticket-{id}"),
+                None => "overview".into(),
+            },
+            Panel::Overview => "overview".into(),
             Panel::New => "new-ticket".into(),
             Panel::Queue => "queue".into(),
             Panel::NeedsYou => "needs-you".into(),
@@ -373,6 +378,7 @@ impl Workbench {
                             })),
                     ),
             )
+            .child(self.overview_entry(cx))
             .child(self.needs_entry(cx))
             .child(crate::accessibility::focus_region(
                 tickets,

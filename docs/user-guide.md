@@ -20,6 +20,7 @@ A fresh workbench can save local tickets, briefs, roles and repositories. Agents
 
 | Area | Use |
 | --- | --- |
+| Overview | The home screen across all projects: **Needs you** (only items that need your action, highest impact first, each with its action), **Running** (one line per executing run with its team, stage and last observed progress), **Landed** (published PRs and completed research with the revision their evidence covers) and **Next** (queued work with its hold reason). Every section says when it is empty. A running run with no agent output, commits or messages for a set time is flagged "No progress for N min", and listed under Needs you after a longer time; this is not a failure verdict. Both times are adjustable on the screen and remembered on this machine |
 | Projects | The sidebar groups tickets by project: **Needs you**, **Running**, **Queued** and **Other**, with tickets without a project under **Unassigned**. Each project header has **New ticket**, **Import** (when it has a confirmed ticket source), a running indicator, collapse and move controls; **Start** on a ticket queues its coordinator in that project. Order, collapsed groups and the current project are remembered on this machine |
 | Coding queue | Order coding plans and inspect holds |
 | Brief | Accept local requirements, choose the project, queue work and adopt revisions |
