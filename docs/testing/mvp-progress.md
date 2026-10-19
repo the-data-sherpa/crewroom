@@ -24,6 +24,16 @@ New tests, real processes on Linux:
 
 `npm run test:e2e` was not run (integrator runs it serially). No live provider or runner delivery is involved.
 
+**Integration on main `8d6ecc0`** (branch already based on main; fast-forwarded, no rebase, so `2d79d60` is unchanged). Checks at `2d79d60`, all through `system_limits.py run` in a worktree prepared with `--build-helpers` and a private `CARGO_TARGET_DIR` (`-j6`, `--test-threads=4`):
+
+| Check | Result |
+|---|---|
+| `npm test` | **346/346** |
+| `npm run build` | passes (existing chunk-size warning) |
+| `npm run test:e2e` | **31 passed** |
+| `cargo test -p crewroom-runtime -- --test-threads=4` | **261 passed, 0 failed** over 21 result lines, including both real-process zombie tests |
+| `cargo clippy -p crewroom-runtime --all-targets -- -D warnings`, `cargo fmt -p crewroom-runtime --check` | clean |
+
 ## FOR-90 — Runner close ownership report under heavy load (2026-10-19)
 
 Code `b4b246f` on branch `for-90-work` from main `860acac` (on main as `de127b6`, review fix `e4bc3ab` as `1fd8574`; see the integration record below); only `crates/crewroom-runtime/src/inspect.rs` changes. Private `CARGO_TARGET_DIR` in the worktree, and every test command ran through `scripts/system_limits.py run`. Linux x86_64, 16 CPUs. All runner results use the fake Claude protocol peer (`tests/fixtures/claude-rpc.py`). Nothing contacted a live service.
