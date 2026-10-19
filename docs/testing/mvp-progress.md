@@ -25,6 +25,14 @@ Checks at `14df3af` (private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, test
 
 *Simulated only:* no live PR, CI or source status was watched; event wakes ran over injected `publicationWatch` and source status values. Pinning does not exist in the native workbench, so there is no unpin to undo. Not yet verified: the operator's on-screen check.
 
+**Integration at `f2ed810` on main `b0054be` (2026-10-19).** `14df3af` and its evidence commit were rebased onto main `b0054be` as `d75ea0b` and the evidence commit. Code conflicts in `navigation.rs` (FOR-77 `OverviewPrefs` and FOR-78 `Shelves` in `Saved`, `update_overview` and `update_shelves`), `views.rs` (`landed_entry` and `publication_watch`, and their unit tests in one `tests` module) and `docs/user-guide.md` kept both sides. The merged tree did not compile because FOR-77 and FOR-78 each added `Workbench::ticket_key` and `Workbench::place`; `f2ed810` renames the shelf versions to `shelf_ticket_key` and `restore_shelf` without changing behavior. The checks above cite the pre-rebase tree. At `f2ed810`, all through `scripts/system_limits.py run` with a private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, the worktree prepared with `--build-helpers` and `TMPDIR` on a short on-disk directory outside the checkout:
+
+- `npm test` **346/346**; `npm run build` passes; `npm run test:e2e` **31/31**.
+- `cargo test --locked --no-fail-fast -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop`: **643 passed, 0 failed, 18 ignored** over 69 test binaries.
+- Clippy `--all-targets -D warnings` and `cargo fmt --check` for these crates: clean.
+- Environment note: a first run with `TMPDIR` inside the worktree failed 12 tests (fixture folders inside a Git checkout read as repositories, and tmux socket paths became too long); a second with `TMPDIR` in the shared `/tmp` failed one runtime test with `Disk quota exceeded`. Both are environmental; the run above passed with an on-disk `TMPDIR`.
+- Still simulated only; the operator's on-screen check is pending.
+
 ## FOR-72 — Recorded harness transcripts for version-stamped replay tests (2026-10-19)
 
 Code `1816139` (branch `for-72-work`, from main `20a6149`). Every check below ran at `1816139` on Linux x86_64 in a worktree with a private `CARGO_TARGET_DIR`. Tests ran through `scripts/system_limits.py run` with `-j6` and `--test-threads=4`. No Jira, GitHub or real model provider was contacted.
