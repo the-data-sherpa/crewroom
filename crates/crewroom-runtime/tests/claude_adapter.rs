@@ -140,8 +140,7 @@ async fn alias_drift_and_changed_account_block_admission() {
     let refused = r
         .submit("input", "Fixture", false)
         .await
-        .err()
-        .expect("changed account was admitted")
+        .expect_err("changed account was admitted")
         .to_string();
     assert!(
         refused.contains("Claude authority or native account changed"),
