@@ -6,7 +6,7 @@ Historical revision IDs and source hashes below refer to the original private sn
 
 ## FOR-71 — Harden the harness compatibility probe (2026-10-19)
 
-Implementation `9f9e217` on branch `for-71-work` from main `9d409b5` (FOR-69 merged). Every check below ran at `9f9e217`. Each ran in a fresh worktree prepared with `scripts/prepare_worktree.py --build-helpers`, with a private `CARGO_TARGET_DIR`, `-j6` and `--test-threads=4`, wrapped by `scripts/system_limits.py run`.
+Implementation `b68910b` on main (rebased without code changes from `9f9e217`, written on main `9d409b5` with FOR-69 merged, onto main `e8b86de`). Every check below, except the integration checks at the end, ran at `9f9e217`. Each ran in a fresh worktree prepared with `scripts/prepare_worktree.py --build-helpers`, with a private `CARGO_TARGET_DIR`, `-j6` and `--test-threads=4`, wrapped by `scripts/system_limits.py run`.
 
 Simulated (synthetic schemas and Python harnesses; no inference, no network):
 
@@ -33,6 +33,14 @@ Checks at `9f9e217`:
 - `cargo test -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop`: **581 passed / 0 failed / 18 ignored** over 67 test binaries.
 - `cargo clippy -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop --all-targets -- -D warnings` and `cargo fmt --check` for these crates: clean.
 - `npm run test:e2e`: not run (integrator).
+
+**Integration at `b68910b` on main `e8b86de`** (rebase with documentation conflicts only), all through `scripts/system_limits.py run` with a private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4` and the worktree prepared with `--build-helpers`:
+
+- `npm test` **345/345**; `npm run build` passes; `npm run test:e2e` **31/31**.
+- `cargo test --locked --no-fail-fast -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop`: **586 passed, 0 failed, 18 ignored** over 67 test binaries.
+- Clippy `--all-targets -D warnings` and `cargo fmt --check` for these crates: clean.
+- Environment note: the first three e2e runs failed in up to 6 browser specs (`net::ERR_INSUFFICIENT_RESOURCES`, `Unknown system error -122`, which is EDQUOT) because the shared `/tmp` tmpfs user quota was nearly exhausted by other work; `QUE-05` failed the same way at main `e8b86de`. With `TMPDIR` on a short on-disk directory the suite passed 31/31. A temporary directory under the worktree path failed instead with "The tmux socket path is too long".
+- The live probes were not rerun at integration.
 
 ## FOR-75 — Project-first sidebar (2026-10-19)
 
