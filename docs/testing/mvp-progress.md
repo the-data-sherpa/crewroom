@@ -42,6 +42,8 @@ Integration at `4f9f295` on main `a1faa87` (fast-forward, no rebase; private `CA
 
 Not yet verified: no on-screen check of the real xdg portal picker on the operator's Linux (Hyprland) machine. The coordinator will ask the operator to look at the window. Every picker answer above is simulated by the GPUI test platform; the portal integration is GPUI's own, unchanged.
 
+**Operator on-screen check (2026-10-19):** the operator's service was restarted on the debug package built from main `3b4cb06` (same data directory, roles and port 4318). The operator then used Settings → Repositories → Choose folder in the running native app on their Linux (Hyprland) machine and reported that the flow "looks fantastic". This is the operator's qualitative report; no screenshot or per-step receipt was retained.
+
 ## FOR-60 — `npm test` under machine load, closed (2026-10-18)
 
 Code revision `6791de4` (branch `for-60-close`, from main `4a2ac78`). It has two commits: `0007bf0` names the readiness blockers in the DEL-04/05/06 assertion message, and `6791de4` makes the lease helper's owner receipt atomic. This closes the two criteria that the first pass (section below) left partial, and adds one fix. Machine: 16 cores, shared with other agents. Every run started from this agent session, which has `RLIMIT_RTTIME` soft = hard = 0 (`grep "realtime timeout" /proc/self/limits`). Load came from a loop of clean `cargo build --locked -j16 -p crewroom-desktop` builds in a private target directory, started through `system_limits.py run`. All 93 builds succeeded, and the 1-minute load was about 17–25 for the whole series. All tests used simulated providers and fixture Git remotes; nothing contacted a live service.
