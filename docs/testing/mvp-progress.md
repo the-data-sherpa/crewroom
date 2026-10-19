@@ -45,6 +45,12 @@ These recordings show harness protocol behavior. They do not show model behavior
 - Transcripts cover the three named scenarios only. A tool denial is not recorded separately: Crewroom answers `can_use_tool` with deny, but the recorded flows go through its allow gate.
 - OMP reattach replays the adapter's session-restore exchange, not OMP's own session files.
 
+**Review fix at `e91c680` (simulated).** At `1816139` a replay `wait` searched every event collected so far. In `omp/reattach.jsonl` the second session waits for `agent_end` without an id, so the first session's `agent_end` satisfied it. The replay then closed without waiting for the resumed turn and passed only because the peer had already written its frames. The replay now keeps a cursor: a `wait` matches only events after the last satisfied wait or close, as the recorder's per-process queue does. Checks at `e91c680`, run the same way as above:
+- `cargo test -p crewroom-runtime --test harness_replay`: **6/6**, five consecutive runs. The new `the_reattached_turn_must_complete_on_its_own` removes the second session's `agent_end` and adjusts the expectation, so only the wait can catch the gap. It requires a wait timeout and failed when the wait was temporarily reverted to search from the first event. `a_wait_only_matches_unconsumed_events` covers the cursor rule.
+- `cargo test -p crewroom-runtime`: **211 passed, 0 failed, 3 ignored**.
+- `npm test` **346/346**. `cargo clippy -p crewroom-runtime --all-targets -- -D warnings` and `cargo fmt -p crewroom-runtime -- --check` are clean.
+- The recorded transcripts were not re-recorded. The OMP `done()` step in the recorder is still not session-aware; the replay cursor makes this harmless.
+
 ## FOR-74 — Remaining subscription allowance for Codex and Claude Code (2026-10-19)
 
 Code `6d19f33` (branch `for-74-work`, from main `20a6149`). Checks ran on Linux x86_64 with Rust binaries built from this revision in a target directory private to the worktree (prepared with `python3 scripts/prepare_worktree.py --build-helpers`), all through `scripts/system_limits.py run`, `-j6`, `--test-threads=4`. The machine was shared with parallel agents.
