@@ -6,7 +6,7 @@ Historical revision IDs and source hashes below refer to the original private sn
 
 ## FOR-90 — Runner close ownership report under heavy load (2026-10-19)
 
-Code `b4b246f` on branch `for-90-work` from main `860acac`; only `crates/crewroom-runtime/src/inspect.rs` changes. Private `CARGO_TARGET_DIR` in the worktree, and every test command ran through `scripts/system_limits.py run`. Linux x86_64, 16 CPUs. All runner results use the fake Claude protocol peer (`tests/fixtures/claude-rpc.py`). Nothing contacted a live service.
+Code `b4b246f` on branch `for-90-work` from main `860acac` (on main as `de127b6`, review fix `e4bc3ab` as `1fd8574`; see the integration record below); only `crates/crewroom-runtime/src/inspect.rs` changes. Private `CARGO_TARGET_DIR` in the worktree, and every test command ran through `scripts/system_limits.py run`. Linux x86_64, 16 CPUs. All runner results use the fake Claude protocol peer (`tests/fixtures/claude-rpc.py`). Nothing contacted a live service.
 
 **Stress recipe.** 16 concurrent copies of the `claude_adapter` test binary (`--test-threads=4`) per round, with 32 `sh` busy-loop burners. Load average was 136–150 by round 5. The diagnostics were temporary `eprintln!` lines on each uncertain path of `inspect` and on uncertain settle results, captured with `--nocapture`. They were removed before commit `b4b246f`.
 
@@ -58,6 +58,18 @@ Code `b4b246f` on branch `for-90-work` from main `860acac`; only `crates/crewroo
 | `tsx --test --test-name-pattern="escaped inherited lease" scripts/rust/process-extra.test.ts` (helper built from `e4bc3ab`) | 1/1 |
 
 The heavy-load stress rounds were not repeated for this fix. It changes only the exiting branch with a held lease and adds one `lsof` call there on the first inspection.
+
+**Integration on main `cdb3a98`** (branch rebased; only `docs/status.md` and this file conflicted, both sides kept). `b4b246f` became `de127b6` and `e4bc3ab` became `1fd8574` with identical code changes. Checks at `1fd8574`, all through `system_limits.py run` in a worktree prepared with `--build-helpers` and a private `CARGO_TARGET_DIR` (`-j6`, `--test-threads=4`):
+
+| Check | Result |
+|---|---|
+| `npm test` | **346/346** |
+| `npm run build` | passes (existing chunk-size warning) |
+| `npm run test:e2e` | **31 passed** |
+| `cargo test --locked --no-fail-fast` for the five crates (core, runtime, service, desktop, test-support) | **693 passed, 0 failed, 18 ignored** over 77 result lines (FOR-89 integration had 687; this adds FOR-90's 6 tests) |
+| `cargo clippy --locked --all-targets -- -D warnings` and `cargo fmt -p <five crates> -- --check` | clean |
+
+Simulated peer only.
 
 Follow-up: FOR-92. On Linux, a process whose thread-group leader called `exit` while other threads run is listed as `Zl` and filtered out as a zombie. A synthetic check showed `ZNl` with 2 tasks.
 
