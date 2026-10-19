@@ -4,6 +4,26 @@ The operator requested that each work item pass its checks before the next start
 
 Historical revision IDs and source hashes below refer to the original private snapshots before the FOR-17 history rewrite. Sanitized copies are not byte-identical evidence for rewritten revisions; replay requires the private archive. New validation is recorded separately.
 
+## FOR-92 — Zombie-led process with a live thread (2026-10-19)
+
+Code `2d79d60` on branch `for-92-work` from main `8d6ecc0`; only `crates/crewroom-runtime/src/inspect.rs` changes. Private `CARGO_TARGET_DIR` in the worktree; test commands ran through `scripts/system_limits.py run`. Linux only; macOS not checked.
+
+New tests, real processes on Linux:
+
+- `a_running_thread_behind_a_zombie_leader_is_a_member_without_its_lock`: a Python group leader starts a sleeping thread, then its main thread calls `syscall(SYS_exit)`. The test waits until `ps` shows `Z` with 2 tasks. With the lease free, `inspect_owned` reports `uncertain` ("A process survives without its inherited ownership lock.") with the process as the only member, and `stopped_before_owner` refuses. With the previous `Z` filter restored temporarily, this test failed.
+- `an_unreaped_zombie_whose_every_task_is_dead_is_gone`: an unreaped `/bin/true` group leader (`Z`, 1 task) gives `stopped` from `inspect_owned` and `stopped_before_owner`.
+- `a_task_stat_state_decides_dead`: parses a task `stat` state.
+
+| Check at `2d79d60` | Result |
+|---|---|
+| `cargo test --locked --no-fail-fast -p crewroom-runtime -- --test-threads=4` | **261 passed, 0 failed, 3 ignored** over 21 result lines |
+| `cargo test -p crewroom-runtime --lib inspect::` repeated 20 times | 20/20 passed (11 tests each) |
+| `cargo clippy -p crewroom-runtime --all-targets --locked -- -D warnings`, `cargo fmt -p crewroom-runtime --check` | clean |
+| `npm test` | **346/346** |
+| `npm run build` | passes (existing chunk-size warning) |
+
+`npm run test:e2e` was not run (integrator runs it serially). No live provider or runner delivery is involved.
+
 ## FOR-90 — Runner close ownership report under heavy load (2026-10-19)
 
 Code `b4b246f` on branch `for-90-work` from main `860acac` (on main as `de127b6`, review fix `e4bc3ab` as `1fd8574`; see the integration record below); only `crates/crewroom-runtime/src/inspect.rs` changes. Private `CARGO_TARGET_DIR` in the worktree, and every test command ran through `scripts/system_limits.py run`. Linux x86_64, 16 CPUs. All runner results use the fake Claude protocol peer (`tests/fixtures/claude-rpc.py`). Nothing contacted a live service.
