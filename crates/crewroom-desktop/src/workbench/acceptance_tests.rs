@@ -787,9 +787,11 @@ fn native_session_shell_groups_tickets_keeps_four_facts_separate_and_drawer_foll
     cx: &mut gpui::TestAppContext,
 ) {
     let (mut queued, mut active, mut refining) = (Value::Null, Value::Null, Value::Null);
+    let mut project = String::new();
     let f = Fixture::projected(|s, root| {
         let (t, _, repo) = coding_plan(s, root);
         queued = t;
+        project = id(&repo);
         let task = s
             .create_task(
                 &json!({"title":"Active session","description":"","repositoryId":repo["id"]}),
@@ -819,7 +821,8 @@ fn native_session_shell_groups_tickets_keeps_four_facts_separate_and_drawer_foll
     let (h, v, e) = open(cx, &f);
     select(cx, h, &v, &e, &active);
 
-    // Active runs, the local queue and other tickets are separate groups, in that order.
+    // Within its project, running work comes before the local queue; a ticket without a
+    // project is listed under Unassigned (FOR-75).
     let side = labels(cx, h, Some("ticket-list"));
     let top = |cx: &mut gpui::TestAppContext, id: String| {
         cx.update_window(h, |_, window, cx| {
@@ -829,11 +832,11 @@ fn native_session_shell_groups_tickets_keeps_four_facts_separate_and_drawer_foll
         .unwrap()
     };
     let order = [
-        "group-active-runs".to_owned(),
+        format!("project-{project}-running"),
         format!("row-key-{}", id(&active)),
-        "group-queue".to_owned(),
+        format!("project-{project}-queued"),
         format!("row-key-{}", id(&queued)),
-        "group-other-tickets".to_owned(),
+        "project-name-unassigned".to_owned(),
         format!("row-key-{}", id(&refining)),
     ];
     let tops: Vec<_> = order.iter().map(|i| top(cx, i.clone())).collect();

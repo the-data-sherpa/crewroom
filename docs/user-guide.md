@@ -14,29 +14,30 @@ Use the installed bundle and the same explicit data and role paths each time:
 
 For a source checkout, see [build and start](../README.md#build-and-start). The launcher opens the native window and starts or reuses the background service. Reopen keeps the existing service configuration. Closing the window leaves the service and agents running. Finder alone does not provision the service.
 
-A fresh workbench can save local tickets, briefs, roles and repositories. Agents need configured OMP, tmux, Rust Agent Mail, Docker and authenticated model access. Jira and Bitbucket need their own configuration; save their access tokens in **Settings → Integrations** (stored encrypted, never shown again). GitHub connects there with a personal access token that Crewroom checks with GitHub before saving; see [GitHub token permissions](operations.md#github-personal-access-token). A project's GitHub issues can be imported as tickets once GitHub Issues is its confirmed ticket source under **Settings → Repositories**, where the project's filters and **Sync issues** live; see [GitHub Issues ticket source](operations.md#github-issues-ticket-source). See [operations](operations.md#configuration-inventory); the app does not provide an account-setup wizard. Unexpectedly empty data usually means a different data directory was selected.
+A fresh workbench can save local tickets, briefs, roles and repositories. Agents need configured OMP, tmux, Rust Agent Mail, Docker and authenticated model access. Jira and Bitbucket need their own configuration; save their access tokens in **Settings → Integrations** (stored encrypted, never shown again). GitHub connects there with a personal access token that Crewroom checks with GitHub before saving; see [GitHub token permissions](operations.md#github-personal-access-token). A project's GitHub issues can be imported as tickets once GitHub Issues is its confirmed ticket source under **Settings → Projects**, where the project's filters and **Sync issues** live; see [GitHub Issues ticket source](operations.md#github-issues-ticket-source). See [operations](operations.md#configuration-inventory); the app does not provide an account-setup wizard. Unexpectedly empty data usually means a different data directory was selected.
 
 ## Find your way around
 
 | Area | Use |
 | --- | --- |
-| Tickets and Queue | Select work, order coding plans and inspect holds |
-| Brief | Accept local requirements, select the target, queue work and adopt revisions |
+| Projects | The sidebar groups tickets by project: **Needs you**, **Running**, **Queued** and **Other**, with tickets without a project under **Unassigned**. Each project header has **New ticket**, **Import** (when it has a confirmed ticket source), a running indicator, collapse and move controls; **Start** on a ticket queues its coordinator in that project. Order, collapsed groups and the current project are remembered on this machine |
+| Coding queue | Order coding plans and inspect holds |
+| Brief | Accept local requirements, choose the project, queue work and adopt revisions |
 | Conversation | Send coordinator steering, inspect delivery and propose specialists |
 | Results | Inspect revisions, checks, review, citations, publication and recovery actions |
 | History | Inspect prior runs, attempts, captured configuration and recorded usage |
 | Open agent wall | Observe separate agent terminals and retained output |
 | Agent roles | Create and edit reusable agent specialties, instructions and models |
-| Repositories and Learning | Configure future work and review proposed guidance |
+| Projects and Learning | Configure future work and review proposed guidance |
 
 On a narrow window, use **Tickets & settings** to reach navigation. Jira status, workflow state and agent activity are independent. A queued plan has not necessarily started, and observed idle output does not prove validation passed. The agent wall is read-only; send direction through Conversation.
 
 ## Prepare and queue a coding ticket
 
-1. In **Repositories**, register the existing checkout, target branch, instruction files and required checks. Each repository's row suggests its ticket source from the remote it publishes to (a github.com remote suggests GitHub Issues; a bitbucket.org remote suggests Jira, with a site you pick); confirm it once. If the remote later changes, the row warns that the source no longer matches and changes nothing; a source cannot be changed while queued or open work uses the repository. Checks require existing pinned local Docker images, absolute executables, arguments and timeouts; they run without network. Crewroom uses owned worktrees and leaves your checkout intact.
+1. In **Settings → Projects**, register the existing checkout (an empty workbench offers **Add a project**, which starts from **Choose folder**), target branch, instruction files and required checks. Each repository's row suggests its ticket source from the remote it publishes to (a github.com remote suggests GitHub Issues; a bitbucket.org remote suggests Jira, with a site you pick); confirm it once. If the remote later changes, the row warns that the source no longer matches and changes nothing; a source cannot be changed while queued or open work uses the repository. Checks require existing pinned local Docker images, absolute executables, arguments and timeouts; they run without network. Crewroom uses owned worktrees and leaves your checkout intact.
 2. In **Agent roles**, choose **Edit** beside a specialty or **Create agent role** to add one. Set its purpose, instructions, model and reasoning effort, then **Save agent role**. Enabled roles are available for new assignments. Existing assignments keep their captured definitions.
-3. Use **New ticket** for a local request, **Refresh Jira** in a Jira project's row under **Settings → Repositories** for configured live intake (each project saves its own project key, saved filter, assignee or JQL; see [Jira refresh per project](operations.md#jira-refresh-per-project)), or **Import snapshot** for supported Jira JSON. Snapshot import does not connect live Jira.
-4. Select the ticket and open **Brief**. Choose its target repository, save the local brief and acceptance criteria, and resolve source-change or unsaved-draft holds.
+3. Use **New ticket** for a local request, **Refresh Jira** in a Jira project's row under **Settings → Projects** for configured live intake (each project saves its own project key, saved filter, assignee or JQL; see [Jira refresh per project](operations.md#jira-refresh-per-project)), or **Import snapshot** for supported Jira JSON. Snapshot import does not connect live Jira.
+4. Select the ticket and open **Brief**. Choose its project, save the local brief and acceptance criteria, and resolve source-change or unsaved-draft holds.
 5. Choose the queued coordinator role and select **Queue run**. Inspect the queue and hold reason. With valid launch details, available execution and a free slot, coding starts automatically.
 
 Only one coding ticket executes at a time. Queue order is separate from Jira rank. Dependencies require provider-confirmed merge; a closed PR or local branch alone cannot release them. A changed target may require explicit reconciliation before the dependent plan can start.

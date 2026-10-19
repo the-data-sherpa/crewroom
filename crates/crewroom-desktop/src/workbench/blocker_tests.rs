@@ -191,7 +191,7 @@ fn empty_repository_state_routes_to_repositories_in_one_activation(cx: &mut gpui
     );
     contains(
         &labels(cx, h),
-        "No active repositories. Add one to choose a target.",
+        "No active projects. Add one to choose a project.",
     );
     click(cx, h, "plan-add-repository");
     cx.read(|cx| assert!(matches!(v.read(cx).panel, Panel::Repositories)));
@@ -232,12 +232,9 @@ fn retired_target_and_open_run_name_the_controls_that_clear_them(cx: &mut gpui::
     let shown = labels(cx, h);
     contains(
         &shown,
-        "Selected repository is retired. Choose an active repository before you select Queue run.",
+        "Selected project is retired. Choose an active project before you select Queue run.",
     );
-    contains(
-        &shown,
-        "No active repositories. Add one to choose a target.",
-    );
+    contains(&shown, "No active projects. Add one to choose a project.");
 
     let other = fixture.root.path().join("active");
     checkout(&other);

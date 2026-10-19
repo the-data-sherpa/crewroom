@@ -1,7 +1,7 @@
 //! Jira refresh per project (FOR-53). A project whose confirmed ticket source
 //! (FOR-47) is a Jira site sets its own filters (project key, saved filter,
 //! assignee, JQL), refreshes, and shows its last refresh result and whether
-//! Jira is connected for its site, in its row under Settings → Repositories.
+//! Jira is connected for its site, in its row under Settings → Projects.
 //! Settings → Integrations summarises every project. Jira status appears on
 //! each ticket as its source status; it never changes workflow state or agent
 //! activity.
@@ -103,7 +103,7 @@ fn line(id: String, value: impl Into<SharedString>) -> Div {
 impl Workbench {
     /// Settings → Integrations: the Jira connection, every project's refresh
     /// status, and a workspace-level setting no project uses. Filters and
-    /// refresh live with each project under Settings → Repositories.
+    /// refresh live with each project under Settings → Projects.
     pub(super) fn jira_refresh_section(&self) -> Div {
         let refresh = &self.workspace["jiraRefresh"];
         let mut panel = div().flex().flex_col().gap_1().child(line(

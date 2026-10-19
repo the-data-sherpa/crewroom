@@ -350,7 +350,7 @@ impl Store {
         let source = &repository["ticketSource"];
         if source["tickets"] != GITHUB.kind {
             return Err(conflict(
-                "Confirm GitHub Issues as this project's ticket source under Settings → Repositories first.",
+                "Confirm GitHub Issues as this project's ticket source under Settings → Projects first.",
             ));
         }
         source["repository"]

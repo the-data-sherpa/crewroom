@@ -1,7 +1,7 @@
 //! GitHub Issues per project (FOR-45) through the real local service and a
 //! simulated GitHub API on loopback (not github.com): confirming GitHub Issues
 //! as a project's ticket source (FOR-47) gives it its own filters and sync in
-//! Settings → Repositories; the missing connection is stated, then a sync
+//! Settings → Projects; the missing connection is stated, then a sync
 //! imports the issues with GitHub open/closed as source status, and
 //! Settings → Integrations summarises the project.
 use super::acceptance_tests::labels;
@@ -141,7 +141,7 @@ fn native_project_confirms_github_issues_sets_filters_and_syncs_truthfully(
     assert!(text.iter().any(|l| l == "GitHub Issues"), "{text:?}");
     assert!(
         text.iter().any(|l| l
-            == "No project has GitHub Issues as its ticket source. Confirm it for a project under Settings → Repositories."),
+            == "No project has GitHub Issues as its ticket source. Confirm it for a project under Settings → Projects."),
         "{text:?}"
     );
 
@@ -238,8 +238,9 @@ fn native_project_confirms_github_issues_sets_filters_and_syncs_truthfully(
     wait(cx, h, &v, &e, |v, _| {
         !v.busy && v.workspace["github"]["state"] == "connected"
     });
+    // Import in the project's sidebar header runs this project's sync (FOR-75).
     navigate(cx, h, "repositories");
-    click(cx, h, format!("sync-github-issues-{id}"));
+    click(cx, h, format!("project-import-{id}"));
     let target = id.clone();
     wait(cx, h, &v, &e, move |v, _| {
         !v.busy && issues(v, &target)["state"] == "connected"
@@ -276,6 +277,12 @@ fn native_project_confirms_github_issues_sets_filters_and_syncs_truthfully(
             [format!("GitHub {status}")]
         );
     }
+    // Imported issues are listed under their project in the sidebar.
+    let listed = labels(cx, h, Some(&format!("project-{id}")));
+    assert!(
+        listed.iter().any(|l| l == "Synthetic open issue"),
+        "{listed:?}"
+    );
     cx.update_window(h, |_, window, _| window.remove_window())
         .unwrap();
 }

@@ -3,16 +3,15 @@
 use super::*;
 use gpui_kit::Stateful;
 
-const ENDED: [&str; 3] = ["cancelled", "closed", "completed"];
+pub(super) const ENDED: [&str; 3] = ["cancelled", "closed", "completed"];
 const KEYBOARD_ROUTES: &str = if cfg!(target_os = "macos") {
     "Cmd+1 tickets · Cmd+2 session · Cmd+3 Needs you"
 } else {
     "Ctrl+1 tickets · Ctrl+2 session · Ctrl+3 Needs you"
 };
-type Rows = Vec<(Value, Option<Value>)>;
 
 #[derive(Clone, Copy, PartialEq)]
-enum Group {
+pub(super) enum Group {
     Active,
     Queued,
     Other,
@@ -105,7 +104,7 @@ impl Workbench {
         )
     }
 
-    fn group(run: Option<&Value>) -> Group {
+    pub(super) fn group(run: Option<&Value>) -> Group {
         match run.and_then(|r| r["status"].as_str()) {
             Some("awaiting_runner") => Group::Queued,
             Some(status) if !ENDED.contains(&status) => Group::Active,
@@ -113,14 +112,18 @@ impl Workbench {
         }
     }
 
-    fn ticket_row(
+    pub(super) fn ticket_row(
         &self,
         task: &Value,
         run: Option<&Value>,
+        project: Option<&Value>,
         cx: &mut Context<Self>,
     ) -> Stateful<Div> {
         let id = string(task, "id");
         let select = id.clone();
+        let select_project = project
+            .filter(|p| p["retiredAt"].is_null())
+            .map(|p| string(p, "id"));
         let selected = self.sidebar_current().as_deref() == Some(&format!("ticket-{id}"));
         let workflow = Self::workflow_label(task, run);
         let (activity, _, activity_tone) = self.activity_summary(run);
@@ -163,6 +166,9 @@ impl Workbench {
                     .w_full()
                     .on_click(cx.listener(move |this, _, window, cx| {
                         this.selected = Some(select.clone());
+                        if select_project.is_some() {
+                            this.set_current_project(select_project.clone());
+                        }
                         this.panel = Panel::Ticket;
                         this.navigation_open = false;
                         // The next Tab continues in the session instead of the remaining rows.
@@ -197,6 +203,49 @@ impl Workbench {
                     ))
                     .child(chip(format!("row-activity-{id}"), activity, activity_tone)),
             )
+            .children(self.row_action(task, run, project, cx))
+    }
+
+    /// Start for a ticket in an active project with no unfinished run; Choose a project for a
+    /// ticket without one, which opens the ticket's project picker.
+    fn row_action(
+        &self,
+        task: &Value,
+        run: Option<&Value>,
+        project: Option<&Value>,
+        cx: &mut Context<Self>,
+    ) -> Option<Div> {
+        let id = string(task, "id");
+        if project.is_none() && task["internal"] != true && Self::group(run) == Group::Other {
+            return Some(
+                div().flex().child(
+                    Button::new(SharedString::from(format!("choose-project-{id}")))
+                        .ghost()
+                        .label("Choose a project")
+                        .on_click(cx.listener(move |this, _, _, cx| {
+                            this.selected = Some(id.clone());
+                            this.panel = Panel::Ticket;
+                            this.tab = "Brief";
+                            this.navigation_open = false;
+                            cx.notify();
+                        })),
+                ),
+            );
+        }
+        if !self.startable(task, run) {
+            return None;
+        }
+        let name = project.map(|p| string(p, "name")).unwrap_or_default();
+        Some(
+            div().flex().child(
+                Button::new(SharedString::from(format!("start-{id}")))
+                    .ghost()
+                    .label("Start")
+                    .accessibility_label(format!("Start {} in {name}", string(task, "key")))
+                    .disabled(self.blocked())
+                    .on_click(cx.listener(move |this, _, _, cx| this.start_ticket(&id, cx))),
+            ),
+        )
     }
 
     /// The one sidebar control that names the current panel. Every control's selected state comes
@@ -219,26 +268,6 @@ impl Workbench {
 
     pub(super) fn sidebar(&self, cx: &mut Context<Self>) -> Stateful<Div> {
         let current = self.sidebar_current();
-        let mut groups: [(Group, &str, Rows); 3] = [
-            (Group::Active, "ACTIVE RUNS", vec![]),
-            (Group::Queued, "QUEUE", vec![]),
-            (Group::Other, "OTHER TICKETS", vec![]),
-        ];
-        for task in records(&self.workspace, "tasks") {
-            let run = self.current_run(&string(&task, "id"));
-            let group = Self::group(run.as_ref());
-            groups
-                .iter_mut()
-                .find(|g| g.0 == group)
-                .unwrap()
-                .2
-                .push((task, run));
-        }
-        groups[1].2.sort_by_key(|(_, r)| {
-            r.as_ref()
-                .and_then(|r| r["position"].as_u64())
-                .unwrap_or(u64::MAX)
-        });
         let mut tickets = div()
             .id("ticket-list")
             .flex_1()
@@ -250,39 +279,34 @@ impl Workbench {
         let loaded = self.workspace_loaded();
         if !loaded {
             tickets = tickets.child(named_hint("workspace-waiting", WORKSPACE_WAITING));
-        } else if records(&self.workspace, "tasks").is_empty() {
-            tickets = tickets.child(hint("Create a ticket or import a Jira snapshot to begin."));
-        }
-        // One waiting state; no group is known to be empty before the first snapshot.
-        for (group, title, rows) in groups.iter().filter(|_| loaded) {
-            if rows.is_empty() && *group != Group::Queued {
-                continue;
-            }
-            let mut heading = div().flex().items_center().justify_between().pt_2().child(
+        } else {
+            // One waiting state; nothing is known to be empty before the first snapshot.
+            let queued = records(&self.workspace, "runs")
+                .iter()
+                .filter(|r| r["status"] == "awaiting_runner")
+                .count();
+            tickets = tickets.child(
                 div()
-                    .text_xs()
-                    .text_color(rgb(0x9eacb9))
-                    .child(crate::accessibility::named(
-                        format!("group-{}", title.to_lowercase().replace(' ', "-")),
-                        *title,
-                    )),
+                    .flex()
+                    .items_center()
+                    .justify_between()
+                    .child(
+                        // Named after the page it opens.
+                        Button::new("queue")
+                            .ghost()
+                            .label("Coding queue")
+                            .selected(current.as_deref() == Some("queue"))
+                            .on_click(cx.listener(|this, _, _, cx| {
+                                this.panel = Panel::Queue;
+                                this.navigation_open = false;
+                                cx.notify();
+                            })),
+                    )
+                    .when(queued > 0, |row| {
+                        row.child(named_hint("queue-count", format!("{queued} queued")).text_xs())
+                    }),
             );
-            if *group == Group::Queued {
-                // Named after the page it opens.
-                heading = heading.child(
-                    Button::new("queue")
-                        .ghost()
-                        .label("Coding queue")
-                        .selected(current.as_deref() == Some("queue"))
-                        .on_click(cx.listener(|this, _, _, cx| {
-                            this.panel = Panel::Queue;
-                            this.navigation_open = false;
-                            cx.notify();
-                        })),
-                );
-            }
-            tickets = tickets.child(heading);
-            if rows.is_empty() {
+            if queued == 0 {
                 tickets = tickets.child(
                     named_hint(
                         "queue-empty",
@@ -291,9 +315,25 @@ impl Workbench {
                     .text_xs(),
                 );
             }
-            for (task, run) in rows {
-                tickets = tickets.child(self.ticket_row(task, run.as_ref(), cx));
+            tickets = tickets.child(
+                div()
+                    .pt_2()
+                    .text_xs()
+                    .text_color(rgb(0x9eacb9))
+                    .child(crate::accessibility::named("projects-heading", "PROJECTS")),
+            );
+            if self.ordered_projects().is_empty() {
+                tickets = tickets
+                    .child(named_hint("projects-empty", "No projects yet.").text_xs())
+                    .child(
+                        div().flex().child(
+                            Button::new("sidebar-add-project")
+                                .label("Add a project")
+                                .on_click(cx.listener(|this, _, _, cx| this.add_project(cx))),
+                        ),
+                    );
             }
+            tickets = tickets.children(self.project_groups(cx));
         }
         div()
             .id("sidebar")
@@ -351,6 +391,7 @@ impl Workbench {
                             .selected(current.as_deref() == Some("new-ticket"))
                             .flex_1()
                             .on_click(cx.listener(|this, _, _, cx| {
+                                this.new_project = this.current_project();
                                 this.panel = Panel::New;
                                 this.navigation_open = false;
                                 cx.notify();
@@ -424,7 +465,7 @@ impl Workbench {
             ("models", "Models & budget", Panel::Models),
             ("principles", "Principles", Panel::Principles),
             ("playbooks", "Playbooks", Panel::Playbooks),
-            ("repositories", "Repositories", Panel::Repositories),
+            ("repositories", "Projects", Panel::Repositories),
             ("learning", "Learning", Panel::Learning),
             ("import-jira", "Integrations", Panel::Import),
         ] {

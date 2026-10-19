@@ -1,4 +1,4 @@
-//! Settings → Repositories → Ticket source (FOR-47): the source suggested from
+//! Settings → Projects → Ticket source (FOR-47): the source suggested from
 //! a project's publish remote, one explicit confirmation, a "source no longer
 //! matches remote" warning, and a change that names the work blocking it. The
 //! local service reads the remote and decides; this view never switches a

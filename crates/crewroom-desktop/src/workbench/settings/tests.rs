@@ -1460,9 +1460,9 @@ fn repository_path_and_branch_errors_are_distinct(cx: &mut gpui::TestAppContext)
     let shown = labels(cx, handle);
     for expected in [
         "Choose the checkout folder.",
-        "Enter a repository name.",
+        "Enter a project name.",
         "Choose a target branch.",
-        "To save this repository: enter a repository name, choose the checkout folder, choose a target branch.",
+        "To save this project: enter a project name, choose the checkout folder, choose a target branch.",
     ] {
         assert!(shown.iter().any(|s| s == expected), "{expected}: {shown:?}");
     }
@@ -1482,7 +1482,7 @@ fn repository_path_and_branch_errors_are_distinct(cx: &mut gpui::TestAppContext)
             .any(|s| s == "This folder is not a Git repository.")
     );
     assert!(shown.iter().any(|s| {
-        s.starts_with("To save this repository: initialize the folder or choose a Git checkout")
+        s.starts_with("To save this project: initialize the folder or choose a Git checkout")
     }));
     // Save is unavailable, so a click sends nothing.
     click(cx, handle, "save-repository");
@@ -1498,7 +1498,7 @@ fn repository_path_and_branch_errors_are_distinct(cx: &mut gpui::TestAppContext)
     for expected in [
         "'release' is not a branch in this checkout.",
         "Use a branch prefix ending in /, with letters, numbers, hyphens or underscores.",
-        "To save this repository: choose one of the checkout's branches, fix the branch prefix.",
+        "To save this project: choose one of the checkout's branches, fix the branch prefix.",
     ] {
         assert!(shown.iter().any(|s| s == expected), "{expected}: {shown:?}");
     }
@@ -1507,7 +1507,7 @@ fn repository_path_and_branch_errors_are_distinct(cx: &mut gpui::TestAppContext)
     assert!(
         !labels(cx, handle)
             .iter()
-            .any(|s| s.starts_with("To save this repository"))
+            .any(|s| s.starts_with("To save this project"))
     );
     // The service still re-verifies on save: a branch deleted after
     // inspection is refused at the save row.
@@ -1593,11 +1593,7 @@ fn choosing_a_subfolder_prefills_name_branches_and_remotes(cx: &mut gpui::TestAp
     ] {
         assert!(shown.contains(&expected), "{expected}: {shown:?}");
     }
-    assert!(
-        !shown
-            .iter()
-            .any(|s| s.starts_with("To save this repository"))
-    );
+    assert!(!shown.iter().any(|s| s.starts_with("To save this project")));
     click(cx, handle, "target-branch-1");
     assert_eq!(repository_field(cx, &view, "targetBranch"), "main");
     click(cx, handle, "save-repository");
@@ -1663,7 +1659,7 @@ fn cancelled_or_unavailable_picker_keeps_the_typed_path(cx: &mut gpui::TestAppCo
     assert!(
         !labels(cx, handle)
             .iter()
-            .any(|s| s.starts_with("To save this repository"))
+            .any(|s| s.starts_with("To save this project"))
     );
 }
 
@@ -1721,7 +1717,7 @@ fn initializing_a_plain_folder_requires_confirmation(cx: &mut gpui::TestAppConte
     assert!(
         !labels(cx, handle)
             .iter()
-            .any(|s| s.starts_with("To save this repository"))
+            .any(|s| s.starts_with("To save this project"))
     );
     click(cx, handle, "save-repository");
     wait(cx, handle, &view, &events, |v, _| {

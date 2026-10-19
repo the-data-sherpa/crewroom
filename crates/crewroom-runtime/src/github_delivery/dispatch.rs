@@ -188,7 +188,7 @@ impl<S: StoreAccess> GitHubDelivery<S> {
             }
             if current.is_empty() {
                 update["reason"] = json!(
-                    "No project has GitHub Issues as its ticket source. Confirm it for the project under Settings → Repositories; the update is kept."
+                    "No project has GitHub Issues as its ticket source. Confirm it for the project under Settings → Projects; the update is kept."
                 );
                 self.store.with_store(|s| s.save_github_update(&update))?;
                 held.insert(lane);

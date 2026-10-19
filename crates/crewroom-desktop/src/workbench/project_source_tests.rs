@@ -1,4 +1,4 @@
-//! Settings → Repositories → Ticket source (FOR-47) through the real local
+//! Settings → Projects → Ticket source (FOR-47) through the real local
 //! service and a Git checkout with synthetic remotes (no remote is contacted):
 //! the suggestion is prefilled, one click confirms it, a moved remote shows a
 //! warning without switching, queued work blocks a change with the blocker

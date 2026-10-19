@@ -54,6 +54,9 @@ mod playbooks;
 mod project_source;
 #[cfg(test)]
 mod project_source_tests;
+mod projects;
+#[cfg(test)]
+mod projects_tests;
 mod results;
 mod run_actions;
 mod settings;
@@ -164,6 +167,8 @@ pub struct Workbench {
     pending_keys: HashMap<String, (String, Value)>,
     reset_new: bool,
     reset_import: bool,
+    /// The project a ticket created from New ticket targets; `None` leaves it unassigned.
+    new_project: Option<String>,
     _events: Option<gpui_kit::Task<()>>,
     _focus_lost: gpui_kit::Subscription,
 }
@@ -326,6 +331,7 @@ impl Workbench {
             pending_keys: HashMap::new(),
             reset_new: false,
             reset_import: false,
+            new_project: None,
             _events: task,
         }
     }
@@ -614,10 +620,12 @@ impl Workbench {
                             self.feedback_origin = Some(self.origin_at(feedback::Place::Top));
                         }
                         if path.starts_with("/repositories/") && path.ends_with("/retire") {
-                            self.notice = "Repository retired. Saved tickets, history and worktrees are retained.".into();
+                            self.notice = "Project retired. Saved tickets, history and worktrees are retained.".into();
                         }
                         if path == "/repositories" {
-                            self.notice = "Repository saved. Existing runs keep their captured configuration.".into();
+                            self.notice =
+                                "Project saved. Existing runs keep their captured configuration."
+                                    .into();
                         }
                         if path == settings::repository_folder::INITIALIZE {
                             self.notice = "Repository initialized with one empty commit. Existing files were not staged or committed. Review the details, then save.".into();
@@ -735,12 +743,57 @@ impl Workbench {
                 .join("\n"),
         });
     }
+    /// Opens Settings → Projects on a new project, which starts from Choose folder (FOR-70).
+    pub(super) fn add_project(&mut self, cx: &mut Context<Self>) {
+        self.settings.repository = settings::NEW.into();
+        self.panel = Panel::Repositories;
+        self.navigation_open = false;
+        cx.notify();
+    }
     fn new_ticket(&self, cx: &mut Context<Self>) -> Div {
+        let projects = self.ordered_projects();
+        let target = self
+            .new_project
+            .as_ref()
+            .and_then(|id| projects.iter().find(|p| p["id"] == *id));
+        let mut choices = div().flex().flex_wrap().gap_2();
+        for project in &projects {
+            let id = string(project, "id");
+            let selected = target.is_some_and(|t| t["id"] == id);
+            choices = choices.child(
+                Button::new(SharedString::from(format!("new-ticket-project-{id}")))
+                    .label(string(project, "name"))
+                    .selected(selected)
+                    .on_click(cx.listener(move |this, _, _, cx| {
+                        this.new_project = Some(id.clone());
+                        cx.notify();
+                    })),
+            );
+        }
+        choices = choices.child(
+            Button::new("new-ticket-project-none")
+                .label("No project")
+                .selected(target.is_none())
+                .on_click(cx.listener(|this, _, _, cx| {
+                    this.new_project = None;
+                    cx.notify();
+                })),
+        );
         section("New local ticket").child(hint("Capture the request, then refine its brief and acceptance criteria."))
+            .child(crate::accessibility::text("Project"))
+            .child(choices)
+            .child(named_hint("new-ticket-project", match target {
+                Some(p) => format!("Creates the ticket in {}.", string(p, "name")),
+                None => "Creates the ticket under Unassigned. Choose a project before starting it.".into(),
+            }))
             .child(crate::accessibility::text("Title")).child(Input::new(&self.title).id("ticket-title").disabled(self.blocked()))
             .child(crate::accessibility::text("Description")).child(Textarea::new(&self.description).accessibility_id("ticket-description").aria_label("Description").h(px(180.)).disabled(self.blocked()))
             .child(Button::new("create-ticket").primary().label("Create ticket").disabled(self.blocked()).on_click(cx.listener(|this,_,_,cx| {
-                this.send("/tasks".into(),json!({"title":this.title.read(cx).value().to_string(),"description":this.description.read(cx).value().to_string()}),false,cx);
+                let mut body = json!({"title":this.title.read(cx).value().to_string(),"description":this.description.read(cx).value().to_string()});
+                if let Some(id) = this.new_project.clone().filter(|id| this.ordered_projects().iter().any(|p| p["id"] == *id)) {
+                    body["repositoryId"] = json!(id);
+                }
+                this.send("/tasks".into(),body,false,cx);
             })))
     }
     fn import_panel(&self, cx: &mut Context<Self>) -> Div {
@@ -750,7 +803,7 @@ impl Workbench {
                 "Jira: Credentials unreadable — reconnect under Credentials below."
             } else {
                 ""
-            })).child(hint(if self.workspace["capabilities"]["liveJira"]==true {"Each project whose ticket source is a Jira site refreshes with its own filters under Settings → Repositories. Imported fields remain separate from your accepted brief."}else{"Live Jira is not configured. You can import a snapshot and retain source fields separately."}))
+            })).child(hint(if self.workspace["capabilities"]["liveJira"]==true {"Each project whose ticket source is a Jira site refreshes with its own filters under Settings → Projects. Imported fields remain separate from your accepted brief."}else{"Live Jira is not configured. You can import a snapshot and retain source fields separately."}))
             .child(self.jira_refresh_section())
             .child(Button::new("refresh-jira").label("Refresh all Jira projects").disabled(self.blocked()||self.workspace["capabilities"]["liveJira"]!=true).on_click(cx.listener(|this,_,_,cx|this.send("/jira/sync".into(),json!({}),false,cx))))
             .child(crate::accessibility::text("Import a Jira snapshot"))
@@ -1147,6 +1200,8 @@ impl Render for Workbench {
                         .find(|t| t["id"].as_str() == self.selected.as_deref());
                     if let Some(task) = task {
                         self.ticket(task, window, cx)
+                    } else if self.workspace_loaded() && self.ordered_projects().is_empty() {
+                        (self.empty_workspace(cx), None)
                     } else {
                         (
                             section("Choose what to work on")

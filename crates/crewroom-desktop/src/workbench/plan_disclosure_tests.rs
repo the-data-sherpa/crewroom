@@ -211,7 +211,7 @@ fn editing_an_accepted_brief_or_target_warns_before_setting_the_plan_aside(
     let fixture = Fixture::start();
     let (id, _) = ticket(&fixture, 2);
     let set_aside = "Saving changed requirements sets accepted plan 1 aside. Queue will start scoping again unless you accept a new plan version.";
-    let retarget = "Using another repository sets accepted plan 1 aside. Queue will start scoping again unless you accept a new plan version.";
+    let retarget = "Using another project sets accepted plan 1 aside. Queue will start scoping again unless you accept a new plan version.";
     {
         // No accepted plan yet: neither control has a plan to set aside.
         let (h, v, _events) = show(cx, &fixture, &id);

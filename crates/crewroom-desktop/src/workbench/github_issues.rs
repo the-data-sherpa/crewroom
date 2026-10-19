@@ -1,7 +1,7 @@
 //! GitHub Issues per project (FOR-45). A project whose confirmed ticket source
 //! (FOR-47) is a GitHub repository sets its own filters, syncs, and shows its
 //! last sync result as the local service reports it, in its row under
-//! Settings → Repositories. Settings → Integrations summarises every project.
+//! Settings → Projects. Settings → Integrations summarises every project.
 //! GitHub's open/closed state appears on each ticket as its source status; it
 //! never changes workflow state or agent activity.
 use super::*;
@@ -141,11 +141,11 @@ fn line(id: String, value: impl Into<SharedString>) -> Div {
 impl Workbench {
     /// Settings → Integrations: every project's GitHub Issues status, and a
     /// former workspace-level source no project has adopted. Filters and sync
-    /// live with each project under Settings → Repositories.
+    /// live with each project under Settings → Projects.
     pub(super) fn github_issues_section(&self, _cx: &mut Context<Self>) -> Div {
         let issues = &self.workspace["githubIssues"];
         let mut panel = section("GitHub Issues").child(hint(
-            "Each project whose ticket source is a GitHub repository imports its issues as tickets, with its own filters, under Settings → Repositories. Pull requests are not imported. GitHub open/closed is shown as each ticket's source status, separate from its workflow state and agent activity.",
+            "Each project whose ticket source is a GitHub repository imports its issues as tickets, with its own filters, under Settings → Projects. Pull requests are not imported. GitHub open/closed is shown as each ticket's source status, separate from its workflow state and agent activity.",
         ));
         panel = panel.child(line(
             "github-issues-state".into(),
@@ -175,7 +175,7 @@ impl Workbench {
     }
 
     /// A project's GitHub Issues filters, sync and workflow labels, shown in
-    /// its Settings → Repositories row once GitHub Issues is its confirmed
+    /// its Settings → Projects row once GitHub Issues is its confirmed
     /// ticket source.
     pub(super) fn github_issues_block(
         &mut self,

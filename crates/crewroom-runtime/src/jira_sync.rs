@@ -179,7 +179,7 @@ impl<S: StoreAccess> JiraSync<S> {
         })?;
         let saved = saved.ok_or_else(|| {
             crewroom_core::Error::Conflict(
-                "Confirm a Jira site as this project's ticket source under Settings → Repositories before refreshing.".into(),
+                "Confirm a Jira site as this project's ticket source under Settings → Projects before refreshing.".into(),
             )
         })?;
         if jira_projects::jql(&saved["source"]).is_none() {

@@ -283,7 +283,7 @@ impl Store {
         let source = &repository["ticketSource"];
         if source["tickets"] != JIRA.kind {
             return Err(conflict(
-                "Confirm a Jira site as this project's ticket source under Settings → Repositories first.",
+                "Confirm a Jira site as this project's ticket source under Settings → Projects first.",
             ));
         }
         source["site"]

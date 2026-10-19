@@ -1,7 +1,7 @@
 //! Jira refresh per project (FOR-53) through the real local service and a
 //! simulated Jira API on loopback (not a live Jira site): confirming the
 //! connected Jira site as a project's ticket source (FOR-47) gives it its own
-//! filters and refresh in Settings → Repositories; a project on another site
+//! filters and refresh in Settings → Projects; a project on another site
 //! is shown not connected; Settings → Integrations summarises each project.
 use super::test_support::{Fixture, click, navigate, open, screen_text, wait};
 use super::*;

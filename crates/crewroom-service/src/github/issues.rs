@@ -116,7 +116,7 @@ async fn sync(state: &AppState, repository_id: &str) -> Result<(), ApiError> {
     .await?
     .ok_or_else(|| {
         Error::Conflict(
-            "Confirm GitHub Issues as this project's ticket source under Settings → Repositories before syncing.".into(),
+            "Confirm GitHub Issues as this project's ticket source under Settings → Projects before syncing.".into(),
         )
     })?;
     let source = saved["source"].clone();
@@ -327,9 +327,9 @@ pub(crate) fn summary(
         projects.push(status);
     }
     let label = match projects.len() {
-        0 => "No project has GitHub Issues as its ticket source. Confirm it for a project under Settings → Repositories.".to_owned(),
+        0 => "No project has GitHub Issues as its ticket source. Confirm it for a project under Settings → Projects.".to_owned(),
         n => format!(
-            "{n} project{} import{} GitHub issues; each sets its own filters under Settings → Repositories.",
+            "{n} project{} import{} GitHub issues; each sets its own filters under Settings → Projects.",
             if n == 1 { "" } else { "s" },
             if n == 1 { "s" } else { "" }
         ),
@@ -490,7 +490,7 @@ mod tests {
         assert_eq!(projects[0]["project"], "Alpha");
         assert_eq!(
             summary["label"],
-            "1 project imports GitHub issues; each sets its own filters under Settings → Repositories."
+            "1 project imports GitHub issues; each sets its own filters under Settings → Projects."
         );
         assert!(summary["legacy"].is_null());
         let legacy = json!({"source":{"repository":"o/old","labels":["bug"],"assignee":null,"milestone":null,"state":"all"}});

@@ -78,16 +78,12 @@ impl RepositoryDraft {
         let mut out = Problems::default();
         let name = self.fields.text("name", cx);
         if name.trim().is_empty() {
-            out.add(
-                "name",
-                "Enter a repository name.",
-                "enter a repository name",
-            );
+            out.add("name", "Enter a project name.", "enter a project name");
         } else if name.trim().chars().count() > 120 {
             out.add(
                 "name",
                 "Use at most 120 characters.",
-                "shorten the repository name",
+                "shorten the project name",
             );
         }
         let path = self.fields.text("path", cx);
@@ -572,7 +568,7 @@ impl Workbench {
     pub(super) fn save_blockers(&self, problems: &Problems) -> Option<Div> {
         blockers::line(
             "save-repository-blockers",
-            "save this repository",
+            "save this project",
             &problems.blockers,
         )
     }

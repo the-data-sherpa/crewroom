@@ -12,8 +12,12 @@ _Avoid_: Team account, shared workspace member
 A work item whose requirements and progress are tracked in Crewroom, whether created locally or imported from Jira or GitHub Issues.
 _Avoid_: Run, agent assignment
 
+**Project**:
+One local checkout that Crewroom works in, together with its ticket source, checks, instruction files and branch prefix. The workbench groups tickets by project; a ticket without one is **Unassigned**. The service and stored data call a project a *repository*.
+_Avoid_: Jira project, workspace
+
 **Target repository**:
-The one repository assigned to a ticket as the destination for its coding work.
+The project assigned to a ticket as the destination for its coding work. In the workbench this is the ticket's project.
 _Avoid_: Jira project
 
 **Ticket source**:

@@ -248,7 +248,7 @@ impl Workbench {
             if !task["repositoryId"].is_string() {
                 panel = panel.child(named_hint(
                     "plan-prerequisite",
-                    "To write a plan here, choose a target repository below, then select Refresh repository basis.",
+                    "To write a plan here, choose a project below, then select Refresh repository basis.",
                 ));
             } else if !source.is_object() {
                 panel = panel.child(named_hint(

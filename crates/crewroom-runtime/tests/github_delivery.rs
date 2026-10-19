@@ -611,7 +611,7 @@ async fn labels_apply_only_when_configured_and_the_merge_closes_the_issue_as_a_s
         .unwrap_err()
         .to_string();
     assert!(off.contains("labels are off"), "{off}");
-    assert!(off.contains("Settings → Repositories"), "{off}");
+    assert!(off.contains("Settings → Projects"), "{off}");
     assert!(!off.contains("Integrations"), "{off}");
     with(&s.store, |st| {
         st.save_publication(&publication(&s.run, false)).unwrap()

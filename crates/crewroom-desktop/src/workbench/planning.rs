@@ -4,7 +4,7 @@ use super::*;
 #[derive(Default)]
 pub(super) struct Planning {
     coordinator_roles: HashMap<String, String>,
-    playbooks: HashMap<String, String>,
+    pub(super) playbooks: HashMap<String, String>,
     pub(super) playbook_open: std::collections::HashSet<String>,
 }
 fn open_run(run: &Value) -> bool {
@@ -44,6 +44,38 @@ impl Workbench {
     pub(super) fn accepted_plan_version(&self, task_id: &str) -> Option<u64> {
         self.workspace["intake"][task_id]["currentPlan"]["version"].as_u64()
     }
+    /// The role chosen for a ticket's coordinator: the operator's choice, else the saved
+    /// launch's, else the enabled "coordinator" role, else the first enabled role.
+    pub(super) fn coordinator_role(&self, task_id: &str, current: Option<&Value>) -> String {
+        if let Some(role) = self.planning.coordinator_roles.get(task_id) {
+            return role.clone();
+        }
+        let roles: Vec<_> = records(&self.workspace, "roles")
+            .into_iter()
+            .filter(|r| r["enabled"] == true)
+            .collect();
+        current
+            .and_then(|r| {
+                records(r.get("launch").unwrap_or(&Value::Null), "team")
+                    .into_iter()
+                    .find(|m| m["coordinator"] == true)
+            })
+            .map(|m| string(&m, "roleId"))
+            .or_else(|| {
+                roles
+                    .iter()
+                    .find(|r| r["id"] == "coordinator")
+                    .or(roles.first())
+                    .map(|r| string(r, "id"))
+            })
+            .unwrap_or_default()
+    }
+    /// The default launch: one coordinator with the ticket's brief, in a new worktree.
+    pub(super) fn coordinator_launch(&self, snapshot: &Value, role: &str) -> Value {
+        let mut member = json!({"name":"Coordinator","roleId":role,"coordinator":true,"input":json!({"brief":snapshot["brief"],"criteria":snapshot["criteria"]}).to_string()});
+        self.capture_model_preview(&mut member, role);
+        json!({"team":[member],"repository":{"mode":"new"}})
+    }
     pub(super) fn plan_controls(
         &mut self,
         task: &Value,
@@ -58,7 +90,7 @@ impl Workbench {
         let repos = records(&self.workspace, "repositories");
         let target = repos.iter().find(|r| r["id"] == task["repositoryId"]);
         let retired = target.is_some_and(|r| !r["retiredAt"].is_null());
-        let mut panel = section("Target repository");
+        let mut panel = section("Project");
         if let Some(repo) = target {
             panel = panel.child(hint(format!(
                 "Saved target: {}{} · {}",
@@ -67,7 +99,9 @@ impl Workbench {
                 string(repo, "targetBranch")
             )));
         } else {
-            panel = panel.child(hint("No target repository selected."));
+            panel = panel.child(hint(
+                "No project selected. The ticket is listed under Unassigned.",
+            ));
         }
         if let Some(version) = self.accepted_plan_version(&task_id)
             && repos
@@ -75,7 +109,7 @@ impl Workbench {
                 .any(|r| r["retiredAt"].is_null() && r["id"] != task["repositoryId"])
         {
             panel = panel.child(hint(format!(
-                "Using another repository sets accepted plan {version} aside. Queue will start scoping again unless you accept a new plan version."
+                "Using another project sets accepted plan {version} aside. Queue will start scoping again unless you accept a new plan version."
             )));
         }
         for repo in repos.iter().filter(|r| r["retiredAt"].is_null()) {
@@ -90,9 +124,9 @@ impl Workbench {
                 .child(
                     Button::new(SharedString::from(format!("assign-{id}")))
                         .label(if task["repositoryId"] == id {
-                            "Selected target"
+                            "Selected project"
                         } else {
-                            "Use repository"
+                            "Use project"
                         })
                         .selected(task["repositoryId"] == id)
                         .disabled(self.blocked() || current.is_some())
@@ -108,10 +142,10 @@ impl Workbench {
         }
         if repos.iter().all(|r| !r["retiredAt"].is_null()) {
             panel = panel
-                .child(hint("No active repositories. Add one to choose a target."))
+                .child(hint("No active projects. Add one to choose a project."))
                 .child(
                     Button::new("plan-add-repository")
-                        .label("Add a repository")
+                        .label("Add a project")
                         .on_click(cx.listener(|this, _, _, cx| {
                             this.panel = Panel::Repositories;
                             cx.notify();
@@ -126,35 +160,17 @@ impl Workbench {
         }
         if retired {
             panel = panel.child(hint(
-                "Selected repository is retired. Choose an active repository before you select Queue run.",
+                "Selected project is retired. Choose an active project before you select Queue run.",
             ));
         }
         let roles: Vec<_> = records(&self.workspace, "roles")
             .into_iter()
             .filter(|r| r["enabled"] == true)
             .collect();
-        let selection = self
-            .planning
+        let selection = self.coordinator_role(&task_id, current);
+        self.planning
             .coordinator_roles
-            .entry(task_id.clone())
-            .or_insert_with(|| {
-                current
-                    .and_then(|r| {
-                        records(r.get("launch").unwrap_or(&Value::Null), "team")
-                            .into_iter()
-                            .find(|m| m["coordinator"] == true)
-                    })
-                    .map(|m| string(&m, "roleId"))
-                    .or_else(|| {
-                        roles
-                            .iter()
-                            .find(|r| r["id"] == "coordinator")
-                            .or(roles.first())
-                            .map(|r| string(r, "id"))
-                    })
-                    .unwrap_or_default()
-            })
-            .clone();
+            .insert(task_id.clone(), selection.clone());
         let editable = current.is_none_or(|r| r.get("position").is_some());
         let mut choices = div().id("launch-role-choices").flex().flex_wrap().gap_2();
         for role in &roles {
@@ -192,10 +208,10 @@ impl Workbench {
         }
         let mut blockers: Vec<String> = Vec::new();
         if target.is_none() {
-            blockers.push("choose a target repository".into());
+            blockers.push("choose a project".into());
         }
         if retired {
-            blockers.push("choose an active repository".into());
+            blockers.push("choose an active project".into());
         }
         if let Some(source) = super::blockers::reacceptance(task) {
             blockers.push(super::blockers::accept_source(source));
@@ -243,7 +259,11 @@ impl Workbench {
         let snapshot = current
             .map(|r| r["taskSnapshot"].clone())
             .unwrap_or_else(|| task.clone());
-        let mut launch=current.and_then(|r|r.get("launch")).filter(|v|v.is_object()).cloned().unwrap_or_else(||json!({"team":[{"name":"Coordinator","roleId":selection,"coordinator":true,"input":json!({"brief":snapshot["brief"],"criteria":snapshot["criteria"]}).to_string()}],"repository":{"mode":"new"}}));
+        let mut launch = current
+            .and_then(|r| r.get("launch"))
+            .filter(|v| v.is_object())
+            .cloned()
+            .unwrap_or_else(|| self.coordinator_launch(&snapshot, &selection));
         if let Some(team) = launch["team"].as_array_mut() {
             for member in team.iter_mut().filter(|m| m["coordinator"] == true) {
                 member["roleId"] = json!(selection);

@@ -193,7 +193,7 @@ fn prepare_a_plan_names_its_prerequisites_until_the_editor_is_available(
     let shown = screen_text(cx, h);
     contains(
         &shown,
-        "To write a plan here, choose a target repository below, then select Refresh repository basis.",
+        "To write a plan here, choose a project below, then select Refresh repository basis.",
     );
     absent(&shown, "prepare a plan here");
     click(
@@ -209,13 +209,13 @@ fn prepare_a_plan_names_its_prerequisites_until_the_editor_is_available(
         &shown,
         "Select Refresh repository basis to pin the source a plan is written against.",
     );
-    absent(&shown, "choose a target repository below");
+    absent(&shown, "choose a project below");
     click(cx, h, "refresh-plan-source");
     wait(cx, h, &v, &events, |v, _| {
         !v.busy && v.workspace["intake"][&id]["source"].is_object()
     });
     let shown = screen_text(cx, h);
-    absent(&shown, "choose a target repository below");
+    absent(&shown, "choose a project below");
     absent(&shown, "Select Refresh repository basis to pin");
     contains(&shown, "Write a plan");
 }

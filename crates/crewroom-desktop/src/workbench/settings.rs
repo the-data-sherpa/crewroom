@@ -11,7 +11,7 @@ mod principles;
 pub(super) mod repository_folder;
 mod roles;
 
-const NEW: &str = "__new";
+pub(super) const NEW: &str = "__new";
 #[derive(Default)]
 pub(super) struct Settings {
     role: String,
@@ -29,7 +29,7 @@ pub(super) struct Settings {
     preview_task: String,
     preview: Option<Value>,
     preview_source: Option<(Value, String)>,
-    repository: String,
+    pub(super) repository: String,
     roles: HashMap<String, RoleDraft>,
     repositories: HashMap<String, RepositoryDraft>,
     submitted_role: String,
@@ -361,7 +361,7 @@ impl Workbench {
                 .repositories
                 .insert(id, RepositoryDraft::new(&value, window, cx));
             self.notice =
-                "Repository saved. Existing runs retain their captured configuration.".into();
+                "Project saved. Existing runs retain their captured configuration.".into();
         }
         let key = if kind == "role" {
             "roles"
@@ -516,7 +516,7 @@ impl Workbench {
                 .insert(id.clone(), RepositoryDraft::new(&value, window, cx));
         }
         self.apply_folder(window, cx);
-        let mut panel=section("Repositories").child(hint("Choose the checkout folder; the local service inspects it and verifies it again on save. Existing runs keep their captured configuration."));
+        let mut panel=section("Projects").child(hint("A project is one local checkout with its ticket source, checks and branch prefix. Choose the checkout folder; the local service inspects it and verifies it again on save. Existing runs keep their captured configuration."));
         for repo in records(&self.workspace, "repositories") {
             let target = string(&repo, "id");
             let edit = target.clone();
@@ -551,13 +551,13 @@ impl Workbench {
                 row = row.child(self.ticket_source_block(&repo, window, cx));
             }
             if !retired {
-                row=row.child(div().flex().flex_wrap().gap_2().child(Button::new(SharedString::from(format!("edit-repository-{target}"))).label(format!("Edit {name}")).selected(target==id).disabled(self.busy).on_click(cx.listener(move|this,_,_,cx|{this.settings.repository=edit.clone();cx.notify();}))).child(Button::new(SharedString::from(format!("retire-repository-{target}"))).label("Retire repository").disabled(self.blocked()).on_click(cx.listener(move|_,_,window,cx|{let view=cx.entity().downgrade();let target=target.clone();window.open_alert_dialog(cx,move|dialog,_,_|{let view=view.clone();let target=target.clone();dialog.title(crate::accessibility::text("Retire this repository?")).description(crate::accessibility::text("New work will require another target. Saved tickets, history and worktrees are retained. Active or queued work can prevent retirement.")).show_cancel(true).cancel_text("Keep repository").ok_text("Retire repository").on_ok(move|_,_,cx|{let _=view.update(cx,|this,cx|this.send(format!("/repositories/{target}/retire"),json!({"revision":revision}),true,cx));true})});}))));
+                row=row.child(div().flex().flex_wrap().gap_2().child(Button::new(SharedString::from(format!("edit-repository-{target}"))).label(format!("Edit {name}")).selected(target==id).disabled(self.busy).on_click(cx.listener(move|this,_,_,cx|{this.settings.repository=edit.clone();cx.notify();}))).child(Button::new(SharedString::from(format!("retire-repository-{target}"))).label("Retire project").disabled(self.blocked()).on_click(cx.listener(move|_,_,window,cx|{let view=cx.entity().downgrade();let target=target.clone();window.open_alert_dialog(cx,move|dialog,_,_|{let view=view.clone();let target=target.clone();dialog.title(crate::accessibility::text("Retire this project?")).description(crate::accessibility::text("New work will require another project. Saved tickets, history and worktrees are retained. Active or queued work can prevent retirement.")).show_cancel(true).cancel_text("Keep project").ok_text("Retire project").on_ok(move|_,_,cx|{let _=view.update(cx,|this,cx|this.send(format!("/repositories/{target}/retire"),json!({"revision":revision}),true,cx));true})});}))));
             }
             panel = panel.child(row);
         }
         panel = panel.child(
             Button::new("new-repository")
-                .label("Add a repository")
+                .label("Add a project")
                 .disabled(self.busy)
                 .on_click(cx.listener(|this, _, _, cx| {
                     this.settings.repository = NEW.into();
@@ -568,14 +568,14 @@ impl Workbench {
         let retired = current.as_ref().is_some_and(|r| !r["retiredAt"].is_null());
         panel = panel.child(hint(match draft.revision {
             Some(r) => format!(
-                "Edit repository · revision {r}{}",
+                "Edit project · revision {r}{}",
                 if draft.dirty(cx) {
                     " · Unsaved changes"
                 } else {
                     ""
                 }
             ),
-            None => "New repository".into(),
+            None => "New project".into(),
         }));
         if let Some(current) = current
             && current["revision"].as_u64() != draft.revision
@@ -588,7 +588,7 @@ impl Workbench {
         let problems = draft.problems(cx);
         for (key, label) in [
             ("path", "Checkout path"),
-            ("name", "Repository name"),
+            ("name", "Project name"),
             ("targetBranch", "Target branch"),
             ("branchPrefix", "Branch prefix"),
         ] {
@@ -609,7 +609,7 @@ impl Workbench {
             }
         }
         let draft = &self.settings.repositories[&id];
-        panel=panel.child(hint("Leave the prefix blank to use codex/crewroom/.")).child(crate::accessibility::text("Repository checks")).child(hint("Each check uses a pinned container image. Leave the list empty if no checks are required."));
+        panel=panel.child(hint("Leave the prefix blank to use codex/crewroom/.")).child(crate::accessibility::text("Project checks")).child(hint("Each check uses a pinned container image. Leave the list empty if no checks are required."));
         for check in &draft.checks {
             let key = check.key.clone();
             let prefix = format!("check-{key}");
@@ -711,7 +711,7 @@ impl Workbench {
                     .child(
                         Button::new("save-repository")
                             .primary()
-                            .label("Save repository")
+                            .label("Save project")
                             .disabled(self.blocked() || retired || !problems.blockers.is_empty())
                             .on_click(cx.listener(|this, _, _, cx| {
                                 let id = this.settings.repository.clone();
@@ -735,7 +735,7 @@ impl Workbench {
                     )
                     .child(
                         Button::new("reload-repository")
-                            .label("Reload saved repository")
+                            .label("Reload saved project")
                             .disabled(self.busy)
                             .on_click(cx.listener(move |this, _, window, cx| {
                                 this.reload_setting("repository", target.clone(), window, cx)

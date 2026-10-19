@@ -99,9 +99,9 @@ pub(crate) fn summary(
         projects.push(status);
     }
     let label = match projects.len() {
-        0 => "No project has a Jira site as its ticket source, so nothing refreshes from Jira. Confirm a Jira site for a project under Settings → Repositories.".to_owned(),
+        0 => "No project has a Jira site as its ticket source, so nothing refreshes from Jira. Confirm a Jira site for a project under Settings → Projects.".to_owned(),
         n => format!(
-            "{n} project{} refresh{} from Jira; each sets its own filters under Settings → Repositories.",
+            "{n} project{} refresh{} from Jira; each sets its own filters under Settings → Projects.",
             if n == 1 { "" } else { "s" },
             if n == 1 { "es" } else { "" }
         ),
