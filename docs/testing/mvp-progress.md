@@ -17,6 +17,18 @@ Simulated (real SQLite, Git and the local service; the model catalog comes from 
 
 Not executed: `npm run test:e2e` (left to the integrator), the operator's on-screen check, and live providers.
 
+### FOR-88 review fix — effort source over a legacy default (2026-10-19)
+
+Fix `89bbb06` on branch `for-88-review-fix` from `for-88-work` `293deff`. Finding: with a legacy single default policy and a project that overrides only a job model, the role source line said `Effort source: Workspace · legacy default` and the project picker showed the legacy effort, while admission (`Configuration::role_policy`) turns the legacy default into per-job values and takes the effort from the budget. Now `project_settings::model_sources` names the legacy default as the effort source only while the project overrides no job model and no budget; otherwise it names the budget's source, and the built-in default when the legacy policy has no budget of its own (`model_jobs::defaults` records `legacyBudget`). In a project scope the job-model picker's effort is always the resolved budget's, since choosing a job model is itself an override; the workspace scope keeps the legacy effort.
+
+All checks ran at `89bbb06` in a fresh worktree prepared with `python3 scripts/prepare_worktree.py --build-helpers`, a private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, and every test command wrapped by `scripts/system_limits.py`. Linux x86_64. Simulated only (GPUI test platform, real local service, fixture OMP catalog; no provider was contacted):
+
+- `crewroom-core` `tests/project_settings.rs` **9/9**, including the new `a_job_model_override_over_a_legacy_policy_takes_the_budget_effort`: a project overriding only the review job over a legacy policy without a budget reports budget `large` from the built-in default and no legacy default; another project and All projects keep the legacy default; a legacy policy with its own budget reports that budget from the workspace.
+- `crewroom-desktop` `a_project_model_choice_shows_in_its_role_facts_and_preview` (its fixture is a legacy policy with effort `high`, no budget) now also asserts that the resolved effort is the `large` budget's, the roles page shows `Effort source: Built-in default · budget large` and no `legacy default`, and the project picker's effort matches the budget for the code and review jobs (review differs from the legacy effort), while the workspace scope shows the legacy effort.
+- Full suites: `cargo test -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop` **674 passed / 0 failed / 18 ignored**; `npm test` **346/346**; `npm run build` passes; Clippy `--all-targets -D warnings` for core, service and desktop and rustfmt `--check` clean.
+
+Not executed: `npm run test:e2e` (left to the integrator), the operator's on-screen check, and live providers.
+
 ## FOR-87 — Approve execution profiles for discovered models (2026-10-19)
 
 Code `176c550` and fix `7170303` on branch `for-87-work` from main `3f05023` (builds on the FOR-83 runner save path `a1ce41b`, `bf62c79`, `88bb6c9`). Checks ran in a fresh worktree prepared with `prepare_worktree.py --build-helpers`, a private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, wrapped by `scripts/system_limits.py`.
