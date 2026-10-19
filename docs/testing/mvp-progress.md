@@ -4,6 +4,47 @@ The operator requested that each work item pass its checks before the next start
 
 Historical revision IDs and source hashes below refer to the original private snapshots before the FOR-17 history rewrite. Sanitized copies are not byte-identical evidence for rewritten revisions; replay requires the private archive. New validation is recorded separately.
 
+## FOR-72 — Recorded harness transcripts for version-stamped replay tests (2026-10-19)
+
+Code `1816139` (branch `for-72-work`, from main `20a6149`). Every check below ran at `1816139` on Linux x86_64 in a worktree with a private `CARGO_TARGET_DIR`. Tests ran through `scripts/system_limits.py run` with `-j6` and `--test-threads=4`. No Jira, GitHub or real model provider was contacted.
+
+**Recordings: real binaries, synthetic provider.** `scripts/harness_transcripts.py record` ran each installed executable through the production adapter (`codex-fixture` example) with a tee shim. A synthetic loopback provider streamed the model output.
+- Harnesses: Codex `codex-cli 0.163.0`, Claude Code `2.1.303 (Claude Code)` and OMP `omp/18.11.3`.
+- Scenarios: `tool-completion`, `steer-interrupt` and `reattach`, giving nine transcripts and about 0.5 MB in `crates/crewroom-runtime/tests/fixtures/harness-transcripts/`.
+- Coverage: launch, tool approval (the Claude gate hook allows the call, and Codex and OMP answer the host tool), completion, steering, interrupt, and restart on the same session (`recoveryMode: session` on each harness).
+- Behaviors the recordings captured:
+  - Claude Code absorbs steering without a separate prompt result and aborts the turn.
+  - Codex and OMP report both inputs as aborted.
+  - Codex tries WebSockets four times, then falls back to HTTPS.
+  - OMP has a built-in provider named `synthetic`; the recorder uses `crewroom-fixture` instead.
+
+These recordings show harness protocol behavior. They do not show model behavior.
+
+**Redaction gate.** The recorder normalizes paths, host name, user name, UUIDs and the provider origin, and redacts credential and account fields. It then checks the transcript and writes nothing that fails. During development the gate refused two candidates:
+- a Codex ChatGPT token file field (a synthetic JSON web token);
+- a Codex `gitInfo.originUrl` from a recording made inside a checkout. Recordings now run outside any checkout.
+
+`python3 scripts/harness_transcripts.py check`: 9/9 pass. A manual search of the committed transcripts found no home path, user name or account value.
+
+**Replay (simulated).** `cargo test -p crewroom-runtime --test harness_replay` passed **4/4**, then three more times. Each of the nine transcripts reports `SIMULATED replay (not live evidence)` with 0 client drift notes. `CREWROOM_REPLAY_REPORT` rows are labelled `"evidence":"simulated-replay"`, all `passed: true`. `a_changed_harness_frame_fails_the_replay` checks two failures:
+- An unadmitted model in a recorded assistant frame changes the adapter's events.
+- A renamed client frame kind is a hard peer failure.
+
+**Version diffs (real binaries, synthetic provider).** `tool-completion` was re-recorded on two other installed versions, outside the repository, and compared with `diff`:
+- **Claude Code 2.1.302 against 2.1.303:** only the version and executable identity changed, plus the order of two independent client frames.
+- **Codex 0.162.0 against 0.163.0:** the version and identity changed, `account/login/completed` moved earlier, and 0.163.0 adds a `thread/readState/changed` notification before the turn ends.
+
+**Other checks at `1816139`:**
+- `npm test` **346/346**, including `scripts/test_harness_transcripts.py` (7 tests: gate over committed transcripts, refusals, normalization, diff, provider).
+- `npm run build` passes.
+- `cargo test -p crewroom-runtime`: **209 passed, 0 failed, 3 ignored**.
+- `cargo clippy -p crewroom-runtime --all-targets -- -D warnings` and `cargo fmt -p crewroom-runtime -- --check` are clean.
+- `npm run test:e2e` was not run here; the integrator runs it.
+
+**Limits:**
+- Transcripts cover the three named scenarios only. A tool denial is not recorded separately: Crewroom answers `can_use_tool` with deny, but the recorded flows go through its allow gate.
+- OMP reattach replays the adapter's session-restore exchange, not OMP's own session files.
+
 ## FOR-74 — Remaining subscription allowance for Codex and Claude Code (2026-10-19)
 
 Code `6d19f33` (branch `for-74-work`, from main `20a6149`). Checks ran on Linux x86_64 with Rust binaries built from this revision in a target directory private to the worktree (prepared with `python3 scripts/prepare_worktree.py --build-helpers`), all through `scripts/system_limits.py run`, `-j6`, `--test-threads=4`. The machine was shared with parallel agents.
