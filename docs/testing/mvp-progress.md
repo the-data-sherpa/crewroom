@@ -4,6 +4,20 @@ The operator requested that each work item pass its checks before the next start
 
 Historical revision IDs and source hashes below refer to the original private snapshots before the FOR-17 history rewrite. Sanitized copies are not byte-identical evidence for rewritten revisions; replay requires the private archive. New validation is recorded separately.
 
+## FOR-84 — Target-refresh and retained-work journeys without the TypeScript oracle (2026-10-19)
+
+Code `49f245b` (branch `for-84-work`, from main `3f05023`; test files only). Every check below ran at `49f245b` on Linux x86_64 with Docker Engine 29.7.2 (rootful) and Node 26, with Rust binaries (`crewroom-process`, `repository-fixture`) built from this revision in a target directory private to the worktree (worktree prepared with `python3 scripts/prepare_worktree.py --build-helpers`). Git is real; no provider, Jira or GitHub service was contacted. The machine was shared with parallel agents.
+
+**Before (main `3f05023`):** the two files were **15/25**. `target-refresh.test.ts` "unchanged native target names the exact same-head source candidate…" stopped with "Workflow database is newer than this application." `retained-work.test.ts` was 1/10: seven cases failed with "Needs an accepted implementation plan.", the dependency case with "Workflow database is newer than this application.", and the observer case timed out waiting for the observer because queueing had already failed.
+
+**Oracle decision (consistent with FOR-61/FOR-82):** native-only expectations, not a pre-migration copy or fixed snapshot.
+- Same-head refresh: the second candidate is seeded through the native `policy_fixture` operation. The retained `RepositoryWork.refreshBase` oracle compared the whole refresh receipt except `requestId` and `at`; the test now asserts that receipt exactly (`fromBase`/`fromHead` from the source candidate, `toBase` from `refs/heads/main`, `toHead`, `targetRef`, `sourceCandidateId`, `candidateId`, `state`), that a second request key yields the same receipt, that no Git process is started and the worktree head and status are unchanged, and that both receipts are persisted.
+- Retained work: the native queue admits a coding successor only under an accepted implementation plan, so the fixture accepts one through `plan_source`/`plan_save`/`plan_decide`. Admission re-pins the plan source, so a refined brief or a moved target needs a re-accepted plan (with `predecessorId`); the moved-target case still asserts that the continuation stays pinned to the retained base until an explicit refresh. The dependency case seeds its upstream ticket, accepted plan, coding run, dependency and merged publication through native operations. No assertion was removed.
+
+**Live journeys (real Git):** `target-refresh.test.ts` and `retained-work.test.ts` **25/25**, run twice. These journeys start no check container; `docker ps -a --filter label=io.crewroom.command` was empty before and after each run, the fixture checks every recorded Git process is stopped, and no fixture root remained in the temporary directory.
+
+**Other checks at `49f245b`:** `npm test` **346/346** (simulated providers); `npm run build` passes (existing chunk-size warning); no Rust source changed, `cargo fmt -p crewroom-runtime -- --check` clean. `npm run test:e2e` was not run here (the integrator runs it). Not re-run: rootless Docker, macOS.
+
 ## FOR-85 — Daemon-scheduling restart usage test (2026-10-19)
 
 Simulated checks only (fixture daemon, seeded agent events, private `CARGO_TARGET_DIR`, Linux x86_64); no live provider or delivery.
