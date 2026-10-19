@@ -4,6 +4,19 @@ The operator requested that each work item pass its checks before the next start
 
 Historical revision IDs and source hashes below refer to the original private snapshots before the FOR-17 history rewrite. Sanitized copies are not byte-identical evidence for rewritten revisions; replay requires the private archive. New validation is recorded separately.
 
+## FOR-88 — Project job-model picker and project-aware role previews (2026-10-19)
+
+Implementation `51320ae` on branch `for-88-work` from main `3f05023`. All checks below ran at `51320ae` (the evidence commit changes only documentation) in a fresh worktree prepared with `python3 scripts/prepare_worktree.py --build-helpers`, a private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, and every test command wrapped by `scripts/system_limits.py`. Linux x86_64.
+
+Simulated (real SQLite, Git and the local service; the model catalog comes from the fixture OMP `models` script with synthetic offerings; no provider, Jira or GitHub was contacted):
+
+- `crewroom-core` `tests/project_settings.rs` **8/8**, including the new `model_sources` test: a project's job model and budget are named as project overrides, another project and All projects name the workspace, a role's own model and effort win, never-saved models fall back to the built-in default, and a legacy single default counts as workspace unless the project sets a budget.
+- `crewroom-service` `tests/project_settings.rs` **2/2**, including the new role-preview test: with `repositoryId`, the previewed role carries the project's `projectSettings` (model override and instructions) and the prompt includes the project instructions; without it the preview stays the workspace resolution; another project's ID or a non-string ID is refused. Without a runner the model is reported as unavailable, not resolved.
+- `crewroom-desktop` overrides tests **4/4** (GPUI test platform, no window on the operator's desktop). A project's job-model rows show the catalog picker instead of the text field. A value saved before the picker is selected as `Legacy selection: …`, is not offered as a new choice, and is saved back verbatim. The effort follows the project's budget. The workspace editor keeps its own picker. With the configured fixture catalog, a model chosen by keyboard search in the project's picker is saved as the project override, and the workspace models are unchanged. **Agent roles** then shows `Model in Alpha: <selector> · effort <effort>` and `Model source: Project override · code job model`. The project preview returns `repositoryId`, `projectOverrides` and the chosen `intendedModel`, and it reads as current. After the override is reset, the preview reads as out of date.
+- Full suites: `npm test` **346/346**; `npm run build` passes; `cargo test -p crewroom-core -p crewroom-service -p crewroom-desktop` **731 passed / 0 failed / 18 ignored** (desktop **177 passed / 15 ignored**); Clippy `--all-targets -D warnings` for the three crates and `cargo fmt --check` for core, runtime, service and desktop clean. The runtime crate was not changed and its tests were not rerun.
+
+Not executed: `npm run test:e2e` (left to the integrator), the operator's on-screen check, and live providers.
+
 ## FOR-87 — Approve execution profiles for discovered models (2026-10-19)
 
 Code `176c550` and fix `7170303` on branch `for-87-work` from main `3f05023` (builds on the FOR-83 runner save path `a1ce41b`, `bf62c79`, `88bb6c9`). Checks ran in a fresh worktree prepared with `prepare_worktree.py --build-helpers`, a private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, wrapped by `scripts/system_limits.py`.
