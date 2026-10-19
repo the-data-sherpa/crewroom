@@ -97,11 +97,19 @@ fn task_exiting(stat: &str) -> Option<bool> {
     let flags: u64 = fields.get(6)?.parse().ok()?;
     Some(state.starts_with(['Z', 'X']) || flags & PF_EXITING != 0)
 }
-/// A process with no remaining task, or whose every task is dead or flagged
-/// `PF_EXITING`, can no longer run user code. Anything unreadable counts as
-/// running, so an unknown process is never mistaken for an exiting one.
+/// Whether one task's `/proc/<pid>/task/<tid>/stat` line shows it dead.
+#[cfg_attr(not(target_os = "linux"), allow(dead_code))]
+fn task_dead(stat: &str) -> Option<bool> {
+    let state = stat
+        .get(stat.rfind(')')? + 1..)?
+        .split_whitespace()
+        .next()?;
+    Some(state.starts_with(['Z', 'X']))
+}
+/// Whether process `pid` has no remaining task, or `done` holds for the
+/// `stat` line of every task it has. Anything unreadable fails the check.
 #[cfg(target_os = "linux")]
-fn exiting(pid: i32) -> bool {
+fn every_task(pid: i32, done: fn(&str) -> Option<bool>) -> bool {
     use std::io::ErrorKind::NotFound;
     let tasks = match std::fs::read_dir(format!("/proc/{pid}/task")) {
         Ok(tasks) => tasks,
@@ -110,12 +118,35 @@ fn exiting(pid: i32) -> bool {
     for task in tasks {
         let Ok(task) = task else { return false };
         match std::fs::read_to_string(task.path().join("stat")) {
-            Ok(stat) if task_exiting(&stat) == Some(true) => {}
+            Ok(stat) if done(&stat) == Some(true) => {}
             Err(error) if error.kind() == NotFound => {} // This task already finished.
             _ => return false,
         }
     }
     true
+}
+/// A process with no remaining task, or whose every task is dead or flagged
+/// `PF_EXITING`, can no longer run user code. Anything unreadable counts as
+/// running, so an unknown process is never mistaken for an exiting one.
+#[cfg(target_os = "linux")]
+fn exiting(pid: i32) -> bool {
+    every_task(pid, task_exiting)
+}
+/// Whether a `ps` row for process `pid` with state `stat` lists a process
+/// that counts as a group member. A zombie (`Z`) is gone only when every task
+/// is dead: on Linux a thread-group leader that calls `exit` (not
+/// `exit_group`) becomes a zombie while its other threads keep running user
+/// code with the shared descriptor table, inherited lock included, and `ps`
+/// then shows the whole process as `Zl`. Anything unreadable counts as a
+/// member.
+#[cfg(target_os = "linux")]
+fn listed_member(pid: i32, stat: &str) -> bool {
+    !stat.starts_with('Z') || !every_task(pid, task_dead)
+}
+/// Elsewhere a process becomes a zombie only after its last thread exits.
+#[cfg(not(target_os = "linux"))]
+fn listed_member(_pid: i32, stat: &str) -> bool {
+    !stat.starts_with('Z')
 }
 /// Elsewhere `ps` already reports an exiting process (`E`), so only a process
 /// that no longer exists counts.
@@ -145,17 +176,14 @@ async fn inspect(root: &Path, scan_holders: bool, exiting: ExitProbe) -> Result<
         .lines()
         .filter_map(|line| {
             let fields: Vec<_> = line.split_whitespace().collect();
-            if fields.len() < 4
-                || fields[2].starts_with('Z')
-                || fields[2].chars().skip(1).any(|c| c == 'E')
-            {
+            if fields.len() < 4 || fields[2].chars().skip(1).any(|c| c == 'E') {
                 return None;
             }
-            Some((
-                fields[0].parse::<i32>().ok()?,
-                fields[1].parse::<i32>().ok()?,
-                fields[3..].join(" "),
-            ))
+            let pid = fields[0].parse::<i32>().ok()?;
+            if !listed_member(pid, fields[2]) {
+                return None;
+            }
+            Some((pid, fields[1].parse::<i32>().ok()?, fields[3..].join(" ")))
         })
         .collect();
     let current = processes.iter().find(|p| p.0 == owner.pid);
@@ -310,12 +338,14 @@ pub(crate) async fn stopped_before_owner(root: &Path, pgid: i32) -> bool {
         // still be listed, and still hold the inherited lease, for a moment.
         let deadline = Instant::now() + Duration::from_secs(1);
         loop {
-            let table = output("/bin/ps", &["-axo", "pgid=,stat="]).await?;
+            let table = output("/bin/ps", &["-axo", "pid=,pgid=,stat="]).await?;
             let empty = !table.lines().any(|line| {
                 let fields: Vec<_> = line.split_whitespace().collect();
-                fields.len() == 2
-                    && fields[0].parse::<i32>() == Ok(pgid)
-                    && !fields[1].starts_with('Z')
+                fields.len() == 3
+                    && fields[1].parse::<i32>() == Ok(pgid)
+                    && fields[0]
+                        .parse::<i32>()
+                        .map_or(true, |pid| listed_member(pid, fields[2]))
             });
             let stopped = empty && lease_free(root)?;
             if stopped || Instant::now() >= deadline {
@@ -504,12 +534,13 @@ mod tests {
     /// not hold the (free) lease: what a runner looks like after it released
     /// its files, whether it is exiting or survives.
     fn unlocked_owner() -> (tempfile::TempDir, std::process::Child) {
+        unlocked(std::process::Command::new("/bin/sleep").arg("30"))
+    }
+    /// A launch whose recorded owner is `command`, run as a group leader that
+    /// does not hold the (free) lease.
+    fn unlocked(command: &mut std::process::Command) -> (tempfile::TempDir, std::process::Child) {
         let root = prepared();
-        let child = std::process::Command::new("/bin/sleep")
-            .arg("30")
-            .process_group(0)
-            .spawn()
-            .unwrap();
+        let child = command.process_group(0).spawn().unwrap();
         let pid = child.id() as i32;
         let started = std::process::Command::new("/bin/ps")
             .args(["-o", "lstart=", "-p", &pid.to_string()])
@@ -670,5 +701,84 @@ mod tests {
         zombie.wait().unwrap();
         assert!(dead);
         assert!(exiting(reaped_group()));
+    }
+
+    /// Wait until `ps` lists `pid` as a zombie with `tasks` tasks left.
+    #[cfg(target_os = "linux")]
+    fn await_zombie(pid: i32, tasks: usize) {
+        let deadline = std::time::Instant::now() + Duration::from_secs(10);
+        loop {
+            let stat = std::process::Command::new("/bin/ps")
+                .args(["-o", "stat=", "-p", &pid.to_string()])
+                .output()
+                .unwrap()
+                .stdout;
+            let listed = std::fs::read_dir(format!("/proc/{pid}/task")).map(|t| t.count());
+            if stat.starts_with(b"Z") && listed.ok() == Some(tasks) {
+                return;
+            }
+            assert!(std::time::Instant::now() < deadline, "{pid} never a zombie");
+            std::thread::sleep(Duration::from_millis(10));
+        }
+    }
+    #[cfg(target_os = "linux")]
+    fn kill_group(mut child: std::process::Child) {
+        // SAFETY: signals only the test's own process group.
+        unsafe { libc::kill(-(child.id() as i32), libc::SIGKILL) };
+        child.wait().unwrap();
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    async fn a_running_thread_behind_a_zombie_leader_is_a_member_without_its_lock() {
+        // The leader thread calls `exit` (not `exit_group`); a worker thread
+        // keeps running, so `ps` shows the whole process as a zombie.
+        let script = "import ctypes, sys, threading, time\n\
+                      threading.Thread(target=time.sleep, args=(30,)).start()\n\
+                      ctypes.CDLL(None).syscall(int(sys.argv[1]), 0)\n";
+        let (root, child) = unlocked(std::process::Command::new("python3").args([
+            "-c",
+            script,
+            &libc::SYS_exit.to_string(),
+        ]));
+        let pid = child.id() as i32;
+        await_zombie(pid, 2);
+        let member = listed_member(pid, "Zl");
+        let state = inspect_owned(root.path(), true).await;
+        let empty_receipt = prepared();
+        let launched_nothing = stopped_before_owner(empty_receipt.path(), pid).await;
+        kill_group(child);
+        assert!(member);
+        assert_eq!(state.state, "uncertain", "{state:?}");
+        assert_eq!(state.reason.as_deref(), Some(SURVIVES), "{state:?}");
+        assert_eq!(state.members, Some(vec![pid]));
+        assert!(!launched_nothing);
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    async fn an_unreaped_zombie_whose_every_task_is_dead_is_gone() {
+        let (root, child) = unlocked(&mut std::process::Command::new("/bin/true"));
+        let pid = child.id() as i32;
+        await_zombie(pid, 1);
+        let member = listed_member(pid, "Z");
+        let state = inspect_owned(root.path(), true).await;
+        let empty_receipt = prepared();
+        let launched_nothing = stopped_before_owner(empty_receipt.path(), pid).await;
+        kill_group(child);
+        assert!(!member);
+        assert_eq!(state.state, "stopped", "{state:?}");
+        assert!(launched_nothing);
+    }
+
+    #[test]
+    fn a_task_stat_state_decides_dead() {
+        let stat = |state: &str| format!("42 (a (b) c) {state} 1 42 42 0 -1 4 0");
+        assert_eq!(task_dead(&stat("Z")), Some(true));
+        assert_eq!(task_dead(&stat("X")), Some(true));
+        assert_eq!(task_dead(&stat("S")), Some(false));
+        assert_eq!(task_dead(&stat("D")), Some(false));
+        assert_eq!(task_dead("42 (truncated"), None);
+        assert!(listed_member(std::process::id() as i32, "Sl"));
     }
 }
