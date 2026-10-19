@@ -252,7 +252,13 @@ impl Workbench {
                 "Create a ticket to preview its accepted brief with this role.",
             ));
         }
-        if let Some(preview) = &self.settings.preview {
+        // A project's preview belongs to that project's overrides section.
+        if let Some(preview) = self
+            .settings
+            .preview
+            .as_ref()
+            .filter(|p| p["repositoryId"].is_null())
+        {
             let current = self.settings.roles[&self.settings.role].value(cx);
             let current_task = tasks.iter().find(|t| t["id"] == self.settings.preview_task);
             let fresh = self
@@ -272,9 +278,11 @@ impl Workbench {
             let fresh = fresh
                 && preview["catalogRevision"] == self.workspace["modelDiscovery"]["revision"]
                 && preview["modelJobsRevision"] == self.workspace["modelJobs"]["revision"];
-            panel = panel.child(super::super::model_details::details(
-                &preview["assignment"]["model"],
-            ));
+            panel = panel
+                .child(hint(self.model_source_line(&current, None)))
+                .child(super::super::model_details::details(
+                    &preview["assignment"]["model"],
+                ));
             if let Some(error) = preview["modelError"].as_str() {
                 panel = panel.child(hint(error.to_owned()));
             }

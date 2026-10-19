@@ -34,6 +34,9 @@ pub(super) struct Settings {
     preview_task: String,
     preview: Option<Value>,
     preview_source: Option<(Value, String)>,
+    /// FOR-88: the role and ticket chosen for a project's role preview.
+    scope_preview_role: String,
+    scope_preview_task: String,
     pub(super) repository: String,
     roles: HashMap<String, RoleDraft>,
     repositories: HashMap<String, RepositoryDraft>,

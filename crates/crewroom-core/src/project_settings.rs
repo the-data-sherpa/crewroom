@@ -143,6 +143,64 @@ pub fn resolve(
     }
 }
 
+/// Source of a model or effort the role definition sets itself.
+pub const ROLE: &str = "role";
+
+/// FOR-88: where a role's model and effort come from in a scope. A role's
+/// own model or effort override wins; otherwise the job model and the budget
+/// resolve through project, workspace and built-in default, as the runtime's
+/// policy applies them at admission.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ModelSources {
+    pub job: String,
+    pub model_source: &'static str,
+    /// The budget behind the effort; `None` when the role sets its effort.
+    pub budget: Option<String>,
+    pub effort_source: &'static str,
+}
+pub fn model_sources(
+    role: &Value,
+    settings: &Value,
+    project: Option<&str>,
+    model_jobs: &Value,
+    roles: &[Value],
+) -> ModelSources {
+    let (job, _) = crate::model_jobs::job(role);
+    let model_source = if role["model"].as_str().is_some_and(|m| !m.trim().is_empty()) {
+        ROLE
+    } else {
+        resolve(
+            &format!("models.jobs.{job}"),
+            settings,
+            project,
+            model_jobs,
+            roles,
+        )
+        .source
+    };
+    let (budget, effort_source) = if role["effort"]
+        .as_str()
+        .is_some_and(|e| !["", "default"].contains(&e))
+    {
+        (None, ROLE)
+    } else {
+        let budget = resolve("models.budget", settings, project, model_jobs, roles);
+        // A legacy single default policy is workspace configuration.
+        let source = if budget.source != PROJECT && model_jobs["legacyDefault"] == true {
+            WORKSPACE
+        } else {
+            budget.source
+        };
+        (budget.value.as_str().map(str::to_owned), source)
+    };
+    ModelSources {
+        job: job.to_owned(),
+        model_source,
+        budget,
+        effort_source,
+    }
+}
+
 /// Projects that override `key`, in their stored order.
 pub fn overriding_projects(key: &str, settings: &Value) -> Vec<String> {
     settings["projects"]

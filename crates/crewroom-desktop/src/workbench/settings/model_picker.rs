@@ -10,17 +10,17 @@ use gpui_kit::component::{
 #[cfg(test)]
 mod live_tests;
 #[cfg(test)]
-mod tests;
+pub(in crate::workbench) mod tests;
 
 #[derive(Clone, PartialEq)]
-struct Choice {
-    key: String,
-    label: String,
+pub(super) struct Choice {
+    pub(super) key: String,
+    pub(super) label: String,
     /// Reasons specific to this model; empty when nothing applies to it alone.
     detail: String,
     /// Route identities, searchable but not repeated in the row title.
     routes: String,
-    blocked: bool,
+    pub(super) blocked: bool,
     /// FOR-73: a harness group title row; never selectable or searched.
     header: bool,
 }
@@ -89,8 +89,8 @@ impl SelectItem for Choice {
 pub(super) struct Picker {
     input: Entity<InputState>,
     state: Entity<SelectState<Choices>>,
-    choices: Vec<Choice>,
-    selected: String,
+    pub(super) choices: Vec<Choice>,
+    pub(super) selected: String,
     width: f32,
 }
 struct Choices {

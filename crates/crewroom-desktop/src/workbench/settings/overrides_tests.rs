@@ -243,3 +243,163 @@ fn roles_instructions_principles_and_capacity_override_per_project(cx: &mut gpui
     assert_eq!(capacity(&alpha), 2);
     assert_eq!(capacity(&beta), 1);
 }
+
+/// FOR-88: a project's job model uses the workspace catalog picker; a value
+/// saved before the picker stays selected and is saved back verbatim.
+#[gpui::test]
+fn a_project_job_model_uses_the_catalog_picker_and_keeps_saved_text(cx: &mut gpui::TestAppContext) {
+    let (fixture, alpha, _beta) = fixture();
+    let saved = "pre-picker/model text";
+    assert_eq!(
+        fixture
+            .post(
+                "/project-settings",
+                json!({"repositoryId":alpha,"set":{"models.jobs.code":saved,"models.budget":"small"}})
+            )
+            .0,
+        200
+    );
+    let (h, v, e) = super::super::super::test_support::open(cx, &fixture);
+    wait(cx, h, &v, &e, |v, _| v.connected);
+    navigate(cx, h, "models");
+    click(cx, h, format!("settings-scope-{alpha}"));
+    cx.update_window(h, |_, w, cx| {
+        w.render_frame(cx);
+        assert!(w.try_find("scope-job-code").is_some());
+        // The plain text field is gone.
+        assert!(w.try_find("scope-models-jobs-code-value").is_none());
+    })
+    .unwrap();
+    cx.read(|cx| {
+        let pickers = &v.read(cx).settings.pickers;
+        let picker = &pickers["scope-job-code"];
+        assert_eq!(picker.selected, saved);
+        let kept = picker.choices.iter().find(|c| c.key == saved).unwrap();
+        assert_eq!(kept.label, format!("Legacy selection: {saved}"));
+        assert!(kept.blocked, "kept as saved, never offered as a new choice");
+        // The workspace editor keeps its own picker.
+        assert!(pickers.contains_key("job-code"));
+        // A job the project does not override starts from what it inherits.
+        assert_eq!(pickers["scope-job-review"].selected, "");
+    });
+    // The project's budget sets the effort shown with its pickers.
+    let effort = crewroom_core::model_jobs::effort("small", "judgment").unwrap();
+    assert!(shows(cx, h, &format!("Effective effort: {effort}")));
+    click(cx, h, "set-models-jobs-code");
+    wait(cx, h, &v, &e, |v, _| !v.busy);
+    assert_eq!(overrides(&fixture, &alpha)["models.jobs.code"], saved);
+    assert_eq!(fixture.get("/workspace")["modelJobs"]["revision"], 0);
+}
+
+/// FOR-88: with a project selected, a catalog model is chosen for its job,
+/// and the roles page shows what each role resolves to there, including the
+/// model and effort sources, with a project-aware preview.
+#[gpui::test]
+fn a_project_model_choice_shows_in_its_role_facts_and_preview(cx: &mut gpui::TestAppContext) {
+    let fixture = Fixture::configured(
+        |store, root| {
+            let repo = store
+                .create_repository(&json!({"name":"Alpha","path":checkout(root, "Alpha"),"targetBranch":"main","checks":[]}))
+                .unwrap();
+            store
+                .create_task(&json!({"title":"Alpha preview ticket","description":"","repositoryId":repo["id"]}))
+                .unwrap();
+        },
+        super::super::model_picker::tests::configured,
+    );
+    let alpha = fixture.get("/workspace")["repositories"][0]["id"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    let (h, v, e) = super::super::super::test_support::open(cx, &fixture);
+    wait(cx, h, &v, &e, |v, _| v.connected);
+    navigate(cx, h, "models");
+    click(cx, h, "refresh-model-catalog");
+    wait(cx, h, &v, &e, |v, _| {
+        !v.busy && v.workspace["modelDiscovery"]["state"] == "partial"
+    });
+    click(cx, h, format!("settings-scope-{alpha}"));
+    super::super::super::test_support::activate_by_keyboard(cx, h, "scope-job-code");
+    cx.update_window(h, |_, w, cx| w.input("omp / fixture / second", cx))
+        .unwrap();
+    cx.run_until_parked();
+    cx.update_window(h, |_, w, cx| {
+        w.press("down", cx);
+        w.press("enter", cx);
+    })
+    .unwrap();
+    let key = "offering:omp:fixture:second:unknown";
+    let draft = format!("{alpha}:models.jobs.code");
+    wait(cx, h, &v, &e, |v, cx| {
+        v.settings.scope_drafts.fields[&draft].text("value", cx) == key
+    });
+    // The chosen model's facts appear with the project's picker.
+    assert!(shows(cx, h, "Eligible · effort"));
+    click(cx, h, "set-models-jobs-code");
+    wait(cx, h, &v, &e, |v, _| {
+        !v.busy && v.workspace["projectSettings"]["projects"][&alpha]["models.jobs.code"] == key
+    });
+    assert_eq!(fixture.get("/workspace")["modelJobs"]["revision"], 0);
+
+    navigate(cx, h, "roles");
+    let view = fixture.get("/workspace");
+    let scoped = &view["roleCatalog"]["implementer"]["projects"][&alpha]["model"];
+    assert_eq!(scoped["projectOverrides"]["jobs"]["code"], key);
+    let resolved = &scoped["resolved"];
+    assert!(shows(
+        cx,
+        h,
+        &format!(
+            "Model in Alpha: {} · effort {}",
+            string(resolved, "selector"),
+            string(resolved, "effort")
+        )
+    ));
+    assert!(shows(
+        cx,
+        h,
+        "Model source: Project override · code job model"
+    ));
+    // The workspace resolution is unchanged.
+    assert_ne!(
+        view["roleCatalog"]["implementer"]["model"]["selection"]["intendedModel"],
+        key
+    );
+
+    click(cx, h, "scope-preview-refresh");
+    wait(cx, h, &v, &e, |v, _| {
+        !v.busy
+            && v.settings
+                .preview
+                .as_ref()
+                .is_some_and(|p| p["repositoryId"] == alpha.as_str())
+    });
+    cx.read(|cx| {
+        let preview = v.read(cx).settings.preview.clone().unwrap();
+        let model = &preview["assignment"]["model"];
+        assert_eq!(model["projectOverrides"]["jobs"]["code"], key);
+        assert_eq!(model["selection"]["intendedModel"], key);
+        assert_eq!(model["selection"]["modelSource"], "job");
+    });
+    assert!(shows(cx, h, "Read-only preview of the current inputs."));
+    // Resetting the override makes the preview stale until refreshed.
+    navigate(cx, h, "models");
+    click(cx, h, "reset-models-jobs-code");
+    wait(cx, h, &v, &e, |v, _| {
+        !v.busy
+            && v.workspace["projectSettings"]["projects"][&alpha]
+                .get("models.jobs.code")
+                .is_none()
+    });
+    navigate(cx, h, "roles");
+    assert!(shows(
+        cx,
+        h,
+        "Preview is out of date. Refresh it to include current inputs."
+    ));
+    assert!(!shows(
+        cx,
+        h,
+        "Model source: Project override · code job model"
+    ));
+}

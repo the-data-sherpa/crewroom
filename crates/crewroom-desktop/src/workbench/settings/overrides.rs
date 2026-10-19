@@ -17,6 +17,7 @@ pub(in crate::workbench) fn source_label(source: &str) -> &'static str {
     match source {
         PROJECT => "Project override",
         WORKSPACE => "Workspace",
+        ps::ROLE => "Role override",
         _ => "Built-in default",
     }
 }
@@ -348,14 +349,15 @@ impl Workbench {
         row
     }
 
-    fn scope_field(
+    /// The draft for `key` in the current scope, created from the resolved
+    /// value; returns the scope and the draft's key.
+    fn scope_draft(
         &mut self,
         key: &str,
-        label: &'static str,
         multiline: bool,
         window: &mut Window,
         cx: &mut Context<Self>,
-    ) -> Div {
+    ) -> (Option<String>, String) {
         let scope = self.settings_scope().map(|(id, _)| id);
         let draft = draft_key(scope.as_deref(), key);
         if !self.settings.scope_drafts.fields.contains_key(&draft) {
@@ -371,30 +373,97 @@ impl Workbench {
                 .fields
                 .insert(draft.clone(), fields);
         }
+        (scope, draft)
+    }
+    fn scope_save_button(
+        &self,
+        key: &str,
+        scope: Option<String>,
+        cx: &mut Context<Self>,
+    ) -> Button {
+        let id = key.replace('.', "-");
+        let key_owned = key.to_owned();
+        Button::new(SharedString::from(format!("set-{id}")))
+            .label(if scope.is_some() {
+                "Use for this project"
+            } else {
+                "Save for all projects"
+            })
+            .disabled(self.blocked())
+            .on_click(cx.listener(move |this, _, _, cx| {
+                let draft = draft_key(scope.as_deref(), &key_owned);
+                let text = this.settings.scope_drafts.fields[&draft].text("value", cx);
+                this.save_scope(scope.clone(), json!({key_owned.clone(): text}), &[], cx)
+            }))
+    }
+    fn scope_field(
+        &mut self,
+        key: &str,
+        label: &'static str,
+        multiline: bool,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> Div {
+        let (scope, draft) = self.scope_draft(key, multiline, window, cx);
         let id = key.replace('.', "-");
         let fields = &self.settings.scope_drafts.fields[&draft];
-        let target = scope.clone();
-        let key_owned = key.to_owned();
-        let button = if scope.is_some() {
-            "Use for this project"
-        } else {
-            "Save for all projects"
-        };
+        let field = fields.render(&format!("scope-{id}"), "value", label, self.busy);
         div()
             .flex()
             .flex_col()
             .gap_2()
-            .child(fields.render(&format!("scope-{id}"), "value", label, self.busy))
-            .child(
-                Button::new(SharedString::from(format!("set-{id}")))
-                    .label(button)
-                    .disabled(self.blocked())
-                    .on_click(cx.listener(move |this, _, _, cx| {
-                        let draft = draft_key(target.as_deref(), &key_owned);
-                        let text = this.settings.scope_drafts.fields[&draft].text("value", cx);
-                        this.save_scope(target.clone(), json!({key_owned.clone(): text}), &[], cx)
-                    })),
-            )
+            .child(field)
+            .child(self.scope_save_button(key, scope, cx))
+    }
+    /// FOR-88: the effort a job runs at in a scope: the resolved budget's,
+    /// or the legacy single default's while no budget applies over it.
+    fn scope_effort(&self, job: &str, project: Option<&str>) -> String {
+        let budget = self.resolved_setting("models.budget", project);
+        if budget.source != PROJECT && self.workspace["modelJobs"]["legacyDefault"] == true {
+            return self.workspace["modelJobs"]["legacyEffort"]
+                .as_str()
+                .unwrap_or("unknown")
+                .to_owned();
+        }
+        crewroom_core::model_jobs::effort(budget.value.as_str().unwrap_or("large"), job)
+            .unwrap_or("unknown")
+            .to_owned()
+    }
+    /// FOR-88: a project's job model is chosen with the workspace's catalog
+    /// picker. The draft starts from the resolved value, so a value saved
+    /// before the picker (or one the catalog no longer lists) stays selected
+    /// as typed and is saved verbatim until another model is chosen.
+    fn scope_job_picker(
+        &mut self,
+        job: &str,
+        label: &'static str,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> Div {
+        let key = format!("models.jobs.{job}");
+        let (scope, draft) = self.scope_draft(&key, false, window, cx);
+        let input = self.settings.scope_drafts.fields[&draft].inputs["value"].clone();
+        let effort = self.scope_effort(job, scope.as_deref());
+        let picker = self.model_picker(
+            &format!("scope-job-{job}"),
+            label,
+            input,
+            &effort,
+            None,
+            window,
+            cx,
+        );
+        let save = self.scope_save_button(&key, scope, cx);
+        div().child(
+            div()
+                .id(SharedString::from(format!("scope-model-job-{job}")))
+                .flex()
+                .flex_col()
+                .min_w_0()
+                .gap_2()
+                .child(picker)
+                .child(save),
+        )
     }
 
     /// The overridable settings that belong on the current Settings page.
@@ -450,7 +519,7 @@ impl Workbench {
                     let key = format!("models.jobs.{job}");
                     let editor = target
                         .is_some()
-                        .then(|| self.scope_field(&key, label, false, window, cx));
+                        .then(|| self.scope_job_picker(job, label, window, cx));
                     page = page.child(self.setting_row(&key, label, editor, cx));
                 }
             }
@@ -468,23 +537,49 @@ impl Workbench {
                                 self.resolved_setting(&key, target.as_deref()).value == true;
                             let t = target.clone();
                             let set_key = key.clone();
-                            let editor = div().child(
-                                Button::new(SharedString::from(format!("scope-role-{id}")))
-                                    .label(if allowed {
-                                        format!("Don't allow in {name}")
-                                    } else {
-                                        format!("Allow in {name}")
-                                    })
-                                    .disabled(self.blocked())
-                                    .on_click(cx.listener(move |this, _, _, cx| {
-                                        this.save_scope(
-                                            t.clone(),
-                                            json!({set_key.clone(): !allowed}),
-                                            &[],
-                                            cx,
-                                        )
-                                    })),
-                            );
+                            let facts = self.scoped_role_model(&id, target.as_deref());
+                            let model = &facts["model"]["resolved"];
+                            // FOR-88: what the role resolves to here, and why.
+                            let model_label = if model["selector"].is_string() {
+                                format!(
+                                    "Model in {name}: {} · effort {}",
+                                    string(model, "selector"),
+                                    string(model, "effort")
+                                )
+                            } else {
+                                format!(
+                                    "Model in {name}: {}",
+                                    facts["modelError"]
+                                        .as_str()
+                                        .unwrap_or("Model resolution unavailable")
+                                )
+                            };
+                            let editor = div()
+                                .flex()
+                                .flex_col()
+                                .gap_2()
+                                .child(named_hint(format!("scope-role-model-{id}"), model_label))
+                                .child(named_hint(
+                                    format!("scope-role-source-{id}"),
+                                    self.model_source_line(role, target.as_deref()),
+                                ))
+                                .child(
+                                    Button::new(SharedString::from(format!("scope-role-{id}")))
+                                        .label(if allowed {
+                                            format!("Don't allow in {name}")
+                                        } else {
+                                            format!("Allow in {name}")
+                                        })
+                                        .disabled(self.blocked())
+                                        .on_click(cx.listener(move |this, _, _, cx| {
+                                            this.save_scope(
+                                                t.clone(),
+                                                json!({set_key.clone(): !allowed}),
+                                                &[],
+                                                cx,
+                                            )
+                                        })),
+                                );
                             page = page.child(self.setting_row(
                                 &key,
                                 &string(role, "name"),
@@ -492,6 +587,8 @@ impl Workbench {
                                 cx,
                             ));
                         }
+                        let (project, name) = (target.clone().unwrap_or_default(), name.clone());
+                        page = page.child(self.scope_role_preview(&project, &name, cx));
                     }
                     None => {
                         let overridden: Vec<_> = roles
@@ -609,6 +706,158 @@ impl Workbench {
             _ => return None,
         }
         Some(div().child(page))
+    }
+
+    /// FOR-88: preview a saved role as `project` admits it (availability,
+    /// instructions, principles, model and effort), over one of the
+    /// project's tickets. Role definitions stay read-only here; nothing is
+    /// queued or started.
+    fn scope_role_preview(&mut self, project: &str, name: &str, cx: &mut Context<Self>) -> Div {
+        let roles = records(&self.workspace, "roles");
+        let tasks: Vec<Value> = records(&self.workspace, "tasks")
+            .into_iter()
+            .filter(|t| t["repositoryId"] == project)
+            .collect();
+        let preview = &mut self.settings;
+        if !roles
+            .iter()
+            .any(|r| r["id"] == preview.scope_preview_role.as_str())
+        {
+            preview.scope_preview_role = roles
+                .iter()
+                .find(|r| r["id"] == "implementer")
+                .or(roles.first())
+                .map(|r| string(r, "id"))
+                .unwrap_or_default();
+        }
+        if !tasks
+            .iter()
+            .any(|t| t["id"] == preview.scope_preview_task.as_str())
+        {
+            preview.scope_preview_task = tasks.first().map(|t| string(t, "id")).unwrap_or_default();
+        }
+        let (role_id, task_id) = (
+            preview.scope_preview_role.clone(),
+            preview.scope_preview_task.clone(),
+        );
+        let role = roles.iter().find(|r| r["id"] == role_id.as_str()).cloned();
+        let mut panel = section(format!("Role preview in {name}"))
+            .id("scope-role-preview")
+            .child(hint(format!(
+                "What a saved role resolves to for a ticket in {name}: model, effort and their source, instructions and principles."
+            )));
+        let mut choices = div().flex().flex_wrap().gap_2();
+        for r in &roles {
+            let id = string(r, "id");
+            let pick = id.clone();
+            choices = choices.child(
+                Button::new(SharedString::from(format!("scope-preview-role-{id}")))
+                    .label(string(r, "name"))
+                    .selected(id == role_id)
+                    .on_click(cx.listener(move |this, _, _, cx| {
+                        this.settings.scope_preview_role = pick.clone();
+                        cx.notify();
+                    })),
+            );
+        }
+        panel = panel.child(choices);
+        if tasks.is_empty() {
+            return div().child(panel.child(hint(format!(
+                "No tickets in {name} yet. Add one to this project to preview its assembled brief."
+            ))));
+        }
+        let mut tickets = div().flex().flex_col().min_w_0().gap_2();
+        for task in &tasks {
+            let id = string(task, "id");
+            let pick = id.clone();
+            tickets = tickets.child(
+                Button::new(SharedString::from(format!("scope-preview-ticket-{id}")))
+                    .w_full()
+                    .min_w_0()
+                    .label(format!(
+                        "{} · {}",
+                        string(task, "key"),
+                        string(task, "title")
+                    ))
+                    .selected(id == task_id)
+                    .on_click(cx.listener(move |this, _, _, cx| {
+                        this.settings.scope_preview_task = pick.clone();
+                        cx.notify();
+                    })),
+            );
+        }
+        let send_role = role.clone();
+        let target = project.to_owned();
+        panel = panel.child(tickets).child(
+            Button::new("scope-preview-refresh")
+                .label(format!("Preview in {name}"))
+                .disabled(self.blocked() || role.is_none())
+                .on_click(cx.listener(move |this, _, _, cx| {
+                    let Some(role) = send_role.clone() else {
+                        return;
+                    };
+                    let task = this.settings.scope_preview_task.clone();
+                    this.settings.preview_source = Some((role.clone(), task.clone()));
+                    this.send(
+                        "/role-preview".into(),
+                        json!({"role":role,"taskId":task,"repositoryId":target}),
+                        false,
+                        cx,
+                    );
+                })),
+        );
+        let (Some(role), Some(preview)) = (role, self.settings.preview.as_ref()) else {
+            return div().child(panel);
+        };
+        if preview["repositoryId"] != project {
+            return div().child(panel);
+        }
+        // Fresh while the saved role, ticket, project settings and model
+        // configuration are what the preview was made from.
+        let expected = crewroom_core::roles::validate_role(&role).map(|r| {
+            ps::effective_roles(&[r], &self.workspace["projectSettings"], project).remove(0)
+        });
+        let fresh = self
+            .settings
+            .preview_source
+            .as_ref()
+            .is_some_and(|(sent, task)| *sent == role && *task == task_id)
+            && tasks
+                .iter()
+                .find(|t| t["id"] == task_id.as_str())
+                .is_some_and(|t| *t == preview["task"])
+            && expected.is_ok_and(|r| r == preview["role"])
+            && preview["catalogRevision"] == self.workspace["modelDiscovery"]["revision"]
+            && preview["modelJobsRevision"] == self.workspace["modelJobs"]["revision"];
+        panel = panel
+            .child(named_hint(
+                "scope-preview-source",
+                self.model_source_line(&role, Some(project)),
+            ))
+            .child(super::super::model_details::details(
+                &preview["assignment"]["model"],
+            ));
+        if let Some(error) = preview["modelError"].as_str() {
+            panel = panel.child(named_hint(
+                "scope-preview-model-error",
+                format!("Model unavailable: {error}"),
+            ));
+        }
+        panel = panel
+            .child(named_hint(
+                "scope-preview-freshness",
+                if fresh {
+                    "Read-only preview of the current inputs."
+                } else {
+                    "Preview is out of date. Refresh it to include current inputs."
+                },
+            ))
+            .child(hint(string(preview, "scope")))
+            .child(crate::accessibility::named(
+                "scope-role-preview-prompt",
+                string(preview, "prompt"),
+            ));
+        div().child(panel)
     }
 
     /// Workspace-only content while a project is selected: visible, dimmed

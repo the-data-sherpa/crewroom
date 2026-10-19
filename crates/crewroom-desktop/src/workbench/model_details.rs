@@ -73,6 +73,46 @@ impl Workbench {
         }
         details(&facts["model"])
     }
+    /// FOR-88: the role's model facts as `project` resolves it: the
+    /// project's own preview where its settings change the role, otherwise
+    /// the workspace preview (the project changes nothing for it).
+    pub(super) fn scoped_role_model(&self, role: &str, project: Option<&str>) -> &Value {
+        let facts = &self.workspace["roleCatalog"][role];
+        project
+            .and_then(|p| facts["projects"].get(p))
+            .unwrap_or(facts)
+    }
+    /// FOR-88: where a role's model and effort come from in a scope, in
+    /// operator words.
+    pub(super) fn model_source_line(&self, role: &Value, project: Option<&str>) -> String {
+        use crewroom_core::project_settings::{PROJECT, ROLE, model_sources};
+        let sources = model_sources(
+            role,
+            &self.workspace["projectSettings"],
+            project,
+            &self.workspace["modelJobs"],
+            &records(&self.workspace, "roles"),
+        );
+        let label = super::settings::overrides::source_label;
+        let model = if sources.model_source == ROLE {
+            "Role override".to_owned()
+        } else {
+            format!(
+                "{} · {} job model",
+                label(sources.model_source),
+                sources.job
+            )
+        };
+        let legacy = self.workspace["modelJobs"]["legacyDefault"] == true;
+        let effort = match &sources.budget {
+            None => "Role override".to_owned(),
+            Some(_) if legacy && sources.effort_source != PROJECT => {
+                format!("{} · legacy default", label(sources.effort_source))
+            }
+            Some(budget) => format!("{} · budget {budget}", label(sources.effort_source)),
+        };
+        format!("Model source: {model} · Effort source: {effort}")
+    }
     /// FOR-79: where the project's settings change the role, admission
     /// verifies the project's preview, so capture that one.
     pub(super) fn capture_model_preview(&self, input: &mut Value, role: &str, project: &str) {

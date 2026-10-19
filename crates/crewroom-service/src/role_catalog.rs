@@ -33,8 +33,33 @@ pub(super) fn facts(state: &AuthorityState, workspace: &Value) -> Result<Value> 
 /// A preview is a hypothetical one-role assignment over the selected saved ticket.
 /// It never queues work, admits an assignment, or reads private provider settings.
 pub(super) fn preview(state: &AuthorityState, body: &Value) -> Result<Value> {
-    let role = validate_role(&body["role"])?;
+    let mut role = validate_role(&body["role"])?;
     let task = state.store.get_task(text(body, "taskId")?)?;
+    // FOR-88: with a project, the role as admitted there: its availability,
+    // instructions, principles and model overrides. Admission resolves the
+    // ticket's project, so the ticket must belong to it.
+    let project = match body.get("repositoryId") {
+        None | Some(Value::Null) => None,
+        Some(Value::String(id)) => Some(id.clone()),
+        Some(_) => {
+            return Err(crewroom_core::Error::Invalid(
+                "repositoryId must be a string or null.".into(),
+            ));
+        }
+    };
+    if let Some(project) = &project {
+        if task["repositoryId"] != project.as_str() {
+            return Err(crewroom_core::Error::Invalid(
+                "Choose a ticket from this project to preview its settings.".into(),
+            ));
+        }
+        role = crewroom_core::project_settings::effective_roles(
+            &[role],
+            &state.store.project_settings()?,
+            project,
+        )
+        .remove(0);
+    }
     let name = if role["id"] == "coordinator" {
         "Coordinator"
     } else {
@@ -64,7 +89,12 @@ pub(super) fn preview(state: &AuthorityState, body: &Value) -> Result<Value> {
         None,
         false,
     )?;
+    let scope = if project.is_some() {
+        "Preview uses the saved ticket, the role as this project's settings resolve it and one hypothetical assignment with all criteria and no dependencies. The launch plan supplies actual obligations and teammates; repository instructions are captured when its worktree is prepared. No agent is started."
+    } else {
+        "Preview uses the saved ticket, current role draft and one hypothetical assignment with all criteria and no dependencies. The launch plan supplies actual obligations and teammates; repository instructions are captured when its worktree is prepared. No agent is started."
+    };
     Ok(
-        json!({"role":role,"task":task,"assignment":assignment,"prompt":prompt,"scope":"Preview uses the saved ticket, current role draft and one hypothetical assignment with all criteria and no dependencies. The launch plan supplies actual obligations and teammates; repository instructions are captured when its worktree is prepared. No agent is started."}),
+        json!({"role":role,"task":task,"assignment":assignment,"prompt":prompt,"repositoryId":project,"scope":scope}),
     )
 }

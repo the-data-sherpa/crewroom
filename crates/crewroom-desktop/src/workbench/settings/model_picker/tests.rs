@@ -4,7 +4,7 @@ use gpui::test::TestWindowExt;
 use gpui_kit as gpui;
 use std::os::unix::fs::PermissionsExt;
 
-fn configured(root: &std::path::Path) -> crewroom_service::ServiceOptions {
+pub(in crate::workbench) fn configured(root: &std::path::Path) -> crewroom_service::ServiceOptions {
     let binary = root.join("models.py");
     if !binary.exists() {
         std::fs::write(&binary,r#"#!/usr/bin/python3

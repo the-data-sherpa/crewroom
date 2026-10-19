@@ -173,3 +173,96 @@ async fn overrides_save_reset_and_report_without_touching_other_layers() {
     );
     assert_eq!(capacity(&view, alpha), 3);
 }
+
+/// FOR-88: a role preview for a project resolves the role as that project
+/// admits it; without one it stays the workspace resolution.
+#[tokio::test]
+async fn a_role_preview_resolves_the_selected_project() {
+    let root = tempfile::tempdir().unwrap();
+    let roles = root.path().join("roles.json");
+    let server = Service::start(root.path(), &roles, 0).await.unwrap();
+    let info = &server.info;
+    let origin = info.origin.clone();
+    let mut ids = vec![];
+    for name in ["alpha", "beta"] {
+        let repo: Value = post(
+            info,
+            "/repositories",
+            json!({"name":name,"path":checkout(root.path(), name),"targetBranch":"main"}),
+            &origin,
+        )
+        .await
+        .json()
+        .await
+        .unwrap();
+        ids.push(repo["id"].as_str().unwrap().to_owned());
+    }
+    let (alpha, beta) = (&ids[0], &ids[1]);
+    let saved = post(
+        info,
+        "/project-settings",
+        json!({"repositoryId":alpha,"set":{"instructions":"Use the alpha fixtures.","models.jobs.code":"alpha/code"}}),
+        &origin,
+    )
+    .await;
+    assert!(saved.status().is_success());
+    let task: Value = post(
+        info,
+        "/tasks",
+        json!({"title":"Alpha preview","description":"","repositoryId":alpha}),
+        &origin,
+    )
+    .await
+    .json()
+    .await
+    .unwrap();
+    let role = workspace(info).await["roles"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|r| r["id"] == "implementer")
+        .unwrap()
+        .clone();
+    let preview = |project: Value| {
+        post(
+            info,
+            "/role-preview",
+            json!({"role":role,"taskId":task["id"],"repositoryId":project}),
+            &origin,
+        )
+    };
+    let scoped: Value = preview(json!(alpha)).await.json().await.unwrap();
+    assert_eq!(scoped["repositoryId"], json!(alpha));
+    assert_eq!(
+        scoped["role"]["projectSettings"]["repositoryId"],
+        json!(alpha)
+    );
+    assert_eq!(
+        scoped["role"]["projectSettings"]["models"]["jobs"]["code"],
+        "alpha/code"
+    );
+    assert!(
+        scoped["prompt"]
+            .as_str()
+            .unwrap()
+            .contains("Use the alpha fixtures.")
+    );
+    // Without a runner the model stays explicitly unverified.
+    assert_eq!(scoped["modelError"], "Runner integration is unavailable.");
+    let workspace_preview: Value = preview(Value::Null).await.json().await.unwrap();
+    assert!(workspace_preview["repositoryId"].is_null());
+    assert!(workspace_preview["role"].get("projectSettings").is_none());
+    assert!(
+        !workspace_preview["prompt"]
+            .as_str()
+            .unwrap()
+            .contains("Use the alpha fixtures.")
+    );
+    // The ticket must belong to the project being previewed.
+    for project in [json!(beta), json!(7)] {
+        assert!(
+            preview(project.clone()).await.status().is_client_error(),
+            "{project}"
+        );
+    }
+}

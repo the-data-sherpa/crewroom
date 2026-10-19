@@ -2,7 +2,7 @@
 //! default, show their source, and never alter captured assignments.
 mod support;
 use crewroom_core::project_settings::{
-    DEFAULT, PROJECT, WORKSPACE, effective_roles, overriding_projects, resolve,
+    DEFAULT, PROJECT, ROLE, WORKSPACE, effective_roles, model_sources, overriding_projects, resolve,
 };
 use crewroom_core::store::Store;
 use serde_json::{Value, json};
@@ -426,4 +426,48 @@ fn a_principle_that_settings_apply_cannot_be_deleted() {
         .unwrap();
     let settings = f.store.project_settings().unwrap();
     catalog.delete("no-network", 1, &roles, &settings).unwrap();
+}
+
+#[test]
+fn a_role_names_where_its_model_and_effort_come_from_in_each_scope() {
+    let f = fixture();
+    let alpha = f.project("alpha");
+    let beta = f.project("beta");
+    f.save(json!({"repositoryId":alpha,"set":{"models.jobs.code":"alpha-code","models.budget":"small"}}))
+        .unwrap();
+    let settings = f.store.project_settings().unwrap();
+    let models = saved_models();
+    let implementer = json!({"id":"implementer","job":"code","model":"","effort":"default"});
+    let sources = |role: &Value, project: Option<&str>| {
+        let s = model_sources(role, &settings, project, &models, &f.roles);
+        (s.job, s.model_source, s.budget, s.effort_source)
+    };
+    assert_eq!(
+        sources(&implementer, Some(&alpha)),
+        ("code".into(), PROJECT, Some("small".into()), PROJECT)
+    );
+    assert_eq!(
+        sources(&implementer, Some(&beta)),
+        ("code".into(), WORKSPACE, Some("medium".into()), WORKSPACE)
+    );
+    assert_eq!(
+        sources(&implementer, None),
+        ("code".into(), WORKSPACE, Some("medium".into()), WORKSPACE)
+    );
+    // A role's own model and effort take precedence over every scope.
+    let pinned = json!({"id":"implementer","job":"code","model":"role-model","effort":"high"});
+    assert_eq!(
+        sources(&pinned, Some(&alpha)),
+        ("code".into(), ROLE, None, ROLE)
+    );
+    // Never-saved workspace models fall back to the built-in defaults.
+    let unsaved = json!({"revision":0,"budget":"large","jobs":{},"legacyDefault":false});
+    let s = model_sources(&implementer, &settings, Some(&beta), &unsaved, &f.roles);
+    assert_eq!((s.model_source, s.effort_source), (DEFAULT, DEFAULT));
+    // A legacy single default policy counts as workspace configuration.
+    let legacy = json!({"revision":0,"legacyDefault":true,"jobs":{"code":"legacy"}});
+    let s = model_sources(&implementer, &settings, Some(&beta), &legacy, &f.roles);
+    assert_eq!((s.model_source, s.effort_source), (WORKSPACE, WORKSPACE));
+    let s = model_sources(&implementer, &settings, Some(&alpha), &legacy, &f.roles);
+    assert_eq!(s.effort_source, PROJECT);
 }
