@@ -595,6 +595,17 @@ async fn docker_items(config: &Value, images: Vec<String>) -> [Value; 2] {
     };
     [docker_ready, images_item]
 }
+/// Launches require canonical executable paths; a symlink such as a version
+/// manager's `latest` is refused with the real path to use instead.
+fn real_path(label: &str, path: &str) -> std::result::Result<(), String> {
+    match std::fs::canonicalize(path) {
+        Ok(real) if real.as_os_str() != Path::new(path).as_os_str() => Err(format!(
+            "The {label} path {path} goes through a symbolic link; agents launch only from a real path, such as {}.",
+            real.display()
+        )),
+        _ => Ok(()),
+    }
+}
 fn harness_items(config: Option<&Value>, catalog: &Value) -> Vec<Value> {
     let mut items = Vec::new();
     for (key, label, field) in [
@@ -623,8 +634,26 @@ fn harness_items(config: Option<&Value>, catalog: &Value) -> Vec<Value> {
             _ if entry["configured"] == true => {
                 "Found; not probed yet (refresh models in Settings → Models & budget)".into()
             }
+            // With a runner, discovery covers only the configured harnesses.
+            _ if config.is_some() => "Not checked".into(),
             _ => "Not found on the service PATH".into(),
         };
+        let binary = config.and_then(|c| match key {
+            "omp" => c["ompBinary"].as_str(),
+            "codex" => c["codex"]["binary"].as_str(),
+            _ => c["claudeCode"]["binary"].as_str(),
+        });
+        if configured && let Some(Err(message)) = binary.map(|b| real_path(label, b)) {
+            items.push(item(
+                &id,
+                label,
+                "failing",
+                message,
+                Some("Enter the executable's real path and save.".into()),
+                false,
+            ));
+            continue;
+        }
         if !configured {
             items.push(item(
                 &id,
@@ -1157,6 +1186,15 @@ pub(crate) fn save(data: &Path, body: &Value) -> Result<()> {
             entry["binary"] = json!(binary);
             entry[other_key] = json!(other);
             config[key] = entry;
+        }
+    }
+    for (label, path) in [
+        ("OMP executable", &config["ompBinary"]),
+        ("Codex executable", &config["codex"]["binary"]),
+        ("Claude Code executable", &config["claudeCode"]["binary"]),
+    ] {
+        if let Some(path) = path.as_str() {
+            real_path(label, path).map_err(invalid)?;
         }
     }
     // Validate the resolved configuration before anything is written.

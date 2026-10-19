@@ -291,6 +291,18 @@ async fn an_embedded_service_saves_but_states_that_a_restart_is_needed() {
     let written: Value =
         serde_json::from_slice(&std::fs::read(root.join("data/runtime.json")).unwrap()).unwrap();
     assert_eq!(written.get("models"), None, "{written}");
+    // A version manager's symlinked executable is refused with its real path.
+    let link = root.join("codex-latest");
+    std::os::unix::fs::symlink("/bin/sh", &link).unwrap();
+    let mut linked = settings(&root);
+    linked["fields"]["codexBinary"] = json!(link);
+    linked["fields"]["codexAuthFile"] = json!(root.join("auth.json"));
+    let (status, refused) = post(&info, "/runner/settings", linked).await;
+    assert_eq!(status, 400, "{refused}");
+    assert!(
+        refused["error"].as_str().unwrap().contains("symbolic link"),
+        "{refused}"
+    );
     // Cross-origin mutations are refused like every other mutation.
     let response = reqwest::Client::new()
         .post(format!("{}/api/runner/apply", info.origin))
