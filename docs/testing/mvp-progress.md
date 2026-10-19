@@ -51,6 +51,12 @@ These recordings show harness protocol behavior. They do not show model behavior
 - `npm test` **346/346**. `cargo clippy -p crewroom-runtime --all-targets -- -D warnings` and `cargo fmt -p crewroom-runtime -- --check` are clean.
 - The recorded transcripts were not re-recorded. The OMP `done()` step in the recorder is still not session-aware; the replay cursor makes this harmless.
 
+**Integration at `da7ab61` on main `0fe0364` (2026-10-19).** `1816139`, its evidence commit, `e91c680` and its evidence commit were rebased onto main `0fe0364` as `07e3269`, `d978728`, `da7ab61` and the evidence commit `fa315bb`, with conflicts only in this record and `docs/status.md`; the code is unchanged, so the checks above still cite the pre-rebase SHAs. Checks at `fa315bb` (code tree of `da7ab61`), all through `scripts/system_limits.py run` with a private `CARGO_TARGET_DIR`, `-j6`, `--test-threads=4`, `TMPDIR` on a short on-disk directory and the worktree prepared with `--build-helpers`:
+
+- `npm test` **346/346**; `npm run build` passes; `npm run test:e2e` **31/31**.
+- `cargo test --locked --no-fail-fast -p crewroom-runtime`: **247 passed, 0 failed, 3 ignored** over 21 binaries (main now includes the FOR-74 allowance tests). `harness_replay` **6/6** in that run and two more.
+- `cargo clippy -p crewroom-runtime --all-targets -- -D warnings` and `cargo fmt -p crewroom-runtime -- --check`: clean.
+
 ## FOR-74 — Remaining subscription allowance for Codex and Claude Code (2026-10-19)
 
 Code `6d19f33` (branch `for-74-work`, from main `20a6149`). Checks ran on Linux x86_64 with Rust binaries built from this revision in a target directory private to the worktree (prepared with `python3 scripts/prepare_worktree.py --build-helpers`), all through `scripts/system_limits.py run`, `-j6`, `--test-threads=4`. The machine was shared with parallel agents.
