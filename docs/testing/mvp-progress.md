@@ -45,6 +45,8 @@ Integration on main (2026-10-19): rebased without code changes onto main `a1604d
 - `cargo clippy -p crewroom-core -p crewroom-runtime -p crewroom-service -p crewroom-desktop --all-targets -- -D warnings` and `cargo fmt --check` for these crates: clean.
 - Simulated/local only at integration: the live isolated probe was not rerun, and the operator service on port 4318 was not touched. Its restart with model selection checked in the restarted app remains (coordinator).
 
+**Operator check (2026-10-19, main `fe34a22`):** the operator's service (port 4318, same data directory and roles) was restarted on the debug package built from `fe34a22`. In Settings → Models & budget the operator saw `claude-code · success · compatible (probed 2.1.303) · 5 models`, `codex · success · verified · 8 models` (billing: subscription for both) and `omp · success · verified · 0 models` (OMP lists models only from runner-configured providers; the runner is not configured on this machine). The searchable picker listed the Claude Code offerings as "Listed · saved as your choice; checked when the runner is configured". The operator reported that it looks good and shared a screenshot, which is not retained in the repository. Live inference was not part of this check.
+
 ## FOR-70 — Add a repository by choosing a folder (2026-10-19)
 
 Implementation `4f9f295` on branch `for-70-repository-folder-picker` from main `a1faa87`. The core module is `crates/crewroom-core/src/repository_folders.rs`, and the service routes are `GET /api/repository-folders/inspect` and `POST /api/repository-folders/initialize`. The desktop flow is in `crates/crewroom-desktop/src/workbench/settings/repository_folder.rs`.
