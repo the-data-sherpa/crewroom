@@ -14,6 +14,7 @@ Simulated checks only (fixture daemon, seeded agent events, private `CARGO_TARGE
 - `npm test`: **346 passed / 0 failed**. `npm run build`: passes.
 - No Rust source changed. `cargo test -p crewroom-service --lib usage`: 5 passed; `cargo clippy -p crewroom-service --all-targets -- -D warnings`: clean; `cargo fmt -p crewroom-service -p crewroom-core --check`: clean.
 - Not run: `npm run test:e2e` (integrator runs it serially).
+- Integration on main `3f05023` (branch already on main, no rebase; `2552e35` and `ff3a1ff` unchanged), all through `system_limits.py run` in a worktree prepared with `--build-helpers`: `npm test` **346/346**, `npm run build` passes, `npm run test:e2e` **31/31** (run alone; a run concurrent with `npm test` had 3 timing failures that did not recur), `daemon-scheduling.test.ts` **3/3**, `cargo test -p crewroom-service --lib` **18/0 failed**, Clippy `-D warnings` for `crewroom-service` and fmt for core, runtime and service clean.
 
 ## FOR-79 — Per-project setting overrides (2026-10-19)
 
