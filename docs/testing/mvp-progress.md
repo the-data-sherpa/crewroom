@@ -6,7 +6,7 @@ Historical revision IDs and source hashes below refer to the original private sn
 
 ## FOR-89 — Test fixtures installed without an in-process writer (2026-10-19)
 
-Code `ab2d161` on branch `for-89-work` from main `860acac`; tests and test support only. Private `CARGO_TARGET_DIR` in the worktree, `-j6`, `--test-threads=4`, and every test command run through `scripts/system_limits.py run`. All fixtures are simulated harness scripts with synthetic data. Nothing contacted a live service.
+Code `ab2d161` on branch `for-89-work` from main `860acac` (on main as `53ef179`; see the integration record below); tests and test support only. Private `CARGO_TARGET_DIR` in the worktree, `-j6`, `--test-threads=4`, and every test command run through `scripts/system_limits.py run`. All fixtures are simulated harness scripts with synthetic data. Nothing contacted a live service.
 
 **Change.** New dev-only workspace crate `crates/crewroom-test-support` (a `[dev-dependencies]` entry of runtime, service and desktop; it is never linked into a product binary). `install_executable(path, content)` writes the content to a uniquely named hidden staging file, has a separate `cp` write a second hidden file, sets mode `0700` and renames that file onto `path`. The test process therefore never holds a writer to a file it executes, and replacement is atomic. FOR-86's local copy in `claude_adapter.rs` now uses the shared helper.
 
@@ -37,6 +37,18 @@ Load-sensitive results seen while iterating, recorded rather than retried silent
 - An `npm test` run at the same load, concurrent with cargo, failed two timing assertions (`live.test.ts` reconnect and `repository-work.test.ts` observer ticks). No TypeScript changed, and the rerun passed 346/346.
 
 Not run here: `npm run test:e2e` (the integrator runs it serially).
+
+**Integration on main `d0e7c30`** (branch rebased; only `docs/status.md` and this file conflicted, both sides kept). `ab2d161` became `53ef179` with identical changes; FOR-91's `store.rs` tests execute no fixture. Checks at `53ef179`, all through `system_limits.py run` in a worktree prepared with `--build-helpers` and a private `CARGO_TARGET_DIR` (`-j6`, `--test-threads=4`):
+
+| Check | Result |
+|---|---|
+| `npm test` | **346/346** |
+| `npm run build` | passes (existing chunk-size warning) |
+| `npm run test:e2e` | **31 passed** |
+| `cargo test --locked --no-fail-fast` for the five crates | **687 passed, 0 failed, 18 ignored** over 77 result lines (685 plus FOR-91's 2 tests) |
+| `cargo clippy --locked --all-targets -- -D warnings` and `cargo fmt -p <five crates> -- --check` | clean |
+
+Simulated fixtures only.
 
 ## FOR-91 — Service starts after a probe-contract upgrade (2026-10-19)
 
