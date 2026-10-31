@@ -4,6 +4,19 @@ The operator requested that each work item pass its checks before the next start
 
 Historical revision IDs and source hashes below refer to the original private snapshots before the FOR-17 history rewrite. Sanitized copies are not byte-identical evidence for rewritten revisions; replay requires the private archive. New validation is recorded separately.
 
+## FOR-96 — Foundations comparison (2026-10-31)
+
+Assessed `main` at `bd5561462744fa39fef42b61070a896bb4dda143` against the consensus-reviewed FOR-95 research. Application code was unchanged. The [comparison](../research/crewroom-foundations-assessment-2026-10-31.md) distinguishes implemented controls, fresh checks, historical live evidence and unverified integrated/value claims. It proposes a consolidation sequence without changing accepted product policy or creating follow-up implementation tasks.
+
+Fresh existing tests ran through `scripts/system_limits.py run`, with supported Node v26.10.0 selected in PATH:
+
+| Command following the wrapper | Result |
+|---|---|
+| `cargo test -p crewroom-core --test intake --test choreography --test capacity --test comparisons` | 55 passed, 0 failed, 0 ignored |
+| `cargo test -p crewroom-runtime --test comparison_security --test github_publication --test github_delivery --test process_ownership` | 17 passed, 0 failed, 0 ignored |
+
+`python3 scripts/verify-feature.py check pause-resume` returned unavailable (exit 2): initially default Node v22.23.4 was below the minimum; with supported Node 26 the remaining reason was no verified build receipt. No feature recipe execution or new build receipt followed. The GitHub tests use loopback fixtures; process ownership uses real local children. These checks do not establish live model quality, native UI usability or a complete live delivery journey. No full npm/build/e2e or full Cargo run was performed for this documentary assessment. Raw logs remain outside the repository; the [sanitized receipt](for-96-foundations-assessment-2026-10-31.json) records commands, suite totals, log hashes and limitations. No commit, PR, push or live remote mutation was part of this assessment.
+
 ## FOR-92 — Zombie-led process with a live thread (2026-10-19)
 
 Code `2d79d60` on branch `for-92-work` from main `8d6ecc0`; only `crates/crewroom-runtime/src/inspect.rs` changes. Private `CARGO_TARGET_DIR` in the worktree; test commands ran through `scripts/system_limits.py run`. Linux only; macOS not checked.

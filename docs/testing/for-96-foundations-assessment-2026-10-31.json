@@ -1,0 +1,125 @@
+{
+  "issue": "FOR-96",
+  "date": "2026-10-31",
+  "applicationRevision": "bd5561462744fa39fef42b61070a896bb4dda143",
+  "applicationSourceChanged": false,
+  "scope": "Documentary assessment with targeted existing tests; no live model/provider calls or full native journey.",
+  "commands": [
+    {
+      "command": "python3 scripts/system_limits.py run -- cargo test -p crewroom-core --test intake --test choreography --test capacity --test comparisons",
+      "environment": "Supported Node 26 bin prepended to PATH",
+      "exitCode": 0,
+      "logSha256": "4f6c1b6c162ede4e661e28e609d6aa1ac204012036e9bbceb609ed6d30130de1"
+    },
+    {
+      "command": "python3 scripts/system_limits.py run -- cargo test -p crewroom-runtime --test comparison_security --test github_publication --test github_delivery --test process_ownership",
+      "environment": "Supported Node 26 bin prepended to PATH",
+      "exitCode": 0,
+      "logSha256": "578cede9924975e41ef7dd6f6b65dc9f8691ee8e1599e97a3095167995ac92b3"
+    }
+  ],
+  "suites": [
+    {
+      "crate": "crewroom-core",
+      "suite": "capacity",
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "crate": "crewroom-core",
+      "suite": "choreography",
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "crate": "crewroom-core",
+      "suite": "comparisons",
+      "passed": 24,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "crate": "crewroom-core",
+      "suite": "intake",
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "crate": "crewroom-runtime",
+      "suite": "comparison_security",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "crate": "crewroom-runtime",
+      "suite": "github_delivery",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "crate": "crewroom-runtime",
+      "suite": "github_publication",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    },
+    {
+      "crate": "crewroom-runtime",
+      "suite": "process_ownership",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0
+    }
+  ],
+  "totals": {
+    "passed": 72,
+    "failed": 0,
+    "ignored": 0,
+    "filteredOut": 0
+  },
+  "preflight": [
+    {
+      "command": "python3 scripts/verify-feature.py check pause-resume",
+      "environment": "Default shell Node v22.23.4",
+      "outcome": "unavailable",
+      "exitCode": 2,
+      "reason": "Node >=24 required"
+    },
+    {
+      "command": "python3 scripts/verify-feature.py check pause-resume",
+      "environment": "Supported Node 26 bin prepended to PATH",
+      "outcome": "unavailable",
+      "exitCode": 2,
+      "reason": "No verified build receipt. Run verify-feature.py build --evidence-dir <fresh directory>."
+    }
+  ],
+  "limitations": [
+    "No fresh feature-map build or journey execution.",
+    "GitHub publication/delivery tests use loopback fixtures, not live GitHub.",
+    "Process ownership tests use real local child processes.",
+    "No live model quality or native UI usability claim.",
+    "Full npm test/build/e2e and full Cargo suites were not run for this assessment; application source unchanged.",
+    "Prior historical receipts retain their own revision/platform and publication-sanitization limits.",
+    "Raw execution logs retained outside tracked repository."
+  ],
+  "assessment": "../research/crewroom-foundations-assessment-2026-10-31.md",
+  "toolVersions": {
+    "nodeDefault": "v22.23.4",
+    "nodeSelected": "v26.10.0",
+    "rustc": "1.99.1",
+    "cargo": "1.99.1"
+  }
+}
